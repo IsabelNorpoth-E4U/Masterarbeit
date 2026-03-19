@@ -1,0 +1,74 @@
+% !BIB TS-program = biber
+
+\RequirePackage[l2tabu,orthodox]{nag}
+
+% TODO: decide if one-sided/two-sided
+%\documentclass[headsepline,footsepline,footinclude=false,fontsize=11pt,paper=a4,listof=totoc,bibliography=totoc,BCOR=12mm,DIV=12]{scrbook} % two-sided
+\documentclass[headsepline,footsepline,footinclude=false,oneside,fontsize=12pt,paper=a4,listof=totoc,bibliography=totoc]{scrbook}
+\usepackage{amsmath} % one-sided
+\usepackage{float}
+
+% TODO: change citation style in settings
+\input{settings}
+
+% TODO: change thesis information
+\newcommand*{\getUniversity}{Hochschule Mittweida}
+\newcommand*{\getFaculty}{Angewandte Comupter- und Biowissenschaften}
+\newcommand*{\getDegree}{Cyber Crime/Cyber Security}
+\newcommand*{\getSchool}{Hochschule Mittweida}
+\newcommand*{\getTitle}{Prompt Injection bei einem Chatbot}
+\newcommand*{\getAuthor}{Isabel Norpoth}
+\newcommand*{\getDoctype}{Masterarbeit}
+\newcommand*{\getSupervisor}{Fabio Rodrigues}
+\newcommand*{\getAdvisor}{Ronny Bodach}
+\newcommand*{\getSubmissionDate}{27.08.2024}
+\newcommand*{\getSubmissionLocation}{Potsdam}
+
+\begin{document}
+
+% Set page numbering to avoid "destination with the same identifier has been already used" warning for cover page.
+% (see https://en.wikibooks.org/wiki/LaTeX/Hyperlinks#Problems_with_Links_and_Pages).
+\pagenumbering{alph}
+
+\frontmatter{}
+
+% Include pages
+\input{pages/title}
+\input{pages/disclaimer}
+\input{chapters/01_Abstrakt}
+\input{chapters/02_Abstract}
+
+\microtypesetup{protrusion=false}
+\tableofcontents{}
+\microtypesetup{protrusion=true}
+
+\mainmatter{}
+
+\input{chapters/03_Einleitung}
+
+\appendix{}
+
+\microtypesetup{protrusion=false}
+
+\addchap{Abbreviations}
+\begin{acronym}
+	\itemsep-.25\baselineskip
+	\acro{KI}[KI]{Künstlichen Intelligenz}
+	\acro{NN}[NN]{Neuronale Netzwerke}
+	\acro{LLM}[LLM]{Large Language Model}
+	\acro{CNN}[CNN]{Convolutional Neural Network}
+	\acro{VM}[VM]{virtuelle Maschine}
+	\acro{HTTP}[HTTP]{Hypertext Transfer Protocol}
+	\acro{RAM}[RAM]{Random Access Memory}
+	\acro{HTTPS}[HTTPS]{Hypertext Transfer Protocol Secure}
+	\acro{vCPU}[vCPU]{virtual Central Processing Unit}
+	\acro{TEDS}[TEDS]{Tree-Edit-Distance-based Similarity}
+\end{acronym}
+
+\listoffigures{}
+% \listoftables{}
+
+\microtypesetup{protrusion=true}
+\printbibliography{}
+
+\end{document}
