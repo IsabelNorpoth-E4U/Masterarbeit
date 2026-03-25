@@ -1,0 +1,3 @@
+\nomenclature{C}{Celsius}
+\nomenclature{PC}{Personal Computer}
+\nomenclature{Hybridformen}{ Formen von Hybriden}
