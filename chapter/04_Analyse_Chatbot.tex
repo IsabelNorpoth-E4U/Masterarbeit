@@ -1,0 +1,29 @@
+\chapter{Prompt-Injection-Angriffe}\label{ch:promptinjection}
+
+\section{Definition und Einordnung von Prompt Injection}
+
+\section{Klassifikation von Prompt-Injection-Techniken (Indirekte und Direkte Angriffe)}
+
+\subsection{Direkte Angriffe: Erklärung und Beispiel}
+
+\subsection{Indirekte Angriffe: Erklärung und Beispiel}
+
+\section{Typische Angriffsszenarien im Unternehmenskontext -> Bezug auf die Sicherheitsbedrohungen aus den Grundlagen}
+
+\section{(Beispiele bekannter Angriffe und die Auswirkungen)}
+
+Infrastruktur - aufgeteilt in zwei Projekte:
+
+AI-Tools (intern):
+BACKEND - Cloud Run (imsbot4u-prod, imsbot4u-dev und imsbot4u-test)
+FRONTEND - Google App Engine - bald vermutlich Cloud Run
+DATENBANK - VM (Qdrant mit INTERNAL und PUBLIC Vektor- UND Inhaltsdaten)
+ORIGINALFILES - BUCKET (makobot_bucket_demo - werden über server.js mit Berechtigungsprüfung dann im ChatBot Fenster angezeigt)
+NUTZERDATENBANK - FIRESTORE (Mit Nutzungsdaten und -inhalten) bot4u-userdata
+
+Demo-ChatBot4U (extern):
+BACKEND - Cloud Run (chatbot4u-backend, chatbot4u-backend-dev)
+FRONTEND - Google App Engine - bald vermutlich Cloud Run
+DATENBANK - VM (Qdrant PUBLIC Vektor- UND Inhaltsdaten)
+ORIGINALFILES - BUCKET (makobot_bucket_external - werden über server.js mit Berechtigungsprüfung dann im ChatBot Fenster angezeigt)
+NUTZERDATENBANK - FIRESTORE (Mit Nutzungsdaten und -inhalten) bot4u-external

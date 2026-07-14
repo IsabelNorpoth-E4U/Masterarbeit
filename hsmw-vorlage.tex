@@ -47,50 +47,48 @@ uniquename=init, %
 
 %%%%%%%%%%
 
-\Art{Handreichung} % Protokoll / Bachelorarbeit / Masterarbeit / ...
+\Art{Masterarbeit} % Protokoll / Bachelorarbeit / Masterarbeit / ...
 
-\Anrede{Organisationseinheit} % Herr/Frau
+\Anrede{Frau} % Herr/Frau
 
 % Einzelautor - aktiv ohne multiauthor Option
 \Vorname{Isabel}
 \Nachname{Norpoth}
 
 % Autorenteam - aktiv bei multiauthor Option
-\Autorenteam{Fachgruppe Biotechnologie und Chemie}
+%\Autorenteam{Fachgruppe Biotechnologie und Chemie}
 
 
-\Thema{Vorlage und Informationen für das Verfassen von Protokollen und Abschlussarbeiten}
-\Unterthema{Für alle \LaTeX{}-Freunde}
+\Thema{Untersuchung und Entwicklung von Schutzmaßnahmen gegen indirekte Prompt-Injection-Angriffe bei Tool Calling im Anwendungsfall eines unternehmensinternen Chatbot}
+%\Unterthema{Für alle \LaTeX{}-Freunde}
 
 % Ihr Studiengang:
-\Studiengang{Bachelor Biotechnologie\\Master Genomische Biotechnologie}
+\Studiengang{Master Cybercrime/Cybersecurity}
 
 % Ihre Seminargruppe
-\Seminargruppe{}
+\Seminargruppe{CY24w1-M}
 
-\Fakultaet{} % Voreinstellung: CB
+\Fakultaet{Fakultät Angewandte Computer- und Biowissenschaften} % Voreinstellung: CB
 
-\Erstpruefer{} % Prof. der Hochschule Mittweida
-\Zweitpruefer{} % Externer Betreuer
+\Erstpruefer{Prof. Dr. rer. pol. Ronny Bodach} % Prof. der Hochschule Mittweida
+\Zweitpruefer{M. Sc. Fabio Rodrigues} % Externer Betreuer
 
-\WeitererBetreuer{} % 
+\Datum{18.11.2026} % für Selbstständigkeitserklärung
 
-\Datum{} % für Selbstständigkeitserklärung
-
-\Tag{}
-\Monat{}
-\Jahr{} % für Titelseiten und bibliographische Angaben
+%\Tag{}
+%\Monat{}
+%\Jahr{} % für Titelseiten und bibliographische Angaben
 
 % Nach Bedarf für die bibliographische Angaben füllen
-\Anlagen{} % zB CDROM
-\Copyright{}
-\Textsatz{\LaTeX{}}
-\Druck{}
-\Verlag{}
-\ISBN{}
+%\Anlagen{} % zB CDROM
+%\Copyright{}
+%\Textsatz{\LaTeX{}}
+%\Druck{}
+%\Verlag{}
+%\ISBN{}
 
 % Englischer Titel - IMMER ANGEBEN
-\TitelZwei{Template for and Information about Writing Protocols and Final Theses}
+%\TitelZwei{Template for and Information about Writing Protocols and Final Theses}
 
 
 
@@ -121,7 +119,14 @@ Ich möchte an dieser Stelle Professor Klaus Dohmen für die gute Vorlage danken
 
 \Hauptteil % Diese Anweisung nicht löschen!
 
-\input{chapter/03_Einleitung}
+\input{chapter/01_Einleitung}
+
+\input{chapter/02_Grundlagen}
+
+\input{chapter/03_Prompt_Injection}
+
+\input{chapter/04_Analyse_Chatbot}
+
 %
 %\chapter{Über diese \LaTeX{}-Vorlage}
 %Nachfolgend finden Sie eingige wichtige Informationen zu dieser Vorlage. Eine gute Online-Einführung finden sie unter \url{de.wikibooks.org/wiki/LaTeX-Kompendium}. Ein superkurze Einführung ist auch in meinem Buch enthalten \citep{Wuenschiers2016kap12}.
