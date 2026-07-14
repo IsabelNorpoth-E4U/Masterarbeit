@@ -1,0 +1,49 @@
+vektordatenbank (qdrant) -> 
+
+public und internal getrennt -> sehr sicher
+
+code wird deployt mithilfe von umgebungsvariablen
+-> IS_EXTERNAL (logische Trennung beim deployment)
+
+Server.js nur standardanfragen (keine externen oder interne daten)
+
+formatanpassung nur hardcoded -> keine daten oder Referenzen
+
+backend (energiemarkmodus) weitergekeitet vom frontend
+
+-> mögliche Sicherheitsrisiken (databas_handler.py query_handler.py)
+-> datenbankhandler wird je nach umgebungsvariable gequerriert
+
+model_communicater (uninterressant0) -> querries aus der Datenbank zusammengeführt
+-> könnte ein systempromt ausgegeben werden
+
+systemprompt versuchen auszugeben, aber ist nicht krass relevant -> beeinflusst Qualität der ausgaben
+
+imSbot4U
+
+firebase / firestore -> verwaltet sessions der user
+
+Server.js hat verschlüsselungsid -> im secret Manager beim gcd
+
+serverseitige verschlüsselung
+
+tool calling -> Chatbot hat keine Entscheidungsfreiheit 
+durch tootl calling Filterung der Datenbank (dynamisch) und browser Möglichkeit !!
+
+
+-----
+
+- tool calling
+- SQL injection
+- token Limit ausnutzen
+- reg Datenbank
+- rollen injection
+
+
+- reg Systeme / req ?
+
+
+
+angriffsvektor: rollen übersprung, Datenbank -> daten löschen, kosten verbraten vom modell
+
+
