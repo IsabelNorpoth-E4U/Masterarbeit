@@ -17,7 +17,10 @@ dashed=false, % wenn true, werden wiederholte Erstautorennamen
 maxbibnames=10, % ab wann soll et al. gedruckt werden
 terseinits=true, % Initialien ohne Punkt und Leerzeichen
 uniquename=init, %
-]{biblatex} 
+]{biblatex}
+
+\usepackage[printonlyused,nohyperlinks]{acronym}
+\usepackage{microtype}
 
 
 
@@ -207,6 +210,14 @@ Ich möchte an dieser Stelle Professor Klaus Dohmen für die gute Vorlage danken
 %\caption{Eine Tabelle mit Ergebnissen aus den Versuchen von Gregor Mendel \citep{Mendel1866}.}
 %\label{tab:mendel}
 %\end{table}
+
+\microtypesetup{protrusion=false}
+
+\addchap{Abbreviations}
+\begin{acronym}
+	\itemsep-.25\baselineskip
+	\acro{LLM}[LLM]{Large Language Model}
+\end{acronym}
 
  
 \section{Bibliographie}
