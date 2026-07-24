@@ -38,49 +38,6 @@ können rollenbasierte Zugriffskontrollen sowie strukturierte Prompt-Formate zur
 
 2. Grundlagen 
    2.1 Large Language Models (LLMs) und Funktionsweise
-
-a) Definition & Grundprinzip
-
-Was ist ein LLM: statistisches Sprachmodell, next-token-prediction auf Basis großer Textkorpora
-Transformer-Architektur nur soweit nötig anreißen (Self-Attention) – kein Deep-Dive in Mathematik
-b) Kontextfenster als zentrales Konzept
-
-Alle Eingaben (System-Prompt, Nutzereingabe, später externe Tool-Ergebnisse) landen im selben Kanal
-Kernfakt/Schlüsselsatz: keine architektonische Trennung zwischen Instruktion und Daten – nur eine Konvention, keine harte Grenze. Dieser Satz trägt die gesamte Argumentation bis Kapitel 3
-c) Trainingsparadigma
-
-Pretraining auf großen Textkorpora
-Instruction-Tuning/RLHF → macht aus reiner Textvervollständigung einen anweisungsfolgenden Assistenten
-d) Prompting/Steuerung
-
-In-Context Learning
-System-Prompt vs. User-Prompt – Unterscheidung existiert nur auf Konventionsebene, nicht technisch erzwungen (knüpft an b) an)
-e) Überleitung (kurzer Entwicklungsbogen)
-
-reines Sprachmodell → instruction-tuned Chat-Modell → agentisches LLM mit Handlungsfähigkeit
-leitet direkt zu 2.2 Tool Calling über
-
-   2.1.1 Sicherheitsbedrohungen bei LLMs
-
-a) Einordnung
-
-Warum LLMs eine eigene Bedrohungsklasse bilden – direkter Rückbezug auf den Kernfakt aus 2.1b
-b) Kurze Taxonomie (z. B. angelehnt an OWASP Top 10 for LLM Applications), je 1–2 Sätze:
-
-Training Data Poisoning
-Sensitive Information Disclosure
-Model Denial of Service
-Supply-Chain-Schwachstellen
-Overreliance/Halluzination
-Prompt Injection – nur Teaser-Satz + Verweis "vertiefte Behandlung in Kapitel 3", keine Definition vorwegnehmen
-c) Bewusste Abgrenzung
-
-Tool-Calling-spezifische Bedrohungen (Excessive Agency etc.) werden hier explizit ausgeklammert und erst in 2.2.1 behandelt, da das Konzept dem Leser noch nicht bekannt ist
-d) Überleitungssatz
-
-Verweis, dass die Erweiterung um Tool Calling (2.2) die Angriffsfläche der hier vorgestellten Bedrohungen zusätzlich vergrößert
-
-
    2.2 Tool Calling / Function Calling bei LLMs
    2.2.1 Sicherheitsbedrohungen bei Tool Calling
    2.3 Chatbots: Definition und Abgrenzung
@@ -94,12 +51,18 @@ Verweis, dass die Erweiterung um Tool Calling (2.2) die Angriffsfläche der hier
       2. Indirekte Angriffe: Erklärung und Beispiel
    3. Typische Angriffsszenarien im Unternehmenskontext -> Bezug auf die Sicherheitsbedrohungen aus den Grundlagen
    4. (Beispiele bekannter Angriffe und die Auswirkungen) 
-    
-4. Analyse der Verwundbarkeit eines internen Chatbots
-   1. Beschreibung des untersuchten Systems -> Wie ist der Chatbot aufgebaut, auf welche externen Quellen hat er zutritt, welche Angriffspunkte gibt es 
-   2. Methodik zur Durchführung der Angriffe (Welche, Warum, In welchem Rahmen)
-   3. Durchführung der ausgewählten Prompt-Injection Angriffe -> Aufteilung in direkte und indirekte 
-   4. Identifikation der Schwachstellen -> welche angriffe haben funktioniert
+
+4. Analyse der Verwundbarkeit eines internen Chatbots 
+   - [ ] Beschreibung des untersuchten Systems 
+   - [ ] Einrichtung der Umgebung
+     - [X] Installation/Implementierung des Repository 
+   - [ ] Methodik zur Durchführung der Angriffe 
+     - [ ] Ziel der Angriffe
+     - [ ] Implementierung de Tools Calls/Browser Action
+     - [ ] Aufbau lokale Website
+   - [X] Durchführung der ausgewählten Prompt-Injection Angriffe 
+   - [ ] Identifikation der Schwachstellen
+
 
 5. Schutzmaßnahmen gegen Prompt Injection
    1. Technische Schutzmaßnahmen:

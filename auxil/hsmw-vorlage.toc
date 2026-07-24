@@ -33,17 +33,48 @@
 \contentsline {subsection}{\numberline {3.2.2}Indirekte Angriffe: Erklärung und Beispiel}{3}{subsection.3.2.2}%
 \contentsline {section}{\numberline {3.3}Typische Angriffsszenarien im Unternehmenskontext -> Bezug auf die Sicherheitsbedrohungen aus den Grundlagen}{3}{section.3.3}%
 \contentsline {section}{\numberline {3.4}(Beispiele bekannter Angriffe und die Auswirkungen)}{3}{section.3.4}%
-\contentsline {chapter}{\numberline {4}Prompt-Injection-Angriffe}{4}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Definition und Einordnung von Prompt Injection}{4}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Klassifikation von Prompt-Injection-Techniken (Indirekte und Direkte Angriffe)}{4}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Direkte Angriffe: Erklärung und Beispiel}{4}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Indirekte Angriffe: Erklärung und Beispiel}{4}{subsection.4.2.2}%
-\contentsline {section}{\numberline {4.3}Typische Angriffsszenarien im Unternehmenskontext -> Bezug auf die Sicherheitsbedrohungen aus den Grundlagen}{4}{section.4.3}%
-\contentsline {section}{\numberline {4.4}(Beispiele bekannter Angriffe und die Auswirkungen)}{4}{section.4.4}%
-\contentsline {chapter}{\nonumberline Abbreviations}{5}{chapter*.11}%
-\contentsline {section}{\numberline {4.5}Bibliographie}{5}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Glossar}{5}{section.4.6}%
-\contentsline {section}{\numberline {4.7}Index}{5}{section.4.7}%
-\contentsline {chapter}{\numberline {5}Allgemeine Informationen}{6}{chapter.5}%
+\contentsline {chapter}{\numberline {4}Analyse der Verwundbarkeit eines internen Chatbots}{4}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Beschreibung des untersuchten Systems}{4}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Einrichtung der Umgebung}{4}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Installation/Implementierung des Repository}{4}{subsection.4.2.1}%
+\contentsline {section}{\numberline {4.3}Methodik zur Durchführung der Angriffe}{7}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Ziel der Angriffe}{7}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Implemetierung de Tools Calls/Browser Action}{7}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Aufbau lokale Website}{7}{subsection.4.3.3}%
+\contentsline {section}{\numberline {4.4}Durchführung der ausgewählten Prompt-Injection Angriffe}{7}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}E-Mail Injection}{8}{subsection.4.4.1}%
+\contentsline {subsubsection}{Versuch 1}{8}{section*.11}%
+\contentsline {subsubsection}{Versuch 2}{9}{section*.12}%
+\contentsline {subsection}{\numberline {4.4.2}Multiturn Injection}{9}{subsection.4.4.2}%
+\contentsline {subsubsection}{Versuch 1}{9}{section*.13}%
+\contentsline {subsubsection}{Versuch 2}{9}{section*.14}%
+\contentsline {subsection}{\numberline {4.4.3}Website Injection}{10}{subsection.4.4.3}%
+\contentsline {subsubsection}{Versuch 1}{11}{section*.15}%
+\contentsline {subsection}{\numberline {4.4.4}Jailbreak Prompt}{11}{subsection.4.4.4}%
+\contentsline {subsection}{\numberline {4.4.5}Versuch 1}{11}{subsection.4.4.5}%
+\contentsline {subsection}{\numberline {4.4.6}Multi-Modal Injection}{12}{subsection.4.4.6}%
+\contentsline {subsection}{\numberline {4.4.7}Versuch 1}{13}{subsection.4.4.7}%
+\contentsline {subsection}{\numberline {4.4.8}Versuch 2}{14}{subsection.4.4.8}%
+\contentsline {subsection}{\numberline {4.4.9}Versuch 3}{14}{subsection.4.4.9}%
+\contentsline {subsection}{\numberline {4.4.10}Document Injection}{15}{subsection.4.4.10}%
+\contentsline {subsection}{\numberline {4.4.11}Versuch 1}{15}{subsection.4.4.11}%
+\contentsline {subsection}{\numberline {4.4.12}Versuch 2}{16}{subsection.4.4.12}%
+\contentsline {subsection}{\numberline {4.4.13}Versuch 3}{16}{subsection.4.4.13}%
+\contentsline {subsection}{\numberline {4.4.14}URL-Parameter Injection}{17}{subsection.4.4.14}%
+\contentsline {subsection}{\numberline {4.4.15}Versuch 1}{18}{subsection.4.4.15}%
+\contentsline {subsection}{\numberline {4.4.16}Versuch 2}{18}{subsection.4.4.16}%
+\contentsline {section}{\numberline {4.5}Identifikation der Schwachstellen}{19}{section.4.5}%
+\contentsline {subsection}{\numberline {4.5.1}E-Mail Injection}{19}{subsection.4.5.1}%
+\contentsline {subsection}{\numberline {4.5.2}Multiturn Injection}{19}{subsection.4.5.2}%
+\contentsline {subsection}{\numberline {4.5.3}Website Injection}{19}{subsection.4.5.3}%
+\contentsline {subsection}{\numberline {4.5.4}Jailbreak Prompt}{19}{subsection.4.5.4}%
+\contentsline {subsection}{\numberline {4.5.5}Multi-Modal Injection}{19}{subsection.4.5.5}%
+\contentsline {subsection}{\numberline {4.5.6}Document Injection}{19}{subsection.4.5.6}%
+\contentsline {subsection}{\numberline {4.5.7}URL-Parameter Injection}{19}{subsection.4.5.7}%
+\contentsline {chapter}{\nonumberline Abbreviations}{20}{chapter*.16}%
+\contentsline {section}{\numberline {4.6}Bibliographie}{20}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Glossar}{20}{section.4.7}%
+\contentsline {section}{\numberline {4.8}Index}{20}{section.4.8}%
+\contentsline {chapter}{\numberline {5}Allgemeine Informationen}{21}{chapter.5}%
 \def \@chapapp {\appendixname }
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

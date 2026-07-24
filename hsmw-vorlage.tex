@@ -19,10 +19,23 @@ terseinits=true, % Initialien ohne Punkt und Leerzeichen
 uniquename=init, %
 ]{biblatex}
 
+\usepackage{listings}
+\lstdefinestyle{mystyle}{
+    breakatwhitespace=false,
+    breaklines=true
+}
+\lstset{
+    style=mystyle, % falls du deinen definierten Stil nutzt
+    breakatwhitespace=false,
+    breaklines=true,
+    basicstyle=\ttfamily,    % Zwingt LaTeX, eine nicht-proportionale Schrift (wie Courier) zu nehmen
+    columns=fullflexible,    % Sorgt dafür, dass der Zeichenabstand ganz natürlich bleibt
+    keepspaces=true          % Erhält absichtliche Leerzeichen im Code, anstatt sie zu ignorieren
+}
+
+
 \usepackage[printonlyused,nohyperlinks]{acronym}
 \usepackage{microtype}
-
-
 
 % Lädt Bibliograpie aus Datei literatur.bib
 \addbibresource{/C:/Users/inorpoth/OneDrive - ALTEN Group/Dokumente/Masterarbeit/hsmw-literatur.bib}
@@ -150,7 +163,7 @@ Ich möchte an dieser Stelle Professor Klaus Dohmen für die gute Vorlage danken
 %\textit{hsmw-literatur.sty} & Datei für das Literaturverzeichnis.\\
 %\textit{hsmw-logo.pdf} & Das Hochschulelogo\\
 %\textit{hsmw-logo-150.pdf} & Das Jubiläums-Hochschullogo\\
-%\textit{fig-latex.png} & eine Abbildung\\
+%\textit{figs-latex.png} & eine Abbildung\\
 %\end{tabular}
 %
 %\section{Formatierungsoptionen}
@@ -179,13 +192,13 @@ Ich möchte an dieser Stelle Professor Klaus Dohmen für die gute Vorlage danken
 %\section{Abbildungen \& Tabellen} \label{sec-abb}
 %Abbildungen und Tabellen müssen immer im Text referenziert werden. Dazu erstellen Sie mit \verb+\label{}+ eine Marke, auf die Sie woanders im Text mit \verb+\ref{}+ verweisen können.
 %
-%Die Abb. \ref{fig:latex} zeigt das \LaTeX{}-Dokument, mit dem wir im Modul \enquote{Wissenschaftliches Schreiben} begonnen haben. Abbildungen können Sie als PDF- oder PNG-Datei hinterlegen.
+%Die Abb. \ref{figs:latex} zeigt das \LaTeX{}-Dokument, mit dem wir im Modul \enquote{Wissenschaftliches Schreiben} begonnen haben. Abbildungen können Sie als PDF- oder PNG-Datei hinterlegen.
 %
 %\begin{figure}[h]
 %    \centering
-%    \includegraphics[width=.7\columnwidth]{/C:/Users/inorpoth/OneDrive - ALTEN Group/Dokumente/Masterarbeit/settings/fig-latex}
+%    \includegraphics[width=.7\columnwidth]{/C:/Users/inorpoth/OneDrive - ALTEN Group/Dokumente/Masterarbeit/settings/figs-latex}
 %    \caption{Von \LaTeX{} zum PDF. Aus \citep{Wuenschiers2016}}.
-%    \label{fig:latex}
+%    \label{figs:latex}
 %\end{figure}
 %
 %Für Abbildungen verwenden Sie die Umgebung \texttt{figure}, wie im Beispiel in der Datei \textit{hsmw-vorlage.tex} angewendet.
