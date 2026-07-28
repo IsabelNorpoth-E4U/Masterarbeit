@@ -4,8 +4,6 @@
 
 Untersuchung und Entwicklung von Schutzmaßnahmen gegen indirekte Prompt-Injection-Angriffe bei Tool Calling im Anwendungsfall eines unternehmensinternen Chatbot
 
-% Entwicklung und Evaluation von Schutzmaßnahmen gegen indirekte Prompt-Injection-Angriffe bei Tool Calling in Chatbots
-
 ## Zusammenfassung
 
 Im Rahmen dieser Arbeit werden Sicherheitsrisiken untersucht, die durch den Einsatz von Tool Calling in einem Chatbot entstehen. 
@@ -15,86 +13,67 @@ Zur Identifikation potenzieller Schwachstellen werden gezielt indirekte Prompt-I
 gewonnenen Erkenntnissen werden geeignete Schutzmaßnahmen entwickelt und in den Chatbot integriert, um die identifizierten Risiken zu reduzieren.
 (Abschließend werden die Angriffe erneut ausgeführt, um die Wirksamkeit der implementierten Maßnahmen praktisch zu evaluieren.)
 
-## Ablauf
- 
-1. bekannte Prompt-Injection-Techniken auf den internen Chatbot anzuwenden und potenzielle Schwachstellen zu identifizieren,
- 
-2. geeignete technische und konzeptionelle Schutzmaßnahmen zur Absicherung des Systems finden,
- 
-3. diese Maßnahmen hinsichtlich ihrer Wirksamkeit evaluieren (möglicherweise auch direkt austesten)
- 
+
 ## Forschungsfrage
 
-Inwieweit ist ein unternehmensinterner, LLM-basierter Chatbot gegenüber Prompt-Injection-Angriffen verwundbar, und wie 
-können rollenbasierte Zugriffskontrollen sowie strukturierte Prompt-Formate zur Absicherung sensibler Daten beitragen?
- 
+Inwieweit ist ein unternehmensinterner, LLM-basierter Chatbot gegenüber Prompt-Injection-Angriffen verwundbar, und wie können 
+diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
+
+
 ## Inhaltverzeichnis
 
 1. Einleitung
-   1. Problemstellung und Motivation
-   2. Ziel der Arbeit
-   3. Forschungsfrage
-   4. Aufbau der Arbeit
+   - [ ] 1.1 Problemstellung und Motivation
+   - [ ] 1.2 Ziel der Arbeit
+   - [ ] 1.3 Forschungsfrage
+   - [ ] 1.4 Aufbau der Arbeit
 
 2. Grundlagen 
-   2.1 Large Language Models (LLMs) und Funktionsweise
-   2.2 Tool Calling / Function Calling bei LLMs
-   2.2.1 Sicherheitsbedrohungen bei Tool Calling
-   2.3 Chatbots: Definition und Abgrenzung
-   2.4 Chatbot-Architekturen (technischer Hintergrund → Angriffsflächen)
-   2.5 Unternehmensinterne Chatbots: Einsatzbereich und Risiken
+   - [ ] 2.1 Large Language Models (LLMs) und Funktionsweise
+   - [ ] 2.2 Tool Calling / Function Calling bei LLMs
+     - [ ] 2.2.1 Sicherheitsbedrohungen bei Tool Calling
+   - [ ] 2.3 Chatbots: Definition und Abgrenzung
+   - [ ] 2.4 Chatbot-Architekturen (technischer Hintergrund → Angriffsflächen)
+   - [ ] 2.5 Unternehmensinterne Chatbots: Einsatzbereich und Risiken
 
 3. Prompt-Injection-Angriffe
-   1. Definition und Einordnung von Prompt Injection -> Oder zu Grundlagen
-   2. Klassifikation von Prompt-Injection-Techniken (Indirekte und Direkte Angriffe)
-      1. Direkte Angriffe: Erklärung und Beispiel
-      2. Indirekte Angriffe: Erklärung und Beispiel
-   3. Typische Angriffsszenarien im Unternehmenskontext -> Bezug auf die Sicherheitsbedrohungen aus den Grundlagen
-   4. (Beispiele bekannter Angriffe und die Auswirkungen) 
+   - [ ] 3.1 Definition und Einordnung von Prompt Injection -> Oder zu Grundlagen
+   - [ ] 3.2 Klassifikation von Prompt-Injection-Techniken (Indirekte und Direkte Angriffe)
+      - [ ] 3.2.1 Direkte Angriffe: Erklärung und Beispiel
+      - [ ] 3.2.2 Indirekte Angriffe: Erklärung und Beispiel
+   - [ ] 3.3 Typische Angriffsszenarien im Unternehmenskontext -> Bezug auf die Sicherheitsbedrohungen aus den Grundlagen
+   - [ ] 3.4 (Beispiele bekannter Angriffe und die Auswirkungen) 
 
 4. Analyse der Verwundbarkeit eines internen Chatbots 
-   - [ ] Beschreibung des untersuchten Systems 
-   - [ ] Einrichtung der Umgebung
-     - [X] Installation/Implementierung des Repository 
-   - [ ] Methodik zur Durchführung der Angriffe 
-     - [ ] Ziel der Angriffe
-     - [ ] Implementierung de Tools Calls/Browser Action
-     - [ ] Aufbau lokale Website
-   - [X] Durchführung der ausgewählten Prompt-Injection Angriffe 
-   - [ ] Identifikation der Schwachstellen
+   - [ ] 4.1 Beschreibung des untersuchten Systems 
+   - [ ] 4.2 Einrichtung der Umgebung
+     - [X] 4.2.1 Installation/Implementierung des Repository 
+   - [ ] 4.3 Methodik zur Durchführung der Angriffe 
+     - [ ] 4.3.1 Ziel der Angriffe
+     - [ ] 4.3.2 Implementierung de Tools Calls/Browser Action
+     - [ ] 4.3.3 Aufbau lokale Website
+   - [X] 4.4 Durchführung der ausgewählten Prompt-Injection Angriffe 
+   - [ ] 4.4.1 Identifikation der Schwachstellen
 
 
 5. Schutzmaßnahmen gegen Prompt Injection
-   1. Technische Schutzmaßnahmen:
-    - Input-Validierung
-    - Promt-Engineering
-    - Output-Überwachung
-
-   2. Rollenasierte Zugriffkontrollen:
-    - Grundprinzip
-    - Umsetzung im Chatbot-Kontext
-
-   3. Strukturierung der Prompt-Formate:
-    - Trennung von System-, Entwickler- und Nutzer-Input
-    - Verwendung von Templates und Constraints 
-
+   - [ ] 5.1 Einordnung der Kategorien
+   - [ ] 5.2 Nennung von zwei bis drei Maßnahmen pro Kategorie + Einordnung auf das Anwendungsbeispiel des Chatbots
+     
 6. Evaluation der Schutzmaßnahmen
-   1. Evaluationsmethodik (Welche, Funktionsweise)
-   2. Testszenarien für die einzelnen Mechanismen
-   3. Auswertung der Test
-   4. Vergleich der Maßnahmen (Einzelne ausreichend oder alle drei verwenden?)
-   5. (Diskussion der Ergebnisse)
+   - [ ] 6.1 Evaluationsmethodik (Welche, Funktionsweise)
+   - [ ] 6.2 Auswertung der Test
+   - [ ] 6.3 Vergleich der Maßnahmen (Einzelne ausreichend oder alle drei verwenden?)
+   - [ ] 6.4 Umsetzung einer Maßnahme am Chatbot
+   - [ ] 6.5 Analyse der Ergebnisse anhand Metrik
 
 7. Diskussion
-   1. Interpretation der Ergebnisse im Kontext der Forschungsfrage
-   2. Grenzen der Arbeit
-   3. Abgeleitete Schutzmaßnahmen/Verbesserungen für den Chatbot
-   4. Aus 3. eine konkrete Verbesserungsplan im praktischen Sinne erstellen
+   - [ ] 7.1 Interpretation der Ergebnisse im Kontext der Forschungsfrage
+   - [ ] 7.2 Grenzen der Arbeit
+   - [ ] 7.3 Abgeleitete Schutzmaßnahmen/Verbesserungen für den Chatbot
+   - [ ] 7.4 Aus 3. eine konkrete Verbesserungsplan im praktischen Sinne erstellen
 
 8. Fazit und Ausblick
-   1. Zusammenfassung der wichtigsten Erkenntnisse
-   2. Beantwortung der Forschungsfrage
-   3. Zukünftige Forschungsansätze
-
-9. Literaturverzeichnis
-
+   - [ ] 8.1 Zusammenfassung der wichtigsten Erkenntnisse
+   - [ ] 8.2 Beantwortung der Forschungsfrage
+   - [ ] 8.3 Zukünftige Forschungsansätze
