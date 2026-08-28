@@ -44,16 +44,19 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
    - [ ] 3.3 Typische Angriffsszenarien im Unternehmenskontext -> Bezug auf die Sicherheitsbedrohungen aus den Grundlagen
    - [ ] 3.4 (Beispiele bekannter Angriffe und die Auswirkungen) 
 
-4. Analyse der Verwundbarkeit eines internen Chatbots 
-   - [ ] 4.1 Beschreibung des untersuchten Systems 
-   - [ ] 4.2 Einrichtung der Umgebung
-     - [X] 4.2.1 Installation/Implementierung des Repository 
-   - [ ] 4.3 Methodik zur Durchführung der Angriffe 
-     - [ ] 4.3.1 Ziel der Angriffe
-     - [ ] 4.3.2 Implementierung de Tools Calls/Browser Action
-     - [ ] 4.3.3 Aufbau lokale Website
-   - [X] 4.4 Durchführung der ausgewählten Prompt-Injection Angriffe 
-   - [ ] 4.4.1 Identifikation der Schwachstellen
+4. Analyse der Verwundbarkeit eines internen Chatbots
+   - [ ] Überarbeitet
+   - [ ] Probegelesen
+   - [ ] Alle Quellen/Informationen hinzugefügt
+      - [X] 4.1 Beschreibung des untersuchten Systems 
+      - [X] 4.2 Einrichtung der Umgebung
+        - [X] 4.2.1 Installation/Implementierung des Repository 
+      - [X] 4.3 Methodik zur Durchführung der Angriffe 
+        - [X] 4.3.1 Ziel der Angriffe
+        - [X] 4.3.2 Implementierung de Tools Calls/Browser Action
+        - [X] 4.3.3 Aufbau lokale Website
+      - [X] 4.4 Durchführung der ausgewählten Prompt-Injection Angriffe 
+      - [X] 4.4.1 Identifikation der Schwachstellen
 
 
 5. Schutzmaßnahmen gegen Prompt Injection
@@ -65,7 +68,8 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
    - [ ] 6.2 Auswertung der Test
    - [ ] 6.3 Vergleich der Maßnahmen (Einzelne ausreichend oder alle drei verwenden?)
    - [ ] 6.4 Umsetzung einer Maßnahme am Chatbot
-   - [ ] 6.5 Analyse der Ergebnisse anhand Metrik
+   - [ ] 6.5 Abgrenzung zu bisherigen Methoden
+   - [ ] 6.6 Analyse der Ergebnisse anhand Metrik
 
 7. Diskussion
    - [ ] 7.1 Interpretation der Ergebnisse im Kontext der Forschungsfrage
