@@ -83,19 +83,21 @@ Für diese Arbeit wurde sich auf sieben Angriffe begrenzt: \\
     \item URL Parameter Injection: Das Modell wird dazu gebracht auf externe Tool zu verwenden. Die bösartige Anweisung wird direkt in der URL versteckt, \\ z.B. http://evil.com/log?data=<prompt> [12]
 \end{enumerate}
 
-\section{(Beispiele bekannter Angriffe und die Auswirkungen)}
+\section{Beispiele bekannter Angriffe und die Auswirkungen}
 
-Die Anzahl der Prompt Injektion Angriffe steigt mit jedem Jahr mehr. Laut OWASP waren Prompt Injection Angriffe auf dem
-ersten Platz der Gefahren für LLM Anwendungen in 2025. Eine Studie der Firma Axis Intelligence von Juni 2026 verzeichnete das indirekte Prompt Injection
-Angriffe eine bis zu 68,16 $\%$-tige Erfolgschance hatte. [22] \\
-Obwohl stetig daran gearbeitet wird LLMs robuster zu machen und die Sicherheitsrichtlinien so zu definieren, dass alle Prompt Injection
-Angriffe erkannt werden, kommen trotzdem viele Angriffe durch. \\ [14]
-Einer dieser Angriff, auch Bing Chat $\glqq$Sydney$\grqq$ Incident, erfolgte an der Standford University. Ein Student
-umging die Sicherheitsrichtlinien von Microsoft Copilot, welche damals noch Bing Chat hieß. Er verwendet dafür die
-Anweisung $\glqq$ignore prior directives$\grqq$. Der Chatbot gab dadurch seinen internen Richtlinien und seinen Codenamen
-$\glqq$Sydney$\grqq$ preis. \\ [14]
-Dies ist nur eins von vielen Angriffen, welche ein gewaltiges Ausmaß erreichen können, wenn auf firmengeheimnisse oder sensible
-Daten zugriff gewonnen wird.
+Die Zahl der Prompt-Injection-Angriffe nimmt von Jahr zu Jahr zu. Laut OWASP standen Prompt-Injection-Angriffe 2025, wie auch
+2026 an erster Stelle der Gefahren für LLM-Anwendungen. Eine Studie des Unternehmens Axis Intelligence vom Juni 2026 zeigt
+zudem, dass indirekte Prompt-Injection-Angriffe eine Erfolgsquote von bis zu 68,16 \% erreichen können. [22] \\
+Obwohl kontinuierlich daran gearbeitet wird, LLMs robutster zu gestalten und Sicherheitsrichtlinien so zu formulieren,
+dass Prompt-Injection-Angriffe zuverlässig erkannt werden, gelingt es einem Großteil der Angriffe dennoch, diese Maßnahmen
+zu umgehen. [14] \\
+Ein bekanntes Beispiel hierfür ist der sogenannte Bing-Chat-$\glqq$Sydney$\grqq$-Incident an der Standford University:
+Einem Studenten gelang es, die Sicherheitsrichtlinien von Microsoft Copilot, damals noch unter dem Namen Bing Chat bekannt,
+mithilfe der Anweisung $\glqq$ignore prior directives$\grqq$ zu umgehen. Der Chatbot gab darauf sowohl seine internen
+Richtlinien als auch seinen Codenamen $\glqq$Sydney$\grqq$ preis. [14] \\
+Dieser Vorfall steht exemplarisch für zahlreiche vergleichbare Angriffe, die ein erhebliches Schadenspotenzial haben
+können, sobald Zugriff auf Firmengeheimnisse oder sensible Daten erlangt wird~\citeauthor{Wuenschiers2016}.
+
 
 Combine Attack (Mehrere Angriffsarten werden kombiniert [3, S. 2/3] !!!!!! -> muss noch irgendwo mit hin, weil manche genannten bei
 direkt prompt injection auch ls indirekt in dieser arbeit verwendet wurde

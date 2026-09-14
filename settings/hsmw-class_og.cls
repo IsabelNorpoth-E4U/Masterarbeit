@@ -75,7 +75,7 @@
 
 % KOMAScript wird geladen
 \ifoneside
-\LoadClass[11pt,%
+\LoadClass[12pt,%
 headsepline,%
 toc=flat,%
 index=toc,
@@ -90,7 +90,7 @@ numbers=noendperiod,%
 version=3.04]{scrbook}[2009/07/07]
 \RequirePackage[paper=a4paper, inner=35mm, outer=26mm, top=13mm, bottom=28mm, includehead]{geometry}
 \else
-\LoadClass[11pt,%
+\LoadClass[12pt,%
 headsepline,%
 toc=flat,%
 index=toc,
@@ -109,7 +109,7 @@ version=3.04]{scrbook}[2009/07/07]
 \RequirePackage[ngerman]{babel}
 %\RequirePackage{ngerman} ROBBE
 \englishfalse}{\RequirePackage[english]{babel}\englishtrue}
-\RequirePackage{xcolor}
+\RequirePackage[override]{xcolor}
 \RequirePackage{url}
 \RequirePackage{xspace}
 \RequirePackage{verbatim}

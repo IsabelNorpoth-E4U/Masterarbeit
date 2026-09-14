@@ -25,28 +25,27 @@
 \newif\ifoneside
 \onesidefalse
 \newif\ifEid
-\Eidfalse
-\newif\ifjubilogo
-\jubilogofalse
-\newif\ifenglish
-\englishfalse
-\newif\ifmultiauthor % Röbbe
-\multiauthorfalse
-
-\RequirePackage{ifthen}
-\RequirePackage{xkeyval}
-
-
-\newboolean{seplists}
-\setboolean{seplists}{true}
-
-\newcounter{firstpage}
-
-% DOCUMENTCLASS
-\DeclareOptionX{multiauthor}{\multiauthortrue} % Röbbe
-\DeclareOptionX{english}{\def\@englisch{true}}
-\DeclareOptionX{thmbelow}{\def\@thmbelow{true}}
-\DeclareOptionX{thmpoint}{\def\Trennzeichen{.}}
+\ifdraft\else
+  \ifthenelse{\isundefined{\@hypertext}}{%
+    \providecommand{\phantomsection}{}%
+  }{%
+    \AtBeginDocument{\pagenumbering{alph}}%
+    \Ifpdfoutput{%
+      \RequirePackage[pdftex,colorlinks,linkcolor=linkfarbe,urlcolor=linkfarbe,anchorcolor=linkfarbe,citecolor=linkfarbe,breaklinks,bookmarksnumbered]{hyperref}%
+    }{%
+      \RequirePackage[dvips,colorlinks,linkcolor=linkfarbe,urlcolor=linkfarbe,anchorcolor=linkfarbe,citecolor=linkfarbe,bookmarksnumbered]{hyperref}%
+    }%
+    \RequirePackage[figure,table]{hypcap}%
+    \AtBeginDocument{%
+      \hypersetup{%
+        pdftitle = {\@Thema},%
+        pdfsubject = {\@Art},%
+        pdfauthor = {\@Vorname{} \@Nachname},%
+        pdfcreator = {LaTeX mit HSMW-Thesis}%
+      }%
+    }%
+  }%
+\fi
 \DeclareOptionX{thmcolon}{\def\Trennzeichen{:}}
 \DeclareOptionX{hypertext}{\def\@hypertext{true}}
 \DeclareOptionX{noseplists}{\setboolean{seplists}{false}}
@@ -75,7 +74,7 @@
 
 % KOMAScript wird geladen
 \ifoneside
-\LoadClass[11pt,%
+\LoadClass[12pt,%
 headsepline,%
 toc=flat,%
 index=toc,
@@ -90,7 +89,7 @@ numbers=noendperiod,%
 version=3.04]{scrbook}[2009/07/07]
 \RequirePackage[paper=a4paper, inner=35mm, outer=26mm, top=13mm, bottom=28mm, includehead]{geometry}
 \else
-\LoadClass[11pt,%
+\LoadClass[12pt,%
 headsepline,%
 toc=flat,%
 index=toc,
@@ -126,7 +125,7 @@ version=3.04]{scrbook}[2009/07/07]
 \RequirePackage[T1]{fontenc}
 \RequirePackage[scaled=0.92]{helvet}
 \RequirePackage{mathptmx}
-\RequirePackage[table,figure]{settings/hsmw-counter}
+\RequirePackage[table,figure]{hsmw-counter}
 \ifthenelse{\isundefined{\@englisch}}{%
 \ifthenelse{\isundefined{\@norefpage}}{%
 \RequirePackage[german,refpage]{nomencl}}{%
@@ -516,7 +515,7 @@ pdfcreator = {LaTeX mit HSMW-Thesis}
 % Einstellungen
 \setstretch{1.1}
 \setkomafont{pageheadfoot}{\normalfont\sffamily}
-\addtokomafont{pageheadfoot}{\linespread{1}\selectfont} 
+\addtokomafont{pageheadfoot}{\linespread{1}\selectfont}
 \setkomafont{pagenumber}{\normalfont\sffamily}
 \setheadsepline{0.5pt}
 
@@ -679,25 +678,24 @@ Mittweida, \@Monat{} \@Jahr
 \begin{titlepage}
 \AddToShipoutPicture*{%
 \insertFirmenlogo%
-\Ifpdfoutput{
+\Ifpdfoutput{%
 \ifjubilogo
 \put(369,731){\includegraphics[width=56mm, viewport = 0 0 215 122,
-    clip]{settings/hsmw-logo-150}}
+  clip]{hsmw-logo-150.pdf}}
 \else
-%\put(373,745){\includegraphics[width=56mm, viewport = 5 6 280 131,
 \put(373,745){\includegraphics[width=70mm, viewport = 0 0 280 131,
-    clip]{settings/hsmw-logo}}
+  clip]{hsmw-logo.pdf}}
 \fi
 }%
 {
 \ifjubilogo
-\put(368,730){\includegraphics[width=55.5mm]{settings/hsmw-logo-150.ps}}
+\put(368,730){\includegraphics[width=55.5mm]{hsmw-logo-150.ps}}
 \else
-\put(372,744){\includegraphics[width=55.5mm]{settings/hsmw-logo.ps}}
+\put(372,744){\includegraphics[width=55.5mm]{hsmw-logo.ps}}
 \fi
 }
 }
-~\\ 
+~\\
 \vfill
 \parbox[s][183mm]{92mm}{%
 \begin{raggedleft}
@@ -730,7 +728,7 @@ Mittweida, \@Monat{} \@Jahr
 \AtBeginDocument{\maketitle}
 \fi
 
-% Verzeichnisse 
+% Verzeichnisse
 \providecommand{\figuresandtables}{%
 \ifthenelse{\not\boolean{seplists}}{\listoffiguresandtables}{\listoffigures\listoftables}
 }
@@ -851,7 +849,7 @@ Faculty of \else Fakult\"at \fi\@Fakultaet
 }
 \fi
 
-% Gemeinsames Abbildungs- und Tabellenverzeichnis 
+% Gemeinsames Abbildungs- und Tabellenverzeichnis
 \providecommand{\listoffiguresandtables}{%
 \cleardoublepage
 \pagestyle{scrheadings}
@@ -1026,7 +1024,7 @@ Faculty of \else Fakult\"at \fi\@Fakultaet
 \def\Erklaerungstext{%
 \label{verylastpage}
 \parindent0em
-\ifEid 
+\ifEid
 \ifmultiauthor % Röbbe
 Hiermit versicheren wir an Eides statt, dass wir diese Arbeit selbstst\"andig verfasst, keine anderen als die angegebenen Quellen und Hilfsmittel benutzt und die Arbeit noch nicht anderweitig f\"ur Pr\"ufungszwecke vorgelegt haben.
 \else
