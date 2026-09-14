@@ -1,5 +1,0 @@
-\newglossaryentry{befruchtungen}
-{
-name={Befruchtung}, 
-description={kommt nach der Bestäubung}
-}

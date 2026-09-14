@@ -1,4 +1,0 @@
-\nomenclature{C}{Celsius}
-\nomenclature{PC}{Personal Computer}
-\nomenclature{Hybridformen}{ Formen von Hybriden}
-\nomenclature{LLM}{Large Language Model}

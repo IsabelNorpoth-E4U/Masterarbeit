@@ -1,5 +1,0 @@
-[0] Config.pm:328> INFO - This is Biber 2.21
-[1] Config.pm:331> INFO - Logfile is 'hsmw-vorlage.blg'
-[169] biber-MSWIN64:342> INFO - === 
-[615] Utils.pm:479> ERROR - Cannot find 'hsmw-vorlage.bcf'!
-[616] Biber.pm:137> INFO - ERRORS: 1

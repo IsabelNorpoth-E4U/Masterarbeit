@@ -1,0 +1,29 @@
+# LaTeX Build-Artefakte (werden bei jedem Kompilieren neu erzeugt)
+*.aux
+*.bbl
+*.bbl-SAVE-ERROR
+*.bcf
+*.bcf-SAVE-ERROR
+*.blg
+*.fdb_latexmk
+*.fls
+*.glg
+*.glo
+*.gls
+*.glsdefs
+*.idx
+*.ilg
+*.ind
+*.ist
+*.lof
+*.log
+*.lot
+*.nlo
+*.nls
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
+# IDE
+.idea/

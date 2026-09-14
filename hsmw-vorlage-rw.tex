@@ -1,0 +1,198 @@
+\documentclass[
+% DOKUMENTENTYP: protokoll/beleg/bachelor/master/paper/masterpaper/shortpaper/diploma
+thesis=master,
+%
+% SPRACHE: german/english
+language=german,
+%
+% FAKULTÄT: cb/inw/cb/wi/sw/me
+faculty=cb,	
+%
+% AUTORENSCHAFT: Dokument ohne Autor ...
+% noauthorship
+%
+% DRUCKMODUS: Links ohne Farbe und Graphiken in CMYK
+% printmode,
+%
+% EINSEITIGER DRUCK: Seitenzahlen immer rechts usw.
+onesided,
+%
+% ENGLISCHSPRACHIGE TITELSEITE entfernen
+% nosecondtitle,
+%
+% Abb.- Tab.- und QuellcodeVERZEICHNISSE ohne Seitenumbruch
+% compactlistof,
+%
+% Tab.-VERZEICHNIS vor Abb.-
+% lotbeforelof,	
+%
+% LINKS ohne Farbe
+% colorlinks=false,	
+%
+% INHALTSVERZEICHNIS eingerückt
+graduatedtoc,
+%
+% modernes Design
+fancy,
+%
+%
+%%% NACHFOLGENDE VERWENDEN WIR NICHT ...
+%
+% VORDERTEIL mit kleinen römischen Zahlen
+% smallromans,
+%
+% draft,
+%
+% Abk.-Verz. usw. wird nicht aktualisiert
+% noautobuild,
+%
+% glossaryhref=false,	% Style: Switches glossary links (default=true)
+%
+% Abk.-Verz. ohne Links
+% acronymhref=false,
+%
+% Abk.-Verz. ohne Punkte
+% acronymdots=false,
+%
+% theorembelow,		% Math: Use a linebreak after theorem (instead of a small horizontal skip)
+%
+% theoremdelim=:,		% Math: Specify the separater between theorem label and content (e.g. ".", ":", "-"), default=<none>
+%
+% sansmath,			% Math: Enable sans serif math fonts
+%
+%%% NACHFOLGENDE WEISS ICH NICHT ...
+%
+% nomenclature,
+%
+%	symbolshref=false,	% Style: Switches acronym links (default=true)
+%
+%	symbolsdots=false,	% Style: Switches acronym links (default=true)
+%
+% captionstyle=default,	% Style: Sets the type of caption handling (default, minus, flat)
+%
+]{hsmw-vorlage-rw}
+
+\usepackage{alertmessage}
+
+% für das Literaturverzeichnis
+\usepackage[
+hyperref=true, % Links zu Referenzen
+style=ieee, % IEEE Zitierweise: [1], [1, S. 35]
+natbib, % Formatierengine
+giveninits=true, % Initialien für Vornamen
+dashed=false, % wenn true, werden wiederholte Erstautorennamen
+              % mit - ersetzt 
+maxbibnames=10, % ab wann soll et al. gedruckt werden
+terseinits=true, % Initialien ohne Punkt und Leerzeichen
+uniquename=init, %
+]{biblatex} 
+
+\addbibresource{meine-literatur.bib}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% SPECIAL TO THIS DEMO 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% DIE FOLGENDE ZEILE MÜSSEN SIE AUSKOMMENTIEREN, DAMIT DER HAUPTTITEL "BACHELORARBEIT" LAUTET -> ALSO EINFACH EIN PROZENTZEICHEN AN DEN ANFANG DER NÄCHSTEN ZEILE SETZEN
+\type{Dokumentation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% NOTWENDIGE FELDER
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Titel: [englisch]{deutsch}
+\title[Template and Information for Writing Protocols, Reports and Theses]{Vorlage und \textit{Informationen} für das Verfassen von Protokollen, Belegen und Abschlussarbeiten}
+
+%%% VERWENDEN SIE DEN STERN FÜR EINE AUTORIN
+\author[]{Röbbe}{Wünschiers}<unterschrift.jpg>
+%\addauthor*{Lisa}{Prudnikow}[BT23, Matrikel 12345]% Additional Document Authors
+%\addauthor*{Anna}{Nauruschat}[BT23, Matrikel 23456]% Additional Document Authors
+%\addauthor{Nils}{Schön}[BT23, Matrikel 34567]% Additional Document Authors
+
+\courseofstudy[Biotechnology]{Biotechnologie}% Course of Study
+
+\examiner{Prof. Dr. Röbbe Wünschiers}% Supervisor (Hint: Use \examiner*{} or \addexaminer*{} to add female examiners)
+\addexaminer*{Sie, liebe Studierende}% Additional Supervisors
+
+\submissiondate{\the\year}[\the\month][\the\day]% Submission Date (use individual components of \today in this case for an up to date document)
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% NOTWENDIGE FELDER FÜR PROTOKOLLE UND BELEGE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\module{Wissenschaftliches Präsentieren}% Name of the Module
+
+\seminargroup{BT09}% Seminar Group
+
+\email{\href{mailto:ihre-email@hs-mittweida.de?subject=Einreichung Beleg/Protokoll}{ihre-email@hs-mittweida.de}}% Separate mutiple emails with \and
+
+%\location{}% Location for the Statement of Authorship (default: Mittweida)
+
+%\date{}% Date for the Statement of Authorship (default: \today)
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% NOTWENDIGE FELDER FÜR ABSCHLUSSARBEITEN
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% DIESER EINTRAG IST OPTIONAL UND KANN WEGGELASSEN WERDEN. MEHRERE BETREUER WERDEN DURCH KOMMATA GETRENNT
+ \betreuer{Das WWW, ChatGPT}
+
+%\abstract{Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.}% Abstract (optional english)
+
+%%% Optional Fields for Thesis
+%\defensedate{2022}% Defense Date (please specify year of defense, default will be the same year as submission date)
+%\subtitle{In Vorbereitung auf das Corporate Design 2019}% Subtitle
+%\location{}% Location for the Statement of Authorship (default: Mittweida)
+%\date{}% Date for the Statement of Authorship (default: \today)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% OPTIONAL FIELDS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\subtitle{Brauchen wir nicht}% Subtitle
+
+%\partnerlogo{magic-juggler.png}% Partnerlogo (Path to logo file)
+
+%\nda{}% Non-Disclosure-Agreement: Specify the company owning the sensible data
+
+%\frontispiece{Dieses Dokument wurde auf chlorfreiem Papier gedruckt.}% Backside of first title page
+
+%\preface{}% Preface
+
+\dedication{Eine Danksagung ist bei Abschlussarbeiten üblich. Sie gehört aber nicht in Protokolle und Belege. Denken Sie daran, dass die Danksagung Teil der öffentlich zugänglichen Abschlussarbeit ist. Sie sollte ernsthaft formuliert sein und sie sollten nicht ihrem Goldhamster danken.
+
+Ich möchte an dieser Stelle Stefan Schildbach für die gute Vorlage danken, die ich zu dieser \enquote{bio-spezifischen} Vorlage erweitert habe.}% Dedication
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Provided Hooks
+%\hooklof{beforelof}{afterlof}% Add text before and after the list of figures (lof)
+%\hooklot{beforelot}{afterlot}% Add text before and after the list of tables (lot)
+%\hooklists[][]{} % Add additional lists after toc, lof and lot, but before acronyms
+%\hookbibliography{\printbibliography}% Change the default \printbibliography to something else, e.g. using subbibliographies ordered by type
+%\hookpreauthorship{}% Add content before the Statement of Authorship
+%\hooklastpage{}% Add content after the Statement of Authorship
+
+%%% Abkürzungen
+\input{meine-abk.tex}
+
+\glsaddall
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\input{chapter/01_Einleitung.tex}
+\input{chapter/02_Grundlagen.tex}
+\input{chapter/03_Prompt_Injection.tex}
+\input{chapter/04_Analyse_Chatbot.tex}
+\input{chapter/05_Schutzmaßnahmen.tex}
+
+\end{document}
