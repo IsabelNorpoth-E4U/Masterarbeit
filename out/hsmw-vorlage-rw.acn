@@ -3,6 +3,9 @@
 \glossaryentry{LUCA?\glossentry{luca}|setentrycounter[]{page}"\glsnumberformat}{a}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{a}
 \glossaryentry{API?\glossentry{api}|setentrycounter[]{page}"\glsnumberformat}{a}
+\glossaryentry{SSL?\glossentry{ssl}|setentrycounter[]{page}"\glsnumberformat}{a}
+\glossaryentry{HTTP?\glossentry{http}|setentrycounter[]{page}"\glsnumberformat}{a}
+\glossaryentry{HTTPS?\glossentry{https}|setentrycounter[]{page}"\glsnumberformat}{a}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{I}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{2}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{3}
@@ -13,3 +16,5 @@
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{3}
 \glossaryentry{API?\glossentry{api}|setentrycounter[]{page}"\glsnumberformat}{3}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{4}
+\glossaryentry{SSL?\glossentry{ssl}|setentrycounter[]{page}"\glsnumberformat}{9}
+\glossaryentry{SSL?\glossentry{ssl}|setentrycounter[]{page}"\glsnumberformat}{9}

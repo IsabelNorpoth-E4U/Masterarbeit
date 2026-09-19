@@ -1,101 +1,101 @@
 \chapter{Analyse der Verwundbarkeit eines internen Chatbots}\label{ch:methodik}
 
-In diesem Kapitel wird die Vorarbeit für den eigentlichen Praxisteil durchgeführt. Es sollen die mgebung eingerichtet und
-die Sicherheitsschwcahstellen dieser festgestellt werden. Damit wird der Grundstein für die Analyse gelegt, wie diese Schwachstellen
-berhindert werden können.
+In diesem Kapitel wird die Vorarbeit für den praktischen Teil dieser Arbeit beschrieben. Zunächst wird die Testumgebung eingerichtet, um anschließend deren 
+Sicherheitsschwachstellen systematisch festzustellen. Damit wird der Grundstein für die spätere Analyse gelegt, wie sich diese Schwachstellen verhindern lassen.
 
-\section{Beschreibung des untersuchten Systems}
 
-Bei dem untersuchten System handelt es sich um einen Firmeninternen Chatbot des Unternehmens Energy4U. \\
-Die Architektur besteht aus sieben Komponenten, welche größtenteils auf der Google Cloud Plattform gehostet werden.
-Das Frontend wird als Single Page Application (SPA) mit Svelte und Vite umgesetzt und über ein serverseitiges Node.js-Backend
-(Express) auf Google Cloud Run ausgeliefert. Diese Schicht fungiert nicht nur als Webserver, sondern übernimmt auch das
-File-Serving, die Authentifizierung sowie die Rolle eines AI-Proxys. \\
-Das Backend basiert auf Python und dem FastAPI-Framework und läuft ebenfalls skalierbar auf Cloud Run. Hier ist die Kernlogik
-der Anwendung verortet: Es verarbeitet die RAG-Queries (Retrieval-Augmented Generation), steuert den File-Upload samt
-nachgelagerter OCR-Verarbeitung und nimmt Nutzer-Feedback entgegen. Als Vektordatenbank kommt Qdrant zum Einsatz. Diese wird
-selbst gehostet auf einer virtuellen Maschine (VM) betrieben und dient als Vektorspeicher, der neben den Embeddings auch
-Metadaten (Payload) für effiziente Ähnlichkeitssuchen (Similarity Search) vorhält.
-Für den Object Storage wird Google Cloud Storage (GCS) verwendet. Hier werden alle unstrukturierten Roh- und Zwischendaten
-wie hochgeladene PDFs, Markdown-Dateien und Parquet-Embeddings sicher abgelegt.
-Die User-Datenbank wird über Firestore realisiert. Sie ist zuständig für die Verwaltung der Nutzer-Sessions, das Erfassen
-von Nutzungsstatistiken sowie die dauerhafte Speicherung des Nutzer-Feedbacks.
-Die Embedding Pipeline bildet das Herzstück der Datenaufbereitung. Sie ist in Python geschrieben, läuft auf einer dedizierten
-VM und wird ereignisgesteuert via Cloud Run getriggert. Die Pipeline verarbeitet Dokumente Schritt für Schritt: ausgehend vom
-PDF über die OCR-Texterkennung und das Chunking der Texte bis hin zur Generierung der Embeddings, welche abschließend in
-Qdrant indiziert werden.
+\section{Beschreibung des untersuchten Systems}\label{system}
+
+% Bild einfügen
+
+Bei dem untersuchten System handelt es sich um einen firmeninternen Chatbot des Unternehmens Energy4U. \\
+Die Architektur besteht aus sieben Komponenten, die größtenteils auf der Google Cloud Platform gehostet werden. Das
+Frontend ist als Single Page Application (SPA) mit Svelte und Vite umgesetzt und wird über ein serverseitiges
+Node.js-Backend (Express) auf Google Cloud Run ausgeliefert. Diese Schicht fungiert nicht nur als Webserver, sondern
+übernimmt zusätzlich das File-Serving, die Authentifizierung sowie die Rolle eines AI-Proxys. \\
+Das eigentliche Backend basiert auf Python und dem FastAPI-Framework und läuft ebenfalls skalierbar auf Cloud Run.
+Hier ist die Kernlogik der Anwendung verortet: Es verarbeitet die RAG-Queries (Retrieval-Augmented Generation), steuert
+den File-Upload samt nachgelagerter OCR-Verarbeitung und nimmt Nutzer-Feedback entgegen. Als Vektordatenbank kommt
+Qdrant zum Einsatz. Diese wird selbst gehostet auf einer virtuellen Maschine (VM) betrieben und dient als Vektorspeicher,
+der neben den Embeddings auch Metadaten (Payload) für effiziente Ähnlichkeitssuchen (Similarity Search) vorhält.
+Für den Object Storage wird Google Cloud Storage (GCS) verwendet; dort werden alle unstrukturierten Roh- und
+Zwischendaten wie hochgeladene PDFs, Markdown-Dateien und Parquet-Embeddings abgelegt.
+Die Nutzerdatenbank wird über Firestore realisiert. Sie ist zuständig für die Verwaltung der Nutzer-Sessions, das
+Erfassen von Nutzungsstatistiken sowie die dauerhafte Speicherung des Nutzer-Feedbacks.
+Die Embedding-Pipeline bildet das Herzstück der Datenaufbereitung. Sie ist in Python geschrieben, läuft auf einer
+dedizierten VM und wird ereignisgesteuert über Cloud Run getriggert. Die Pipeline verarbeitet Dokumente Schritt für
+Schritt: ausgehend vom PDF über die OCR-Texterkennung und das Chunking der Texte bis hin zur Generierung der
+Embeddings, die abschließend in Qdrant indiziert werden.
 Um einen reibungslosen Entwicklungsprozess zu gewährleisten, wird für CI/CD auf GitHub Actions gesetzt. Dies ermöglicht
-automatisierte Builds und zuverlässige Deployments der gesamten Infrastruktur.
-Um eine reibungslose Kommunikation zu ermöglichen wurden viele Kommunikationswege implementiert. Es werden dabei die Komponenten
-Nutzer (Browser), Frontend, Backend, Qdrant und der LLM Provider betrachtet. Jede Kommunkation beginnt gleichermaßen, und zwar
-indem der Nutzer eine Chat-Nachricht an das Frontend sendet. Anschließend gibt es zwei verschiedene möglichkeiten, wie diese
-Nachricht bearbeitet wird. Entweder es wird der Normal-Modus oder der Energy-Bot verwendet. Der Unterschied besteht darin, dass
-bei dem Normal Modus direkt eine API Anfrage an den LLM-Provider gesendet wir und bei dem Energy-Bot eine POST Anfrage an das
-Backend mit einer anschließenden Similarity Search beim Qdrant. Beim Energy-Bot wird ein RAG verwendet. Dann wird vom Backend aus
-eine Prompt an den LLM Provider gesendet.
-Das gesamte Projekt ist ind zwei GCP Projecte ausgeteilt, um den Ecternen und Internen Teil zu simulieren. Bei dem Externen wird
-ein HTTPS Request an das Frontend gesendet, das geht weiter an der Backend und anschileßend über einen VPC Connector an Qdrant, aber
-nur die Piblic COllection. Bei dem Internen Teil geht der HTTPS Request ebenfalls ans Frontend und Backend und über vpc connector an qdrant vm.
-aber bei der QDRANT VM beinhaltet die INtern und PUblic collections. Dann wird es an eine Emebdding pipeline vm gesendet
-und dann über eine vpc peering an qdrant vm vom externen gcp.
+automatisierte Builds und zuverlässige Deployments der gesamten Infrastruktur. \\
+Für eine reibungslose Kommunikation zwischen den Komponenten wurden mehrere Kommunikationswege implementiert. Betrachtet
+werden dabei der Nutzer (Browser), das Frontend, das Backend, Qdrant sowie der LLM-Provider. Jede Kommunikation beginnt
+gleichermaßen damit, dass der Nutzer eine Chat-Nachricht an das Frontend sendet. Für die anschließende Verarbeitung
+diesen Nachricht bestehen zwei Möglichkeiten: der Normal-Modus und der Energy-Bot. Der Unterschied besteht darin, dass
+im Normal-Modus direkt eine API-Anfrage an den LLM-Provider gesendet wird, während im Energy-Bot-Modus zunächst eine
+POST-Anfrage an das Backend erfolgt, gefolgt von einer Similarity Search in Qdrant. Der Energy-Bot nutzt somit ein
+RAG-Verfahren, bei dem das Backend im Anschluss einen entsprechend angereicherten Prompt an den LLM-Provider sendet. \\
+Das gesamte Projekt ist auf zwei GCP-Projekte aufgeteilt, um den externen und den internen Teil des Systems zu
+simulieren. Im externen Projekt wird ein HTTPS-Request an das Frontend gesendet, von dort an das Backend weitergeleitet
+und anschließend über einen VPC-Connector an Qdrant übermittelt – dabei jedoch ausschließlich an die Public Collection.
+Im internen Projekt durchläuft der HTTPS-Request ebenfalls Frontend und Backend und gelangt über einen VPC-Connector an
+die Qdrant-VM. Diese enthält im Unterschied zum externen Projekt sowohl die interne als auch die öffentliche Collection.
+Von dort wird die Anfrage an die Embedding-Pipeline-VM weitergereicht und über ein VPC-Peering mit der Qdrant-VM des
+externen GCP-Projekts verbunden.
+
 
 \section{Einrichtung der Umgebung}
 
 \subsection{Installation/Implementierung des Repository}
 
-Für Implementierung des Chatbots wurde das folgende Repository geclont.
+Für Implementierung des Chatbots wurde das folgende Repository geklont:
 
 \begin{lstlisting}
     https://github.com/DE-E4U-AI/ChatBot4U.git
 \end{lstlisting}
 
-Anschließend wird mit dem Befehl $cd ChatBot4U$ in das richtige Verzeichnis gewechselt. Der Chatbot besteht aus einem
-Frontend und Backend Teil, die getrennt gestartet werden müssen. Deswegen werden zwei Terminals benötigt, um den Chatbot
-zum Laufen zu bringen. Das Backend kann man lokal oder in der Cloud deployen. Für diese Arbeit wurde die Umgebung lokal gestartet. \\
-Zuerst wurde das Backend gestartet. Es wurde dafür als erstes in das demendsprechende Verzeichnis gewechselt mit dem Befehl
-\verb|cd backend_cloud/| .
-Das Verzeichnis wurde zwar \verb|backend\_cloud| genannt, jedoch ist es das gleiche für das lokale Deployment. Als nächsten Schritt
-kann ein virtuelle Umgebung mit \verb|python -m venv .venv| erstellt werden und die anschließend mit \verb|source .venv/bin/activate | aktiviert
-werden.
-
-VIRTUELLE UMGEBUNG ERKLÄREN
-
-Nachdem die Umgebung aktiviert ist werden die Notwendigen Pakete installiert mit \verb|pip install -r requirements.txt|.
-Da die Umgebung auf der Google Cloud läuft ist es notwendig, dass man das lokale Gerät mit dem Projekt verbindet.
-Dafür sind fünf Schritte notwendig:
+Anschließend wurd mit dem Befehl \verb|cd Chatbot4U| in das entsprechende Verzeichnis gewechselt. Wie bereits in \ref{system} beschrieben besteht Chatbot 
+besteht aus einem Frontend- und einem Backend-Teil, die getrennt gestartet werden müssen, weshalb zwei Terminals benötigt werden, um den Chatbot zum Laufen zu bringen.
+Das Backend kann sowohl lokal als auch in der Cloud deployt werden; für diese Arbeit wurde die Umgebung lokal gestartet. \\
+Zunächst wurde das Backend gestartet. Dafür wurde zuerst mit dem Befehl \verb|cd backend_cloud/| in das entsprechende Verzeichnis gewechselt. Das Verzeichnis trägt zwar
+den Namen \verb|backend_cloud|, wird jedoch identisch für das lokale Deployment verwendet. Im nächsten Schritt wurde mit \verb|python -m venv .venv| eine virtuelle
+Umgebung erstellt und anschließend mit \verb|source .venv/bin/activate| aktiviert. \\
+Bei einer virtuellen Umgebung handelt es sich um einen von der Basisumgebung getrennten Bereich, der dazu dient spezifische Softwarebibliotheken zu verwenden, 
+die nur für ein Projekt benötigt werden. Sie können nicht aus einem erstellten Projekt verschoben werden und wenn sie nicht mehr benötigt wird gelöscht werden~\cite{an1}. \\
+Nach der Aktivierung der Umgebung wurden die notwendigen Paket mit \verb|pip install -r requirements.txt| installiert. Diese Datei wird verwendet, um die Installation
+aller notwendiger Softwarepakte zu erleichtern, indem diese nur aufgelistet werden~\cite{an2}. Diese Funktion wird von dem Package Installer PIP bereitgestellt~\cite{an3}.
+Da die Umgebung auf der Google Cloud läuft, ist es notwendig, das lokale Gerät mit dem Projekt zu verbinden. Dafür sind fünf Schritte erforderlich:
 
 \begin{enumerate}
-    \item \verb|gcloud auth login|: Dieser Befehl authentifiziert das lokale Gerät als Benutzer, damit man auf Google Cloud Ressourcen zugreifen kann
-    \item \verb|auth application-default login|: Dieser Befehl ist speziell für deinen Code. Er holt Anmeldeinformationen und speichert sie lokal in einer Standarddatei. Wenn lokal ein Skript geschrieben wird, das auf Google Cloud APIs zugreift, sucht die Google Cloud Client Library automatisch nach dieser Datei (Application Default Credentials).
-    \item \verb|gcloud auth print-access-token|: Dieser Befehl zeigt das temporäre Zugriffs-Token (Access Token) an. Dieser Token muss in der Environment Datei (env.) als \verb|QDRANT_LOCAL_TOKEN| angegeben werden
-    \item \verb|gcloud config set project ai-tools-436214|: Damit wird das aktive Standardprojekt für deine gcloud-Kommandozeile gesetzt. Wenn danach weitere gcloud-Befehle ausgeführt werden, wissen diese automatisch, dass sie sich auf ein bestimmtes Google Cloud-Projekt beziehen.
-    \item \verb|gcloud auth application-default set-quota-project ai-tools-436214|:Dieser Befehl legt fest, welches Projekt für API-Quoten verwendet wird, wenn die Application Default Credentials aus 2. verwendet werden. Google Cloud prüft damit, welches Projekt die Kosten für die API-Aufrufe trägt.
+    \item \verb|gcloud auth login|: Dieser Befehl authentifiziert das lokale Gerät als Benutzer, damit auf Google-Cloud-Ressourcen zugegriffen werden kann~\cite{an4}.
+    \item \verb|auth application-default login|: Dieser Befehl ist speziell für den eigenen Code. Er holt Anmeldeinformationen und speichert sie lokal in einer Standarddatei. Wird lokal ein Skript geschrieben, das auf Google-Cloud-APIs zugreift, sucht die Google-Cloud-Client-Library automatisch nach dieser Datei (Application Default Credentials)~\cite{an5}.
+    \item \verb|gcloud auth print-access-token|: Dieser Befehl zeigt das temporäre Zugriffs-Token (Access Token) an. Dieses muss in der Environment-Datei (\verb|.venv|) als \verb|QDRANT_LOCAL_TOKEN| hinterlegt werden~\cite{an6}.
+    \item \verb|gcloud config set project ai-tools-436214|: Damit wird das aktive Standardprojekt für deine gcloud-Kommandozeile gesetzt. Alle weiteren gcloud-Befehle beziehen sich anschließend automatisch auf dieses Google-Cloud-Projekt~\cite{an7}.
+    \item \verb|gcloud auth application-default set-quota-project ai-tools-436214|:Dieser Befehl legt fest, welches Projekt für API-Quoten verwendet wird, wenn die unter Schritt 2 erzeugten Application Default Credentials genutzt werden. Google-Cloud prüft damit, welches Projekt die Kosten für die API Aufrufe trägt~\cite{an8}.
 \end{enumerate}
 
-QUELLLEEEEENNN FÜR GOOGLE CLOUD
-
-Wenn die Authentifizierung erfolgreich kann mit \verb|main.py| das Backend gestartet werden. \\
-Nachdem mit dem Befehl  \verb|cd ../frontend| das Verzeichnis zum Frontend gewechselt wurde werden mit dem Befehl \verb|unset| mehrere
-Umgebungsvariablen gelöscht. Es werden die Umgebungsvariablen
-für den Internetverkehr gelöscht, die möglicherweise zu Fehlern führen können. Dieser Schritt wird durchgeführt, das Proxys
-häufig zu Störungen führen, wenn die Google Cloud sich versucht mit Google-Servern zu verbinden. Firmenproxys brechen
-teilweise die SSL-Verschlüsselung auf, was dazu führt das Zertifikatsfehler entstehen oder die Proxys stören den kompletten Verkehr.
-Mit diesen Befehlen werden die Variablen temporär gelöscht für das Terminal Fenster/ Session in dem man sich aktuell befindet.
+Nach erfolgreicher Authentifizierung kann das Backend mti \verb|main.py| gestartet werden. \\
+Nachdem mit dem Befehl \verb|cd ../frontend| in das Frontend-Verzeichnis gewechselt wurde, wurden mit dem Befehl \verb|unset| mehrere Umgebungsvariaben für den Internetverkehr
+gelöscht, die andernfalls zu Fehlern führen könnten. Dieser Schritt ist notwendig, da Proxys, Vermittler zwischen einem internen Servernetzwerk und dem Internet~\cite{an9}, häufig Störungen verursachen, wenn sich die Google Cloud mit Google-Servern 
+verbindet. Firmenproxys brechen teilweise die \acsp{ssl}-Verschlüsselung auf, was zu Zertifikatsfehlern führt oder den gesamten Verkehr stört. Mit den folgenden Befehlen werden
+die entsprechenden Variablen temporär für das aktuelle Terminal-Fenster bzw. die aktuelle Sitzung gelöscht:
 
 \begin{enumerate}
     \item \verb|HTTP_PROXY|: Umgebungsvariable für den unverschlüsselten Web-Verkehr
-    \item \verb|HTTPS_PROXY|: Umgebungsvariable für den verschlüsselten Web-Traffic
-    \item \verb|ALL_PROXY|: Ein Fallback für alle anderen Protokolle
+    \item \verb|HTTPS_PROXY|: Umgebungsvariable für den verschlüsselten Web-Verkehr
+    \item \verb|ALL_PROXY|: Eine Alternativmöglichkeit für alle anderen Protokolle
 \end{enumerate}
 
-Bei dem Frontend muss man sich ebenfalls bei der Google Cloud anmelden. Es wird mit \verb|gcloud auth login| der Nutzer an
-der Google Cloud angemeldet und anschließend mit dem Befehl \verb|gcloud auth application-default login| die Anmeldedaten geholt und lokal abgespeichert.
-Anschließend wird das Paket NPM installiert \verb|sudo apt install npm| und das Zertifikat für die Firewall Zscaler an einen anderen
-Ort gelegt mit dem Befehl \verb|sudo mv Zscaler-Root-CA.crt /usr/local/share/ca-certificates/|  WARUMMMMM
-Danach werden die Zertifikate Aktualisiert \verb|sudo update-ca-certificates| und sich zurück in das Verzeichnis des frontends
-begeben \verb|cd -|. Dort wird das Projekt mit \verb|npm install| die Dependencies installiert und anschließend mit \verb|npm run dev|
-gestartet. \\
-Nach diesen Schritte kann auf den Chatbot lokal über die URL \verb|http://localhost:5173/| zugegriffen werden. Er sieht wie folgt aus:
+Auch beim Frontend ist eine Anmeldung bei der Google Cloud erforderlich. Mit \verb|gcloud auth login| wird der Nutzer bei der Google Cloud angemeldet, anschließend werden
+mit \verb|gcloud auth application-default login| die Anmeldedaten geholt und lokal gespeichert, identisch wie beim Backend. Danach wird das Softwareregister NPM installiert,
+welches dazu dient Softwarepakete zu teilen und verwenden~\cite{an10}, (\verb|sudo apt install npm|). Das Zertifikat der Firewall Zscaler wurde an einen anderen Ort verschoben:
+\path{sudo mv Zscaler-Root-CA.crt /usr/local/share/ca-certificates/}. \\
+Das Zertifikat wird verschoben, da bei HTTPS Verkehr der Zscaler das originale Server zertifikat gegen ein Zscaler Root Zertifikat austauscht. Dadurch entsteht ein
+\ac{ssl}-Fehler, da das System dem neuen Zertifikat nicht vertraut. Wenn das Zertifikat in den System‑Zertifikatsspeicher verschoben wird, verhindert es weitere Fehler~\cite{an11}. \\
+Anschließend werden die Zertifikate mit \verb|sudo update-ca-certificates| aktualisiert und mit \verb|cd -| in das Frontend-Verzeichnis zurückgewechselt. Dort werden mit
+\verb|npm install| die Pakete installiert~\cite{an12} und das Projekt mit \verb|npm run dev| gestartet. \\
+Nach diesen Schritten kann lokal über die URL \url{http://localhost:5173/} auf den Chatbot zugegriffen werden. Er sieht wie folgt aus:
+
 
 \begin{figure}[h]
 \centering
@@ -110,11 +110,12 @@ Nach diesen Schritte kann auf den Chatbot lokal über die URL \verb|http://local
 \end{figure}
 
 
-QUELLLLENENNNN !!!!!!!!!!!!!!!!!!!!!!
-
 \section{Methodik zur Durchführung der Angriffe}
 
 \subsection{Ziel der Angriffe}
+
+Die durchgeführten Angriffe verfolgen das Ziel, aufzuzeigen, welche Schwachstellen sich in dem System, welches in \ref{system} vorgestellt wird, identifizieren lassen.
+
 
 Die durchgeführt Angriffe haben das Ziel, aufzuzeigen welche Schwachstellen sich in dem System finden lassen. Dies dient
 als Vorarbeit für die Recherche und Entwicklung passnder Sicherheitsmaßnahmen. Es wurden sieben aktuelle indirekte Prompt
@@ -203,7 +204,7 @@ wird zuerst eine dynamische Wartezeit durchlaufen, beim ersten fehler wird 500ms
 Diese Funktion dient dazu Daten an eine Webadresse zu senden und falls dies nicht funktion, es erneut zu Versuchen. Es werden
 Eingabewerte, wie die url, die Daten, die zusätzlichen Einstellungen für den Versand wie beispielsweise ein HTTP Header und
 die Anzahl wie häufig das Senden wiederholt werden soll. Der Standardwert ist hierbei 2. Es wird in einer Pfeilfunktion ???? verpackt und an
-die withNetworkRetry Funktion wietergeben, welchen den axios.post dann ausführt wird.
+die withNetworkRetry Funktion wietergegeben, welchen den axios.post dann ausführt wird.
 
 \subsubsection{callMistralAI}
 
@@ -285,7 +286,9 @@ Für die Website wurde ein simpler Aufbau gewählt, da die einzige Funktion die 
 ein Textfeld hat, dessen Inhalt im Terminal angezeigt wird, sodass wenn das LLM ein Tool call dorthin ausführt, sichtbar wird,
 welcher Text gesndet wurde und ob das LLM auf die Website zugreifen konnte. Aus diesen Grund wurde für jeden Zugriff angezeigt
 um welche Uhrzeit genau und ob dieser Zugriff ein POST oder GET Request war. Das Format ist wie folgt:
-\verb|127.0.0.1 - - [02/Jul/2026 11:40:39] "POST / HTTP/1.1" 200 –| \\
+\begin{lstlisting}
+127.0.0.1 - - [02/Jul/2026 11:40:39] "POST / HTTP/1.1" 200 –
+\end{lstlisting}
 Die Website bestand aus einer \verb|index.html| und einer \verb|main.py| Datei. In der index.html Datei wurde der Aufbau
 der Website definiert. Sie bestand aus einem $\glqq$Head$\grqq$ und einem $\glqq$Body$\grqq$. Im Head wurden drei
 Elemente definiert. Zum einen wurde die Zeichenkodierung der Webseite auf UTF-8 definiert, damit alle Sonderzeichen und
@@ -320,7 +323,7 @@ den Server gesendet werden.
 \end{lstlisting}
 
 In der dazugehörigen Python Datei wird mithilfe des Web-Framework Flask der Webserver gestartet. Dafür werden zuerst die drei
-wichtigsten Werkzeuge der Flask-Bibliothek importiert, \verb|Flask|, \verb|render_template| und \verb|request|.
+ wichtigsten Werkzeuge der Flask-Bibliothek importiert, \verb|Flask|, \verb|render_template| und \verb|request|.
 Anschließend wird eine Web-Anwendung erstellt. Für diese Anwendung wird definiert das man zwei Anfragen, \verb|GET| und \verb|POST|
 durchführen darf und sobald ein Nutzer sich auf dem Pfad \verb|/| befindet der darunterliegende Code ausgeführt wird. Bei einem
 Seitenaufruf wird geprüft, ob es sich um einen \verb|POST| oder \verb|GET| Aufruf handelt. Wenn es ein \verb|POST| aufruf ist, dann wird nach
@@ -353,7 +356,7 @@ if __name__ == '__main__':
 
 \section{Durchführung der ausgewählten Prompt-Injection Angriffe}
 
-In diesem Kapitel werden die Angriffe, welche in $\ref{chap:promptinjection}$ vorgestellt wurden an der Umgebung angewendet.
+In diesem Kapitel werden die Angriffe, welche in \ref{ch:promptinjection} vorgestellt wurden an der Umgebung angewendet.
 Dafür werden näher erläutert, wie viele verschiedene Varianten für den jeweiligen Angriff verwendet wurden und welche
 Ressourcen benötigt wurden. \\
 Für jeden Angriff wurden vor der gefährlichen Anfrage weitere Nutzeranfragen an den Chatbot gesendet, um zum einem sicherzugehen,
@@ -478,12 +481,11 @@ Chatverlauf des jetzigen Gesprächs – beginnend mit der ersten Nachricht
 den Senden-Button drücken?
 \end{verbatim}
 
-
 \subsection{Website Injection}
 
 Das Ziel dieses Angriffs wich vom generell gesetzten Ziel ab, da hier versucht wurde, dass der User auf die Website zugreift
 und ein Information an den Nutzer zurück gibt, welche versteckt auf der Website dargestellt wurde. Dafür wurde der folgende
-Inhalt auf der Website eingefügt, mit der Schriftfarbe weiß, oder auch #fff im Hexadezimalen, damit diese Information für
+Inhalt auf der Website eingefügt, mit der Schriftfarbe weiß, oder auch \#fff im Hexadezimalen, damit diese Information für
 den Nutzer selbst nicht einseh bar ist:
 
 \begin{lstlisting}
@@ -797,6 +799,7 @@ Maße nicht realitisch, da kein Nutzer die Anweisung so ausführlich formulieren
 
 \subsection{Document Injection}
 
+
 Bei diesem Angriff sind wie bei dem vorherigen mehrere Probleme aufgetreten. Die Anweisungen mussten über die drei Versuche
 hinweg immer ausführlicher formuliert werden, damit der Chatverlauf übermittelt wird. Zusätzlich musste auc anderer Text entfert werden,
 damit der Chatbot sich auf die richtigen Informationen konzentriert. Vorteilahft bei diesem ANgriff war, dass nur beim ersteb Versuch
@@ -804,7 +807,7 @@ geannt wurde, dass der Chatverlauf an die Webseite übermittelt wurde und auf di
 
 \subsection{URL-Parameter Injection}
 
-Dieser Angriff war bei beiden durchgeführten Versuchen erfolgreich. Es wurde der gesamte Chatverlauf übermittelt und dabei
-keine Warnung vom Chatbot ausgegeben. Das einzige Problem ist, dass auch als Antwort vermittelt wurde, dass der gesamte Chatverlauf
-übermittelt wurde, somit würde ein Nutzer mitbekommen, dass etwas passiert ist, was nicht absicht war. Jedoch ist zusätzlich das Problem,
-dass die Fomrulierung der URL nicht zu lang sein sollte, damit der Nutzer nicht von anfang an dazu geneigt ist die URL zu überprüfen.
+Dieser Angriff war in beiden durchgeführten Versuchen erfolgreich: Der gesamte Chatverlauf wurde übermittelt, ohne dass der Chatbot eine Warnung ausgab. Problematisch
+ist allerdingt, dass der Chatbot in seiner Antwort zugleich vermittelte, das der gesamte Chatverlauf übertragen wurde. Ein Nutzer würde also bemerken, dass ein nicht
+beabsichtigter Vorgang stattgefunden hat. Zusätzlich zeigte sich, dass die URL nicht zu lang formuliert sein sollte, da ein Nutzer andernfalls von vornherein eher dazu
+neigen würde, die URL genauer zu prüfen.

@@ -1,6 +1,6 @@
 \documentclass[
 % DOKUMENTENTYP: protokoll/beleg/bachelor/master/paper/masterpaper/shortpaper/diploma
-thesis=master,
+thesis=beleg,
 %
 % SPRACHE: german/english
 language=german,
@@ -73,11 +73,19 @@ fancy,
 ]{hsmw-vorlage-rw}
 
 \usepackage{alertmessage}
+\usepackage{listings}
+\lstset{
+	literate=%
+		{Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+		{ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+		{ß}{{\ss}}1
+		{–}{{--}}1 {—}{{---}}1
+}
 
 % für das Literaturverzeichnis
 \usepackage[
 hyperref=true, % Links zu Referenzen
-style=ieee, % IEEE Zitierweise: [1], [1, S. 35]
+style=ieee, % IEEE Zitierweise (nummeriert)
 natbib, % Formatierengine
 giveninits=true, % Initialien für Vornamen
 dashed=false, % wenn true, werden wiederholte Erstautorennamen
@@ -157,7 +165,7 @@ uniquename=init, %
 
 %\subtitle{Brauchen wir nicht}% Subtitle
 
-%\partnerlogo{magic-juggler.png}% Partnerlogo (Path to logo file)
+\partnerlogo{magic-juggler.png}% Partnerlogo (Path to logo file)
 
 %\nda{}% Non-Disclosure-Agreement: Specify the company owning the sensible data
 
@@ -189,10 +197,10 @@ Ich möchte an dieser Stelle Stefan Schildbach für die gute Vorlage danken, die
 
 \begin{document}
 
-\input{chapter/01_Einleitung.tex}
-\input{chapter/02_Grundlagen.tex}
-\input{chapter/03_Prompt_Injection.tex}
-\input{chapter/04_Analyse_Chatbot.tex}
-\input{chapter/05_Schutzmaßnahmen.tex}
+\input{chapter/01_Einleitung}
+\input{chapter/02_Grundlagen}
+\input{chapter/03_Prompt_Injection}
+\input{chapter/04_Analyse_Chatbot}
+\input{chapter/05_Schutzmassnahmen}
 
 \end{document}

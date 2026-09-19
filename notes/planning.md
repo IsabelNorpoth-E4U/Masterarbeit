@@ -37,12 +37,15 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
    - [ ] 2.5 Unternehmensinterne Chatbots: Einsatzbereich und Risiken
 
 3. Prompt-Injection-Angriffe
-   - [ ] 3.1 Definition und Einordnung von Prompt Injection -> Oder zu Grundlagen
-   - [ ] 3.2 Klassifikation von Prompt-Injection-Techniken (Indirekte und Direkte Angriffe)
-      - [ ] 3.2.1 Direkte Angriffe: Erklärung und Beispiel
-      - [ ] 3.2.2 Indirekte Angriffe: Erklärung und Beispiel
-   - [ ] 3.3 Typische Angriffsszenarien im Unternehmenskontext -> Bezug auf die Sicherheitsbedrohungen aus den Grundlagen
-   - [ ] 3.4 (Beispiele bekannter Angriffe und die Auswirkungen) 
+   - [X] Überarbeitet
+   - [ ] Probegelesen
+   - [X] Alle Quellen/Informationen hinzugefügt
+   - [X] 3.1 Definition und Einordnung von Prompt Injection -> Oder zu Grundlagen
+   - [X] 3.2 Klassifikation von Prompt-Injection-Techniken (Indirekte und Direkte Angriffe)
+      - [X] 3.2.1 Direkte Angriffe: Erklärung und Beispiel
+      - [X] 3.2.2 Indirekte Angriffe: Erklärung und Beispiel
+   - [X] 3.3 Typische Angriffsszenarien im Unternehmenskontext -> Bezug auf die Sicherheitsbedrohungen aus den Grundlagen
+   - [X] 3.4 (Beispiele bekannter Angriffe und die Auswirkungen) 
 
 4. Analyse der Verwundbarkeit eines internen Chatbots
    - [ ] Überarbeitet

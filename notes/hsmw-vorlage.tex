@@ -19,6 +19,26 @@
 
 % für Code-Listings (\begin{lstlisting})
 \usepackage{listings}
+% Zusätzliche Einstellungen für Code-Listings: Zeilenumbruch innerhalb von langen Zeilen
+\usepackage{xcolor}
+\lstset{
+  breaklines=true,
+  breakatwhitespace=true,
+  postbreak=\mbox{\textcolor{gray}{\ensuremath{\hookrightarrow}}},
+  basicstyle=\ttfamily\small,
+  columns=flexible,
+  keepspaces=true,
+  breakindent=0pt,
+  showstringspaces=false,
+  frame=single,
+  xleftmargin=0pt,
+  xrightmargin=0pt
+}
+
+% Make inline verbatim breakable: use fvextra + shortvrb and define | as short verb delimiter
+\usepackage{fvextra,shortvrb}
+\fvset{breaklines=true,breakanywhere=true}
+\MakeShortVerb{\|}
 
 % für das Literaturverzeichnis
 \usepackage[
@@ -254,3 +274,4 @@ Ich möchte an dieser Stelle Professor Klaus Dohmen für die gute Vorlage danken
 
 
 \end{document}
+

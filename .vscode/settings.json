@@ -17,22 +17,30 @@
             "name": "biber",
             "command": "biber",
             "args": [
-                "--input-directory=%DIR%",
                 "--output-directory=%OUTDIR%",
+                "%DOCFILE%"
+            ]
+        },
+        {
+            "name": "makeglossaries",
+            "command": "makeglossaries",
+            "args": [
+                "-d", "%OUTDIR%",
                 "%DOCFILE%"
             ]
         }
     ],
     "latex-workshop.latex.recipes": [
         {
-            "name": "pdflatex -> biber -> pdflatex*2",
+            "name": "pdflatex -> biber -> makeglossaries -> pdflatex*2",
             "tools": [
                 "pdflatex",
                 "biber",
+                "makeglossaries",
                 "pdflatex",
                 "pdflatex"
             ]
         }
     ],
-    "latex-workshop.latex.recipe.default": "pdflatex -> biber -> pdflatex*2"
+    "latex-workshop.latex.recipe.default": "pdflatex -> biber -> makeglossaries -> pdflatex*2"
 }

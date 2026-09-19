@@ -1,0 +1,23 @@
+% Minimal stub of hsmw-counter.sty to satisfy hsmw-class requirements
+% This provides basic counters used by the class. Replace with the real package when available.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hsmw-counter}[2026/09/19 minimal stub]
+
+\RequirePackage{etoolbox}
+
+% Define counters for figures/tables if not present
+\providecounter{totalfigures}
+\providecounter{totaltables}
+
+% Provide macros that expand to the numeric values (used by class via \equal)
+\providecommand{\totalfigures}{\arabic{totalfigures}}
+\providecommand{\totaltables}{\arabic{totaltables}}
+
+% Option handling: accept 'table' and 'figure' options without effect
+\DeclareOption*{\relax}
+\ProcessOptions\relax
+
+% No-op placeholders for any other expected commands
+\providecommand{\resetTotalCounters}{}
+
+\endinput
