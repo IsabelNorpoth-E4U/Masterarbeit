@@ -115,64 +115,55 @@ Nach diesen Schritten kann lokal über die URL \url{http://localhost:5173/} auf 
 \subsection{Ziel der Angriffe}
 
 Die durchgeführten Angriffe verfolgen das Ziel, aufzuzeigen, welche Schwachstellen sich in dem System, welches in \ref{system} vorgestellt wird, identifizieren lassen.
-
-
-Die durchgeführt Angriffe haben das Ziel, aufzuzeigen welche Schwachstellen sich in dem System finden lassen. Dies dient
-als Vorarbeit für die Recherche und Entwicklung passnder Sicherheitsmaßnahmen. Es wurden sieben aktuelle indirekte Prompt
-Injection Angriffe gewählt und diese lokal getestet. Dafür wurde eine lokale Website erstellt und eine neue Funktion für
-die Ausführung eines Tool Calls erstellt. Dieser Funktion wurden die Funktionen hinzugefügt, dass der Chatbot auch Aktionen
-im Browser auf einer Website durchführen kann, beispielsweise ein Formular/Textfeld ausfüllen. Für den Tool Call wurde
-eine Verbindung zum Brave Browser hergestellt.
+Dies dient als Vorarbeit für die Recherche und Entwicklung geeigneter Sicherheitsmaßnahmen. Dafür wurden sieben aktuelle indirekte Prompt-Injection-Angriffe ausgewählt
+und lokal getestet. Für diesen Zweck wurde eine lokale Webseite erstellt sowie eine neue Funktion implementiert, die es dem Chatbot ermöglicht, Tool Calls auszuführen.
+Bei einem Tool Call interagiert ein \ac{llm} mit einem externen Tool oder einer \ac{api}, um ihre eigene Funktionalität zu verbesser, indem zum Beispiel mehr 
+Informationen gesammelt werden~\cite{an13}. 
+Dieser Funktion wurde die Fähigkeit hinzugefügt, Aktionen im Browser auf einer Webseite durchzuführen, beispielsweise das Ausfüllen eines Formulars bzw. Textfelds.
+Für die Ausführung der Tool Calls wurde eine Verbindung zum Brave Browser~\cite{an14} hergestellt.
 
 \subsection{Implemetierung de Tools Calls/Browser Action}
 
-Für den Implementierung eines Tool Calls wurde eine Verbindung zum Brave Browser implementiert. Der dafür hinzugefügt und
-geänderte Code wird in diesem Kapitel näher erläutert. Um den Tool Call zu implementieren war es neben den neu erstellten
-Funktionen ebenfalls notwendig Änderungen im bereits bestehenden Code durchzuführen.
-Es wurden Änderungen an zwei Dateien gemacht: der \verb|.env| und der \verb|server.js| des Frontends. Bei dem Backend waren keine Änderungen
-notwendig.
-Beim der Datei \verb|.env|, welche die Umgebungsvariablen beinhaltet wurde die Änderung vorgenommen, dass es dem Chatbot
-ermöglicht ist Zugriff auf lokale Websiten zu haben. Dies wurde mit \verb|ALLOW_LOCAL_WEB_ACCESS=true| ermöglicht.
-Zusätzlich wurde der API Schlüssel für den Brave Browser hinzugefügt, mit welchem eine Verbindung aufgebaut wird zum Browser. \verb|BRAVE_SEARCH_API_KEY|
-In der \verb|server.js| wurden mehrere Änderungen vorgenommen.
-Es wurde die Bibliothek chromium von playwright hinzugefügt. Diese Bibliothek dient dazu.....
-Es wurden die Funktionen braveSearch, auditUrl browserAction, withNetworkRetry, postWithRetry, callMistralAI, extractMistralContentText
-wurden hinzugefügt beziehungsweise überarbeitet. \\
-Im folgenden werden die einzelnen Funktionen näher erläutert. Der vollständige Code befindet sich im Anhang.
+Für die Implementierung eines Tool Calls wurde eine Verbindung zum Brave Browser hergestellt. Der dafür hinzugefügt und geänderte Code wird in diesem Abschnitt
+näher erläutert. Neben den neu erstellten Funktionen waren dafür auch Änderungen am bereits bestehenden Code notwendig. Diese betrafen zwei Dateien im Frontend,
+die \verb|.env|, welche die Umgebungsvariablen enthält sowie die \verb|server.js|. Am Backend waren keine Anpassungen notwendig. \\
+In der Datei \verb|.env| wurden die Änderung vorgenommen, dass dem Chatbot der Zugriff auf lokale Webseiten ermöglicht wird. Dies wurde über \verb|ALLOW_LOCAL_WEB_ACCESS=true|
+umgesetzt. Zusätzlich wurde API-Schlüssel für den Brave Browser hinterlegt, über den die Verbindung zum Browser aufgebaut wird: \verb|BRAVE_SEARCH_API_KEY|. \\
+In der Datei \verb|server.js| wurden mehrere Änderungen vorgenommen. Zunächst wurde die Bibliothek \verb|chromium| von Playwright eingebunden. Diese Bibliothek dient
+dazu, einen künstlichen Browser zu erstellen und mit diesem Browser Aktionen, die über einfache Informationensammlung hinausgeht zu erfüllen~\cite{an15}. 
+Darüber hinaus wurden die Funktionen \verb|braveSearch|, \verb|auditUrl|, \verb|browserAction|, \verb|withNetworkRetry|, \verb|postWithRetry|, 
+\verb|callMistralAI| und \verb|extractMistralContentText| hinzugefügt oder überarbeitet. Im Folgenden werden die einzelnen Funktionen näher erläutert. Der vollständige
+Code befindet sich im Anhang.
 
-\subsubsection{braveSearch}
+\texttt{braveSearch}
 
-Es handelt sich um eine asynchrone Funktion. Sie nimmt einen Parameter query (de.: Suchbegriff) auf. Als erstes wird der
-API-SChlüssel aus den Umgebungsvariablen ausgelesen und überprüft, ob ein Schlüssel gefunden wurde oder das Skript eine
-Fehlermeldung wirft. Anschließend wird mit einer try catch Funktion versucht eine Anfrage an den Brave Brower zu senden.
-Die Anfrage beinhaltet eine HTTP Anfrage an die Webadresse von Brave mit den definiert Suchdetails, wie Anfrage, auch Query,
-wie viele Ergebnisse gewünscht sind und das ein moderater Filt für nicht jugendfreie Inhalte aktiv sein soll. Zusätzlich wird
-ein Header mit dem API-Schlüssel gesendet. Der letzte Paramter der Anfrage ist eine Hilfsfunktion, die dafür sorgt, dass eine
-Anfrage mit einem Netzwerkfehler automatisch noch mal wiederholt werden soll, bevor sie abbricht. \\
-Nach der Anfrage werden die Suchergebnise ausgelsesen. Falls es keine Ergebnisse gibt wird eine leere Liste verwendet
-Diese Sucherergbenisse werden gekörzt mit der Funktion \verb|results.map(...)| und für jedes Suchergebnis ein Objekt erstellt, welches
-den Titel, den Link  und eine kurz Beschbung enthält. \\
-Falls die Suche fehlschlägt, wird zuerst überprüft, ob der Brave-Server geantwortet hat. Wenn ja, wird die exakte Fehlermeldung
-die Brave geschickt hat im Terminal angezeigt hat. Wenn der Brave-Server nicht erreicht werden konnte wird nur die lokale
-Fehlermeldung des Computers ausgegeben. Am Ende wird der Fehler weitergereicht, um der App mitzuteilen, dass es nicht nur
-keine Ergebnisse bei der Suche gab, sondern ein Fehler aufgetretetn ist.
+Bei \verb|braveSearch| handelt es sich um eine asynchrone Funktion, die den Parameter \verb|query| (de.: Suchbegriff) entgegennimmt. Zunächst wurd der API-Schlüssel aus
+den Umgebungsvariablen ausgelesen und geprüft, ob ein Schlüssel gefunden wurde. Ist dies nicht der Fall, wirft das Skript eine Fehlermeldung. Anschließend wird innerhalb
+eines Try-Catch-Blocks versucht, eine Anfrage an den Brave Browser zu senden. Die Anfrage enthält eine HTTP-Anfrage an die Webadrese von Brave mit den definierten 
+Suchdetails: der Query, der gewünschten Anzahl an Ergebnissen sowie einem aktivierten moderaten Filter für nicht jugendfreie Inhalte. Zusätzlich wird ein Header mit dem 
+API-Schlüsse mitgesendet. Der letzte Parametr der Anfrage ist eine Hilfsfunktion, die dafür sorgt, dass eine Anfrage bei einem Netzwerkfehler automatisch wiederholt
+wird, bevor sie endgültig abbricht. \\
+Nach der Anfrage werden die Suchergebnisse ausgelesen. Liegen keine Ergebniss vor, wird eine leere Liste verwendet. Diese Suchergebnise werden mit der Funktion
+\verb|results.map(...)| aufbereitet, wobei für jedes Ergebnis ein Objekt mit Titel, Link und einer kurzen Beschreibung erzeugt wird. \\
+Schlägt die Suche fehl, wird zunächst geprüft, ob der Brave-Sever überhaupt geantwortet hat. Ist dies der Fall, wird die exakte, von Brave zurückgegbene Fehlermeldung
+im Terminal ausgegeben. Konnte der Brave-Server hingegen nicht erreicht werden, wird lediglich die lokale Fehlermeldung des Computers ausgegeben. Abschließend wird 
+der Fehler weitergereicht, um der Anwendung mitzuteilen, dass nicht nur keine Ergebnisse vorliegen, sondern tatsächlich ein Fehler ausgetreten ist.
 
-\subsubsection{auditUrl}
+\texttt{auditUrl}
 
-Mit dieser Funktion wird eine Webadresse (URL) auf ihre richtigkeit validiert, bevor das Programm versucht diese aufzurufen.
-Dafür wird zuerst überprüft, ob überhaupt eine URL übergeben wurde, wenn nicht wird das Programm abgebrochen. Anschließend
-wird die übergebene URL $\glqq$gesäubert$\grqq$, um zu vermeiden, dass Fehler durch eine falsche Formatierung entstehen.
-Dafür wird mit \verb|.trim()| die überflüssigen Leerzeichen am Anfang und Ende entfernt und mit \verb|.replace(...)| die
-Anführungszeichen entfernt. \\
-Die bereinigte URL wird mit dem eingebauten JavaScript-Objekt \verb|URL| in ihre Bestandteile zerlegt (Protokoll, Domain, Pfad, usw.)
-und überprüft, ob diese gültig ist. Anschließend wird überprüft, ob die Webadresse mit \verb|HTTP| oder \verb|HTTPS| beginnnt und ob die
-Adresse auf ein lokales Netzwerk zeigt. Typische lokale Adressen sind dabei \verb|::1| und \verb|127.0.0.1|.
-Wenn eine lokale Adresse erkannt wird wird der Zugriff abgebrochen, außer die Umgebungsvariable \verb|ALLOW_LOCAL_WEB_ACCESS === "true"|
-ist gesetzt, was für diese Arbeit der Fall ist. \\
-Wenn alle Sicherheitsüberprüfungen durchgeführt wurden, dann wird die Webadresse als ein Objekt zurückgegeben, welches die
-Original-URL, die gesäuberte URL die Bestandteile und Informationen, wie ob sie lokal ist, beinhaltet.
+Mit dieser Funktion wird eine \ac{url} auf ihre Gültigkeit geprüft, bevor as Programm versucht, diese auszurufen. Dafür wird zunächst kontrolliert, ob die \ac{url}
+übergegeben wurde. Ist dies nicht der Fall, wird das Programm abgebrochen. Anschließend wird die übergebene \ac{url} bereinigt, um Fehler durch feherhafte Formatierung
+zu vermeiden. Mit \verb|.trim()| werden überflüssige Leerzeichen am Anfang und Ende entfernt, mit \verb|.replace(...)| werden Anführungszeichen entfernt. \\
+Die bereinigte \ac{url} wird mithilfe des eingebauten JavaScript-Objekts \verb|URL| in ihre Bestandteile zerlegt (Protokoll, Domain, Pfad, usw.) und auf Gültigkeit
+geprüft. Anschließend wird kontrolliert, ob die Adresse mit \verb|HTTP| oder \verb|HTTPS| beginnt und ob sie auf ein lokals Netzwerk verweist. Typische lokale 
+Adressen sind dabei \verb|::1| und \verb|127.0.0.1|. Wird eine lokale Adresse erkannt, wird der Zugriff abgebrochen, es sei denn, die Umgebungsvariable 
+\verb|ALLOW_LOCAL_WEB_ACCESS === "true"| ist gesetzt, was für diese Arbeit vorgenommen wurde. \\
+Nach erfolgreichem Durchlaufen aller Sicherheitsüberprüfungen wird die Webadresse als Objekt zurückgegeben, welches die Original-\ac{url}, die bereinigte \ac{url},
+deren Bestandteile sowie Zusatzinformationen, etwa, ob es sich um eine lokale Andresse handelt, enthält.
 
-\subsubsection{browserAction}
+\texttt{browserAction}
+
+
 
 Mit dieser FUnktion, kann der Chatbot aktiv Suchen im internet durchführen oder loakel Seiten bedienen. Am Anfang wird
 zur Vorbereitung ie angeforderte URL einer Sicherheitsüberprüfung unterzogen. Anschließend gibt es zwei verschiende Modi,
