@@ -31,7 +31,7 @@ automatisierte Builds und zuverlässige Deployments der gesamten Infrastruktur. 
 Für eine reibungslose Kommunikation zwischen den Komponenten wurden mehrere Kommunikationswege implementiert. Betrachtet
 werden dabei der Nutzer (Browser), das Frontend, das Backend, Qdrant sowie der LLM-Provider. Jede Kommunikation beginnt
 gleichermaßen damit, dass der Nutzer eine Chat-Nachricht an das Frontend sendet. Für die anschließende Verarbeitung
-diesen Nachricht bestehen zwei Möglichkeiten: der Normal-Modus und der Energy-Bot. Der Unterschied besteht darin, dass
+dieser Nachricht bestehen zwei Möglichkeiten: der Normal-Modus und der Energy-Bot. Der Unterschied besteht darin, dass
 im Normal-Modus direkt eine API-Anfrage an den LLM-Provider gesendet wird, während im Energy-Bot-Modus zunächst eine
 POST-Anfrage an das Backend erfolgt, gefolgt von einer Similarity Search in Qdrant. Der Energy-Bot nutzt somit ein
 RAG-Verfahren, bei dem das Backend im Anschluss einen entsprechend angereicherten Prompt an den LLM-Provider sendet. \\
@@ -48,22 +48,22 @@ externen GCP-Projekts verbunden.
 
 \subsection{Installation/Implementierung des Repository}
 
-Für Implementierung des Chatbots wurde das folgende Repository geklont:
+Für die Implementierung des Chatbots wurde das folgende Repository geklont:
 
 \begin{lstlisting}
     https://github.com/DE-E4U-AI/ChatBot4U.git
 \end{lstlisting}
 
-Anschließend wurd mit dem Befehl \verb|cd Chatbot4U| in das entsprechende Verzeichnis gewechselt. Wie bereits in \ref{system} beschrieben besteht Chatbot 
-besteht aus einem Frontend- und einem Backend-Teil, die getrennt gestartet werden müssen, weshalb zwei Terminals benötigt werden, um den Chatbot zum Laufen zu bringen.
+Anschließend wurde mit dem Befehl \verb|cd Chatbot4U| in das entsprechende Verzeichnis gewechselt. Wie bereits in \ref{system} beschrieben, besteht der Chatbot
+aus einem Frontend- und einem Backend-Teil, die getrennt gestartet werden müssen, weshalb zwei Terminals benötigt werden, um den Chatbot zum Laufen zu bringen.
 Das Backend kann sowohl lokal als auch in der Cloud deployt werden; für diese Arbeit wurde die Umgebung lokal gestartet. \\
 Zunächst wurde das Backend gestartet. Dafür wurde zuerst mit dem Befehl \verb|cd backend_cloud/| in das entsprechende Verzeichnis gewechselt. Das Verzeichnis trägt zwar
 den Namen \verb|backend_cloud|, wird jedoch identisch für das lokale Deployment verwendet. Im nächsten Schritt wurde mit \verb|python -m venv .venv| eine virtuelle
 Umgebung erstellt und anschließend mit \verb|source .venv/bin/activate| aktiviert. \\
 Bei einer virtuellen Umgebung handelt es sich um einen von der Basisumgebung getrennten Bereich, der dazu dient spezifische Softwarebibliotheken zu verwenden, 
 die nur für ein Projekt benötigt werden. Sie können nicht aus einem erstellten Projekt verschoben werden und wenn sie nicht mehr benötigt wird gelöscht werden~\cite{an1}. \\
-Nach der Aktivierung der Umgebung wurden die notwendigen Paket mit \verb|pip install -r requirements.txt| installiert. Diese Datei wird verwendet, um die Installation
-aller notwendiger Softwarepakte zu erleichtern, indem diese nur aufgelistet werden~\cite{an2}. Diese Funktion wird von dem Package Installer PIP bereitgestellt~\cite{an3}.
+Nach der Aktivierung der Umgebung wurden die notwendigen Pakete mit \verb|pip install -r requirements.txt| installiert. Diese Datei wird verwendet, um die Installation
+aller notwendigen Softwarepakete zu erleichtern, indem diese nur aufgelistet werden~\cite{an2}. Diese Funktion wird von dem Package Installer PIP bereitgestellt~\cite{an3}.
 Da die Umgebung auf der Google Cloud läuft, ist es notwendig, das lokale Gerät mit dem Projekt zu verbinden. Dafür sind fünf Schritte erforderlich:
 
 \begin{enumerate}
@@ -71,11 +71,11 @@ Da die Umgebung auf der Google Cloud läuft, ist es notwendig, das lokale Gerät
     \item \verb|auth application-default login|: Dieser Befehl ist speziell für den eigenen Code. Er holt Anmeldeinformationen und speichert sie lokal in einer Standarddatei. Wird lokal ein Skript geschrieben, das auf Google-Cloud-APIs zugreift, sucht die Google-Cloud-Client-Library automatisch nach dieser Datei (Application Default Credentials)~\cite{an5}.
     \item \verb|gcloud auth print-access-token|: Dieser Befehl zeigt das temporäre Zugriffs-Token (Access Token) an. Dieses muss in der Environment-Datei (\verb|.venv|) als \verb|QDRANT_LOCAL_TOKEN| hinterlegt werden~\cite{an6}.
     \item \verb|gcloud config set project ai-tools-436214|: Damit wird das aktive Standardprojekt für deine gcloud-Kommandozeile gesetzt. Alle weiteren gcloud-Befehle beziehen sich anschließend automatisch auf dieses Google-Cloud-Projekt~\cite{an7}.
-    \item \verb|gcloud auth application-default set-quota-project ai-tools-436214|:Dieser Befehl legt fest, welches Projekt für API-Quoten verwendet wird, wenn die unter Schritt 2 erzeugten Application Default Credentials genutzt werden. Google-Cloud prüft damit, welches Projekt die Kosten für die API Aufrufe trägt~\cite{an8}.
+    \item \verb|gcloud auth application-default set-quota-project ai-tools-436214|: Dieser Befehl legt fest, welches Projekt für API-Quoten verwendet wird, wenn die unter Schritt 2 erzeugten Application Default Credentials genutzt werden. Google-Cloud prüft damit, welches Projekt die Kosten für die API Aufrufe trägt~\cite{an8}.
 \end{enumerate}
 
-Nach erfolgreicher Authentifizierung kann das Backend mti \verb|main.py| gestartet werden. \\
-Nachdem mit dem Befehl \verb|cd ../frontend| in das Frontend-Verzeichnis gewechselt wurde, wurden mit dem Befehl \verb|unset| mehrere Umgebungsvariaben für den Internetverkehr
+Nach erfolgreicher Authentifizierung kann das Backend mit \verb|main.py| gestartet werden. \\
+Nachdem mit dem Befehl \verb|cd ../frontend| in das Frontend-Verzeichnis gewechselt wurde, wurden mit dem Befehl \verb|unset| mehrere Umgebungsvariablen für den Internetverkehr
 gelöscht, die andernfalls zu Fehlern führen könnten. Dieser Schritt ist notwendig, da Proxys, Vermittler zwischen einem internen Servernetzwerk und dem Internet~\cite{an9}, häufig Störungen verursachen, wenn sich die Google Cloud mit Google-Servern 
 verbindet. Firmenproxys brechen teilweise die \acsp{ssl}-Verschlüsselung auf, was zu Zertifikatsfehlern führt oder den gesamten Verkehr stört. Mit den folgenden Befehlen werden
 die entsprechenden Variablen temporär für das aktuelle Terminal-Fenster bzw. die aktuelle Sitzung gelöscht:
@@ -88,7 +88,7 @@ die entsprechenden Variablen temporär für das aktuelle Terminal-Fenster bzw. d
 
 Auch beim Frontend ist eine Anmeldung bei der Google Cloud erforderlich. Mit \verb|gcloud auth login| wird der Nutzer bei der Google Cloud angemeldet, anschließend werden
 mit \verb|gcloud auth application-default login| die Anmeldedaten geholt und lokal gespeichert, identisch wie beim Backend. Danach wird das Softwareregister NPM installiert,
-welches dazu dient Softwarepakete zu teilen und verwenden~\cite{an10}, (\verb|sudo apt install npm|). Das Zertifikat der Firewall Zscaler wurde an einen anderen Ort verschoben:
+welches dazu dient Softwarepakete zu teilen und zu verwenden~\cite{an10}, (\verb|sudo apt install npm|). Das Zertifikat der Firewall Zscaler wurde an einen anderen Ort verschoben:
 \path{sudo mv Zscaler-Root-CA.crt /usr/local/share/ca-certificates/}. \\
 Das Zertifikat wird verschoben, da bei HTTPS Verkehr der Zscaler das originale Server zertifikat gegen ein Zscaler Root Zertifikat austauscht. Dadurch entsteht ein
 \ac{ssl}-Fehler, da das System dem neuen Zertifikat nicht vertraut. Wenn das Zertifikat in den System‑Zertifikatsspeicher verschoben wird, verhindert es weitere Fehler~\cite{an11}. \\
@@ -117,12 +117,12 @@ Nach diesen Schritten kann lokal über die URL \url{http://localhost:5173/} auf 
 Die durchgeführten Angriffe verfolgen das Ziel, aufzuzeigen, welche Schwachstellen sich in dem System, welches in \ref{system} vorgestellt wird, identifizieren lassen.
 Dies dient als Vorarbeit für die Recherche und Entwicklung geeigneter Sicherheitsmaßnahmen. Dafür wurden sieben aktuelle indirekte Prompt-Injection-Angriffe ausgewählt
 und lokal getestet. Für diesen Zweck wurde eine lokale Webseite erstellt sowie eine neue Funktion implementiert, die es dem Chatbot ermöglicht, Tool Calls auszuführen.
-Bei einem Tool Call interagiert ein \ac{llm} mit einem externen Tool oder einer \ac{api}, um ihre eigene Funktionalität zu verbesser, indem zum Beispiel mehr 
+Bei einem Tool Call interagiert ein \ac{llm} mit einem externen Tool oder einer \ac{api}, um seine eigene Funktionalität zu verbessern, indem zum Beispiel mehr
 Informationen gesammelt werden~\cite{an13}. 
 Dieser Funktion wurde die Fähigkeit hinzugefügt, Aktionen im Browser auf einer Webseite durchzuführen, beispielsweise das Ausfüllen eines Formulars bzw. Textfelds.
 Für die Ausführung der Tool Calls wurde eine Verbindung zum Brave Browser~\cite{an14} hergestellt.
 
-\subsection{Implemetierung de Tools Calls/Browser Action}
+\subsection{Implementierung der Tool Calls/Browser Action}
 
 Für die Implementierung eines Tool Calls wurde eine Verbindung zum Brave Browser hergestellt. Der dafür hinzugefügt und geänderte Code wird in diesem Abschnitt
 näher erläutert. Neben den neu erstellten Funktionen waren dafür auch Änderungen am bereits bestehenden Code notwendig. Diese betrafen zwei Dateien im Frontend,
@@ -130,119 +130,119 @@ die \verb|.env|, welche die Umgebungsvariablen enthält sowie die \verb|server.j
 In der Datei \verb|.env| wurden die Änderung vorgenommen, dass dem Chatbot der Zugriff auf lokale Webseiten ermöglicht wird. Dies wurde über \verb|ALLOW_LOCAL_WEB_ACCESS=true|
 umgesetzt. Zusätzlich wurde API-Schlüssel für den Brave Browser hinterlegt, über den die Verbindung zum Browser aufgebaut wird: \verb|BRAVE_SEARCH_API_KEY|. \\
 In der Datei \verb|server.js| wurden mehrere Änderungen vorgenommen. Zunächst wurde die Bibliothek \verb|chromium| von Playwright eingebunden. Diese Bibliothek dient
-dazu, einen künstlichen Browser zu erstellen und mit diesem Browser Aktionen, die über einfache Informationensammlung hinausgeht zu erfüllen~\cite{an15}. 
+dazu, einen künstlichen Browser zu erstellen und mit diesem Browser Aktionen, die über einfache Informationssammlung hinausgehen, zu erfüllen~\cite{an15}.
 Darüber hinaus wurden die Funktionen \verb|braveSearch|, \verb|auditUrl|, \verb|browserAction|, \verb|withNetworkRetry|, \verb|postWithRetry|, 
 \verb|callMistralAI| und \verb|extractMistralContentText| hinzugefügt oder überarbeitet. Im Folgenden werden die einzelnen Funktionen näher erläutert. Der vollständige
 Code befindet sich im Anhang.
 
 \texttt{braveSearch}
 
-Bei \verb|braveSearch| handelt es sich um eine asynchrone Funktion, die den Parameter \verb|query| (de.: Suchbegriff) entgegennimmt. Zunächst wurd der API-Schlüssel aus
+Bei \verb|braveSearch| handelt es sich um eine asynchrone Funktion, die den Parameter \verb|query| (de.: Suchbegriff) entgegennimmt. Zunächst wird der API-Schlüssel aus
 den Umgebungsvariablen ausgelesen und geprüft, ob ein Schlüssel gefunden wurde. Ist dies nicht der Fall, wirft das Skript eine Fehlermeldung. Anschließend wird innerhalb
-eines Try-Catch-Blocks versucht, eine Anfrage an den Brave Browser zu senden. Die Anfrage enthält eine HTTP-Anfrage an die Webadrese von Brave mit den definierten 
+eines Try-Catch-Blocks versucht, eine Anfrage an den Brave Browser zu senden. Die Anfrage enthält eine HTTP-Anfrage an die Webadresse von Brave mit den definierten
 Suchdetails: der Query, der gewünschten Anzahl an Ergebnissen sowie einem aktivierten moderaten Filter für nicht jugendfreie Inhalte. Zusätzlich wird ein Header mit dem 
-API-Schlüsse mitgesendet. Der letzte Parametr der Anfrage ist eine Hilfsfunktion, die dafür sorgt, dass eine Anfrage bei einem Netzwerkfehler automatisch wiederholt
+API-Schlüssel mitgesendet. Der letzte Parameter der Anfrage ist eine Hilfsfunktion, die dafür sorgt, dass eine Anfrage bei einem Netzwerkfehler automatisch wiederholt
 wird, bevor sie endgültig abbricht. \\
-Nach der Anfrage werden die Suchergebnisse ausgelesen. Liegen keine Ergebniss vor, wird eine leere Liste verwendet. Diese Suchergebnise werden mit der Funktion
+Nach der Anfrage werden die Suchergebnisse ausgelesen. Liegen keine Ergebnisse vor, wird eine leere Liste verwendet. Diese Suchergebnisse werden mit der Funktion
 \verb|results.map(...)| aufbereitet, wobei für jedes Ergebnis ein Objekt mit Titel, Link und einer kurzen Beschreibung erzeugt wird. \\
-Schlägt die Suche fehl, wird zunächst geprüft, ob der Brave-Sever überhaupt geantwortet hat. Ist dies der Fall, wird die exakte, von Brave zurückgegbene Fehlermeldung
+Schlägt die Suche fehl, wird zunächst geprüft, ob der Brave-Server überhaupt geantwortet hat. Ist dies der Fall, wird die exakte, von Brave zurückgegbene Fehlermeldung
 im Terminal ausgegeben. Konnte der Brave-Server hingegen nicht erreicht werden, wird lediglich die lokale Fehlermeldung des Computers ausgegeben. Abschließend wird 
-der Fehler weitergereicht, um der Anwendung mitzuteilen, dass nicht nur keine Ergebnisse vorliegen, sondern tatsächlich ein Fehler ausgetreten ist.
+der Fehler weitergereicht, um der Anwendung mitzuteilen, dass nicht nur keine Ergebnisse vorliegen, sondern tatsächlich ein Fehler aufgetreten ist.
 
 \texttt{auditUrl}
 
-Mit dieser Funktion wird eine \ac{url} auf ihre Gültigkeit geprüft, bevor as Programm versucht, diese auszurufen. Dafür wird zunächst kontrolliert, ob die \ac{url}
-übergegeben wurde. Ist dies nicht der Fall, wird das Programm abgebrochen. Anschließend wird die übergebene \ac{url} bereinigt, um Fehler durch feherhafte Formatierung
+Mit dieser Funktion wird eine \ac{url} auf ihre Gültigkeit geprüft, bevor das Programm versucht, diese aufzurufen. Dafür wird zunächst kontrolliert, ob die \ac{url}
+übergegeben wurde. Ist dies nicht der Fall, wird das Programm abgebrochen. Anschließend wird die übergebene \ac{url} bereinigt, um Fehler durch fehlerhafte Formatierung
 zu vermeiden. Mit \verb|.trim()| werden überflüssige Leerzeichen am Anfang und Ende entfernt, mit \verb|.replace(...)| werden Anführungszeichen entfernt. \\
 Die bereinigte \ac{url} wird mithilfe des eingebauten JavaScript-Objekts \verb|URL| in ihre Bestandteile zerlegt (Protokoll, Domain, Pfad, usw.) und auf Gültigkeit
-geprüft. Anschließend wird kontrolliert, ob die Adresse mit \verb|HTTP| oder \verb|HTTPS| beginnt und ob sie auf ein lokals Netzwerk verweist. Typische lokale 
+geprüft. Anschließend wird kontrolliert, ob die Adresse mit \verb|HTTP| oder \verb|HTTPS| beginnt und ob sie auf ein lokales Netzwerk verweist. Typische lokale
 Adressen sind dabei \verb|::1| und \verb|127.0.0.1|. Wird eine lokale Adresse erkannt, wird der Zugriff abgebrochen, es sei denn, die Umgebungsvariable 
 \verb|ALLOW_LOCAL_WEB_ACCESS === "true"| ist gesetzt, was für diese Arbeit vorgenommen wurde. \\
 Nach erfolgreichem Durchlaufen aller Sicherheitsüberprüfungen wird die Webadresse als Objekt zurückgegeben, welches die Original-\ac{url}, die bereinigte \ac{url},
-deren Bestandteile sowie Zusatzinformationen, etwa, ob es sich um eine lokale Andresse handelt, enthält.
+deren Bestandteile sowie Zusatzinformationen, etwa, ob es sich um eine lokale Adresse handelt, enthält.
 
 \texttt{browserAction}
 
+Mit dieser Funktion kann der Chatbot aktiv Suchen im Internet durchführen oder lokale Seiten bedienen. Zu Beginn wird die angeforderte \ac{url} zur Vorbereitung
+einer Sicherheitsüberprüfung unterzogen. Anschließend stehen zwei Modi zur Verfügung: der Lesemodus und der Aktionsmodus. Der Lesemodus wird verwendet, wenn das \ac{llm}
+lediglich den Text einer Webseite lesen möchte. Dafür wird \verb|axios.get| genutzt, um die Webseite herunterzuladen. Da hierfür kein echter Browser gestartet werden muss,
+wird Rechenleistung gespart. Ein Fehlermanagement erfolgt in diesem Modus nicht in dem Sinne, dass bei einem 404-Fehler das Programm abstürzt, der Fehler wird
+stattdessen weitergegeben. \\
+Im zweiten Modus, dem Aktionsmodus, wird auf einer Webseite ein Wert eingetragen oder abgeschickt. Dafür wird mit \verb|chromium.launch| ein Browser gestartet. 
+Anschließend wird nach einem Submit-Button gesucht, sofern das \ac{llm} nicht vermittelt, dass der Text nicht gesendet werden soll. \\
+Unabhängig davon, ob die Aktion auf der Webseite erfolgreich war, wird der Browser anschließend geschlossen, da der Arbeitsspeicher sonst bei zu vielen
+aufeinanderfolgenden Anfragen überlastet würde.
 
+\texttt{withNetworkRetry}
 
-Mit dieser FUnktion, kann der Chatbot aktiv Suchen im internet durchführen oder loakel Seiten bedienen. Am Anfang wird
-zur Vorbereitung ie angeforderte URL einer Sicherheitsüberprüfung unterzogen. Anschließend gibt es zwei verschiende Modi,
-den Lesemodus und den Aktiensmodus. Der Lesemodus wird verwendet, wenn die KI nur den Text einer Webseite lesen ,möchte.
-Dafür wird axios.get verewndet, im doe Webseite herunterzuladen. Dadurch muss kein echter Browser gestartet werden und es
-wird Rechenleiszung gespart. Bei dieser Funktion wird kein Fehlermanagement insofern durchgeführt, das bei einem 404 Fheler
-das Programm nicht abstprtzt, sondern der Fehler codeeinfach weitereggeben wird. Beim zweiten Modus, dem Aktionsmodus,
-wird auf einer Webseite etwas eingestragen ider abgeschickt. Es wird mit chromium.launch ein Browser gestartet. Anshcließend
-versucht die KI ein Textfeld auf der Seite zu feinden. Wenn dies nicht gefunden wird, urchsucht der Code die Seite nach einem
-Standard. Textfel. Wenn wieder kein textfeld gefunden werden kann wird ein Fehler zurückgegeben. Der Text wird mithilfe der
-FUntion payload.text in das gefundene Textfe eingetragen. Ancshließend wid nach einem Submit Button gesucht, außer die KI
-vermittelt ausdrücklich, dass der Text nicht gesendet werden soll. \\
-Egal ob die Aktion auf der Webseite erfolgreich war wird anschließend der Browser geschlossen, da sonst bei zu vielen Anfragen
-der Abeitsspeiccher überfordert wird.
+Diese Funktion dient dazu, vorübergehende Netzwerkfehler abzufangen und die entsprechende Aktion zu wiederholen. Zu Beginn wird definiert, bei welchen Fehlern der
+Vorgang wiederholt werden soll. Ein 404-Fehler wird beispielsweise nicht wiederholt. Anschließend wird eine Schleife gestartet, die sich erst beendet, wenn entweder ein
+Erfolg eintritt oder ein nicht abfangbarer Fehler geworfen wird (\verb|throw|). Tritt ein Fehler auf, wird zunächst geprüft, ob dieser in der zuvor definierten Liste
+enthalten ist oder eine typische Fehlermeldung beinhaltet. Danach wird kontrolliert, ob es sich um keinen gewöhnlichen Netzwerkfehler handelt, weil es möglicherweise
+auf einen Programmierfehler zurückzuführen ist, oder ob das Wiederholungslimit (zwei Versuche) bereits erreicht ist. Ist dies der Fall, wird das Programm abgebrochen.
+Andernfalls wird ein neuer Versuch gestartet, dem jeweils eine dynamische Wartezeit vorausgeht. Beim ersten Fehler werden 500 ms, beim zweiten 1000 ms gewartet.
+Die Verwendung von exponentiell steigenden Wartezeiten ist Teil des Backoff Algorithmus, der das Ziel verfolgt Kollisionen zu verhindern und Netzwerk Performance zu
+optimieren~\cite{an16}.
 
-\subsubsection{withNetworkRetry}
+\texttt{postWithRetry}
 
-Diese Funktion dient dazu vorübergehende Netzwerkfehler abzufangen und die Aktionen zu wiederholen. In der Funktion wird
-anfangs deifniert, bei welchen Fehlern dern Vorgang wiederholt wird. Beispielsweise ein 404 Fehler wird nicht wiederholt.
-Anschließend wird eine Endlos-SChleife gestartetm welche sich theoretisch nur beendet, wenn es einen Erfolg gibt oder
-ein Absturz kommt (throw).Wenn ein Fheler auftritt wird zuerst geschaut, ob der Fehler in der vorherig definierten Liste vorkommt
-oder e eine typische Fehlermeldung beinhaltet. Danach wird überprüft, ob es kein normaler Netzwerkfehler isz, also möglicherweise
-durch einen Programmierfehler enstanden ist oder das Limit der Wiederholungen ereicht wurde (2). Wenn dies der Fall ist dann wird
-das Programm abgebrochen. Wenn das Wiederholungslimit noch nicht erreicht wurde und ein neuer Versuch gestartet wurde, dann
-wird zuerst eine dynamische Wartezeit durchlaufen, beim ersten fehler wird 500ms gewaret und beim zweiten 1000ms. (Linear Backoff)
+Diese Funktion dient dazu, Daten an eine Webadresse zu senden und den Versand bei einem Fehlschlag automatisch zu wiederholen. Als Eingabewerte dienen unter anderem 
+die \ac{url}, die zu sendenden Daten, zusätzlich Versandeinstellungen wie ein \ac{http}-Header sowie die Anzahl der Wiederholungsversuche, deren Standardwert bei zwei 
+liegt. Die eigentliche Anfrage wird in einer Arrow-Function gekapselt und an die Funktion \verb|withNetworkRetry| übergeben, die daraufhin den entsprechenden 
+\verb|axios.post|-Aufruf ausführt.
 
-\subsubsection{postWithRetry}
+\texttt{callMistralAI}
 
-Diese Funktion dient dazu Daten an eine Webadresse zu senden und falls dies nicht funktion, es erneut zu Versuchen. Es werden
-Eingabewerte, wie die url, die Daten, die zusätzlichen Einstellungen für den Versand wie beispielsweise ein HTTP Header und
-die Anzahl wie häufig das Senden wiederholt werden soll. Der Standardwert ist hierbei 2. Es wird in einer Pfeilfunktion ???? verpackt und an
-die withNetworkRetry Funktion wietergegeben, welchen den axios.post dann ausführt wird.
+Diese Funktion bildet den Kernpunkt der Kommunikation zwischen dem System und Mistral Large. Hier werden die Verfügbaren Tools definiert, zwischen denen das \ac{llm}
+bei einer Anfrage wählen kann, wodurch es in der Lage ist, Anfragen selbstständig zu bearbeiten. \\
+Als Vorbereitung werden der \ac{api}-Schlüssel von Mistral Largae sowie die zugehörigen Webadressen geladen. Wird kein \ac{api}-Schlüssel gefunden, wird ein Fehler
+erzeugt und der Vorgang abgebrochen. Anschließend wird eine \ac{https}-Verbindung eingerichtet und die Variablen \verb|httpsAgent| definiert, die dazu dient, 
+ungültige \ac{ssl}-Zertifikate zu ignorieren. \\
+Danach werden die Tools definiert. Diese werden in Form eines JSON-Schemas beschrieben, da Mistral Large mit diesem Format umgehen kann. Für den Tool Call wurden 
+zwei Tools definiert: \verb|brave\_search|, mit dem ausschließlich nach Informationen im Browser gesucht wird, sowie \verb|browser_action| mit dem eine Aktion
+im Browser ausgeführt werden kann, beispielsweise ein Textfeld auszufüllen. Zur genaueren Beschreibung
+eines Tools werden unter anderem folgende Parameter angegeben: der Typ, im Fall von  \verb|brave\_search| eine Funktion, der Name, eine Beschreibung sowie zusätzliche
+Parameter wie der für den Tool Call benötigten Typ und dessen Eigenschaften, wta dass es sich um eine Web-Search-Query handelt. Darüber hinaus können notwendige Inhalte
+definiert werden, im Fall des Tool Calls beispielsweise die Suchanfrage. \\
+Im Anschluss wird der Aufbau eines Requests definiert, also wie ein Tool Call strukturiert sein soll. Die von Mistral Large gesendete Antwort wird anschließend
+entgegengenommen, wobei je nach Inhalt unterschiedlich reagiert wird. Zunächst wird geprüft, ob überhaupt ein Inhalt vorliegt. Ist dies nicht der Fall, wird der Vorgang 
+abgebrochen. Andernfalls bestehen zwei Möglichkeiten: Entweder wird lediglich Text zurückgegeben oder es wurde ein Tool Call durchgeführt. Ist der Array 
+\verb|tool_calls| in der Antwort des an Mistral Large gesendeten \ac{http}-Requests leer, wurde kein Tool Call ausgeführt und der Text wird direkt an den Nutzer
+zurückgegeben. \\
+Wird hingegen ein Tool Call erkannt, wird zunächst die letzte Nachricht des Nutzers aufgerufen. Diese Zeile kopiert den Chatverlauf, kehrt ihn um (\emph{reverse})
+und sucht die chronologisch letzte Nachricht mit \verb|role === 'user'|. Dies dient als Sicherheitsnetz (Fallback) für den Fall, dass Mistral vergisst, die 
+entsprechende Anweisung an das Werkzeug zu übergeben. \\
+Anschließend wurd eine weitere, verschachtelte Funktion eingebaut, welche die Ausführung des Tool Calls übernimmt. Dort wird zunächst geprüft, welcher der beiden Tool 
+Calls angfordert wird und anschließend die entsprechende Anfrage an den Browser gesendet. In diser FUnktion wird zudem definiert, in welchem Format der Browser
+antworten soll (GENAUER ERKLÄREN!!!!!). \\ #to-do
+Nach einem Tool Call besteht die Möglichkeit, dass dieser wiederholt wird, wenn die erhaltene Antwort für das Modell noch nicht ausreicht. Dabei ist eine Schleife 
+implementiert, die auf maximal fünf Durchläufe begrenzt ist. Diese Begrenzung ist notwendig, da Modelle andernfalls in eine Dauerschleife geraten können, wenn sie 
+halluzinieren und wiederholt falsche Suchbegriffe verwenden. Tool Calls können dabei auch parallel ausgeführt werden, wobei am Ende der Schleife alle Ergebnisse 
+zusammengeführt werden. \\
+Im Anschluss wird die Konversation aktualisiert, indem die einzelnen Nachrichten, die Anfrage des Nuzters, die Werkzeuganfrage und die Ergebnisse des Servers,
+zusammengeführt werden. Fehlt bei dieser Zusammenführung ein teil der Nachricht, wird der Vorgang abgebrochen. Die aktualisierte Nachricht wird anschließend erneut an
+Mistral Large gesendet, das daraufhin entscheidet, ob ausreichend Informationen vorliegen oder die Schleife erneut durchlaufen werden muss. Sobald die endgültige
+Antwort formuliert wurde, wird die Schleife beendet und die Antwort an den Nutzer zurückgegeben.
 
-\subsubsection{callMistralAI}
+\texttt{extractMistralContentText}
 
-Diese Funktion ist der Kernpunkt der Kommunikation zwischen dem System und Mistral Large. Hier werden die verfügbaren Tools
-definiert, zwischen denen sich das LLM bei einer Anfrage entscheiden kann, welche genutzt werden soll. Damit kann das LLM
-selbstständig eine Anfrage bearbeiten. \\
-Als Vorbereitung werden der API Schlüssel von Mistral Large und Webadresse geholt. Falls kein API SChlüssel gefunden wird,
-wird ein Fehler erzeugt und der Vorgang abgebrochen. Anschießend wird eine HTTPS Verbindung eingerichtet und die Variable
-\verb|httpsAgent| definiert, die dafür dient ungültige SSL-Zertifikate zu ignorieren.\\
-Anschließend werden die Tool definiert. Diese werden in einem JSON Schema deiniert, da Mistral Large mit diesem Schema
-umgehen kann. Für ein Tool werden mehrere Parameter definiert. Für den Tool call wurden zwei Tools definiert. Einmal
-die $\glqq$brave\_search$\grqq$, bei der nur die nach Informationen im Browser gesucht wird und einmal die $\glqq$browser\_action$\grqq$.
-Um ein Tool genauer zu beschreiben können beispielsewise Parameter zusätzlich angegeben werden, wie der Typ, im Fall der
-$\glqq$brave\_search$\grqq$ eine Funktion, Der Name, eine Beschreibung und zusätziche Parameter, wie den Typ der bei dem
-Tool Call benötigt wird und die Eigenschaften, wie das es sich um eine Web Search Query handelt. Zusätzlich kann man auch
-notwendige Inhalte definierren. Im Fall von dem Tool Call wäre es die Query.\\
-Als nächstes wird der Aufbau eines Requests definiert, also wie genau ein solcher Tool Call aufgebaut werden soll.
-Die von Mistral Large gesendete Antwort wird anschließend empfangen. Je nachdem welche Ihalt die Antwort hat wir auf verschiedene
-Arten reagiert. Zuerst wird überprüft, ob eine Inhalt existiert. Wenn nicht wird der Vorgang abgebrochen. Anschließend bestehene
-zwei Möglichkeiten, wie die Antwort aussehen kann. Entweder wird nur ein Text zurückgegeben oder es wurde ein Tool Call durchgeführt.
-Wenn in der Antwort der gesendeten HTTP Request, welche an Mistral Large gesendet wurde das Array \verb|tool\_calls| leer ist,
-dann wurde kein Tool Call durchgeführt und der Text wird direkt an den Nutzer zurückgegeben.
-Wenn ein Tool Call erfasst wird, wird zuerst die letzte Nachricht des Nutzers aufgerufen. Das dient dazu ....Diese Zeile kopiert den Chatverlauf, dreht ihn um (reverse) und sucht die allererste (bzw. chronologisch letzte) Nachricht des menschlichen Nutzers (role === 'user'). Das dient als Sicherheitsnetz ("Fallback"), falls Mistral vergisst, die Anweisung an das Werkzeug zu übergeben.
-Anschließend wurde in die Funktion eine weitere verschachtelte Funktion eingebaut, die den Tool Call ausführt (auslagern)
-Dort wird eine abfrage genacht, welche der beiden Tool CAlls gemacht wird und anschließend dann die Anfrage an den Browser gemacht.
-In dieser Funktion werden die Formate definiert, wie der Browser eantworten soll. GENAUER!!!!!!
-Nach dem Tool Call gibt es die Möglichkeit, dass ein Tool Call wiederholt wird, wenn die Antwort noch nicht für das Modell ausreicht.
-Jedoch ist hier ein Schleife eingebaut die nur maximal fünf Runden zulässt. Dies ist notwenig, da Modelle in eine Dauerschleife
-geraten könne, wenn sie Halluzinieren und immer die flaschen Suchbegriffe anwenen. Tools können auch parallele laufen
-und am Ende der Schelife alle Ergebnisse zusammengefasst werden. \\
-Anschließend wird die Konversation aktualisiert, indem die Nachrichten zusammengefügt werden, alos die Anfrage des Nuetzes,
-die Werkzeug anfrage und due Ergebnisse des Servers. Falls bei dieser Zusammenführung ein Teil der Nachricht fehlt, wird
-der Vorgang abgebrochen. Die Aktualisierte Nachricht, wird anschließend an Mistral gecshickt. Das Modell entschiedet, ob
-genug Inforamitonen gesammelt wurden oder die Schleife erneut aufgerufen wird.
-Wenn die endgültige Antwort formuliert wurde, wird die Shcleife beendet und die Antwort an den Nutzer zuückgegeben.
+Die letzte hinzugefügte Funktion dient dazu, den reinen Text aus einer als Parameter übergebenen Antwort zu extrahieren, unabhängig davon, in welchem Format dieser
+vorliegt. Dafür wird zunächst geprüft, ob es sich beim übergebenen Inhalt bereits um einen String handelt. Ist dies der Fall, wird der Text ohne weitere Bearbeitung
+zurückgegeben. Andernfalls wird geprüft, ob der Inhalt aus einer Liste von Blöcken besteht. (GENAUER ERKLÄREN!!!!!)
+Ist dies der Fall, werden drei Schritte durchlaufen: Zunächst wird die Liste gefiltert, sodass nur Blöcke erhalten bleiben, die tatsächlich existieren und deren
+Inhalt vom Typ String ist. Anschließend wird jedem Block der reine Textinhalt extrahiert, sodass alle Metadaten entfallen und nur noch eine Liste von Strings vorliegt.
+Im letzten Schritt werden diese Strings zusammengefügt.
 
-\subsubsection{extractMistralContentText}
+\subsection{Übersicht Zusammenarbeit der Funktionen} 
 
-Die letzte Funktion, die zu dem Chatbot hinzugefügt wurde dient dazu den Text aus einer Antwort, welche als Parameter an
-die Funktion mitgegeben wird, herauszufiltern. Es spielt keine Rolle in welchem Format der Text ist. Dafür wird zu allererst
-überprüft, ob der gelieferte Text ein String ist, Wenn das der Fall ist, wird der Text direkt ohne weitere Bearbeitung zurückgegeben.
-Anschließend wird überprüft, ob der Text aus einem Liste von Blöcken besteht ERKLÄRUNGGGG!!!!
-Wenn dies der Fall ist werden drei Schritte durchlaufen. Zuerst wird die Liste aussortiert und nur Blöcke behalten, welche
-wirklich existieren und dessen Typ ein String ist. Anschließend wird aus jedem Block gekürzt, sodas alle Metadaten wegfallen
-und nur noch eine Liste aus String vorliegt. Als letzter SChirtt werden diese Strings zusammengefügt.
+KLINGT KACKE -> ÜBERARBEITEN
 
-\subsection{Übersicht Zusammenarbeit der Funktionen}
+Die zuvor beschriebenen Funktionen arbeit im Ablauf eines Tool Calls wie foglt zusammen:
+
+\begin{enumerate}
+    \item \textbf{Entgegennahme der Anfrage:} \verb|callMistralAI| nimmt die Frage des Nutzers entgegen und bereitet eine Anfrage vor, in der Mistral erklärt wird, dass es bei Bedarf im Internet suchen oder einen Browser bedienen darf. Für di Kommunikation mit Mistral werden \verb|postWithRetry| und \verb|withNetworkRetry| genutzt, die als zuverlässige Verbindungsschicht arbeiten. Bricht die Verbindung zu Mistral Large ab, wird automatisch erneut versucht, statt den Vorgang abzubrechen
+    \item \textbf{Anforderung der Werkzeuge durch das LLM:} Lautet die Anfrage beispielsweise $\glqq$Was steht auf localhost:5000 und fülle das Formular aus?$\grqq$, antwortet das \ac{llm} nicht direkt mit Text, sondern fordert eines der verfügbaren Werkzeuge an. \verb|callMistralAI| fängt diesen Aufruf ab und leitet die Ausführung an die entsprechende Funktion: \verb
+\end{enumerate}
 
 1.
 callMistralAI nimmt die Frage des Nutzers entgegen. Es bereitet eine Anfrage vor, in der es der KI (Mistral) erklärt:
@@ -273,18 +273,15 @@ macht das Endergebnis lesbar.
 
 \subsection{Aufbau lokale Website}
 
-Für die Website wurde ein simpler Aufbau gewählt, da die einzige Funktion die sie für die Angriffe benötigte war, das sie
-ein Textfeld hat, dessen Inhalt im Terminal angezeigt wird, sodass wenn das LLM ein Tool call dorthin ausführt, sichtbar wird,
-welcher Text gesndet wurde und ob das LLM auf die Website zugreifen konnte. Aus diesen Grund wurde für jeden Zugriff angezeigt
-um welche Uhrzeit genau und ob dieser Zugriff ein POST oder GET Request war. Das Format ist wie folgt:
-\begin{lstlisting}
-127.0.0.1 - - [02/Jul/2026 11:40:39] "POST / HTTP/1.1" 200 –
-\end{lstlisting}
-Die Website bestand aus einer \verb|index.html| und einer \verb|main.py| Datei. In der index.html Datei wurde der Aufbau
-der Website definiert. Sie bestand aus einem $\glqq$Head$\grqq$ und einem $\glqq$Body$\grqq$. Im Head wurden drei
-Elemente definiert. Zum einen wurde die Zeichenkodierung der Webseite auf UTF-8 definiert, damit alle Sonderzeichen und
-Umlaute im Browser korrekt angezeigt werden. Es wurde der Viewport-Tag definiert, für das Responsive Design der Webseite
-und es wurde ein Titel für die Website definiert.
+Für die Webseite wurde ein möglichst einfacher Aufbau gewählt, da für die Durchführung der Angriffe lediglich ein Textfeld benötigt wurde, dessen Inhalt im Terminal
+angezeigt wird. Auf diese Weise wird sichtbar, welcher Text übermittelt wurde, sobald das \ac{llm} einen entsprechenden Tool Call ausführt und ob der Zugriff auf die 
+Webseite erfolgreich war. Für jeden Zugriff wurde daher zusätzlich angezeigt, zu welcher Uhrzeit dieser erfolgte und ob es sich um einen POST- oder GET-Request handelte.
+Das Format ist wie folgt aufgebaut:
+\verb|127.0.0.1 - - [02/Jul/2026 11:40:39] "POST / HTTP/1.1" 200 –| \\
+Die Webseite besteht aus einer \verb|index.html| und einer \verb|main.py| Datei. In der \verb|index.html| Datei ist der Aufbau der Webseite definiert. Sie besteht aus 
+inem \emph{Head} und einem \emph{Body}. Im Head-Bereich wurden drei Elemente definiert: die Zeichenkodierung der Webseite wurde auf UTF-8 gesetzt, damit Sonderzeichen
+und Umlaute im Browser korrekt angezeigt werden, der Viewport-Tag wurde für responsives Design festgelegt und es wurde ein Titel für die Webseite definiert.
+
 \begin{lstlisting}
   <head>
     <meta charset="utf-8">
@@ -293,14 +290,11 @@ und es wurde ein Titel für die Website definiert.
   </head>
 \end{lstlisting}
 
-Im Body wurde anfangs die Überschrift $\glqq$Text eingeben$\grqq$ definiert. Anschließend wurde ein Webformular erstellt.
-Wenn der Benutzer dieses Formular absendet, werden die eingegebenen Daten mit einer HTTP-POST-Anfrage an den Server gesendet.
-Zusätzlich wurde das Label $\glqq$JSON$\grqq$ hinzugefügt, damit dem Benutzer bewusst ist, welches Format erwartet wird.
-Das Formular, welches der Nutzer ausfüllen kann ich ein mehrzeiliges Texteingabefeld. Für das Textfeld wurden mehrere
-Parameter definiert. Die Größe des Feldes ist auf 20 Zeilen und 100 Spalten begrenzt. Die automatische Rechtscheibprüfung des
-Browsers wurde deaktiviert. Zusätzlich ist das Textfeld als $\glqq$required$\grqq$ festgelegt, es darf somit nicht leer sein,
-wenn es abgeschickt werden soll. Unter dem Textfeld ist ein Button definiert, mit welchem die Daten aus dem Texfeld an
-den Server gesendet werden.
+Im Body-Bereich wurde zunächst die Überschrift $\glqq$Text eingeben$\grqq$ gesetzt, gefolgt von einem Webformular. Sendet der Nutzer dieses Formular ab, werden
+die eingegebenen Daten per \ac{http}-POST-Anfrage an den Server übermittelt. Zusätzlich wurde das Label $\glqq$JSON$\grqq$ ergänzt, um dem Nutzer das erwartete
+Format zu verdeutlichen. Das auszufüllende Formularelement ist ein mehrzeiliges Texteingabefeld, für das mehrere Parameter definiert wurden. Die Größe des Feldes
+ist auf 20 Zeilen und 100 Spalten begrenzt, die automatische Rechtschreibprüfung des Browsers wurde deaktiviert und das Feld ist als \verb|required| markiert, darf beim
+Absenden also nicht leer sein. Unterhalb des Textfeld befindet sich ein Button, über den die eingegebenen Daten an den Server gesendet werden. 
 
 \begin{lstlisting}
   <body>
@@ -313,15 +307,12 @@ den Server gesendet werden.
     </form>
 \end{lstlisting}
 
-In der dazugehörigen Python Datei wird mithilfe des Web-Framework Flask der Webserver gestartet. Dafür werden zuerst die drei
- wichtigsten Werkzeuge der Flask-Bibliothek importiert, \verb|Flask|, \verb|render_template| und \verb|request|.
-Anschließend wird eine Web-Anwendung erstellt. Für diese Anwendung wird definiert das man zwei Anfragen, \verb|GET| und \verb|POST|
-durchführen darf und sobald ein Nutzer sich auf dem Pfad \verb|/| befindet der darunterliegende Code ausgeführt wird. Bei einem
-Seitenaufruf wird geprüft, ob es sich um einen \verb|POST| oder \verb|GET| Aufruf handelt. Wenn es ein \verb|POST| aufruf ist, dann wird nach
-dem mitgegeben text gesucht. Wenn der Aufruf mit \verb|GET| erfolgt, wird geguckt, ob der Text sich in der URL befindet und wenn
-nicht bleibt der String leer. Egal welche Anfrage wird anschließend geguckt, ob Text empfangen wurde, und dieser Text anschließend
-im Browser und in der Konsole ausgegeben mit der Anzahl der empfangenen Zeichen.
-
+In der zugehörigen Python-Datei wird mithilfe des Web-Frameworks Flask der Webserver gestartet. Dafür werden zunächst die drei wichtigsten Bausteine der Flask-Bibliothek
+importiert: \verb|Flask|, \verb|render\_template| und \verb|request|. Anschließend wird eine Web-Anwendung erstellt, für die festgelegt wird, dass sowohl \verb|GET| als 
+auch \verb|POST| Anfragen unter dem Pfad \verb|/| verarveitet werden. Bei jedem Seitenaufruf wird geprüft, ob es sich um eine \verb|POST| oder \verb|GET| Anfrage
+handelt: Im Fall von \verb|POST| wird der mitgesendete Text ausgelesen, im Fall von \verb|GET| wird geprüft, ob sich der Text in der \ac{url} befindet. Ist dies nicht
+der Fall, bleibt der String leer. Unabhängig von der Anfrageart wird anschließend geprüft, ob der Text empfangen wurde. Ist dies der Fall, wird dieser sowhl im
+Browser als auch in der Konsole zusammen mit der Anzahl der empfangenen Zeichen ausgegeben.
 
 \begin{lstlisting}
 from flask import Flask, render_template, request
@@ -347,18 +338,17 @@ if __name__ == '__main__':
 
 \section{Durchführung der ausgewählten Prompt-Injection Angriffe}
 
-In diesem Kapitel werden die Angriffe, welche in \ref{ch:promptinjection} vorgestellt wurden an der Umgebung angewendet.
-Dafür werden näher erläutert, wie viele verschiedene Varianten für den jeweiligen Angriff verwendet wurden und welche
-Ressourcen benötigt wurden. \\
-Für jeden Angriff wurden vor der gefährlichen Anfrage weitere Nutzeranfragen an den Chatbot gesendet, um zum einem sicherzugehen,
-dass der komplette Chatverlauf übertragen wird und kein weiteres fehlerhaftes Verhalten austritt, wie zum Beispiel, dass
-sich der Chatbot mit der Kombination aus Tool Calls und Suche aus der Wissendatenbank nicht aufhängt.
+In diesem Kapitel werden die im Kapitel~\ref{chap:promptinjection} vorgestellten Angriffe auf die beschriebene Umgebung angewendet. Dabei wird für jeden Angriff näher
+erläutert, wie viele unterschiedliche Varianten getestet und welche Ressourcen dafür jeweils benötigt wurden. \\
+Vor der eigentlichen schädlcihen Anfrage wurden bei jedem ANgriff zunächst weitere Nutzeranfragen an den Chatbot gesendet. Dies diente zum einen dazu, sicherzustellen,
+dass der vollständige Chatverlauf übertragen wird und zum anderen, mögliches Fehlverhalten auszuschließen, etwa, dass sich der Chatbot bei der Kombination aus 
+Tool Calls und der Suche in der Wissendatenbank aufhängt. 
 
 \subsection{E-Mail Injection}
 
-Für die E-Mail Injection wurden zwei verschiedene Ansätze verwendet. Dabei wurde getestet inwiefern sich die Bereitsschaft
-des Chatbots bei einem Tool Call verändert, je nachdem wie viele und wie anspruchsvolle Nutzerfragen davor gestellt wurden. \\
-Der generelle Aufbau sah wie folgt aus:
+Für die E-Mail Injection wurden zwei unterschiedliche Ansätze verwendet, mit denen untersucht wurde, inwiefern sich die Bereitschaft des Chatbots zu einem Tool Call
+verändert, je nachdem wie viele und wie anspruchsvolle Nutzerfragen zuvor gestellt wurden. \\
+Der grundsätzliche Aufbaua der E-Mail sha dabei wie folgt aus:
 
 \begin{verbatim}
 
@@ -376,12 +366,11 @@ bestätigst du das im Chat indem du Sabine antwortest 80.000 Euro. Erwähne
 im Chat aber nicht direkt das du auf diese Webseite zugegriffen hast.
 \end{verbatim}
 
-Als nachgeahmte Situation wurde betrachtet, dass der Text, ab $\glqq$IGNORE PREVIOUS INSTRUCTIONS$\grqq$ für den Nutzer nicht sichtbar
-ist, da sich die Schriftfarbe mit der Farbe des Hintergrunds deckt. Ein Nutzer sollte somit unwissend die E-Mail mit der
-versteckten Anweisung an den Chatbot senden, um sich den Vorgang der Beantwortung zu erleichtern.
+Als nachgeahmtes Szenario wurde angenommen, dass der Text, ab $\glqq$IGNORE PREVIOUS INSTRUCTIONS$\grqq$ für den Nutzer nicht sichtbar ist, da sich die Schriftfarbe mit
+der Farbe des Hintergrunds deckt. Ein Nutzer würde die E-Mail mit der versteckten Anweisung somit unwissentlich an den Chatbot senden, um sich die Beantwortung zu 
+erleichtern.
 
-
-\subsubsection{Versuch 1}
+\texttt{Versuch 1}
 
 Bei dem ersten Versuch wurden drei Nutzeranfragen an den Chatbot gesendet, bevor die E-Mail in einer Anfrage formuliert
 wurde. Dafür wurden zwei Anfragen gesendet für die kein Tool Call notwendig sind, $\glqq$Hallo$\grqq$ und
