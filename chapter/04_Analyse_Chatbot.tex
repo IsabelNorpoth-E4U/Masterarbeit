@@ -235,41 +235,33 @@ Im letzten Schritt werden diese Strings zusammengefügt.
 
 \subsection{Übersicht Zusammenarbeit der Funktionen} 
 
-KLINGT KACKE -> ÜBERARBEITEN
+Den Ausgangspunkt bildet die Funktion \verb|callMistralAI|. Die Funktion steuert den gesamten Ablauf und ist die einzige, die direkt mit dem Sprachmodell kommuniziert. Sie
+ergänzt die Nachrichten des Nutzers um einen System-Prompt sowie die Beschreibung der beiden verfügbaren Werkzeuge, der Websuche und der Browsersteuerung und steuert die 
+Anfrage an die Mistral-API. Das versenden übernimmt sie jedoch nicht selbst, sondern überlässt das der Funktion \verb|postWithRetry|. Diese FUnktion kapselt lediglich 
+den \ac{http}-Aufruf und übergibt ihn an \verb|withNetworkRetry|, in der die eigentliche Wiederholungslogik liegt: Tritt ein vorübergehender Netzwerkfehler auf, etwa ein
+Verbindungsabbruch oder eine Zeitüberschreitung, wird der Aufruf bis zu zweimal mit ansteigender Wartezeit wiederholt. Erst wenn auch diese Versuche scheitern, wird der 
+Fehler an \verb|callMistralAI| weitergegeben. Die Trennung in zwei Funktionen hat den Vorteil, dass \verb|withNetworkRetry| unabhängig von der Mistral-API ist und daher
+auch an anderen Stellen eingesetzt werden kann. \\
+Anhand der Antwort des Modells entscheidet \verb|callMistralAI|, was der nächste Schritt ist. Enthält sie bereit einen Antworttext, war kein Werkzeug erforderlich und die 
+Verarbeitung kann abgeschlossen werden. Fordert das Modell dagegen ein Werkzeug an, liest \verb|callMistralAI| den Funktionsnamen und die übergegebene Argumente aus und ruft
+die entsprechende Funktion auf. Für eine Websuche ist dies \verb|braveSearch|. Die Funktion übermittelt die vom Modell formulierte Suchanfrage an die Brave Search API und greift dabei
+ebenfalls auf \verb|withNetworkRetry| zurück, sodass Verbindungsprobleme bei der Suche auf dieselbe Weise behandelt werden wie bei der Kommunikation mit Mistral.
+Als Ergebnis erhält \verb|callMistralAI| eine Liste der ersten fünf Treffer mit Titel, \ac{url} und Kurzbeschreibung. \\
+Verlangt das Modell stattdessen eine bestimmte Webseite zu öffnen odere ein Formular auszufüllen, wird \verb|browserAction| aufgerufen. Bevor diese FUnktion auf die Seite
+zugreift, übergibt sie die \ac{url} an \verb|auditUrl| Dort wird die Adresse bereinigt und geprüft, ob sie das Protokoll \ac{http} oder \ac{https} verwendet. Lokale 
+Adressen wie \verb|localhost| werden nur akzeptiert, wenn der lokale Zugriff in der Konfiguration freigeschaltet ist. Erst wenn \verb|auditUrl| die Adresse freigibt, lädt
+\verb|browserAction| die Seite, im einfachen Fall per \ac{http}-Anfrage, zum Ausfüllen von Formularen über einen mit Playwright gesteuerten Browser. Die Reihenfolge ist 
+dabei bewusst definiert. Da die \ac{url} vom Sprachmodell stammt und nicht unmittelbar vom Nutzer, soll sie nicht ungeprüft aufgerufen werden. Tritt beim Laden oder 
+Ausfüllen ein Fehler auf, gibt \verb|browserAction| diesen als strukturiertes Ergebnis zurück, statt die Verarbeitung abzubrechen, damit das Modell in seiner Antwort darauf
+eingehen kann. \\
+Die Ergebnisse von \verb|braveSearch| und \verb|browserAction| fügt \verb|callMistralAI| dem Gesprächverlazf hinzu und sendet diesen über \verb|postWithRetry| erneut an 
+das Modell. Da Mistral auf Grundlage der neuen Informationen weitere Werkzeige anfordern kann, etwa zunächst eine Suche und danach das Öfnnen einer der gefundenen Seiten, 
+wiederholt sich dieser Ablauf, bis das Modell eine abschließende Antwort liefert. Um Endlosschleifen zu vermeiden, ist die Zahl der Durchläufe auf fünf begrenzt. \\
+Am Ende der Verarbeitung steht \verb|extractMistralContentText|. Nach einer Websuche liefert Mistral den Antwortinhalt teilweise nicht als einfache Zeichenkette, sondern
+als lIste von Blöcken, die neben dem eigentlichen Text auch Verweise auf die verwendeten Quellen enthalten. Da die Speicherung in der Datenbank und die Darstellung im 
+Frontend einen reinen text erwarten, filtert die Funktion die Textblöcke heraus und fügt sie zusammen. \verb|callMistralAI| gibt die sie bereingite Antwort schließlich
+an den Chat-Endpuntk zurück. 
 
-Die zuvor beschriebenen Funktionen arbeit im Ablauf eines Tool Calls wie foglt zusammen:
-
-\begin{enumerate}
-    \item \textbf{Entgegennahme der Anfrage:} \verb|callMistralAI| nimmt die Frage des Nutzers entgegen und bereitet eine Anfrage vor, in der Mistral erklärt wird, dass es bei Bedarf im Internet suchen oder einen Browser bedienen darf. Für di Kommunikation mit Mistral werden \verb|postWithRetry| und \verb|withNetworkRetry| genutzt, die als zuverlässige Verbindungsschicht arbeiten. Bricht die Verbindung zu Mistral Large ab, wird automatisch erneut versucht, statt den Vorgang abzubrechen
-    \item \textbf{Anforderung der Werkzeuge durch das LLM:} Lautet die Anfrage beispielsweise $\glqq$Was steht auf localhost:5000 und fülle das Formular aus?$\grqq$, antwortet das \ac{llm} nicht direkt mit Text, sondern fordert eines der verfügbaren Werkzeuge an. \verb|callMistralAI| fängt diesen Aufruf ab und leitet die Ausführung an die entsprechende Funktion: % TODO: Funktionen ergänzen
-\end{enumerate}
-
-1.
-callMistralAI nimmt die Frage des Nutzers entgegen. Es bereitet eine Anfrage vor, in der es der KI (Mistral) erklärt:
-"Hier ist die Frage. Du darfst bei Bedarf im Internet suchen oder einen Browser bedienen."
-Um mit Mistral zu telefonieren, nutzt der Manager die Funktionen postWithRetry und withNetworkRetry. Diese fungieren als
-verlässliche Telefonanlage: Wenn die Leitung zu Mistral kurz abbricht, wählen sie einfach automatisch neu, anstatt sofort aufzugeben.
-2. Die KI fordert Werkzeuge an
-Mistral "denkt nach". Wenn die Frage lautet: "Was steht auf localhost:5000 und füll das Formular aus?", antwortet Mistral
-nicht sofort mit Text, sondern ruft nach seinen Werkzeugen. Der Manager (callMistralAI) fängt diesen Aufruf in seiner
-while-Schleife (der Agenten-Schleife) ab und delegiert die Arbeit an seine Spezialisten:
-Spezialist 1 (braveSearch): Wenn Mistral aktuelles Wissen aus dem Internet braucht, schickt dieser Spezialist eine Suchanfrage an B
-rave und bringt die Suchergebnisse zurück.
-Spezialist 2 (browserAction): Wenn Mistral eine konkrete Webseite lesen oder bedienen will (wie dein lokales HTML-Formular),
-startet dieser Spezialist einen echten, unsichtbaren Browser, liest Seiten (open\_url) oder füllt Eingabefelder aus (fill\_form).
-3. Der Türsteher (Sicherheit)
-Bevor der Browser-Spezialist (browserAction) aber losläuft, muss jede URL zwingend am Türsteher auditUrl vorbei.
-Dieser prüft, ob die Adresse gültig ist und ob die KI nicht heimlich versucht, verbotene lokale Server-Dateien abzugreifen.
-4. Die Schleife und das finale Ergebnis
-Die Werkzeuge geben ihre Ergebnisse (Suchtreffer, Webseiten-Text) an den Manager (callMistralAI) zurück.
-Der Manager schickt diese neuen Infos wieder zu Mistral.
-Mistral liest die Infos. Hat es alles verstanden, formuliert es seine finale Text-Antwort.
-Ganz am Ende (oder in der normalizeMistralResponse) wird oft extractMistralContentText genutzt. Das ist der Übersetzer:
-Er nimmt die oft komplex strukturierte, finale Antwort von Mistral und extrahiert daraus den reinen, sauberen Text, der
-dann auf deinem Bildschirm als endgültige Antwort des Chatbots erscheint.
-Kurz: callMistralAI steuert den Prozess -> Retry sichert die Verbindung -> Mistral entscheidet sich für Tools -> auditUrl
-sichert die Links ab -> braveSearch / browserAction führen die Taten in der echten Welt aus -> extractMistralContentText
-macht das Endergebnis lesbar.
 
 \subsection{Aufbau lokale Website}
 
