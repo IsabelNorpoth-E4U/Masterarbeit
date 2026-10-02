@@ -3,10 +3,9 @@
 In diesem Kapitel wird die Vorarbeit für den praktischen Teil dieser Arbeit beschrieben. Zunächst wird die Testumgebung eingerichtet, um anschließend deren 
 Sicherheitsschwachstellen systematisch festzustellen. Damit wird der Grundstein für die spätere Analyse gelegt, wie sich diese Schwachstellen verhindern lassen.
 
-\section{Beschreibung des untersuchten Systems}
+\section{Beschreibung des untersuchten Systems}\label{system}
 
-
-Bei dem untersuchten System handelt es sich um den firmeninternen Chatbot \enquote{ChatBot4U} des Unternehmens Energy4U GmbH.
+Bei dem untersuchten System handelt es sich um den firmeninternen Chatbot \enquote{ChatBot4U} des Unternehmens Energy4U GmbH~\cite{an17}.
 Der Chatbot beantwortet Fragen aus dem Energiewirtschaftsumfeld. Die Komponenten werden auf der Google Cloud Platform (GCP) betrieben. Es 
 sind mehrere Sprachmodelle angebunden, die über externe Anbieter bereitgestellt werden. \\
 Die Architektur setzt sich aus sieben Komponenten zusammen: \\
@@ -49,11 +48,20 @@ Für die Speicherung gibt es eine externe und eine interne Qdrant-Instanz. Nach 
 ausgeliefert, welches sie an das Frontend weiterleitet.
 
 
-\section{Ziel der Untersuchung}
+\section{Untersuchungsziel und Vorgehensweise}\label{sec:untersuchungsziel}
 
-ll
+Wie im Kapitel~\ref{system} erläutert, greift der Chatbot auf externe Daten zu. Durch einen solchen Zugriff entsteht die in Kapitel~\ref{ch:promptinjection} beschriebene
+Angriffsfläche, womit indirekte Prompt-Injection-Angriffe möglich werden. In diesem Kapitel soll untersucht werden, in welchem Maße der Chatbot durch solche Angriffe
+manipuliert werden kann. Dafür wurden die in Kapitel~\ref{ch:promptinjection} vorgestellten Angriffe ausgewählt. \\
+Es wird eine Testumgebung aufgebaut, in der die Angriffe durchgeführt werden. Die Testumgebung besteht aus einer lokalen Instanz des Chatbots,
+die um die Funktionalität des Tool Callings erweitert wird. Dadurch kann der Chatbot nicht nur auf externe Daten zugreifen, sondern auch
+Aktionen auf Webseiten durchführen. Für die Angriffe wurde einheitlich ein Szenario gewählt, in dem versucht wird, sensible Informationen,
+genauer den Chatverlauf des Nutzers, ohne dessen Wissen an ein externes Ziel zu übermitteln. Als externes Ziel dient eine Webseite,
+die ebenfalls lokal gehostet wird. \\
+Es soll die Frage geklärt werden, welche Schwachstellen im System durch diese Angriffe festgestellt werden können. \\
+Die identifizierten Schwachstellen sollen anschließend als Grundlage für die Auswahl und Implementierung geeigneter Schutzmaßnahmen dienen.
 
-\section{Einrichtung der Umgebung}
+\section{Einrichtung der Umgebung}\label{sec:einrichtung}
 
 \subsection{Installation/Implementierung des Repository}
 
@@ -119,7 +127,7 @@ Nach diesen Schritten kann lokal über die URL \url{http://localhost:5173/} auf 
 \end{figure}
 
 
-\section{Methodik zur Durchführung der Angriffe}
+\section{Methodik zur Durchführung der Angriffe}\label{sec:methodik_angriffe}
 
 \subsection{Ziel der Angriffe}
 
@@ -343,7 +351,7 @@ if __name__ == '__main__':
     app.run(debug=True)
 \end{lstlisting}
 
-\section{Durchführung der ausgewählten Prompt-Injection Angriffe}
+\section{Durchführung der ausgewählten Prompt-Injection Angriffe}\label{sec:durchfuehrung}
 
 In diesem Kapitel werden die im Kapitel~\ref{ch:promptinjection} vorgestellten Angriffe auf die beschriebene Umgebung angewendet. Dabei wird für jeden Angriff näher
 erläutert, wie viele unterschiedliche Varianten getestet und welche Ressourcen dafür jeweils benötigt wurden. \\
@@ -795,7 +803,7 @@ Antwort mit, dass der Chatverlauf übertragen wurde, obwohl die Anweisung dies a
 Für die praktische Anwendbarkeit ist die Länge der \ac{url} entscheidend: Je länger und auffälliger sie ist, desto eher würde ein Nutzer sie vor dem Einfügen prüfen.
 In diesen Beispielen ist also anzunehmen, dass ein Nutzer bei der Länge der \ac{url} aufmerksam werden.
 
-\section{Schwachstellen der untersuchten Umgebung}
+\section{Schwachstellen der untersuchten Umgebung}\label{sec:schwachstellen_umgebung}
 
 Aus den Ergebnissen lassen sich mehrere Schwachstellen des untersuchten Systems ableiten:
 
