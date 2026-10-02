@@ -3,46 +3,55 @@
 In diesem Kapitel wird die Vorarbeit für den praktischen Teil dieser Arbeit beschrieben. Zunächst wird die Testumgebung eingerichtet, um anschließend deren 
 Sicherheitsschwachstellen systematisch festzustellen. Damit wird der Grundstein für die spätere Analyse gelegt, wie sich diese Schwachstellen verhindern lassen.
 
+\section{Beschreibung des untersuchten Systems}
 
-\section{Beschreibung des untersuchten Systems}\label{system}
 
-% Bild einfügen
+Bei dem untersuchten System handelt es sich um den firmeninternen Chatbot \enquote{ChatBot4U} des Unternehmens Energy4U GmbH.
+Der Chatbot beantwortet Fragen aus dem Energiewirtschaftsumfeld. Die Komponenten werden auf der Google Cloud Platform (GCP) betrieben. Es 
+sind mehrere Sprachmodelle angebunden, die über externe Anbieter bereitgestellt werden. \\
+Die Architektur setzt sich aus sieben Komponenten zusammen: \\
 
-Bei dem untersuchten System handelt es sich um einen firmeninternen Chatbot des Unternehmens Energy4U. \\
-Die Architektur besteht aus sieben Komponenten, die größtenteils auf der Google Cloud Platform gehostet werden. Das
-Frontend ist als Single Page Application (SPA) mit Svelte und Vite umgesetzt und wird über ein serverseitiges
-Node.js-Backend (Express) auf Google Cloud Run ausgeliefert. Diese Schicht fungiert nicht nur als Webserver, sondern
-übernimmt zusätzlich das File-Serving, die Authentifizierung sowie die Rolle eines AI-Proxys. \\
-Das eigentliche Backend basiert auf Python und dem FastAPI-Framework und läuft ebenfalls skalierbar auf Cloud Run.
-Hier ist die Kernlogik der Anwendung verortet: Es verarbeitet die RAG-Queries (Retrieval-Augmented Generation), steuert
-den File-Upload samt nachgelagerter OCR-Verarbeitung und nimmt Nutzer-Feedback entgegen. Als Vektordatenbank kommt
-Qdrant zum Einsatz. Diese wird selbst gehostet auf einer virtuellen Maschine (VM) betrieben und dient als Vektorspeicher,
-der neben den Embeddings auch Metadaten (Payload) für effiziente Ähnlichkeitssuchen (Similarity Search) vorhält.
-Für den Object Storage wird Google Cloud Storage (GCS) verwendet; dort werden alle unstrukturierten Roh- und
-Zwischendaten wie hochgeladene PDFs, Markdown-Dateien und Parquet-Embeddings abgelegt.
-Die Nutzerdatenbank wird über Firestore realisiert. Sie ist zuständig für die Verwaltung der Nutzer-Sessions, das
-Erfassen von Nutzungsstatistiken sowie die dauerhafte Speicherung des Nutzer-Feedbacks.
-Die Embedding-Pipeline bildet das Herzstück der Datenaufbereitung. Sie ist in Python geschrieben, läuft auf einer
-dedizierten VM und wird ereignisgesteuert über Cloud Run getriggert. Die Pipeline verarbeitet Dokumente Schritt für
-Schritt: ausgehend vom PDF über die OCR-Texterkennung und das Chunking der Texte bis hin zur Generierung der
-Embeddings, die abschließend in Qdrant indiziert werden.
-Um einen reibungslosen Entwicklungsprozess zu gewährleisten, wird für CI/CD auf GitHub Actions gesetzt. Dies ermöglicht
-automatisierte Builds und zuverlässige Deployments der gesamten Infrastruktur. \\
-Für eine reibungslose Kommunikation zwischen den Komponenten wurden mehrere Kommunikationswege implementiert. Betrachtet
-werden dabei der Nutzer (Browser), das Frontend, das Backend, Qdrant sowie der LLM-Provider. Jede Kommunikation beginnt
-gleichermaßen damit, dass der Nutzer eine Chat-Nachricht an das Frontend sendet. Für die anschließende Verarbeitung
-dieser Nachricht bestehen zwei Möglichkeiten: der Normal-Modus und der Energy-Bot. Der Unterschied besteht darin, dass
-im Normal-Modus direkt eine API-Anfrage an den LLM-Provider gesendet wird, während im Energy-Bot-Modus zunächst eine
-POST-Anfrage an das Backend erfolgt, gefolgt von einer Similarity Search in Qdrant. Der Energy-Bot nutzt somit ein
-RAG-Verfahren, bei dem das Backend im Anschluss einen entsprechend angereicherten Prompt an den LLM-Provider sendet. \\
-Das gesamte Projekt ist auf zwei GCP-Projekte aufgeteilt, um den externen und den internen Teil des Systems zu
-simulieren. Im externen Projekt wird ein HTTPS-Request an das Frontend gesendet, von dort an das Backend weitergeleitet
-und anschließend über einen VPC-Connector an Qdrant übermittelt – dabei jedoch ausschließlich an die Public Collection.
-Im internen Projekt durchläuft der HTTPS-Request ebenfalls Frontend und Backend und gelangt über einen VPC-Connector an
-die Qdrant-VM. Diese enthält im Unterschied zum externen Projekt sowohl die interne als auch die öffentliche Collection.
-Von dort wird die Anfrage an die Embedding-Pipeline-VM weitergereicht und über ein VPC-Peering mit der Qdrant-VM des
-externen GCP-Projekts verbunden.
+\begin{enumerate}
+    \item \textbf{Frontend:} Übernimmt die Authentifizierung und leitet Anfragen an das Backend oder an den \ac{llm}-Provider weiter
+    \item \textbf{Backend:} Verarbeitet die RAG-Anfragen und steuert den Datei-Upload sowie die Entgegennahme von Nutzer-Feedback.
+    \item \textbf{Vektordatenbank:} Speichert die Embeddings und bildet Payload für eine Similarity Search
+    \item \textbf{Object Storage:} Legt unstrukturierte Daten wie PDFs, Markdown-Dateien und Embeddings ab
+    \item \textbf{Nutzerdatenbank:} Verwaltet die Nutzer-Sessions, erfasst Nutzungsstatistiken und speichert das Nutzer-Feedback
+    \item \textbf{Embedding-Pipeline:} Bereitet die Dokumente auf, indem sie diese in Chunks zerlegt und in der Vektordatenbank speichert
+    \item \textbf{CI/CD:} Automatisiert Builds und Deployments der gesamten Infrastruktur
+\end{enumerate}
 
+Jede Interaktion beginnt damit, dass der Nutzer im Browser eine Chat-Nachricht über \ac{https} an das Frontend sendet. Für die
+weitere Verarbeitung unterscheidet das System zwei Modi: den Normal-Modus und Formatanpassung und den Energy-Bot-Modus. \\
+Beim Normal-Modus wird das Backend nicht verwendet. Das Frontend sendet eine Anfrage direkt an den \ac{llm}-Provider. Die Antwort wird mit 
+\ac{sse} gestreamt. Diese Technologie wird verwendet, damit eine dauerhafte Verbindung zwischen einem Client und Server aufgebaut wird
+und der Server Daten in Echtzeit sendet. In diesem Fall wird sie eingesetzt, damit der \ac{llm}-Provider die Daten nicht erst nach der vollständigen Generierung
+zurücksendet, da das zu viel Zeit in Anspruch nehmen würde. Stattdessen erhält das Frontend Token-für-Token die Antwort und zeigt diese
+dem Nutzer an~\cite{an18}. \\
+Im Gegensatz dazu wird beim Energy-Bot-Modus eine POST-Anfrage vom Frontend an das Backend gesendet. Das Backend führt eine Similarity Search
+im Qdrant durch und sendet eine vorgegebene Anzahl an Dokumenten zurück. Mithilfe dieser Dokumente wird eine Anfrage vom Backend an den \ac{llm}-Provider
+gesendet. Auch diese Anfrage wird gestreamt. Diese gestreamte Antwort wird zurück an das Frontend gesendet und anschließend Token-für-Token
+dem Nutzer angezeigt. \\
+Das System ist in zwei GCP-Projekte aufgeteilt, um den internen und externen Betrieb voneinander zu trennen. Beide Projekte besitzen jeweils
+ein eigenes Frontend und Backend auf Cloud Run sowie eine Qdrant-VM in einem \ac{vpc}. Das Backend erreicht die jeweilige Qdrant-VM über 
+einen \ac{vpc}-Connector. \\
+Der wesentliche Unterschied zwischen den beiden Instanzen liegt im Datenbestand. Die interne Qdrant-Instanz enthält sowohl die interne als auch
+die öffentliche Sammlung, wogegen die externe Instanz nur die öffentliche Sammlung beinhaltet. \\
+Die Datenflüsse der gesamten Architektur können in vier Bereiche geteilt werden: die Datenquellen, die Verarbeitung, die Speicherung und die
+Auslieferung. Die Datenquellen beinhalten PDF-Dokumente, Confluence-Export, Inhalte der \ac{bnetza} und Gesetzestexte von
+\url{gesetze-im-internet.de}. 
+Bei der Verarbeitung werden alle Datenquellen in einem Bucket gespeichert und durch eine Embedding-Pipeline verarbeitet, welche das Ziel verfolgt, Objekte als
+Punkt in einem Vektorraum darzustellen~\cite{an20}. Ein Bucket
+ist ein Container in der Cloud, in dem Daten als Objekte gespeichert werden~\cite{an19}.
+Die Quellen werden je nach Dateityp in ein Format wie JSON, Markdown oder Text umgeformt und anschließend in Abschnitte, sogenannte Chunks,
+zerlegt. Diese Chunks werden mit einem Azure-Modell in Vektoren umgewandelt und in dem Bereich Speicherung in Qdrant geschrieben.
+Für die Speicherung gibt es eine externe und eine interne Qdrant-Instanz. Nach der Speicherung werden die Daten an das Backend 
+ausgeliefert, welches sie an das Frontend weiterleitet.
+
+
+\section{Ziel der Untersuchung}
+
+ll
 
 \section{Einrichtung der Umgebung}
 

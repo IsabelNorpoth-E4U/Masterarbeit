@@ -1,8 +1,8 @@
-# Shows the results of the baseline and the new approach as tables
+# Shows the results of the Mistral Small 4 guard runs as tables
 # and saves every picture in the results folder.
 #
 # Requirement: python3 -m pip install matplotlib
-# Run:         python3 plot_results.py
+# Run:         python3 visualize_results.py
 
 import json
 import os
@@ -13,12 +13,18 @@ import matplotlib.pyplot as plt
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULT_DIR = os.path.join(BASE_DIR, "results")
 
-# All runs that should be shown: name, results file, picture file
+# All runs that should be shown: name, results file, picture file.
+# Only the Mistral runs, the Qwen runs of main_original.py and
+# main_newapproach.py are not shown here.
 RUNS = [
-    ["Baseline", "qwen35_results.jsonl", "qwen35_tables.png"],
-    ["New approach", "qwen35_newapproach_results.jsonl", "qwen35_newapproach_tables.png"],
+    ["Original approach", "mistral_small4_results.jsonl", "mistral_small4_tables.png"],
+    ["New approach", "mistral_small4_newapproach_results.jsonl",
+     "mistral_small4_newapproach_tables.png"],
+    ["New approach (calibrated)", "mistral_small4_newapproach_calibrated_results.jsonl",
+     "mistral_small4_newapproach_calibrated_tables.png"],
 ]
-COMPARISON_FILE = "qwen35_comparison.png"
+COMPARISON_FILE = "mistral_small4_comparison.png"
+MODEL_NAME = "Mistral Small 4"
 
 COLUMNS = ["n", "TP", "FP", "FN", "TN", "Accuracy", "Precision",
            "Recall", "F1", "FPR", "Latency Ø (ms)"]
@@ -134,7 +140,7 @@ for run in RUNS:
         add_to_group(tables["Per split"], "split = " + str(row["split"]), row)
         add_to_group(tables["Per harmless_level"], "harmless_level = " + str(row["harmless_level"]), row)
 
-    draw_figure(tables, "Prompt injection detection with Qwen3.5 (9B) – " + name, out_file)
+    draw_figure(tables, "Prompt injection detection with " + MODEL_NAME + " – " + name, out_file)
 
     # remember the test split of this run
     for row in rows:
@@ -143,7 +149,7 @@ for run in RUNS:
 
 # one table with all runs next to each other (test split only)
 if len(comparison) > 1:
-    draw_figure({"Test split": comparison}, "Baseline vs. new approach",
+    draw_figure({"Test split": comparison}, "Comparison of the runs",
                 os.path.join(RESULT_DIR, COMPARISON_FILE))
 
 plt.show()

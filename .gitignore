@@ -27,3 +27,6 @@
 
 # IDE
 .idea/
+
+# API-Keys (duerfen nie ins Repository)
+mistral_key.txt
