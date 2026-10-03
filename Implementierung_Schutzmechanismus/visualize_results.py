@@ -17,12 +17,16 @@ RESULT_DIR = os.path.join(BASE_DIR, "results")
 # Only the Mistral runs, the Qwen runs of main_original.py and
 # main_newapproach.py are not shown here.
 RUNS = [
-    ["Original approach", "mistral_small4_results.jsonl", "mistral_small4_tables.png"],
-    ["New approach", "mistral_small4_newapproach_results.jsonl",
-     "mistral_small4_newapproach_tables.png"],
-    ["New approach (calibrated)", "mistral_small4_newapproach_calibrated_results.jsonl",
-     "mistral_small4_newapproach_calibrated_tables.png"],
+    # ["Original approach", "mistral_small4_results.jsonl", "mistral_small4_tables.png"],
+    # ["New approach", "mistral_small4_newapproach_results.jsonl",
+    #  "mistral_small4_newapproach_tables.png"],
+    ["New approach 2 (JA/NEIN)", "mistral_small4_newapproach2_results.jsonl",
+     "mistral_small4_newapproach2_tables.png"],
+    ["New approach 2 (score)", "mistral_small4_newapproach2_score_results.jsonl",
+     "mistral_small4_newapproach2_score_tables.png"],
 ]
+# only these two runs are compared with each other (dev and test split)
+COMPARE = ["Original approach", "New approach 2 (score)"]
 COMPARISON_FILE = "mistral_small4_comparison.png"
 MODEL_NAME = "Mistral Small 4"
 
@@ -120,8 +124,8 @@ def draw_figure(tables, title, out_file):
 
 # ---------- Main program ----------
 
-# test split of every run, for the comparison at the end
-comparison = {}
+# dev and test split of the compared runs, for the comparison at the end
+comparison = {"Dev split": {}, "Test split": {}}
 
 for run in RUNS:
     name = run[0]
@@ -142,14 +146,17 @@ for run in RUNS:
 
     draw_figure(tables, "Prompt injection detection with " + MODEL_NAME + " – " + name, out_file)
 
-    # remember the test split of this run
-    for row in rows:
-        if row["split"] == "test":
-            add_to_group(comparison, name, row)
+    # remember the dev and test split of this run
+    if name in COMPARE:
+        for row in rows:
+            if row["split"] == "dev":
+                add_to_group(comparison["Dev split"], name, row)
+            if row["split"] == "test":
+                add_to_group(comparison["Test split"], name, row)
 
-# one table with all runs next to each other (test split only)
-if len(comparison) > 1:
-    draw_figure({"Test split": comparison}, "Comparison of the runs",
+# one picture with the compared runs next to each other (dev and test split)
+if len(comparison["Test split"]) > 1:
+    draw_figure(comparison, "Comparison: " + " vs. ".join(COMPARE),
                 os.path.join(RESULT_DIR, COMPARISON_FILE))
 
 plt.show()

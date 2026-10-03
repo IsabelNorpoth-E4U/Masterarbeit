@@ -61,7 +61,6 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
       - [X] 4.4 Durchführung der ausgewählten Prompt-Injection Angriffe 
       - [X] 4.4.1 Identifikation der Schwachstellen
 
-
 5. Schutzmaßnahmen gegen Prompt Injection
    - [ ] 5.1 Einordnung der Kategorien
    - [ ] 5.2 Nennung von zwei bis drei Maßnahmen pro Kategorie + Einordnung auf das Anwendungsbeispiel des Chatbots
