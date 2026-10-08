@@ -4,6 +4,9 @@
 \glossentry{api}{\glossaryentrynumbers{\relax 
 		\setentrycounter[]{page}\glsnumberformat{3}\delimN 
 		\setentrycounter[]{page}\glsnumberformat{a}}}\glsgroupskip
+\glsgroupheading{B}\relax \glsresetentrylist %
+\glossentry{bnetza}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsnumberformat{a}}}\glsgroupskip
 \glsgroupheading{D}\relax \glsresetentrylist %
 \glossentry{dna}{\glossaryentrynumbers{\relax 
 		\setentrycounter[]{page}\glsnumberformat{a}}}\glsgroupskip
@@ -15,6 +18,7 @@
 \glsgroupheading{L}\relax \glsresetentrylist %
 \glossentry{llm}{\glossaryentrynumbers{\relax 
 		\setentrycounter[]{page}\glsnumberformat{2\delimR 4}\delimN 
+		\setentrycounter[]{page}\glsnumberformat{7}\delimN 
 		\setentrycounter[]{page}\glsnumberformat{a}\delimN 
 		\setentrycounter[]{page}\glsnumberformat{I}}}%
 \glossentry{luca}{\glossaryentrynumbers{\relax 
@@ -22,7 +26,14 @@
 \glsgroupheading{S}\relax \glsresetentrylist %
 \glossentry{sds}{\glossaryentrynumbers{\relax 
 		\setentrycounter[]{page}\glsnumberformat{a}}}%
+\glossentry{sse}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsnumberformat{a}}}%
 \glossentry{ssl}{\glossaryentrynumbers{\relax 
-		\setentrycounter[]{page}\glsnumberformat{9}\delimN 
+		\setentrycounter[]{page}\glsnumberformat{a}}}\glsgroupskip
+\glsgroupheading{U}\relax \glsresetentrylist %
+\glossentry{url}{\glossaryentrynumbers{\relax 
+		\setentrycounter[]{page}\glsnumberformat{a}}}\glsgroupskip
+\glsgroupheading{V}\relax \glsresetentrylist %
+\glossentry{vpc}{\glossaryentrynumbers{\relax 
 		\setentrycounter[]{page}\glsnumberformat{a}}}%
 \end{theglossary}\glossarypostamble

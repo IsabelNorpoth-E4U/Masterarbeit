@@ -109,21 +109,20 @@ date={2026-08-25}
   date={2026-08-26}
   }
 
-@article{pi9,
-    author = {Alamsabi, Mohammed and Tchuindjang, Michael and Brohi, Sarfraz},
-    title = {Embedding-Based Detection of Indirect Prompt Injection Attacks in Large Language Models Using Semantic Context Analysis},
-    journal = {Algorithms},
-    year = {2026},
-    month = jan,
-    volume = {19},
-    number = {1},
-    pages = {92},
-    issn = {1999-4893},
-    doi = {10.3390/a19010092},
-    keywords = {Large Language Models (LLMs), indirect prompt injection, embedding-based detection, semantic context analysis, OpenAI embeddings, cybersecurity},
-    url = {https://doaj.org/article/b81901bdc93c423ca2d109054fa80732},
-    date = {2026-08-26}
+@Article{pi9,
+AUTHOR = {Alamsabi, Mohammed and Tchuindjang, Michael and Brohi, Sarfraz},
+TITLE = {Embedding-Based Detection of Indirect Prompt Injection Attacks in Large Language Models Using Semantic Context Analysis},
+JOURNAL = {Algorithms},
+VOLUME = {19},
+YEAR = {2026},
+NUMBER = {1},
+ARTICLE-NUMBER = {92},
+URL = {https://www.mdpi.com/1999-4893/19/1/92},
+ISSN = {1999-4893},
+ABSTRACT = {Large Language Models (LLMs) are vulnerable to Indirect Prompt Injection Attacks (IPIAs), where malicious instructions are embedded within external content rather than direct user input. This study presents an embedding-based detection approach that analyses the semantic relationship between user intent and external content, enabling the early identification of IPIAs that conventional defences overlook. We also provide a dataset of 70,000 samples, constructed using 35,000 malicious instances from the Benchmark for Indirect Prompt Injection Attacks (BIPIA) and 35,000 benign instances generated using ChatGPT-4o-mini. Furthermore, we performed a comparative analysis of three embedding models, namely OpenAI text-embedding-3-small, GTE-large, and MiniLM-L6-v2, evaluated in combination with XGBoost, LightGBM, and Random Forest classifiers. The best-performing configuration using OpenAI embeddings with XGBoost achieved an accuracy of 97.7\% and an F1-score of 0.977, matching or exceeding the performance of existing IPIA detection methods while offering practical deployment advantages. Unlike prevention-focused approaches that require modifications to the underlying LLM architecture, the proposed method operates as a model-agnostic external detection layer with an average inference time of 0.001 ms per sample. This detection-based approach complements existing prevention mechanisms by providing a lightweight, scalable solution that can be integrated into LLM pipelines without requiring architectural changes.},
+DOI = {10.3390/a19010092}
 }
+
 
 @article{pi10,
     author = {Clusmann, Jan and Ferber, Dyke and Wiest, Isabella C. and others},
@@ -484,4 +483,287 @@ author = {Vijay K. Garg}
     title = {Was ist Einbettung?},
     url = {https://www.ibm.com/de-de/think/topics/embedding},
     date = {2026-08-30}
+}
+
+% 5. Schutzmaßnahmen
+
+% sm01 == pi1
+
+% sm02 nicht verwendet
+
+% sm03 == pi9
+
+@online{sm04,
+    author = {Microsoft},
+    title = {2. Prompt Injection (Direct / Indirect)},
+    url = {https://learn.microsoft.com/en-us/security/zero-trust/catalog-ai-attack-techniques/prompt-injection},
+    year = {2026},
+    date = {2026-09-05}
+}
+
+% sm05 == pi14
+
+% sm06 == pi15
+
+@online{sm07,
+    title = {Mitigating the risk of prompt injections in browser use},
+    url = {https://github.com/berdyshevol/anthropic-research-wiki/blob/main/wiki/sources/prompt-injection-defenses.md},
+    date = {2026-09-07}
+}
+
+@techreport{sm08,
+    title = {Indirect Prompt Injections - Intrinsische Schwachstelle in anwendungsintegrierten KI-Sprachmodellen},
+    institution = {Bundesamt f{\"u}r Sicherheit in der Informationstechnik (BSI)},
+    type = {BSI IT-Sicherheitsinformation},
+    number = {CSW-Nr. 2023-249034-1032, Version 1.0},
+    address = {Bonn, Deutschland},
+    year = {2023},
+    month = jul,
+    day = {18},
+    url = {https://www.bsi.bund.de/SharedDocs/Cybersicherheitswarnungen/DE/2023/2023-249034-1032.pdf},
+    date = {2026-09-07}
+}
+
+@misc{sm09,
+      title={The Landscape of Prompt Injection Threats in LLM Agents: From Taxonomy to Analysis}, 
+      author={Peiran Wang and Xinfeng Li and Chong Xiang and Jinghuai Zhang and Ying Li and Lixia Zhang and Xiaofeng Wang and Yuan Tian},
+      year={2026},
+      eprint={2602.10453},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2602.10453}, 
+      date = {2026-09-07}
+}
+
+@misc{sm10,
+      title={A Systematic Literature Review on LLM Defenses Against Prompt Injection and Jailbreaking: Expanding NIST Taxonomy}, 
+      author={Pedro H. Barcha Correia and Ryan W. Achjian and Diego E. G. Caetano de Oliveira and Ygor Acacio Maria and Victor Takashi Hayashi and Marcos Lopes and Charles Christian Miers and Marcos A. Simplicio Jr},
+      year={2026},
+      eprint={2601.22240},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2601.22240}, 
+      date = {2026-09-07}
+}
+
+@misc{sm11,
+      title={Formalizing and Benchmarking Prompt Injection Attacks and Defenses}, 
+      author={Yupei Liu and Yuqi Jia and Runpeng Geng and Jinyuan Jia and Neil Zhenqiang Gong},
+      year={2025},
+      eprint={2310.12815},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2310.12815}, 
+      date = {2026-09-07}
+}
+
+@misc{sm12,
+      title={Taxonomy, Evaluation and Exploitation of IPI-Centric LLM Agent Defense Frameworks}, 
+      author={Zimo Ji and Xunguang Wang and Zongjie Li and Pingchuan Ma and Yudong Gao and Daoyuan Wu and Xincheng Yan and Tian Tian and Shuai Wang},
+      year={2025},
+      eprint={2511.15203},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2511.15203}, 
+      date = {2026-09-07}
+}
+
+@online{sm13,
+    author = {GeeksforGeeks},
+    title = {Perplexity for LLM Evaluation},
+    url = {https://www.geeksforgeeks.org/nlp/perplexity-for-llm-evaluation/},
+    year = {2026},
+    date = {2026-09-05}
+}
+
+@online{sm14,
+    author = {Loskan.io},
+    title = {Fine-Tuning},
+    url = {https://loskan.io/wissen/was-ist/fine-tuning},
+    date = {2026-09-05}
+}
+
+@online{sm15,
+    author = {Mistral AI},
+    title = {Mistral Small 4},
+    url = {https://docs.mistral.ai/models/mistral-small-4-0-26-03g},
+    date = {2026-09-08}
+}
+
+@misc{sm16,
+      title={Deceiving Google's Perspective API Built for Detecting Toxic Comments}, 
+      author={Hossein Hosseini and Sreeram Kannan and Baosen Zhang and Radha Poovendran},
+      year={2017},
+      eprint={1702.08138},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/1702.08138}, 
+      date = {2026-09-10}
+}
+
+@misc{sm17,
+      title={FlipAttack: Jailbreak LLMs via Flipping}, 
+      author={Yue Liu and Xiaoxin He and Miao Xiong and Jinlan Fu and Shumin Deng and Yingwei Ma and Jiaheng Zhang and Bryan Hooi},
+      year={2026},
+      eprint={2410.02832},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2410.02832}, 
+      date = {2026-09-10}
+}
+
+@misc{sm18,
+      title={Low-Resource Languages Jailbreak GPT-4}, 
+      author={Zheng-Xin Yong and Cristina Menghini and Stephen H. Bach},
+      year={2024},
+      eprint={2310.02446},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2310.02446}, 
+      date = {2026-09-10}
+}
+
+@misc{sm19,
+      title={How Johnny Can Persuade LLMs to Jailbreak Them: Rethinking Persuasion to Challenge AI Safety by Humanizing LLMs}, 
+      author={Yi Zeng and Hongpeng Lin and Jingwen Zhang and Diyi Yang and Ruoxi Jia and Weiyan Shi},
+      year={2024},
+      eprint={2401.06373},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2401.06373}, 
+      date = {2026-09-10}
+}
+
+@misc{sm20,
+      title={ArtPrompt: ASCII Art-based Jailbreak Attacks against Aligned LLMs}, 
+      author={Fengqing Jiang and Zhangchen Xu and Luyao Niu and Zhen Xiang and Bhaskar Ramasubramanian and Bo Li and Radha Poovendran},
+      year={2024},
+      eprint={2402.11753},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2402.11753}, 
+      date = {2026-09-10}
+}
+
+@misc{sm21,
+      title={Bypassing Prompt Guards in Production with Controlled-Release Prompting}, 
+      author={Jaiden Fairoze and Sanjam Garg and Keewoo Lee and Mingyuan Wang},
+      year={2026},
+      eprint={2510.01529},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2510.01529}, 
+      date = {2026-09-10}
+}
+
+@misc{sm22,
+      title={Bypassing LLM Guardrails: An Empirical Analysis of Evasion Attacks against Prompt Injection and Jailbreak Detection Systems}, 
+      author={William Hackett and Lewis Birch and Stefan Trawicki and Neeraj Suri and Peter Garraghan},
+      year={2025},
+      eprint={2504.11168},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2504.11168}, 
+      date = {2026-09-10}
+}
+
+@misc{sm23,
+      title={Should We Respect LLMs? A Cross-Lingual Study on the Influence of Prompt Politeness on LLM Performance}, 
+      author={Ziqi Yin and Hao Wang and Kaito Horio and Daisuke Kawahara and Satoshi Sekine},
+      year={2024},
+      eprint={2402.14531},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2402.14531}, 
+      date = {2026-09-10}
+}
+
+@misc{sm24,
+      title={Mind Your Tone: Investigating How Prompt Politeness Affects LLM Accuracy (short paper)}, 
+      author={Om Dobariya and Akhil Kumar},
+      year={2025},
+      eprint={2510.04950},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2510.04950}, 
+      date = {2026-09-10}
+}
+
+@misc{sm25,
+      title={Does Tone Change the Answer? Evaluating Prompt Politeness Effects on Modern LLMs: GPT, Gemini, and LLaMA}, 
+      author={Hanyu Cai and Binqi Shen and Lier Jin and Lan Hu and Xiaojing Fan},
+      year={2026},
+      eprint={2512.12812},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2512.12812}, 
+      date = {2026-09-10}
+}
+
+@misc{sm26,
+      title={Jailbroken: How Does LLM Safety Training Fail?}, 
+      author={Alexander Wei and Nika Haghtalab and Jacob Steinhardt},
+      year={2023},
+      eprint={2307.02483},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2307.02483}, 
+      date = {2026-09-10}
+}
+
+@article{sm27,
+	title = {Survey on {LLM} {Safety}: {Attacks}, {Defenses}, {Alignment}, {Metrics}, and {Guardrails}},
+	volume = {115},
+	issn = {1573-0565},
+	url = {https://doi.org/10.1007/s10994-026-07060-8},
+	doi = {10.1007/s10994-026-07060-8},
+	abstract = {Large Language Models (LLM) have demonstrated remarkable capabilities across various applications, but their deployment raises critical safety concerns as potential misuse poses significant societal risks. This survey reviews the end-to-end security and safety pipeline of LLMs, focusing on the interaction between users and model responses. We categorize the system into five key components: attacks, defenses, safety alignment, metrics and guarding mechanisms. Attacks involve crafting adversarial inputs to exploit model vulnerabilities. Defenses act as countermeasures, aiming to detect and prevent such inputs before processing. Safety alignment ensures that, even when attacks reach the model, its responses remain consistent with ethical and policy-aligned behavior. Guarding mechanisms operate post-response to flag, filter, or block unsafe outputs. Each of these stages is subject to rigorous evaluation metrics to assess their effectiveness, robustness, and limitations. As LLMs evolve toward more general-purpose intelligence, these safety considerations become increasingly critical for the development of robust and trustworthy AI systems. Finally, we highlight open challenges and future research directions to advance the security and alignment of LLMs.},
+	number = {6},
+	journal = {Machine Learning},
+	author = {Jalan, Pratik and Abishethvarman, Vadivel and Chandna, Bhavik and Naseem, Usman},
+	month = may,
+	year = {2026},
+	pages = {130},
+    date = {2026-09-11}
+}
+
+@article{sm28,
+author = {Yang, Shengping and Berdine, Gilbert},
+year = {2024},
+month = {10},
+pages = {75-79},
+title = {Confusion matrix},
+volume = {12},
+journal = {The Southwest Respiratory and Critical Care Chronicles},
+doi = {10.12746/swrccc.v12i53.1391},
+date = {2026-09-11}
+}
+
+@InProceedings{sm29,
+author="Lipton, Zachary C.
+and Elkan, Charles
+and Naryanaswamy, Balakrishnan",
+editor="Calders, Toon
+and Esposito, Floriana
+and H{\"u}llermeier, Eyke
+and Meo, Rosa",
+title="Optimal Thresholding of Classifiers to Maximize F1 Measure",
+booktitle="Machine Learning and Knowledge Discovery in Databases",
+year="2014",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="225--239",
+isbn="978-3-662-44851-9",
+date = {2026-09-11}
+}
+
+@article{sm30,
+author = {Baratloo, Alireza and Hosseini, Mostafa and Negida, Ahmed and El Ashal, Gehad},
+title = {Part 1: Simple Definition and Calculation of Accuracy, Sensitivity and Specificity},
+journal = {Emergency (Tehran, Iran)},
+year = {2015},
+volume = {3},
+number = {2},
+pages = {48--49},
+date = {2026-09-11}
 }

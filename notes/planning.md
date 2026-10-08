@@ -37,8 +37,8 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
    - [ ] 2.5 Unternehmensinterne Chatbots: Einsatzbereich und Risiken
 
 3. Prompt-Injection-Angriffe
-   - [X] Überarbeitet
-   - [ ] Probegelesen
+   - [ ] Überarbeitet
+   - [X] Probegelesen
    - [X] Alle Quellen/Informationen hinzugefügt
    - [X] 3.1 Definition und Einordnung von Prompt Injection -> Oder zu Grundlagen
    - [X] 3.2 Klassifikation von Prompt-Injection-Techniken (Indirekte und Direkte Angriffe)
@@ -49,8 +49,8 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
 
 4. Analyse der Verwundbarkeit eines internen Chatbots
    - [ ] Überarbeitet
-   - [ ] Probegelesen
-   - [ ] Alle Quellen/Informationen hinzugefügt
+   - [X] Probegelesen
+   - [X] Alle Quellen/Informationen hinzugefügt
       - [X] 4.1 Beschreibung des untersuchten Systems 
       - [X] 4.2 Einrichtung der Umgebung
         - [X] 4.2.1 Installation/Implementierung des Repository 
@@ -62,8 +62,20 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
       - [X] 4.4.1 Identifikation der Schwachstellen
 
 5. Schutzmaßnahmen gegen Prompt Injection
-   - [ ] 5.1 Einordnung der Kategorien
-   - [ ] 5.2 Nennung von zwei bis drei Maßnahmen pro Kategorie + Einordnung auf das Anwendungsbeispiel des Chatbots
+   - [ ] Überarbeitet
+   - [ ] Probegelesen
+   - [ ] Alle Quellen/Informationen hinzugefügt
+      - [ ] 5.1 Klassifikation von Schutzmaßnahmen
+      - [ ] 5.2 Auswahl und Konzeption einer Schutzmaßnahme
+      - [ ] 5.3 Aufbau der Umgebung
+         - [ ] 5.3.1 Modellwahl und technische Umgebung
+         - [ ] 5.3.2 Erstellung des Datensatzes
+         - [ ] 5.3.3 Auswahl der Metriken
+         - [ ] 5.3.4 Durchführung des Ansatzes
+         - [ ] 5.3.5 Durchführung am Hauptmodell/ Vergleich der Ansätze
+         - [ ] 5.3.6 Überarbeitung des Ansatze und erneute Durchführung
+      - [ ] 5.4 Ergebnisse
+      - [ ] 5.5 Grenzn der Schutzmaßnahme
      
 6. Evaluation der Schutzmaßnahmen
    - [ ] 6.1 Evaluationsmethodik (Welche, Funktionsweise)

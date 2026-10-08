@@ -17,16 +17,17 @@ RESULT_DIR = os.path.join(BASE_DIR, "results")
 # Only the Mistral runs, the Qwen runs of main_original.py and
 # main_newapproach.py are not shown here.
 RUNS = [
-    # ["Original approach", "mistral_small4_results.jsonl", "mistral_small4_tables.png"],
+    ["Original approach", "mistral_small4_results.jsonl", "mistral_small4_tables.png"],
     # ["New approach", "mistral_small4_newapproach_results.jsonl",
     #  "mistral_small4_newapproach_tables.png"],
     ["New approach 2 (JA/NEIN)", "mistral_small4_newapproach2_results.jsonl",
      "mistral_small4_newapproach2_tables.png"],
     ["New approach 2 (score)", "mistral_small4_newapproach2_score_results.jsonl",
      "mistral_small4_newapproach2_score_tables.png"],
+    ["Hybrid", "mistral_small4_hybrid_results.jsonl", "mistral_small4_hybrid_tables.png"],
 ]
-# only these two runs are compared with each other (dev and test split)
-COMPARE = ["Original approach", "New approach 2 (score)"]
+# only these runs are compared with each other (dev and test split)
+COMPARE = ["Original approach", "New approach 2 (score)", "Hybrid"]
 COMPARISON_FILE = "mistral_small4_comparison.png"
 MODEL_NAME = "Mistral Small 4"
 

@@ -43,7 +43,6 @@ import os
 import sys
 import time
 import unicodedata
-from concurrent.futures import ThreadPoolExecutor
 
 from mistralai.client import Mistral
 
@@ -61,6 +60,7 @@ METRICS_FILE = "results/mistral_small4_newapproach2_score_metrics.json"
 THRESHOLDS_FILE = "results/mistral_small4_newapproach2_score_thresholds.json"
 
 MODEL = "mistral-small-2603"
+KEY_FILE = "mistral_key.txt"
 
 # start values, only used for single examples before the calibration
 START_THRESHOLDS = {"TAU": 0.5, "TAU_HIGH": 0.95, "TAU_F": 0.5, "TAU_0": 0.5, "DELTA": 0.3}
@@ -69,14 +69,9 @@ START_THRESHOLDS = {"TAU": 0.5, "TAU_HIGH": 0.95, "TAU_F": 0.5, "TAU_0": 0.5, "D
 # stays at or below this value. A low value means high precision.
 MAX_FPR = 0.05
 
-# how many requests are sent at the same time
-PARALLEL_REQUESTS = 4
-
-# the api is remote, so a request can fail for reasons that are gone a moment later
+# a request to the api can fail, then we try again a few times
 MAX_TRIES = 5
 WAIT_SECONDS = 5
-
-KEY_FILE = "mistral_key.txt"
 
 # stage B, with fixed anchors so the numbers are used more evenly
 GUARD_PROMPT = (
@@ -145,30 +140,19 @@ QUESTIONS = {
 
 # ---------- Mistral api ----------
 
-# the key is never written into this file, so it cannot end up in git by accident
-def load_api_key():
-    if os.path.exists(KEY_FILE):
-        with open(KEY_FILE, encoding="utf-8") as file:
-            key = file.read().strip()
-        if key != "":
-            return key
-
-    raise SystemExit("No api key found. Write your key into the file " + KEY_FILE
-                     + " in this folder.")
-
-
-client = None
+# the key is in its own file, so it does not end up in git
+key_file = open(KEY_FILE, encoding="utf-8")
+api_key = key_file.read().strip()
+key_file.close()
+client = Mistral(api_key=api_key)
 
 
 # sends one request and returns the text of the answer
 def ask_mistral(system_prompt, user_text, max_tokens, json_answer=False):
-    global client
-    if client is None:
-        client = Mistral(api_key=load_api_key())
-
-    response_format = None
     if json_answer:
         response_format = {"type": "json_object"}
+    else:
+        response_format = None
 
     for attempt in range(MAX_TRIES):
         try:
@@ -188,16 +172,11 @@ def ask_mistral(system_prompt, user_text, max_tokens, json_answer=False):
                 return ""
             return answer.strip()
         except Exception as error:
-            # a rejected key will not start working by itself, so stop at once
-            if "401" in str(error) or "403" in str(error):
-                raise SystemExit("The api key was rejected by the server. "
-                                 "Please check the key in " + KEY_FILE + ".")
-
-            # last attempt failed as well, so let the script stop here
-            if attempt == MAX_TRIES - 1:
-                raise
             print("  request failed, trying again:", error)
-            time.sleep(WAIT_SECONDS * (attempt + 1))
+            time.sleep(WAIT_SECONDS)
+
+    print("The api did not answer after", MAX_TRIES, "tries.")
+    sys.exit()
 
 
 # reads JSON from an answer, None if that does not work
@@ -205,9 +184,9 @@ def parse_json(content):
     content = content.replace("```json", "").replace("```", "").strip()
     try:
         data = json.loads(content)
-    except json.JSONDecodeError:
+    except Exception:
         return None
-    if not isinstance(data, dict):
+    if type(data) != dict:
         return None
     return data
 
@@ -235,11 +214,11 @@ def guard_score(text):
 # returns None if the answer is not usable
 def question_scores(text):
     user_text = "Nachricht:\n<<<\n" + text + "\n>>>\n\nFragen:\n"
-    for name, question in QUESTIONS.items():
-        user_text = user_text + name + ": " + question + "\n"
+    for name in QUESTIONS:
+        user_text = user_text + name + ": " + QUESTIONS[name] + "\n"
 
-    data = parse_json(ask_mistral(QUESTION_PROMPT, user_text, max_tokens=100,
-                                  json_answer=True))
+    answer = ask_mistral(QUESTION_PROMPT, user_text, max_tokens=100, json_answer=True)
+    data = parse_json(answer)
     if data is None:
         return None
 
@@ -253,8 +232,9 @@ def question_scores(text):
 
 # V7: LLM reconstruction, returns (clear text, grade, techniques)
 def reconstruct(text):
-    data = parse_json(ask_mistral(RECONSTRUCT_PROMPT, "Text:\n<<<\n" + text + "\n>>>",
-                                  max_tokens=1000, json_answer=True))
+    answer = ask_mistral(RECONSTRUCT_PROMPT, "Text:\n<<<\n" + text + "\n>>>",
+                         max_tokens=1000, json_answer=True)
+    data = parse_json(answer)
     if data is None:
         return None, None, []
 
@@ -263,11 +243,11 @@ def reconstruct(text):
     techniques = data.get("techniken")
 
     # check that the answer has the right form
-    if not isinstance(clear_text, str) or clear_text.strip() == "":
+    if type(clear_text) != str or clear_text.strip() == "":
         return None, None, []
     if grade not in [0, 1, 2, "0", "1", "2"]:
         return None, None, []
-    if not isinstance(techniques, list):
+    if type(techniques) != list:
         techniques = []
 
     return clear_text.strip(), int(grade), techniques
@@ -292,6 +272,12 @@ INNER_SYMBOLS = ".-_*|/+~"
 SIGNAL_WORDS = ["ignoriere", "ignore", "anweisung", "instruction", "vergiss",
                 "forget", "system", "prompt", "passwort", "password"]
 
+# short German words that appear in almost every normal sentence
+COMMON_WORDS = ["der", "die", "das", "und", "ist", "ich", "du", "nicht", "mit",
+                "zu", "in", "im", "den", "dem", "von", "bitte", "alle", "alles",
+                "dieser", "diese", "ein", "eine", "wir", "mir", "mich", "dein",
+                "deine", "auf", "fuer", "für", "an", "sie", "es", "was", "wie"]
+
 
 # V1
 def clean_characters(text):
@@ -301,20 +287,21 @@ def clean_characters(text):
         text = text.replace(character, "")
 
     # Unicode tag characters are invisible copies of normal letters
-    # (U+E0041 is a hidden "A"), so we turn them back into normal letters
+    # (U+E0041 is a hidden "A"), so we turn them back into normal letters.
+    # Tag characters without a letter are removed.
     new_text = ""
     for character in text:
         number = ord(character)
-        if 0xE0020 <= number <= 0xE007E:
+        if number >= 0xE0020 and number <= 0xE007E:
             new_text = new_text + chr(number - 0xE0000)
-        elif 0xE0000 <= number <= 0xE007F:
-            continue
+        elif number >= 0xE0000 and number <= 0xE007F:
+            pass
         else:
             new_text = new_text + character
     text = new_text
 
-    for fake, real in HOMOGLYPHS.items():
-        text = text.replace(fake, real)
+    for fake in HOMOGLYPHS:
+        text = text.replace(fake, HOMOGLYPHS[fake])
     return text
 
 
@@ -324,7 +311,8 @@ def remove_spacing(text):
     new_text = ""
     for i in range(len(text)):
         character = text[i]
-        if character in INNER_SYMBOLS and 0 < i < len(text) - 1:
+        is_first_or_last = i == 0 or i == len(text) - 1
+        if character in INNER_SYMBOLS and not is_first_or_last:
             if text[i - 1].isalpha() and text[i + 1].isalpha():
                 continue
         new_text = new_text + character
@@ -378,35 +366,34 @@ def looks_like_text(text):
     return readable / len(text) > 0.9
 
 
-def try_base64(word):
+# tries to decode one word as Base64 or hex, None if that does not work
+def decode_word(word):
     if len(word) < 16:
         return None
+
     try:
         decoded = base64.b64decode(word, validate=True).decode("utf-8")
+        if looks_like_text(decoded):
+            return decoded
     except Exception:
-        return None
-    if looks_like_text(decoded):
-        return decoded
-    return None
+        pass
 
+    if len(word) % 2 == 0:
+        try:
+            decoded = bytes.fromhex(word).decode("utf-8")
+            if looks_like_text(decoded):
+                return decoded
+        except Exception:
+            pass
 
-def try_hex(word):
-    if len(word) < 16 or len(word) % 2 != 0:
-        return None
-    try:
-        decoded = bytes.fromhex(word).decode("utf-8")
-    except Exception:
-        return None
-    if looks_like_text(decoded):
-        return decoded
     return None
 
 
 def count_signal_words(text):
+    text = text.lower()
     count = 0
-    lower_text = text.lower()
     for word in SIGNAL_WORDS:
-        if word in lower_text:
+        if word in text:
             count = count + 1
     return count
 
@@ -416,9 +403,7 @@ def decode_codes(text):
     # Base64 and hex, word by word
     new_words = []
     for word in text.split(" "):
-        decoded = try_base64(word)
-        if decoded is None:
-            decoded = try_hex(word)
+        decoded = decode_word(word)
         if decoded is None:
             new_words.append(word)
         else:
@@ -434,23 +419,15 @@ def decode_codes(text):
 
 def build_variants(prompt):
     cleaned = clean_characters(prompt)
-    variants = {
-        "V0": prompt,
-        "V1": cleaned,
-        "V2": remove_spacing(cleaned),
-        "V3": reverse_text(cleaned),
-        "V4": reverse_every_word(cleaned),
-        "V5": reverse_word_order(cleaned),
-        "V6": decode_codes(cleaned),
-    }
+    variants = {}
+    variants["V0"] = prompt
+    variants["V1"] = cleaned
+    variants["V2"] = remove_spacing(cleaned)
+    variants["V3"] = reverse_text(cleaned)
+    variants["V4"] = reverse_every_word(cleaned)
+    variants["V5"] = reverse_word_order(cleaned)
+    variants["V6"] = decode_codes(cleaned)
     return variants
-
-
-# short German words that appear in almost every normal sentence
-COMMON_WORDS = ["der", "die", "das", "und", "ist", "ich", "du", "nicht", "mit",
-                "zu", "in", "im", "den", "dem", "von", "bitte", "alle", "alles",
-                "dieser", "diese", "ein", "eine", "wir", "mir", "mich", "dein",
-                "deine", "auf", "fuer", "für", "an", "sie", "es", "was", "wie"]
 
 
 def count_common_words(text):
@@ -466,9 +443,8 @@ def count_common_words(text):
 # the list wins, so a harmless text read backwards never beats the original.
 # V5 is last, because reversed word order has the same words as the original.
 def most_readable(variants):
-    order = ["V6", "V2", "V1", "V0", "V3", "V4", "V5"]
-    best_name = order[0]
-    for name in order:
+    best_name = "V6"
+    for name in ["V6", "V2", "V1", "V0", "V3", "V4", "V5"]:
         if count_common_words(variants[name]) > count_common_words(variants[best_name]):
             best_name = name
     return best_name
@@ -505,17 +481,6 @@ def decide(row, thresholds):
     return True, alarm + "_" + row["f_max_name"]
 
 
-def apply_rule(row, thresholds):
-    flagged, reason = decide(row, thresholds)
-    row["flagged"] = flagged
-    row["reason"] = reason
-    if flagged:
-        row["answer"] = "JA"
-    else:
-        row["answer"] = "NEIN"
-    return row
-
-
 # ---------- One test case: collects all scores, no decision yet ----------
 
 def check_prompt(prompt):
@@ -524,31 +489,22 @@ def check_prompt(prompt):
     # A: variants, the most readable one goes to the LLM reconstruction
     variants = build_variants(prompt)
     readable_variant = most_readable(variants)
+    clear_text, grade, llm_techniques = reconstruct(variants[readable_variant])
 
-    with ThreadPoolExecutor(max_workers=PARALLEL_REQUESTS) as pool:
-        # round 1 (parallel): guard score of the original + reconstruction
-        s0_job = pool.submit(guard_score, prompt)
-        clear_text, grade, llm_techniques = reconstruct(variants[readable_variant])
-        s0 = s0_job.result()
+    # B: guard score of the original and of the clear text.
+    # A reconstruction that does not work is suspicious itself (the LLM often
+    # refuses when the text tells it to do something), so the clear text gets
+    # the highest score. The questions then use the best script variant.
+    s0 = guard_score(prompt)
+    if clear_text is not None:
+        s_clear = guard_score(clear_text)
+        question_text = clear_text
+    else:
+        s_clear = 1.0
+        question_text = variants[readable_variant]
 
-        # a reconstruction that does not work is suspicious itself (the LLM
-        # often refuses when the text tells it to do something), so the clear
-        # text gets the highest score. The questions then use the best script variant.
-        reconstruction_ok = clear_text is not None
-        if reconstruction_ok:
-            question_text = clear_text
-        else:
-            question_text = variants[readable_variant]
-
-        # round 2 (parallel): guard score of the clear text + guiding questions
-        questions_job = pool.submit(question_scores, question_text)
-        if reconstruction_ok:
-            s_clear = guard_score(clear_text)
-        else:
-            s_clear = 1.0
-        questions = questions_job.result()
-
-    # answer of the questions not usable: do not block the alarm
+    # C: guiding questions. If the answer is not usable, the alarm is not blocked
+    questions = question_scores(question_text)
     questions_ok = questions is not None
     if not questions_ok:
         questions = {"F0": 0.0, "F1": 1.0, "F2": 1.0, "F3": 1.0, "F4": 1.0, "F5": 1.0}
@@ -564,7 +520,7 @@ def check_prompt(prompt):
         "variants": variants,
         "readable_variant": readable_variant,
         "clear_text": clear_text,
-        "reconstruction_ok": reconstruction_ok,
+        "reconstruction_ok": clear_text is not None,
         "grade": grade,
         "llm_techniques": llm_techniques,
         "s0": s0,
@@ -592,13 +548,6 @@ def load_jsonl(file_name):
     return rows
 
 
-def load_thresholds():
-    if not os.path.exists(THRESHOLDS_FILE):
-        return None
-    with open(THRESHOLDS_FILE, encoding="utf-8") as file:
-        return json.load(file)
-
-
 # api run for all test cases (dev and test), the scores are saved without a decision
 def run_all():
     testcases = load_jsonl(TESTCASES_FILE)
@@ -612,31 +561,27 @@ def run_all():
     print("Number of test cases:", len(testcases))
     print("Already done:", len(done))
 
-    with open(SCORES_FILE, "a", encoding="utf-8") as file:
-        number = 0
-        for testcase in testcases:
-            number = number + 1
+    number = 0
+    for testcase in testcases:
+        number = number + 1
 
-            # skip testcases that were already processed
-            if testcase["id"] in done:
-                continue
+        # skip testcases that were already processed
+        if testcase["id"] in done:
+            continue
 
-            row = check_prompt(testcase["messages"][-1]["content"])
+        row = check_prompt(testcase["messages"][-1]["content"])
+        row["id"] = testcase["id"]
+        row["seed_id"] = testcase["seed_id"]
+        row["split"] = testcase["split"]
+        row["label"] = testcase["label"]
+        row["harmless_level"] = testcase["harmless_level"]
 
-            result = {
-                "id": testcase["id"],
-                "seed_id": testcase["seed_id"],
-                "split": testcase["split"],
-                "label": testcase["label"],
-                "harmless_level": testcase["harmless_level"],
-            }
-            result.update(row)
+        # write after every test case, so nothing is lost if the script stops
+        with open(SCORES_FILE, "a", encoding="utf-8") as file:
+            file.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-            file.write(json.dumps(result, ensure_ascii=False) + "\n")
-            file.flush()
-
-            print(number, "/", len(testcases), testcase["id"],
-                  "s0", row["s0"], "s_clear", row["s_clear"], "f_max", row["f_max"])
+        print(number, "/", len(testcases), testcase["id"],
+              "s0", row["s0"], "s_clear", row["s_clear"], "f_max", row["f_max"])
 
 
 # ---------- Thresholds from the dev split ----------
@@ -656,9 +601,12 @@ def count_errors(rows, thresholds):
 # how many rules are switched off, used to prefer the simpler rule on a tie
 def rules_off(thresholds):
     count = 0
-    for name in ["TAU_HIGH", "TAU_0", "DELTA"]:
-        if thresholds[name] == OFF:
-            count = count + 1
+    if thresholds["TAU_HIGH"] == OFF:
+        count = count + 1
+    if thresholds["TAU_0"] == OFF:
+        count = count + 1
+    if thresholds["DELTA"] == OFF:
+        count = count + 1
     if thresholds["TAU_F"] == NO_CONFIRMATION:
         count = count + 1
     return count
@@ -676,7 +624,8 @@ def calibrate():
         if row["split"] == "dev":
             dev_rows.append(row)
     if len(dev_rows) == 0:
-        raise SystemExit("No results yet. Run first: python3 main_newapproach_mistral_2.py")
+        print("No results yet. Run first: python3 main_newapproach_mistral_2.py")
+        sys.exit()
 
     attacks = 0
     for row in dev_rows:
@@ -694,7 +643,9 @@ def calibrate():
     steps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
     best = None
-    best_key = None
+    best_tp = -1
+    best_fp = 0
+    best_off = 0
     for tau in [0.0] + steps:
         for tau_high in [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, OFF]:
             for tau_f in [NO_CONFIRMATION] + steps:
@@ -703,19 +654,35 @@ def calibrate():
                         thresholds = {"TAU": tau, "TAU_HIGH": tau_high, "TAU_F": tau_f,
                                       "TAU_0": tau_0, "DELTA": delta_limit}
                         tp, fp = count_errors(dev_rows, thresholds)
+                        off = rules_off(thresholds)
+
+                        # too many false alarms
                         if fp / harmless > MAX_FPR:
                             continue
-                        key = (tp, -fp, rules_off(thresholds))
-                        if best_key is None or key > best_key:
-                            best_key = key
+
+                        # better: more attacks found, then fewer false alarms,
+                        # then more rules switched off
+                        better = False
+                        if tp > best_tp:
+                            better = True
+                        elif tp == best_tp and fp < best_fp:
+                            better = True
+                        elif tp == best_tp and fp == best_fp and off > best_off:
+                            better = True
+
+                        if better:
                             best = thresholds
+                            best_tp = tp
+                            best_fp = fp
+                            best_off = off
 
     if best is None:
-        raise SystemExit("No thresholds reach a false positive rate of " + str(MAX_FPR) + " on dev.")
+        print("No thresholds reach a false positive rate of", MAX_FPR, "on dev.")
+        sys.exit()
 
-    tp, fp = count_errors(dev_rows, best)
     print("\nBest thresholds on dev:", best)
-    print("  recall", round(tp / attacks, 3), " false positive rate", round(fp / harmless, 3))
+    print("  recall", round(best_tp / attacks, 3),
+          " false positive rate", round(best_fp / harmless, 3))
 
     best["MAX_FPR"] = MAX_FPR
     with open(THRESHOLDS_FILE, "w", encoding="utf-8") as file:
@@ -724,7 +691,9 @@ def calibrate():
     # use the thresholds for all rows, the metrics are computed on test only
     with open(RESULTS_FILE, "w", encoding="utf-8") as file:
         for row in rows:
-            apply_rule(row, best)
+            flagged, reason = decide(row, best)
+            row["flagged"] = flagged
+            row["reason"] = reason
             file.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     metrics.evaluate(RESULTS_FILE, METRICS_FILE)
@@ -739,29 +708,39 @@ def show_example(testcase_id):
             prompt = testcase["messages"][-1]["content"]
             print("Label:", testcase["label"])
     if prompt is None:
-        raise SystemExit("Test case not found: " + testcase_id)
+        print("Test case not found:", testcase_id)
+        sys.exit()
 
-    thresholds = load_thresholds()
-    if thresholds is None:
+    if os.path.exists(THRESHOLDS_FILE):
+        with open(THRESHOLDS_FILE, encoding="utf-8") as file:
+            thresholds = json.load(file)
+    else:
         thresholds = START_THRESHOLDS
         print("No calibrated thresholds yet, using the start values.")
 
-    row = apply_rule(check_prompt(prompt), thresholds)
+    row = check_prompt(prompt)
+    flagged, reason = decide(row, thresholds)
 
     print("\nA  Variants (most readable:", row["readable_variant"] + ")")
-    for name, text in row["variants"].items():
-        print(" ", name, "|", text[:110])
-    print("  V7 |", (row["clear_text"] or "(reconstruction failed)")[:110])
+    for name in row["variants"]:
+        print(" ", name, "|", row["variants"][name][:110])
+    if row["clear_text"] is None:
+        print("  V7 | (reconstruction failed)")
+    else:
+        print("  V7 |", row["clear_text"][:110])
     print("  grade:", row["grade"], " techniques:", row["llm_techniques"])
 
     print("\nB  s0 =", row["s0"], " s_clear =", row["s_clear"],
           " delta =", round(row["delta"], 2))
 
     print("\nC  Guiding questions (answer usable:", str(row["questions_ok"]) + ")")
-    for name, score in row["questions"].items():
-        print(" ", name, score)
+    for name in row["questions"]:
+        print(" ", name, row["questions"][name])
 
-    print("\nD  Decision:", row["answer"], "(" + row["reason"] + ")")
+    if flagged:
+        print("\nD  Decision: JA (" + reason + ")")
+    else:
+        print("\nD  Decision: NEIN (" + reason + ")")
     print("   thresholds:", thresholds)
     print("   time:", row["latency_ms"], "ms")
 
