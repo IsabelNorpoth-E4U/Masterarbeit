@@ -1,10 +1,3 @@
-# Same guard run as main_original.py, but with Mistral Small 4 over the
-# Mistral API instead of Qwen3.5 over a local Ollama.
-#
-# Requirement: python3 -m pip install mistralai
-#              and the API key in the file mistral_key.txt in this folder
-# Run:         python3 main_original_mistral.py
-
 import json
 import os
 import time

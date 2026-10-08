@@ -1,17 +1,17 @@
 \chapter{Prompt-Injection-Angriffe}\label{ch:promptinjection}
 
-Wenn ein Mensch eine Antwort formuliert, fließen zahlreiche Faktoren in diesen Prozess ein. Tonart, das Motiv der eigenen Person sowie der gegenüberstehenden Peron
-un das mit einer Antwort verbundene Risiko werden gegeneinander abgewogen, bevor eine Antwort gegeben wird. Auf Grundlage der jeweiligen Situation und eines
+Wenn ein Mensch eine Antwort auf eine Frage formuliert, fließen zahlreiche Faktoren in diesen Prozess ein. Die Tonart der Frage, das Motiv der eigenen Person sowie der gegenüberstehenden Peron
+und das mit einer Antwort verbundene Risiko werden gegeneinander abgewogen, bevor eine Antwort gegeben wird. Auf Grundlage der jeweiligen Situation und eines
 allgemeinen Instinkts kann dabei eingeschätzt werden, ob ein Verhalten als normal zu bewerten ist~\cite{pi17}. \\
-Eine \ac{llm} steht diese Art von Kontext hingegen nicht zur Verfügung. Die Anfrage eines Nutzers wird lediglich als Abfolge von Toke betrachtet und nicht, wie
+Einem \ac{llm} steht diese Art von Kontext hingegen nicht zur Verfügung. Die Anfrage eines Nutzers wird lediglich als Abfolge von Token betrachtet und nicht, wie
 bei Menschen, in Hierarchien und Intentionen gegliedert. Auf den verschiedenen Ebenen des Kontexts wird somit ausschließlich die Textähnlichkeit berücksichtigt.
 \ac{llm}s generieren ihre Antwort folglich, ohne beurteilen zu können, welche verdeckte Bedeutung sich hinter einer Anfrage verbirgt. Zusätzlich sind sie darauf
 ausgerichtet, Nutzer zufriedenzustellen und keine Unsicherheit zu zeigen~\cite{pi17}. \\
-Diese Eigenschaft eröffnet Angriffsfläche, die etwa für Prompt-Injection-Angriffe ausgenutzt werden kann. Im Folgenden werden
-zunächst die Definition dieser Angriffsform und anschließend ihre verschiedenen Ausprägungn erläutert.
+Diese Eigenschaft eröffnet Angriffsflächen, die etwa für Prompt-Injection-Angriffe ausgenutzt werden können. Im Folgenden werden
+zunächst die Definition dieser Angriffsform und anschließend ihre verschiedenen Ausprägungen erläutert.
 
 
-\section{Definition und Klassifizierung von Prompt Injection}
+\section{Definition und Klassifizierung von Prompt-Injection}
 
 Prompt-Injection bezeichnet eine Angriffsart, die \ac{llm}s gefährdet~\cite[54]{pi1}. Dabei wird versucht, das Verhalten eines Sprachmodells zu manipulieren und dessen
 Sicherheitsrichtlinien zu umgehen~\cite[11]{pi2}. Ziel dieser Manipulation ist es, das \ac{llm} dazu zu bringen, schädigende Antworten an einen Nutzer auszugeben
