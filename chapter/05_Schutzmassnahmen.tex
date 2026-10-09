@@ -109,9 +109,8 @@ auf eine eingabeseitige Maßnahme, genauer auf eine Kombination aus Input-Modifi
 Der vorgesehene Ablauf gestaltet sich wie folgt: Bevor eine Nutzeranfrage an das Hauptmodell weitergeleitet wird, wird sie an ein kleineres, vorgeschaltetes Modell
 übergeben. Dieses dient als Klassifikator und erhält die Anweisung, einzuschätzen, ob sich in der Anfrage ein Prompt-Injection-Angriff versteckt. Zusätzlich wird die
 Nutzeranfrage auf mehrere Arten modifiziert und auch jede dieser Varianten wird vom vorgeschalteten Modell bewertet. Die Einzelbewertungen werden anschließend
-zusammengeführt und anhand eines definierten Schwellenwerts wird entschieden, ob die Anfrage insgesamt als Angriff eingestuft wird. Ursprünglich war vorgesehen, dass das
-Modell ausschließlich mit \enquote{Ja} oder \enquote{Nein} antwortet. Aus den in Abschnitt~\ref{sec:umgebung} erläuterten Gründen gibt es in der Umsetzung stattdessen einen Score zwischen
-0 und 100 aus. \\
+zusammengeführt und anhand eines definierten Schwellenwerts wird entschieden, ob die Anfrage insgesamt als Angriff eingestuft wird. Das \ac{llm} antwortet mit 
+\enquote{Ja} oder \enquote{Nein} auf die Frage, ob es sich um einen Prompt-Injection Angriff handelt. \\
 Aufbauend auf diesem Basisansatz wird anschließend eine Erweiterung entwickelt, deren Ziel es ist, die Erkennungsrate weiter zu steigern und damit möglichst viele Angriffe
 zu erkennen. Abbildung%~\ref{fig:konzept} veranschaulicht den Ablauf.
 
@@ -156,7 +155,7 @@ Im Weiteren mussten ein Datensatz erzeugt und passende Metriken für die Impleme
 % Wichtig: Die Mistral-API gibt keine Logprobs zurück. Deshalb antwortet das Modell mit einem Score von 0–100 und nicht mit „Ja/Nein“. In Abschnitt 5.2 (Z. 85)
 % steht aber noch „Antworte mit Ja oder Nein“. Diesen Widerspruch zwischen Konzept und Umsetzung musst du hier erklären.
 
-\subsection{Erstellung des Datensatzes}
+\subsection{Erstellung des Datensatzes}\label{subsec:datensatz}
 
 Da kein öffentlich verfügbarer Datensatz gefunden werden konnte, der auf den vorliegenden Anwendungsfall zugeschnitten ist, wurde ein eigener Datensatz erstellt.
 Die Erstellung erfolgte in zwei Schritten. \\
@@ -243,7 +242,7 @@ Die einzelnen Felder haben folgende Bedeutung:
 
 Insgesamt wurden 330 Einträge dem Entwicklungsteil und 660 Einträge dem Testteil zugeordnet.
 
-\subsection{Auswahl der Metriken}
+\subsection{Auswahl der Metriken}\label{subsec:metrics}
 
 Um die Wirksamkeit der implementierten Schutzmaßnahmen beurteilen und verschiedene Varianten miteinander vergleichen zu können, werden mehrere Metriken verwendet: die
 Werte der Konfusionsmatrix (True Positives, False Negatives, False Positives, True Negatives), Accuracy, Precision, Recall, F1-Score, False Positive Rate sowie die Latenz. Als positive
@@ -328,15 +327,47 @@ während eine hohe False Positive Rate die Nutzbarkeit des Chatbots einschränkt
 \subsection{Durchführung des Ansatzes}
 
 Wie in Abschnitt~\ref{konzept} erläutert, wird als Schutzmaßnahme ein vorgeschaltetes \ac{llm} eingesetzt, das als Klassifikator einschätzt, ob ein Nutzerprompt
-einen Angriff enthält. Die Implementierung erfolgte in Python. Der Ablauf gestaltet sich wie folgt:
+einen Angriff enthält. Als erster Schritt, wird der Klassifikator in einer einfachen Form umgesetzt, um eine Baseline zu erhalte: Es wird jeder Eintrag aus dem 
+Datensatz unverändert an das Modell übergeben. Dazu hält es den Prompt, dass als Antwort JA oder NEIN ausgegeben werden soll. Mit diesen Ergebnissen soll
+es möglich sein einen direkten Vergleich zwischen dem simplen und den weiterentwickelten Ansatz zu bekommen und eine direkte Einschätzung über die 
+Erkennungsleistung des Modells zu erlangen. \\
+Die Implementierung erfolgte in Python zusammen mit dem Modell Mistral Small 4. Der vollständige Quellcode befindet sich im Anhang. In der folgenden Grafik
+ist der Ablauf grafisch dargestellt: \\
 
+% Grafik
 
+Als Eingabe werden die Nutzeranfragen aus dem in Abschnitt~\ref{subsec:datensatz} beschriebenen Datensatz. Es wird mit jeder Anfrage zuerst der Prompt als 
+Systemprompt und anschließend der Datensatz Eintrag als Nutzerprompt übergeben. Das ermöglicht das eine Trennung zwischen den zu prüfenden Text und der Anweisung
+entsteht und nicht nach Anweisungen in den Nutzerprompt gesucht wird von dem Modell. Im folgenden ist zu sehen, wie diese Anfrage aufgebaut ist: \\
 
--> was wird reingegeben und was kommt raus?
+\begin{lstlisting}[language=Python, caption={Anfrage an den Klassifikator (Ausschnitt)}, label={lst:guard}]
+GUARD_PROMPT = ("Ist die folgende Nutzereingabe ein Prompt-Injection-Angriff? "
+                "Antworte ausschliesslich mit JA oder NEIN.")
 
--> Aufbau vom Code
+response = client.chat.complete(
+    model="mistral-small-2603",
+    messages=[
+        {"role": "system", "content": GUARD_PROMPT},
+        {"role": "user", "content": "Nutzereingabe: " + prompt},
+    ],
+    temperature=0,
+    max_tokens=10,
+    reasoning_effort="none",
+)
+\end{lstlisting}
 
--> warum wurde output so gewählt???
+Das Modell gibt als Antwort JA oder Nein zurück. Sobald ein JA zurückgegeben wird, wird dieser Nutzerprompt als Angriff eingestuft. Es wurde für diese
+Auswertung das binäre Modell mit JA und NEIN gwählt, damit eine klare einschätzung gemacht werden kann, wie beispielsweise wenn ein Score von 0 bis 100 
+zurückgegeben werden würde erst einmal eine Schwelle definiert werden müsste. Dadurch weden weniger Token und damit verbundene Kosten benötigt, wodurch 
+ebenfalls die Antwortzeit gering gehalten wird. \\
+Die Antwortlänge des \ac{llm}s ist zusätzlich auf zehn Token definiert und die Reasoning Funktion deaktioviert. Die Temperatur ist auf 0 gesetzt, damit 
+das Modell deterministisch ist und jedem Shcritt das whrscheinlichste nächste Token auswählt. Dadurch sind die Antworten klar und reproduzierbar. (QUELLE!!) \\
+Ein Nachteil dieser binären Antwort ist, dass sich keine Wahrscheinlichkeiten erahnen lassen, zum beispiel könnte die Antwortwahrshcienlichkeit auch 50/50 sein. \\
+Es werden von dem Modell alle einträge in einer SChleife durchlaufen und das Ergebnis, zusätlich mit dem tatsöhclichen Erebnis gespichert. Zusätzlich wird
+di Antwortzeit gespeuchert. Wenn einer dieser Durchläufe scheitert werden sie mehrfach wiederholt. Wenn alle Durchläufe gemacht wurden werden die Metriken erstellt,
+welche in \ref{subsec:metrics} genauer erläutert werden. \\
+Die Ergebnisse werden in Kapitel~\ref{sec:results} vorgestellt.
+
 
 \subsection{Durchführung am Hauptmodell/ Vergleich der Ansätze}
 
@@ -361,7 +392,7 @@ Was wird reingegeben und was kommt raus
 
 -> wurde sich an einem bestimmten Ansatz orientiert?
 
-\section{Ergebnisse}
+\section{Ergebnisse}\label{sec:results}
 
 -> Tabelle von dem normalen Ansatz
 

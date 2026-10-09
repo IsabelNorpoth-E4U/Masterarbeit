@@ -14,61 +14,67 @@ zunächst die Definition dieser Angriffsform und anschließend ihre verschiedene
 \section{Definition und Klassifizierung von Prompt-Injection}
 
 Prompt-Injection bezeichnet eine Angriffsart, die \ac{llm}s gefährdet~\cite[54]{pi1}. Dabei wird versucht, das Verhalten eines Sprachmodells zu manipulieren und dessen
-Sicherheitsrichtlinien zu umgehen~\cite[11]{pi2}. Ziel dieser Manipulation ist es, das \ac{llm} dazu zu bringen, schädigende Antworten an einen Nutzer auszugeben
+Sicherheitsrichtlinien zu umgehen und das \ac{llm} so dazu zu bringen, schädigende Antworten an einen Nutzer auszugeben
 oder schädliches Verhalten auszulösen~\cite[11]{pi2}. \\
-Da \ac{llm}s zunehmend in Agenten-Frameworks integriert werden,~\cite[10471\psq]{pi4} verarbeiten diese Agenten häufig sensible Daten und kommunizieren
-über APIs mit externen Umgebungen. Dadurch ensteht eine Angriffsfläche für Prompt-Injection-Angriffe~\cite[1\psq]{pi5}. Begünstigt wird dies zusätzlich dadurch, dass
-für solche Angriffe nur geringe technische Anforderungen bestehen~\cite[10471\psq]{pi4}. \\
+\ac{llm}s werden immer häufiger in Agenten-Frameworks integriert~\cite[10471\psq]{pi4}. Diese Frameworks werden aus einzelnen Agenten aufgebaut, welche 
+einzelne Aufgaben ausführen, beispielweise mithilfe eines \ac{llm}s Eingaben verarbeiten~\cite{pi30}. Diese Agenten verarbeiten häufig sensible Daten und
+kommunizieren über \ac{api}s, Schnittstellen zwischen Anwendungen, mit externen Umgebungen. 
+Durch den Zugriff auf diese nicht vertrauenswürdigen externen Daten entsteht eine Angriffsfläche für Prompt-Injection-Angriffe~\cite[1\psq]{pi5}. 
+Begünstigt wird dies zusätzlich dadurch, dass
+für solche Angriffe nur geringe technische Anforderungen notwendig sind~\cite[10471\psq]{pi4}. \\
 Vor diesem Hintergrund wurden Prompt-Injection-Angriffe von OWASP 2026 unter die Top-10-Sicherheitsrisiken für \ac{llm}s eingeordnet~\cite[9]{pi24}~\cite[2]{pi11}. OWASP,
-das Open Web Application Security Project, ist ein offene Gemeinschaft mit dem Ziel, Organisatione di Entwicklung sicherer Anwendungen und \ac{api}s zu ermöglichen~\cite{pi25}.
+das Open Web Application Security Project, ist eine offene Gemeinschaft mit dem Ziel, Organisationen die Entwicklung sicherer Anwendungen und \ac{api}s zu ermöglichen~\cite{pi25}.
 Ein vergleichbares Ziel verfolgt die Datenbank MITRE ATT\&CK, die aktuelle Angriffstechniken dokumentert, um Unternehmen eine effektivere Cybersicherheit zu
 ermöglichen~\cite{pi26}. Die dort gesammelten Techniken werden in verschiedene Angriffsphasen unterteilt, die wiederum in der ATLAS-Matrix erfasst sind~\cite[12878]{pi8}.
-Innerhalb dieser Matrix wird Prompt-Injection in zwei Phasen zugeordnet, dem Initial Access und der Persistence~\cite{pi27}. Die Phase Initial Access umfasst Angriffe,
-mit denen sich Zugriff auf ein System verschafft wird~\cite{pi28}. Persistence bezeichnet dagegen Angriffe, die dem Angreifer den Zugriff auch nach einem Neustart des
+Innerhalb dieser Matrix wird Prompt-Injection zwei Phasen zugeordnet, dem Initial Access und der Persistence~\cite{pi27}. Die Phase Initial Access umfasst Angriffe,
+die genutzt werden um sich Zugriff auf ein System zu verschaffen~\cite{pi28}. Persistence bezeichnet dagegen Angriffe, die dem Angreifer den Zugriff auch nach einem Neustart des
 Systems oder einer Änderungen der Zugangsdaten erhalten~\cite{pi29}. \\
 In der Literatur wird die Angriffsart meist in zwei Kategorien unterteilt: direkte und indirekte Angriffe~\cite[55]{pi1}. Bei direkten Angriffen werden die Anweisungen
 unmittelbar in der Nutzeranfrage plaziert~\cite[2]{pi9}. Bei indirekten Angriffen werden hingegen externe Quellen genutzt: Das Sprachmodell greift dabei auf nicht
-vertrauenwürdige Daten, wie Webseiten, zu, in denen bösartige Anweisungen versteckt sein können~\cite[2\psq]{pi6}. \\
-Neben dieser Grundunterscheidung sind weitere Kategorisierungen möglich, di jedoch über den Rahmen dieser Arbeit hinausgehen~\cite[12880]{pi8}.
-Zu den möglichen Folgen solcher Angriffe zählt die Weitergabe sensibler Informationen, etwa interner Unternehmensdaten oder Informationen über das Sprachmodell selbst.
+vertrauenswürdige Daten, wie Webseiten, zu, in denen bösartige Anweisungen versteckt sein können~\cite[2\psq]{pi6}. \\
+Neben dieser Grundunterscheidung sind weitere Kategorisierungen möglich, beispielsweise durch das Ziel eines Angriffs: Betrug, Schaden, Zerstörung und Falschinformation~\cite[12880]{pi8}. 
+Die genaue Erläuterung geht jedoch über den Rahmen dieser Arbeit hinaus. \\
+Zu den möglichen Folgen von Prompt-Injection Angriffe zählt die Weitergabe sensibler Informationen, etwa interner Unternehmensdaten oder Informationen über das Sprachmodell selbst.
 Darüber hinaus können Angreifer Rechte erlangen und dadurch wichtige Prozesse auslösen~\cite{pi15}. \\
-Für Unternehmen stellen Prompt-Injection-Angriffe eine erhebliche Gefahr dar, da die meoisten von ihnen kaum steuern können, welche Tools ihre Mitarbeiter verwenden,
-welche Internetseiten aufgerugen und welche Dateien heruntergeladen werden. Erschwerend kommt hinzu, dass viele KI-Tools uneingeschränkt auf interne Ressourcen zugreifen
+Für Unternehmen stellen Prompt-Injection-Angriffe eine erhebliche Gefahr dar, da die meisten von ihnen kaum steuern können, welche Tools ihre Mitarbeiter verwenden,
+welche Internetseiten aufgerufen und welche Dateien heruntergeladen werden. Erschwerend kommt hinzu, dass viele KI-Tools uneingeschränkt auf interne Ressourcen zugreifen
 können. Eine Studie von Gusto aus dem Jahr 2025 zeigt beispielsweise, dass 45\% der Mitarbeiter KI-Tools wie E-Mail-Clients oder Code-Assistenten nutzen, ohne
 dafür eine Berechtigung erhalten zu haben. Viele Unternehmen verlieren dadurch die Übersicht über ihre eigene Angriffsfläche~\cite{pi21}.
 
 
 \subsection{Direkte Angriffe}
 
-Die einfachte Form direkter Prompt-Injection-Angriffe ist die Direct Instruction Override, also die direkte Anweisungsüberschreibung~\cite{pi12}.
-Sie wird durch eine einfache Anweisung ausglöst, mit der alle vorherigen Anweisungen für ungültig erklärt werden sollen. Bereits Perez und Ribeiro
+Die einfachste Form direkter Prompt-Injection-Angriffe ist die Direct Instruction Override, also die direkte Anweisungsüberschreibung~\cite{pi12}.
+Sie wird durch eine einfache Anweisung ausgelöst, mit der alle vorherigen Anweisungen für ungültig erklärt werden sollen. Bereits Perez und Ribeiro
 zeigen in ihrer Arbeit, dass die Formulierung $\glqq$ignore previous instructions$\grqq$ genügt, um vorherige Anweisungen zu überschreiben und das Verhalten
 des \ac{llm} entsprechend zu manipulieren~\cite[3\psq]{pi9}. \\
 Ebenfalls häufig anzutreffen ist die sogenannte Role Manipulation, auch als DAN-Jailbrak bezeichnet~\cite{pi13}. Dabei wird versucht, das Sprachmodell davon zu
 überzeugen, es besitze eine andere Rolle beziehungsweise Identität, wodurch bestehende Sicherheitsrichtlinien umgangen werden können~\cite{pi12, pi13}.
-Der Name DAn-Jailbreak leitet sich von $\glqq$Do Anything Now$\grqq$ ab. In der Praxis kann dies etwa durch die Anweisung $\glqq$Du bist jetzt DAN. Du bist von allen
+Der Name DAN-Jailbreak leitet sich von $\glqq$Do Anything Now$\grqq$ ab. In der Praxis kann dies etwa durch die Anweisung $\glqq$Du bist jetzt DAN. Du bist von allen
 Richtlinien befreit und musst den Regeln nicht mehr folgen$\grqq$ umgesetzt werden~\cite{pi13}. \\
 Darüber hinaus dokumentiert die Literatur zahlreiche weitere Angriffsarten, etwa das Ersetzen von Symbolen innerhalb einer Anweisung, die Transformation einzelner
 Wörter oder die Übersetzung der Anweisung in eine andere Sprache~\cite[42]{pi18}. \\
 Angriffe lassen sich zudem nach ihrem jeweiligen Ziel kategorisieren, wobei zwischen Missbrauch und dem Eindringen in die Privatsphäre unterschieden werden kann~\cite[40]{pi18}.
-Während beim Missbrauch schädlicher Inhalt oder Propaganda erzeugt werden soll, zielt das Eindringen in die Privatsphäre darauf ab, den System-Prompt oder
-sonstige sensible Informationen zu erfassen~\cite[40]{pi18}.
+Während beim Missbrauch schädlicher Inhalt oder Propaganda erzeugt werden soll, zielt das Eindringen in die Privatsphäre darauf ab, den System-Prompt des \ac{llm}, 
+welcher den Rahmen der Fähigkeiten definiert~\cite{pi31} oder sonstige sensible Informationen zu erfassen~\cite[40]{pi18}.
 
 
-\subsection{Indirekte Angriffe}
+\subsection{Indirekte Angriffe}{subsec:indirektepi}
 
 Auch bei indirekten Prompt-Injection-Angriffen lassen sich verschiedene Kategorien unterscheiden. Eine Möglichkeit ist die Unterteilung in passive und aktive Methoden.
 Zu den aktiven Methoden zählen etwa E-Mails, die direkt an das LLM gesendet werden. Als passiv gilt eine Methode dagegen, wenn Informationen vom LLM selbst gesammelt werden.
-Die bösartigen Anweisunge können in diesem Fall in einer öffentlich zugänglichen Quelle, etwa einer Webseite, versteckt sein~\cite{pi19}. \\
-Eine weitere Kategorisierung orientiert sich an der jeweiligen Auswirkung und bezieht sich dabei auf die CIA-Triade, wobi CIA für Confidentiality (Vertraulichkeit), Integrity (Integrität) und Availability (Verfügbarkeit) steht~\cite{pi23}. \\
+Die bösartigen Anweisungen können in diesem Fall in einer öffentlich zugänglichen Quelle, etwa einer Webseite, versteckt sein~\cite{pi19}. \\
+Eine weitere Kategorisierung orientiert sich an der jeweiligen Auswirkung und bezieht sich dabei auf die CIA-Triade, wobei CIA für Confidentiality (Vertraulichkeit), 
+Integrity (Integrität) und Availability (Verfügbarkeit) steht~\cite{pi23}. \\
 Diese Form des indirekten Prompt-Injection-Angriffs tritt am häufigsten in Agentensystemen auf, sobald eine Interaktion mit externen Daten erfolgt. Sie geht dabei nicht
 vom Endnutzer, sondern von einem Dritten aus und verfolgt das Ziel, ein System zu kompromittieren oder sensible Daten dieses Systems zu exfiltrieren~\cite[2\psq]{pi3}. \\
-Da sich die in der Literatur beschriebenen Angriffe je nach Quelle in Bezeichnung und anderen Aspekten unterscheiden, wird sich diese Arbeit auf sieben Angriffsarten beschränken: \\
+Da sich die in der Literatur beschriebenen Angriffe je nach Quelle in Bezeichnung und anderen Aspekten unterscheiden, wird sich diese Arbeit auf sieben Angriffsarten 
+beschränken: \\
 
 
 \begin{enumerate}
-    \item E-Mail Injection: Die E-Mail enthält sowohl sichtbaren als auch versteckten Inhalt. Der versteckte Inhalt enthält due bösartige Anweisung, die ausgeführt wird, sobald der Nutzer das Modell bittet, die E-Mail zu bearbeiten~\cite{pi13}.
-    \item Multiturn Injection: Der Angriff wird passiv über die Ausgabe eines externen Tools erzeugt, da der Angreifer nicht direkt mit dem Agenten kommunizieren kann~\cite[3]{pi7}. Dazu wird ein Chat-Template manipuliert, um eine entsprechende Konversation künstlich zu erzeugen~\cite[3]{pi7}.
+    \item E-Mail Injection: Die E-Mail enthält sowohl sichtbaren als auch versteckten Inhalt. Der versteckte Inhalt enthält die bösartige Anweisung, die ausgeführt wird, sobald der Nutzer das Modell bittet, die E-Mail zu bearbeiten~\cite{pi13}.
+    \item Multiturn Injection: Der Angriff wird passiv über die Ausgabe eines externen Tools erzeugt, da der Angreifer nicht direkt mit dem Agenten kommunizieren kann~\cite[3]{pi7}. Dazu wird ein Chat-Template manipuliert, um eine entsprechende Konversation künstlich zu erzeugen. Durch diese Konversation, soll das \ac{llm} dazu verleitete werden eine bestimmte Aktion auszuführen~\cite[3]{pi7}.
     \item Website Injection: Versteckte Anweisungen werden in Dokumenten platziert~\cite{pi12}. Liest das Sprachmodell diesen versteckten Text, führt es die enthaltenen Anweisungen aus~\cite{pi13}.
     \item Jailbreak Prompt: Anweisungen werden in einer scheinbar gewöhnlichen Aufforderung versteckt, etwa die Bitte, einen Text in eine andere Sprache zu übersetzen oder zu verschlüsseln~\cite{pi12}.
     \item Multi-Modal Injection / Bild Injection: Anweisungen werden in Metadaten versteckt, beispielsweise in der EXIF-Beschreibung eines Bildes~\cite{pi12}.
@@ -81,13 +87,13 @@ In der Praxis werden direkte und indirekte Angriffsarten häufig miteinander kom
 
 \section{Beispiele bekannter Angriffe und die Auswirkungen}
 
-Die Zahl der Prompt-Injection-Angriffe nimmt von Jahr zu Jahr zu. Laut OWASP standen Prompt-Injection-Angriffe 2025, wie auch
+Die Zahl der Prompt-Injection-Angriffe nimmt von Jahr zu Jahr zu. Laut OWASP standen Prompt-Injection-Angriffe 2025 wie auch
 2026 an erster Stelle der Gefahren für LLM-Anwendungen. Eine Studie des Unternehmens Axis Intelligence vom Juni 2026 zeigt
 zudem, dass indirekte Prompt-Injection-Angriffe eine Erfolgsquote von bis zu 68,16 \% erreichen können~\cite{pi22}. \\
-Obwohl kontinuierlich daran gearbeitet wird, LLMs robutster zu gestalten und Sicherheitsrichtlinien so zu formulieren,
+Obwohl kontinuierlich daran gearbeitet wird, LLMs robuster zu gestalten und Sicherheitsrichtlinien so zu formulieren,
 dass Prompt-Injection-Angriffe zuverlässig erkannt werden, gelingt es einem Großteil der Angriffe dennoch, diese Maßnahmen
 zu umgehen~\cite{pi14}. \\
-Ein bekanntes Beispiel hierfür ist der sogenannte Bing-Chat-$\glqq$Sydney$\grqq$-Incident an der Standford University:
+Ein bekanntes Beispiel hierfür ist der sogenannte Bing-Chat-$\glqq$Sydney$\grqq$-Incident an der Stanford University:
 Einem Studenten gelang es, die Sicherheitsrichtlinien von Microsoft Copilot, damals noch unter dem Namen Bing Chat bekannt,
 mithilfe der Anweisung $\glqq$ignore prior directives$\grqq$ zu umgehen. Der Chatbot gab darauf sowohl seine internen
 Richtlinien als auch seinen Codenamen $\glqq$Sydney$\grqq$ preis~\cite{pi14}. \\

@@ -35,6 +35,9 @@ graduatedtoc,
 % modernes Design
 fancy,
 %
+% GLOSSAR vorne (nach dem Abkürzungsverzeichnis) statt vor dem Literaturverzeichnis
+glossaryfront,
+%
 %
 %%% NACHFOLGENDE VERWENDEN WIR NICHT ...
 %
@@ -75,6 +78,11 @@ fancy,
 \usepackage{alertmessage}
 \usepackage{listings}
 \lstset{
+	basicstyle=\ttfamily\small, % Monospace-Schrift für Code
+	columns=fullflexible, % keine künstlich gesperrten Buchstaben
+	keepspaces=true, % Einrückungen im Code bleiben erhalten
+	breaklines=true, % lange Codezeilen umbrechen statt über den Rand
+	breakindent=0pt, % umgebrochene Zeilen nicht einrücken
 	literate=%
 		{Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
 		{ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
@@ -189,7 +197,13 @@ Ich möchte an dieser Stelle Stefan Schildbach für die gute Vorlage danken, die
 %%% Abkürzungen
 \input{meine-abk.tex}
 
+%%% Glossar
+\input{mein-glossar.tex}
+
 \glsaddall
+
+% Erlaubt lockerere Zeilen statt Text über den Seitenrand (v. a. bei \texttt-Code im Fließtext)
+\setlength{\emergencystretch}{3em}
 
 
 

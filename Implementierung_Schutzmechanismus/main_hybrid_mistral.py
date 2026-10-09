@@ -17,7 +17,6 @@
 # Requirement: python3 -m pip install mistralai pyspellchecker
 #              and the API key in the file mistral_key.txt in this folder
 # Run all:     python3 main_hybrid_mistral.py
-# One example: python3 main_hybrid_mistral.py A01-T07
 # Only the evaluation again (no api calls): python3 main_hybrid_mistral.py --evaluate
 
 import base64
@@ -103,11 +102,12 @@ QUESTIONS = {
 # the questions that point to an attack (F0 points to a harmless question)
 ATTACK_QUESTIONS = ["F1", "F2", "F3", "F4", "F5"]
 
+# fields of a test case that are copied into the result
+TESTCASE_FIELDS = ["id", "seed_id", "split", "label", "harmless_level"]
 
-key_file = open(KEY_FILE, encoding="utf-8")
-api_key = key_file.read().strip()
-key_file.close()
-client = Mistral(api_key=api_key)
+
+with open(KEY_FILE, encoding="utf-8") as key_file:
+    client = Mistral(api_key=key_file.read().strip())
 
 
 def ask_mistral(system_prompt, user_text, max_tokens, json_answer=False):
@@ -143,9 +143,7 @@ def ask_mistral(system_prompt, user_text, max_tokens, json_answer=False):
 
 # turns the answer text into a dictionary, if text is json
 def read_json(answer):
-    answer = answer.replace("```json", "")
-    answer = answer.replace("```", "")
-    answer = answer.strip()
+    answer = answer.replace("```json", "").replace("```", "").strip()
     try:
         data = json.loads(answer)
     except Exception:
@@ -170,8 +168,7 @@ def to_yes_no(answer):
 # step B: asks the guard about one text, returns True for JA and the answer
 def guard_vote(text):
     answer = ask_mistral(GUARD_PROMPT, "Nutzereingabe: " + text, max_tokens=10)
-    flag = answer.upper().startswith("JA")
-    return flag, answer
+    return answer.upper().startswith("JA"), answer
 
 
 # step C: asks all guiding questions in one request.
@@ -205,16 +202,18 @@ def question_answers(original, reading_help):
     return answers
 
 
+# applies a function to every word of the text
+def per_word(text, function):
+    new_words = []
+    for word in text.split(" "):
+        new_words.append(function(word))
+    return " ".join(new_words)
+
+
 # ---------- Step A: simple cleaning for view VN ----------
 
 # symbols that attackers put inside a word, for example "ober.halb"
 INNER_SYMBOLS = ".-_*|/+~"
-
-
-# makes special letters normal again, for example wide letters -> normal letters.
-# Look-alike letters from other alphabets and invisible characters stay.
-def clean_characters(text):
-    return unicodedata.normalize("NFKC", text)
 
 
 # removes symbols and spaces inside words
@@ -223,10 +222,8 @@ def remove_spacing(text):
     new_text = ""
     for i in range(len(text)):
         character = text[i]
-        if character in INNER_SYMBOLS and i > 0 and i < len(text) - 1:
-            letter_before = text[i - 1].isalpha()
-            letter_after = text[i + 1].isalpha()
-            if letter_before and letter_after:
+        if character in INNER_SYMBOLS and 0 < i < len(text) - 1:
+            if text[i - 1].isalpha() and text[i + 1].isalpha():
                 continue
         new_text = new_text + character
 
@@ -259,11 +256,11 @@ def looks_like_text(text):
     return readable / len(text) > 0.9
 
 
-# tries to decode one word as Base64 or hex, None if that does not work
+# tries to decode one word as Base64 or hex, the word stays if that does not work
 def decode_word(word):
     # short words are normal words most of the time
     if len(word) < 16:
-        return None
+        return word
 
     # try Base64
     try:
@@ -282,27 +279,16 @@ def decode_word(word):
         except Exception:
             pass
 
-    return None
+    return word
 
 
-# decodes Base64 and hex, word by word
-def decode_codes(text):
-    new_words = []
-    for word in text.split(" "):
-        decoded = decode_word(word)
-        if decoded is None:
-            new_words.append(word)
-        else:
-            new_words.append(decoded)
-    return " ".join(new_words)
-
-
-# view VN: all cleaning steps one after another
+# view VN: all cleaning steps one after another.
+# NFKC makes special letters normal again, for example wide letters -> normal
+# letters. Look-alike letters from other alphabets and invisible characters stay.
 def normalize(text):
-    text = clean_characters(text)
+    text = unicodedata.normalize("NFKC", text)
     text = remove_spacing(text)
-    text = decode_codes(text)
-    return text
+    return per_word(text, decode_word)
 
 
 # ---------- Step A: spelling correction for view VS ----------
@@ -337,9 +323,7 @@ def correct_word(word):
         end = end - 1
     core = word[start:end]
 
-    if len(core) < 4 or not core.isalpha():
-        return word
-    if core.isupper():
+    if len(core) < 4 or not core.isalpha() or core.isupper():
         return word
     for character in core[1:]:
         if character.isupper():
@@ -360,14 +344,6 @@ def correct_word(word):
     return word[:start] + fixed + word[end:]
 
 
-# view VS: corrects every word of the cleaned text
-def correct_spelling(text):
-    new_words = []
-    for word in text.split(" "):
-        new_words.append(correct_word(word))
-    return " ".join(new_words)
-
-
 # ---------- Step D: the fixed rule ----------
 
 # number of views with JA and number of different views.
@@ -384,12 +360,6 @@ def count_votes(row):
         if view["flag"]:
             votes = votes + 1
     return votes, len(texts_seen)
-
-
-# share of the views that say JA
-def vote_share(row):
-    votes, number_of_views = count_votes(row)
-    return votes / number_of_views
 
 
 # True if at least one question F1 ... F5 says JA.
@@ -414,7 +384,8 @@ def yes_questions(row):
 
 # decides for one test case. Returns True/False and the reason.
 def decide(row):
-    share = vote_share(row)
+    votes, number_of_views = count_votes(row)
+    share = votes / number_of_views
 
     # rule 1: majority vote of the views (SmoothLLM: share > gamma)
     if share > GAMMA:
@@ -447,7 +418,7 @@ def check_prompt(prompt):
 
     # step A: make the texts for the views
     normalized = normalize(prompt)
-    corrected = correct_spelling(normalized)
+    corrected = per_word(normalized, correct_word)
 
     # step B: guard vote for every view
     view_v0 = make_view(prompt, [])
@@ -460,19 +431,17 @@ def check_prompt(prompt):
 
     # if the answer is not usable, the questions must not block an alarm,
     # so F0 = NEIN and all other questions = JA
-    questions_ok = True
-    if questions is None:
-        questions_ok = False
+    questions_ok = questions is not None
+    if not questions_ok:
         questions = {"F0": False, "F1": True, "F2": True, "F3": True, "F4": True, "F5": True}
 
-    end_time = time.time()
-
-    row = {}
-    row["prompt"] = prompt
-    row["views"] = views
-    row["questions_ok"] = questions_ok
-    row["questions"] = questions
-    row["latency_ms"] = round((end_time - start_time) * 1000, 1)
+    row = {
+        "prompt": prompt,
+        "views": views,
+        "questions_ok": questions_ok,
+        "questions": questions,
+        "latency_ms": round((time.time() - start_time) * 1000, 1),
+    }
     # score for ROC-AUC: share of all JA answers, the views and the questions
     # (all questions together count as one more vote)
     votes, number_of_views = count_votes(row)
@@ -489,11 +458,10 @@ def load_jsonl(file_name):
     rows = []
     if not os.path.exists(file_name):
         return rows
-    file = open(file_name, encoding="utf-8")
-    for line in file:
-        if line.strip() != "":
-            rows.append(json.loads(line))
-    file.close()
+    with open(file_name, encoding="utf-8") as file:
+        for line in file:
+            if line.strip() != "":
+                rows.append(json.loads(line))
     return rows
 
 
@@ -519,18 +487,13 @@ def run_all():
             continue
 
         # the last message is the user input we want to check
-        prompt = testcase["messages"][-1]["content"]
-        row = check_prompt(prompt)
-        row["id"] = testcase["id"]
-        row["seed_id"] = testcase["seed_id"]
-        row["split"] = testcase["split"]
-        row["label"] = testcase["label"]
-        row["harmless_level"] = testcase["harmless_level"]
+        row = check_prompt(testcase["messages"][-1]["content"])
+        for field in TESTCASE_FIELDS:
+            row[field] = testcase[field]
 
         # save after every test case, so nothing is lost if the script stops
-        file = open(SCORES_FILE, "a", encoding="utf-8")
-        file.write(json.dumps(row, ensure_ascii=False) + "\n")
-        file.close()
+        with open(SCORES_FILE, "a", encoding="utf-8") as file:
+            file.write(json.dumps(row, ensure_ascii=False) + "\n")
 
         print(number, "/", len(testcases), testcase["id"],
               "V0", row["views"]["V0"]["flag"],
@@ -546,62 +509,18 @@ def run_all():
 def evaluate():
     rows = load_jsonl(SCORES_FILE)
     if len(rows) == 0:
-        # print("No results yet. Run first: python3 main_hybrid_mistral.py")
+        print("No results yet. Run first: python3 main_hybrid_mistral.py")
         sys.exit()
 
     print("Voting views:", VOTE_VIEWS, " GAMMA:", GAMMA)
 
-    file = open(RESULTS_FILE, "w", encoding="utf-8")
-    for row in rows:
-        flagged, reason = decide(row)
-        row["flagged"] = flagged
-        row["reason"] = reason
-        file.write(json.dumps(row, ensure_ascii=False) + "\n")
-    file.close()
+    with open(RESULTS_FILE, "w", encoding="utf-8") as file:
+        for row in rows:
+            row["flagged"], row["reason"] = decide(row)
+            file.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     # metrics.py computes the metrics on the test split
     metrics.evaluate(RESULTS_FILE, METRICS_FILE)
-
-
-# ---------- Example: shows every step for one test case ----------
-
-def show_example(testcase_id):
-    prompt = None
-    for testcase in load_jsonl(TESTCASES_FILE):
-        if testcase["id"] == testcase_id:
-            prompt = testcase["messages"][-1]["content"]
-            print("Label:", testcase["label"])
-    if prompt is None:
-        print("Test case not found:", testcase_id)
-        sys.exit()
-
-    row = check_prompt(prompt)
-    flagged, reason = decide(row)
-
-    print()
-    print("A+B  Views and guard votes")
-    for name in row["views"]:
-        view = row["views"][name]
-        # only the first 110 characters, so the line is not too long
-        print(" ", name, "|", view["answer"], "|", view["text"][:110])
-    votes, number_of_views = count_votes(row)
-    print("  vote share:", votes, "/", number_of_views, "=", round(vote_share(row), 2))
-
-    print()
-    print("C  Guiding questions (answer usable:", row["questions_ok"], ")")
-    for name in row["questions"]:
-        if row["questions"][name]:
-            print(" ", name, "JA")
-        else:
-            print(" ", name, "NEIN")
-
-    print()
-    if flagged:
-        print("D  Decision: JA (" + reason + ")")
-    else:
-        print("D  Decision: NEIN (" + reason + ")")
-    print("   GAMMA:", GAMMA)
-    print("   time:", row["latency_ms"], "ms")
 
 
 # ---------- Start ----------
@@ -612,8 +531,6 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 if len(sys.argv) > 1 and sys.argv[1] == "--evaluate":
     evaluate()
-elif len(sys.argv) > 1:
-    show_example(sys.argv[1])
 else:
     run_all()
     evaluate()

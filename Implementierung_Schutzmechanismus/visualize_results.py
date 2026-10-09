@@ -1,4 +1,4 @@
-# Shows the results of the Mistral Small 4 guard runs as tables
+# Shows the results of the Mistral guard runs as tables
 # and saves every picture in the results folder.
 #
 # Requirement: python3 -m pip install matplotlib
@@ -13,17 +13,19 @@ import matplotlib.pyplot as plt
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULT_DIR = os.path.join(BASE_DIR, "results")
 
-# All runs that should be shown: name, results file, picture file.
-# Original approach = main_original_mistral.py, Hybrid = main_hybrid_mistral.py.
-# The older runs are in the folder archiv.
+# All runs that should be shown: name, model, results file, picture file.
+# Original approach = main_original_mistral.py, Hybrid = main_hybrid_mistral.py,
+# Large 4 = main_original_mistral_large4.py. The older runs are in the folder archiv.
 RUNS = [
-    ["Original approach", "mistral_small4_results.jsonl", "mistral_small4_tables.png"],
-    ["Hybrid", "mistral_small4_hybrid2_results.jsonl", "mistral_small4_hybrid2_tables.png"],
+    ["Original approach", "Mistral Small 4", "mistral_small4_results.jsonl", "mistral_small4_tables.png"],
+    ["Hybrid", "Mistral Small 4", "mistral_small4_hybrid2_results.jsonl", "mistral_small4_hybrid2_tables.png"],
+    ["Large 4", "Mistral Large 4", "mistral_large4_results.jsonl", "mistral_large4_tables.png"],
 ]
-# only these runs are compared with each other (dev and test split)
-COMPARE = ["Original approach", "Hybrid"]
-COMPARISON_FILE = "mistral_small4_comparison.png"
-MODEL_NAME = "Mistral Small 4"
+# runs that are compared with each other (dev and test split): run names, picture file
+COMPARISONS = [
+    [["Original approach", "Hybrid"], "mistral_small4_comparison.png"],
+    [["Original approach", "Large 4"], "mistral_small4_vs_large4_comparison.png"],
+]
 
 COLUMNS = ["n", "TP", "FP", "FN", "TN", "Accuracy", "Precision",
            "Recall", "F1", "FPR", "Latency Ø (ms)"]
@@ -119,13 +121,14 @@ def draw_figure(tables, title, out_file):
 
 # ---------- Main program ----------
 
-# dev and test split of the compared runs, for the comparison at the end
-comparison = {"Dev split": {}, "Test split": {}}
+# results of every run, for the comparisons at the end
+all_rows = {}
 
 for run in RUNS:
     name = run[0]
-    results_file = os.path.join(RESULT_DIR, run[1])
-    out_file = os.path.join(RESULT_DIR, run[2])
+    model_name = run[1]
+    results_file = os.path.join(RESULT_DIR, run[2])
+    out_file = os.path.join(RESULT_DIR, run[3])
 
     # skip runs that do not exist yet
     if not os.path.exists(results_file):
@@ -139,19 +142,30 @@ for run in RUNS:
         add_to_group(tables["Per split"], "split = " + str(row["split"]), row)
         add_to_group(tables["Per harmless_level"], "harmless_level = " + str(row["harmless_level"]), row)
 
-    draw_figure(tables, "Prompt injection detection with " + MODEL_NAME + " – " + name, out_file)
+    draw_figure(tables, "Prompt injection detection with " + model_name + " – " + name, out_file)
 
-    # remember the dev and test split of this run
-    if name in COMPARE:
-        for row in rows:
+    # row name in the comparison tables, with model so runs of both models can be told apart
+    all_rows[name] = [model_name + " – " + name, rows]
+
+# one picture per comparison with the runs next to each other (dev and test split)
+for compare in COMPARISONS:
+    names = compare[0]
+    comparison = {"Dev split": {}, "Test split": {}}
+    for name in names:
+        if name not in all_rows:
+            continue
+        label = all_rows[name][0]
+        for row in all_rows[name][1]:
             if row["split"] == "dev":
-                add_to_group(comparison["Dev split"], name, row)
+                add_to_group(comparison["Dev split"], label, row)
             if row["split"] == "test":
-                add_to_group(comparison["Test split"], name, row)
+                add_to_group(comparison["Test split"], label, row)
 
-# one picture with the compared runs next to each other (dev and test split)
-if len(comparison["Test split"]) > 1:
-    draw_figure(comparison, "Comparison: " + " vs. ".join(COMPARE),
-                os.path.join(RESULT_DIR, COMPARISON_FILE))
+    if len(comparison["Test split"]) > 1:
+        labels = []
+        for name in names:
+            labels.append(all_rows[name][0])
+        draw_figure(comparison, "Comparison: " + " vs. ".join(labels),
+                    os.path.join(RESULT_DIR, compare[1]))
 
 plt.show()

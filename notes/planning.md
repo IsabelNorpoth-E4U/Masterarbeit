@@ -37,7 +37,8 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
    - [ ] 2.5 Unternehmensinterne Chatbots: Einsatzbereich und Risiken
 
 3. Prompt-Injection-Angriffe
-   - [ ] Überarbeitet
+   - [ ] Fabio ok
+   - [X] Überarbeitet
    - [X] Probegelesen
    - [X] Alle Quellen/Informationen hinzugefügt
    - [X] 3.1 Definition und Einordnung von Prompt Injection -> Oder zu Grundlagen
@@ -48,6 +49,7 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
    - [X] 3.4 (Beispiele bekannter Angriffe und die Auswirkungen) 
 
 4. Analyse der Verwundbarkeit eines internen Chatbots
+   - [ ] Fabio ok
    - [ ] Überarbeitet
    - [X] Probegelesen
    - [X] Alle Quellen/Informationen hinzugefügt
@@ -56,7 +58,7 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
         - [X] 4.2.1 Installation/Implementierung des Repository 
       - [X] 4.3 Methodik zur Durchführung der Angriffe 
         - [X] 4.3.1 Ziel der Angriffe
-        - [X] 4.3.2 Implementierung de Tools Calls/Browser Action
+        - [ ] 4.3.2 Implementierung de Tools Calls/Browser Action -> CODE ÜBERARBEITEN UND TEXT MIT ÜBERARBEITEN !!!!!
         - [X] 4.3.3 Aufbau lokale Website
       - [X] 4.4 Durchführung der ausgewählten Prompt-Injection Angriffe 
       - [X] 4.4.1 Identifikation der Schwachstellen
@@ -65,12 +67,12 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
    - [ ] Überarbeitet
    - [ ] Probegelesen
    - [ ] Alle Quellen/Informationen hinzugefügt
-      - [ ] 5.1 Klassifikation von Schutzmaßnahmen
-      - [ ] 5.2 Auswahl und Konzeption einer Schutzmaßnahme
+      - [X] 5.1 Klassifikation von Schutzmaßnahmen
+      - [X] 5.2 Auswahl und Konzeption einer Schutzmaßnahme
       - [ ] 5.3 Aufbau der Umgebung
          - [ ] 5.3.1 Modellwahl und technische Umgebung
-         - [ ] 5.3.2 Erstellung des Datensatzes
-         - [ ] 5.3.3 Auswahl der Metriken
+         - [X] 5.3.2 Erstellung des Datensatzes
+         - [X] 5.3.3 Auswahl der Metriken
          - [ ] 5.3.4 Durchführung des Ansatzes
          - [ ] 5.3.5 Durchführung am Hauptmodell/ Vergleich der Ansätze
          - [ ] 5.3.6 Überarbeitung des Ansatze und erneute Durchführung
