@@ -112,14 +112,14 @@ Nutzeranfrage auf mehrere Arten modifiziert und auch jede dieser Varianten wird 
 zusammengeführt und anhand eines definierten Schwellenwerts wird entschieden, ob die Anfrage insgesamt als Angriff eingestuft wird. Das \ac{llm} antwortet mit 
 \enquote{Ja} oder \enquote{Nein} auf die Frage, ob es sich um einen Prompt-Injection Angriff handelt. \\
 Aufbauend auf diesem Basisansatz wird anschließend eine Erweiterung entwickelt, deren Ziel es ist, die Erkennungsrate weiter zu steigern und damit möglichst viele Angriffe
-zu erkennen. Abbildung%~\ref{fig:konzept} veranschaulicht den Ablauf.
+zu erkennen. Abbildung~\ref{fig:konzept} veranschaulicht den Ablauf.
 
-% \begin{figure}[htbp]
-%     \centering
-%     \includegraphics[width=0.8\textwidth]{figs/05/abaluf_schutzmaßnahme}
-%     \caption{Ablauf der konzipierten Schutzmaßnahme}
-%     \label{fig:konzept}
-% \end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\textwidth]{figs/05/ansatz_idee}
+\caption{Konzept Schutzmaßnahme}
+\label{fig:konzept}
+\end{figure}
 
 
 
@@ -369,10 +369,6 @@ welche in \ref{subsec:metrics} genauer erläutert werden. \\
 Die Ergebnisse werden in Kapitel~\ref{sec:results} vorgestellt.
 
 
-\subsection{Durchführung am Hauptmodell/ Vergleich der Ansätze}
-
-Code bei mistral large implementieren
-
 \subsection{Überarbeitung des Ansatzes und erneute Durchführung}
 
 Die überarbeitete Version besteht aus drei Abschnitten
@@ -394,10 +390,18 @@ Was wird reingegeben und was kommt raus
 
 \section{Ergebnisse}\label{sec:results}
 
--> Tabelle von dem normalen Ansatz
+Die Auswertung erfolgt ausschließlich auf dem Test-Split. Da der weiterentwickelte Ansatz anhand
+des Dev-Splits entworfen und angepasst wurde, würde eine Auswertung auf diesen Daten die Ergebnisse
+zu seinen Gunsten verzerren. Die Einträge des Test-Splits wurden während der Entwicklung nicht
+verwendet und ermöglichen daher einen fairen Vergleich. Der Test-Split umfasst 660 Einträge,
+davon 320 Angriffe und 340 harmlose Prompts. Um die Ansätze vergleichen zu können, wurden für alle
+Durchläufe derselbe Datensatz und dieselben Parameter verwendet.
 
--> Tabelle von Ansatz mit Hauptmodell
-
--> Tabelle von weiterentwickeltem Ansatz
+Für jeden Ansatz werden die in Abschnitt~\ref{subsec:metrics} beschriebenen Metriken angegeben.
+Dazu gehören die Konfusionsmatrix, der Recall pro Transformation sowie die False Positive Rate pro
+Harmless-Level. Für den weiterentwickelten Ansatz wird zusätzlich dargestellt, wie häufig welche der
+beiden Entscheidungsregeln ausgelöst wurde. Abschließend werden die Ansätze in einer Gesamttabelle
+mit allen Kennzahlen und der Latenz sowie in einer Gegenüberstellung des Recalls pro Transformation
+miteinander verglichen.
 
 \section{Grenzen der Schutzmaßnahme}

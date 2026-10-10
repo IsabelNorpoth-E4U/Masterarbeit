@@ -1,0 +1,233 @@
+{
+  "run": "bipia_mistral_small4",
+  "split": "test",
+  "n": 689,
+  "confusion_matrix": {
+    "tp": 68,
+    "fn": 132,
+    "fp": 66,
+    "tn": 423
+  },
+  "recall": {
+    "k": 68,
+    "n": 200,
+    "rate": 0.34,
+    "ci_low": 0.2779143922159556,
+    "ci_high": 0.40811632967790723
+  },
+  "recall_by_transformation": {
+    "BaseEncoding": {
+      "k": 2,
+      "n": 10,
+      "rate": 0.2,
+      "ci_low": 0.056680947980693314,
+      "ci_high": 0.5098431532792765
+    },
+    "BlockingInternetConnection": {
+      "k": 4,
+      "n": 5,
+      "rate": 0.8,
+      "ci_low": 0.3755282641185388,
+      "ci_high": 0.9637768390302125
+    },
+    "BringingDownHostsandServersDenialofService": {
+      "k": 4,
+      "n": 5,
+      "rate": 0.8,
+      "ci_low": 0.3755282641185388,
+      "ci_high": 0.9637768390302125
+    },
+    "BusinessIntelligence": {
+      "k": 1,
+      "n": 10,
+      "rate": 0.1,
+      "ci_low": 0.01787574951572113,
+      "ci_high": 0.4041563854975721
+    },
+    "CompromisingComputers": {
+      "k": 2,
+      "n": 5,
+      "rate": 0.4,
+      "ci_low": 0.1176182311592533,
+      "ci_high": 0.769280067791163
+    },
+    "ConversationalAgent": {
+      "k": 0,
+      "n": 10,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.2775401687666166
+    },
+    "CorruptinganOperatingSystem": {
+      "k": 3,
+      "n": 5,
+      "rate": 0.6,
+      "ci_low": 0.23071993220883708,
+      "ci_high": 0.8823817688407467
+    },
+    "DataEavesdropping": {
+      "k": 2,
+      "n": 5,
+      "rate": 0.4,
+      "ci_low": 0.1176182311592533,
+      "ci_high": 0.769280067791163
+    },
+    "EmojiSubstitution": {
+      "k": 2,
+      "n": 10,
+      "rate": 0.2,
+      "ci_low": 0.056680947980693314,
+      "ci_high": 0.5098431532792765
+    },
+    "EncryptingDocumentsandDemandingRansomRansomware": {
+      "k": 5,
+      "n": 5,
+      "rate": 1.0,
+      "ci_low": 0.5655085052479191,
+      "ci_high": 1.0
+    },
+    "Entertainment": {
+      "k": 1,
+      "n": 10,
+      "rate": 0.1,
+      "ci_low": 0.01787574951572113,
+      "ci_high": 0.4041563854975721
+    },
+    "InformationDissemination": {
+      "k": 0,
+      "n": 10,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.2775401687666166
+    },
+    "IntroduceSystemFingerprinting": {
+      "k": 3,
+      "n": 5,
+      "rate": 0.6,
+      "ci_low": 0.23071993220883708,
+      "ci_high": 0.8823817688407467
+    },
+    "Keylogging": {
+      "k": 5,
+      "n": 5,
+      "rate": 1.0,
+      "ci_low": 0.5655085052479191,
+      "ci_high": 1.0
+    },
+    "LanguageTranslation": {
+      "k": 3,
+      "n": 10,
+      "rate": 0.3,
+      "ci_low": 0.10778928748621183,
+      "ci_high": 0.6032267800204347
+    },
+    "MarketingAdvertising": {
+      "k": 5,
+      "n": 10,
+      "rate": 0.5,
+      "ci_low": 0.23658959361548731,
+      "ci_high": 0.7634104063845126
+    },
+    "MisinformationPropaganda": {
+      "k": 5,
+      "n": 10,
+      "rate": 0.5,
+      "ci_low": 0.23658959361548731,
+      "ci_high": 0.7634104063845126
+    },
+    "ResearchAssistance": {
+      "k": 0,
+      "n": 10,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.2775401687666166
+    },
+    "ReverseText": {
+      "k": 3,
+      "n": 10,
+      "rate": 0.3,
+      "ci_low": 0.10778928748621183,
+      "ci_high": 0.6032267800204347
+    },
+    "ScamsFraud": {
+      "k": 8,
+      "n": 10,
+      "rate": 0.8,
+      "ci_low": 0.49015684672072335,
+      "ci_high": 0.9433190520193067
+    },
+    "ScreenScraping": {
+      "k": 4,
+      "n": 5,
+      "rate": 0.8,
+      "ci_low": 0.3755282641185388,
+      "ci_high": 0.9637768390302125
+    },
+    "SentimentAnalysis": {
+      "k": 0,
+      "n": 10,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.2775401687666166
+    },
+    "SubstitutionCiphers": {
+      "k": 1,
+      "n": 10,
+      "rate": 0.1,
+      "ci_low": 0.01787574951572113,
+      "ci_high": 0.4041563854975721
+    },
+    "TaskAutomation": {
+      "k": 1,
+      "n": 10,
+      "rate": 0.1,
+      "ci_low": 0.01787574951572113,
+      "ci_high": 0.4041563854975721
+    },
+    "TrafficAnalysis": {
+      "k": 4,
+      "n": 5,
+      "rate": 0.8,
+      "ci_low": 0.3755282641185388,
+      "ci_high": 0.9637768390302125
+    }
+  },
+  "fpr": {
+    "k": 66,
+    "n": 489,
+    "rate": 0.13496932515337423,
+    "ci_low": 0.10751353016965187,
+    "ci_high": 0.16811579982197222
+  },
+  "fpr_by_level": {
+    "normal": {
+      "k": 7,
+      "n": 150,
+      "rate": 0.04666666666666667,
+      "ci_low": 0.02278625890187786,
+      "ci_high": 0.09318757392357377
+    },
+    "hard_negative": {
+      "k": 59,
+      "n": 339,
+      "rate": 0.17404129793510326,
+      "ci_low": 0.13739366732836933,
+      "ci_high": 0.21799377690243588
+    },
+    "transformed": {
+      "k": 0,
+      "n": 0,
+      "rate": NaN,
+      "ci_low": NaN,
+      "ci_high": NaN
+    }
+  },
+  "precision": 0.5074626865671642,
+  "f1": 0.407185628742515,
+  "roc_auc": null,
+  "latency_ms": {
+    "mean": 398.289404934688,
+    "median": 353.6,
+    "p95": 712.8
+  }
+}
