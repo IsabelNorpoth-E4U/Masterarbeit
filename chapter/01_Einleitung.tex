@@ -1,17 +1,62 @@
 \chapter{Einleitung}\label{ch:einleitung}
-ng. Ziel ist es, bestehende Ansätze zu implementieren, zu vergleichen und potenzielle Verbesserungen
-zu
+
 
 \section{Problemstelung und Motivation}
 
-Ein kurzes Beispiel für eine Abkürzung: Ein Large Language Model (LLM) wird im weiteren Verlauf oft verwendet llm.
+Heutzutage finden \ac{llm}s immer mehr Anwendung in der Praxis und in Unternehmen. 
+
+
+
+Ausgangslage: LLM-basierte Chatbots werden zunehmend in Unternehmen eingesetzt. Durch Tool Calling können sie nicht nur antworten, sondern auch handeln, z. B. Webseiten aufrufen, Formulare ausfüllen oder Daten weitergeben.
+Das Problem: Sobald ein Chatbot externe Inhalte verarbeitet, kann er Anweisungen darin nicht zuverlässig von Daten unterscheiden. Das ermöglicht indirekte Prompt Injection: Ein Angreifer versteckt Anweisungen in einer Webseite oder einem Dokument, ohne selbst Zugriff auf den Chatbot zu haben.
+Warum das relevant ist: Mit Tool Calling bleibt es nicht bei einer falschen Antwort, es kommt zu echten Aktionen, etwa dem Abfluss vertraulicher Daten wie des Chatverlaufs. Belegen kannst du das mit OWASP (Prompt Injection als Risiko Nr. 1 der LLM Top 10) und bekannten Vorfällen aus deinem Grundlagenkapitel.
+Konkreter Anlass: der unternehmensinterne Chatbot (Chatbot4U), mit kurzem Hinweis auf den Kontext, also interne Daten und Mitarbeitende als Nutzer.
+Die Lücke: Bestehende Schutzmaßnahmen haben Grenzen. Guard-Modelle lassen sich z. B. durch Verschleierung umgehen (FlipAttack, Fairoze et al.). Daraus folgt der Bedarf, Schutzmaßnahmen für genau diesen Anwendungsfall zu untersuchen.
+
+
 
 
 \section{Zielsetzung}
 
+Das Ziel dieser Arbeit ist es mit dieser Arbeit herauszufinden, wie stark ein Chatbot, genauer der unternehmensinterne Chatbot von Energy4u GmbH durch indirekte
+Prompt Injection Angriffe über Tool Call manipuliert werden kann. Dazu werden zuerst die Schwachstellen dieses Chatbots identifiziert, wobei er in einer 
+lokalen Testumgebung aufgebaut wird. \\
+Angepasst an diese Schwachstellen wird eine geeignete Schutzmaßnahme entwicklet und implementiert. Es wird anhand mehrerer Datensätze getstet und mithilfe von Metriken
+die genaue Leistungsfähigkeit festgehalten. \\
+Mit dem Ergebnis der Arbeit soll es möglich sein einen konkreten Vergleich zwischen dem normlaen modell und mit der implementierten Schutzmaßnahme zu bekommen. Diese
+soll sowohl für den unternehmensinternen Chatbot der Energy4U GmbH dienen, sowie übertragbar sein auf andere praxisrelevante Chatbots.
+
 \section{Forschungsfrage}
+
+Für diese Arbeit wurde ein Forschungsfrage definiert, die wiederrum in mehrere Teilfragen geteilt wurde. Die hauptfrage, welch in dieser Arbeit geklärt werden soll 
+ist, inwieweit ein unternehmensinterner Chatvot mit implementierten Tool Calling gegen indirekte Prompt Injections angriffe abgesichert werden kann. Dabei ist der 
+Unternhemensinterne Chatvbot nur das Testsystem, die beantwortung der Frage soll aber allgemein gemacht werden können. Zu beantwortung dieser Frage wurden weitere
+Fragen definiert. Zum einen soll geklärt werden, welch Schwachstellen der Chatbot überhaupt aufweist im bezug auf indirekte Prompt injection angriffe. Zusätzlich 
+sollen bei der Impleneiterung der Schutzmaßnahme die Frage gklärt werden, wie zuverlässig ein vorgeschaltetes \ac{llm} in bzug auf die Abwehr von Prompt injection
+angriffe ist. In Bezug auf diese Frage soll zusätzlich geklärt werden, ob sich die Erkennung von Prompt Injection Angriffe verbessert, wenn neben einem vorgeschalteten
+Modells, auch die Schutzmaßnahme ausgebaut wird. 
 
 \section{Aufbau der Arbeit}
 
-
-
+Diese Arbeit ist in sieben Abschnitte eingteilt. Nach dem Fazit kommt das Grundlagen Kapitel. Dort sollen alle Fachlichen Themen aufarbeitet werden, damit ein
+Leser eine erste Übersicht bekommt, worum sich diese Arbeit drehen wird. Dafür werden \ac{LLM}s behandelt und ihre Funktionsweise. Dazu zählen die Geschihte und 
+Technische Bestandteile und ihr Aufbau. Darauf aufbauend wird sich diese Arbeit mit dem Begriff Tool Calling bei \ac{llm}s beschäftigen, also der verwendung von 
+externn Ressourcen und das Aufrufen dieser. Das Verständinis über die Funktion ist wichtiger Grundsatz für diese Arbeit. Es werden zudem auch Sicherheitsbedrohnugen,
+genannt, die entstehen, wenn man dieses Tool Calling verwendet. Danach werden Chatbots definiert und die ABgrenzung zu \ac{llm}s gemacht. Es wird die Architektur
+erläutert und aufgrund diesen technischen Hintergrund die entstehende ANgriffsfläche benannt. Am ende werden noch zusätzlich Unternehmensinterne Chatbots behandelt 
+und ihren Einsatzbereich und die Risiken. \\
+Nach diesem grundlagen teil, wird das zntrale Thema dieser Arbeit aufgefasst. Es werden Prompt Injeciton Angriffe definiert und eine kategorisierung gemacht in 
+indirekte und direkte Angriffe. Zu den beiden Kategorien werden aktuelle Angriffe genannt und erklärt. es werden auch die Bedeutung für Unternehmen definiert und 
+ein beispiel genannt, welche als eine überleitung in die praxis dienen soll. \\
+Mit diesen Grundlagen können nun der Praxisteil diser Arbeit vorbereitet werden. Dafür wird an dem Unternehmensinternen Chatbot Angriffe getstet.Dfür muss davor 
+die Umgeung aufgbaut werden. Es wird zuerst der aufbau des Chatbots erkläuter und wie er sich zusammensetzt. Danach wird die lokale mplemterierung des chatbots, 
+sowie alle anderen funktionen und betandteile dieser test umgebung näher erläutert. Anhcsließend wird zu jedem Angriff die durchführung näher gebracht. und die 
+erebnisse dokumentiert. Dazu gehören welche Angriffe in welchem Maß erfolgreich waren. Abschließend wurden die dadurch erfassten schwachstellen deieses chatbots
+erläutert, die aus den ergebnissen abgeleitet werden könnnen. \\
+Da nun die Vorarbeit für den Praxisteil abgeschlossen ist kann nun der hauptaspekt dieser arbeit durchgeführt werden. Es wird eine eigene schutmaßnahme definiert
+und implementiert, mit der diese zuvor dokumentierten Angriffe abgewehrt werden sollen. Dafür werden zuerst theoretisch mögliche maßnahme aufbereitet und anahnd 
+dueser dokumentierten mit ausgewählten ein konzept entwickelt. Für diese Maßnahme wird ein Datensatz aufgebaut und Metriken ausgewählt. Anschließend wird sie implementiert.
+Die gesammelten Ergebnisse werden aufbereitet und für die Auswertung zusammengtragen. \\
+Bei der Auswertung wir dzuerst geguckt ob die Fruschungsfrage geklärt werden konnte. Es werden dann die gesammelten Ergebnisse evaluiert und geguckt, ob das
+Konzept der Schutzmaßnahme erfolgreich war und warum. Zusätzlich werden die Grenzen definiert und verbesserungsmöglichkeiten. \\
+Am ende werden die wichtigstn Ergebnisse der Arbeit gesammelt dokumentiert und ein Ausblick getätigt, wie zukündtige Forschung mögliche Lücken schließen kann.

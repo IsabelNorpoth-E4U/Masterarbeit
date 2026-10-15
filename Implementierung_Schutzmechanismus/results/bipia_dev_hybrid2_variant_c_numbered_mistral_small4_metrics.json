@@ -1,0 +1,233 @@
+{
+  "run": "bipia_dev_hybrid2_variant_c_numbered_mistral_small4",
+  "split": "dev",
+  "n": 339,
+  "confusion_matrix": {
+    "tp": 168,
+    "fn": 32,
+    "fp": 24,
+    "tn": 115
+  },
+  "recall": {
+    "k": 168,
+    "n": 200,
+    "rate": 0.84,
+    "ci_low": 0.7828581380609876,
+    "ci_high": 0.8843265779145542
+  },
+  "recall_by_transformation": {
+    "AlphanumericSubstitution": {
+      "k": 9,
+      "n": 10,
+      "rate": 0.9,
+      "ci_low": 0.5958436145024278,
+      "ci_high": 0.9821242504842788
+    },
+    "Anagramming": {
+      "k": 8,
+      "n": 10,
+      "rate": 0.8,
+      "ci_low": 0.49015684672072335,
+      "ci_high": 0.9433190520193067
+    },
+    "Clickbait": {
+      "k": 10,
+      "n": 10,
+      "rate": 1.0,
+      "ci_low": 0.7224598312333834,
+      "ci_high": 1.0
+    },
+    "ContentCreation": {
+      "k": 8,
+      "n": 10,
+      "rate": 0.8,
+      "ci_low": 0.49015684672072335,
+      "ci_high": 0.9433190520193067
+    },
+    "CookieTheft": {
+      "k": 5,
+      "n": 5,
+      "rate": 1.0,
+      "ci_low": 0.5655085052479191,
+      "ci_high": 1.0
+    },
+    "CripplingCriticalInfrastructures": {
+      "k": 4,
+      "n": 5,
+      "rate": 0.8,
+      "ci_low": 0.3755282641185388,
+      "ci_high": 0.9637768390302125
+    },
+    "CryptocurrencyMining": {
+      "k": 5,
+      "n": 5,
+      "rate": 1.0,
+      "ci_low": 0.5655085052479191,
+      "ci_high": 1.0
+    },
+    "DeviceandDriverEnumeration": {
+      "k": 5,
+      "n": 5,
+      "rate": 1.0,
+      "ci_low": 0.5655085052479191,
+      "ci_high": 1.0
+    },
+    "DumpsterDiving": {
+      "k": 4,
+      "n": 5,
+      "rate": 0.8,
+      "ci_low": 0.3755282641185388,
+      "ci_high": 0.9637768390302125
+    },
+    "EnvironmentVariableAnalysis": {
+      "k": 5,
+      "n": 5,
+      "rate": 1.0,
+      "ci_low": 0.5655085052479191,
+      "ci_high": 1.0
+    },
+    "ExploitingSystemVulnerabilities": {
+      "k": 5,
+      "n": 5,
+      "rate": 1.0,
+      "ci_low": 0.5655085052479191,
+      "ci_high": 1.0
+    },
+    "HomophonicSubstitution": {
+      "k": 7,
+      "n": 10,
+      "rate": 0.7,
+      "ci_low": 0.39677321997956516,
+      "ci_high": 0.892210712513788
+    },
+    "InformationRetrieval": {
+      "k": 5,
+      "n": 10,
+      "rate": 0.5,
+      "ci_low": 0.23658959361548731,
+      "ci_high": 0.7634104063845126
+    },
+    "Instruction": {
+      "k": 10,
+      "n": 10,
+      "rate": 1.0,
+      "ci_low": 0.7224598312333834,
+      "ci_high": 1.0
+    },
+    "LanguageTranslation": {
+      "k": 7,
+      "n": 10,
+      "rate": 0.7,
+      "ci_low": 0.39677321997956516,
+      "ci_high": 0.892210712513788
+    },
+    "LearningandTutoring": {
+      "k": 5,
+      "n": 10,
+      "rate": 0.5,
+      "ci_low": 0.23658959361548731,
+      "ci_high": 0.7634104063845126
+    },
+    "MalwareDistribution": {
+      "k": 10,
+      "n": 10,
+      "rate": 1.0,
+      "ci_low": 0.7224598312333834,
+      "ci_high": 1.0
+    },
+    "MemoryScanning": {
+      "k": 4,
+      "n": 5,
+      "rate": 0.8,
+      "ci_low": 0.3755282641185388,
+      "ci_high": 0.9637768390302125
+    },
+    "MisspellingIntentionally": {
+      "k": 10,
+      "n": 10,
+      "rate": 1.0,
+      "ci_low": 0.7224598312333834,
+      "ci_high": 1.0
+    },
+    "NetworkPropagation": {
+      "k": 4,
+      "n": 5,
+      "rate": 0.8,
+      "ci_low": 0.3755282641185388,
+      "ci_high": 0.9637768390302125
+    },
+    "Persuasion": {
+      "k": 10,
+      "n": 10,
+      "rate": 1.0,
+      "ci_low": 0.7224598312333834,
+      "ci_high": 1.0
+    },
+    "ProgrammingHelp": {
+      "k": 6,
+      "n": 10,
+      "rate": 0.6,
+      "ci_low": 0.3126695474501864,
+      "ci_high": 0.8318224187964902
+    },
+    "SendingOutSpamEmails": {
+      "k": 4,
+      "n": 5,
+      "rate": 0.8,
+      "ci_low": 0.3755282641185388,
+      "ci_high": 0.9637768390302125
+    },
+    "SocialInteraction": {
+      "k": 9,
+      "n": 10,
+      "rate": 0.9,
+      "ci_low": 0.5958436145024278,
+      "ci_high": 0.9821242504842788
+    },
+    "SpaceRemovalGrouping": {
+      "k": 9,
+      "n": 10,
+      "rate": 0.9,
+      "ci_low": 0.5958436145024278,
+      "ci_high": 0.9821242504842788
+    }
+  },
+  "fpr": {
+    "k": 24,
+    "n": 139,
+    "rate": 0.17266187050359713,
+    "ci_low": 0.11886086838811098,
+    "ci_high": 0.2440698184706192
+  },
+  "fpr_by_level": {
+    "normal": {
+      "k": 24,
+      "n": 139,
+      "rate": 0.17266187050359713,
+      "ci_low": 0.11886086838811098,
+      "ci_high": 0.2440698184706192
+    },
+    "hard_negative": {
+      "k": 0,
+      "n": 0,
+      "rate": NaN,
+      "ci_low": NaN,
+      "ci_high": NaN
+    },
+    "transformed": {
+      "k": 0,
+      "n": 0,
+      "rate": NaN,
+      "ci_low": NaN,
+      "ci_high": NaN
+    }
+  },
+  "precision": 0.875,
+  "f1": 0.8571428571428572,
+  "roc_auc": null,
+  "latency_ms": {
+    "mean": 3516.23598820059,
+    "median": 3052.0,
+    "p95": 5282.1
+  }
+}

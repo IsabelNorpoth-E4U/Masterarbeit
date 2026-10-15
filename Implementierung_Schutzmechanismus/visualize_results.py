@@ -41,6 +41,9 @@ RUNS = [
     # version 2: prompt for external content
     ["BIPIA prompt 2 original approach", "Mistral Small 4", "bipia_prompt2_mistral_small4_results.jsonl", "bipia_prompt2_mistral_small4_tables.png"],
     ["BIPIA prompt 2 hybrid", "Mistral Small 4", "bipia_prompt2_mistral_small4_hybrid2_results.jsonl", "bipia_prompt2_mistral_small4_hybrid2_tables.png"],
+    # variant C (main_bipia_variant_c_mistral.py): existing approach OR variant C
+    ["BIPIA hybrid + variant C", "Mistral Small 4", "bipia_hybrid2_variant_c_mistral_small4_results.jsonl", "bipia_hybrid2_variant_c_mistral_small4_tables.png"],
+    ["BIPIA original + variant C", "Mistral Small 4", "bipia_original_variant_c_mistral_small4_results.jsonl", "bipia_original_variant_c_mistral_small4_tables.png"],
 ]
 # runs that are compared with each other (dev and test split): run names, picture file
 COMPARISONS = [
@@ -48,6 +51,7 @@ COMPARISONS = [
     [["Original approach", "Large 4"], "mistral_small4_vs_large4_comparison.png"],
     [["BIPIA original approach", "BIPIA hybrid"], "bipia_mistral_small4_comparison.png"],
     [["BIPIA prompt 2 original approach", "BIPIA prompt 2 hybrid"], "bipia_prompt2_mistral_small4_comparison.png"],
+    [["BIPIA hybrid", "BIPIA hybrid + variant C"], "bipia_hybrid2_variant_c_comparison.png"],
 ]
 
 COLUMNS = ["n", "TP", "FP", "FN", "TN", "Accuracy", "Precision",
