@@ -3,18 +3,42 @@
 
 \section{Problemstelung und Motivation}
 
-Heutzutage finden \ac{llm}s immer mehr Anwendung in der Praxis und in Unternehmen. 
-
-
-
-Ausgangslage: LLM-basierte Chatbots werden zunehmend in Unternehmen eingesetzt. Durch Tool Calling können sie nicht nur antworten, sondern auch handeln, z. B. Webseiten aufrufen, Formulare ausfüllen oder Daten weitergeben.
-Das Problem: Sobald ein Chatbot externe Inhalte verarbeitet, kann er Anweisungen darin nicht zuverlässig von Daten unterscheiden. Das ermöglicht indirekte Prompt Injection: Ein Angreifer versteckt Anweisungen in einer Webseite oder einem Dokument, ohne selbst Zugriff auf den Chatbot zu haben.
-Warum das relevant ist: Mit Tool Calling bleibt es nicht bei einer falschen Antwort, es kommt zu echten Aktionen, etwa dem Abfluss vertraulicher Daten wie des Chatverlaufs. Belegen kannst du das mit OWASP (Prompt Injection als Risiko Nr. 1 der LLM Top 10) und bekannten Vorfällen aus deinem Grundlagenkapitel.
-Konkreter Anlass: der unternehmensinterne Chatbot (Chatbot4U), mit kurzem Hinweis auf den Kontext, also interne Daten und Mitarbeitende als Nutzer.
-Die Lücke: Bestehende Schutzmaßnahmen haben Grenzen. Guard-Modelle lassen sich z. B. durch Verschleierung umgehen (FlipAttack, Fairoze et al.). Daraus folgt der Bedarf, Schutzmaßnahmen für genau diesen Anwendungsfall zu untersuchen.
-
-
-
+Heutzutage finden \ac{llm}s immer mehr Anwendung in der Praxis und in Unternehmen. Diese Entwicklung wurde auch in vielen Statistiken 
+über die Jahre dokumentiert. Dabei stellt das Statistische Bundesamt fest, das in den Jahren 2021 bis 2025 die die Prozentanteile der
+Unternehmen welche Künstliche Inteeligenz benutzen von 11 \% auf 26 \% gestiegen. Dabei ist zu beachten das verschiedene Größen von 
+Unternehmen miteinbezogen werden, auch welche mit 10-49 beschäftigte. Bei Unternehmen mit einer Beschäftigen Anzahl von 250 und mehr 
+stieg die Anzahl von 31 \% auf 57 \%. https://de.statista.com/statistik/daten/studie/1538416/umfrage/unternehmen-die-kuenstliche-intelligenz-verwenden-in-deutschland/
+Das IFO Institut verzeichnete, dass im Mai 2026 54,5 \% der Unternehmen in Deutschland 
+KI verwenden und 16 \% dies planen. 21,6 \% haben bereits darüber diskutiert und nur 7,9 \% geben an, dass der Einsatz von 
+Künstlicher Intelligenz für sie keine rolle spielt. https://de.statista.com/statistik/daten/studie/1535661/umfrage/ki-einsatz-in-unternehmen-in-deutschland/
+Dadurch das LLMs immer häufiger in Unternhemn eingestezt werden greifen sie auch immer mehr auf Dokumete zu oder werden für
+Recherchen im Internet eingesetzt. Das wird auch deutlich in einer anderen Statistik des Statistischen Bundesamt von 2025, in welcher
+aufgezeichnet wird für welche Anwendungsbereiche KI in diesen unternehmen verwendet wird. Dabei ist die häufigste Anwendung Text Mining,
+also die Aufgabe große Mengen von unstrukturierten Daten zu strukturieren. 57 \% der unternehmen mit 250 oder mehr mitarbeitern verwendne 
+LLMs dafür. https://de.statista.com/statistik/daten/studie/1538431/umfrage/verwendung-von-ki-in-deutschen-unternehmen/
+Mit der Funktion auf immer mehr Daten zugreifen zu müssen kommt auch die Möglichkeit dazu, dass Tool Calls ausgeführt werden können. 
+Mit einem Tool Call werden einem LLM ermöglicht, dass mehr Aktionen ausgeführt werden können, beispielsweise den Zugriff auf externe Daten
+und Webseitem das ausfüllen von Formularen usw.. Es können beliebige Funktionen hinzugefügt werden. Jedoch entstehen durch 
+eben diese Funktionen auch Gefahren, da durch den Aufruf externer Quellen und verwendung großer Datenmengen auch Gefahren entstehen 
+können. Das geschieht beispielsweise dadurch, das LLMs nicht zuverlässig zwischen Anweisungen und Daten unterschieden könnn. Somit
+können sich in den Daten ebenfalls Anweisungen verstecken, welche dann von dem LLM ausgeführt werden. Diese Schwachstelle wird von 
+Angreifern für sogenannte Prompt Injection angriffe ausgenutzt. Die Angreidfer verstecken Anweisungen in den externn Daten auf die ein
+LLM zugreift. So ist es möglich eschädliche Aktionen auszulösen, ohne direkt Zugriff auf ein LLM zu haben. (OWASP QUELLE) \\
+Durch die Verwendung von Tool Calls wird dieses Risiko von Prompt Injeciton Angriffen verstärkt, da normalerweise nur eine flasche 
+Antwort ausgelöst werden kann, aber dadurch das mit einem Tool Call richtige Aktionen ausgeführt werden können werden 
+diese Art von Angriffen immer gefährlicher. Dies wird besonders gefährlich bei Firmeninternen Chatbots, da diese höufig auf viele 
+sensible intere Daten zugreifen können und beispielsweise firmengeheimnisse preisgeben können. \\
+Dieses Problem ist schon seit mehreren Jahren bekannt, dadurch gibt es auch bereits viele Versuche diese Angriffsfläche einzudämmen.
+Es werden teilweise zusätzliche Klassifikatoren, Filter oder Vorverarbeitungen eingesetzt, um zu versuchn die Angriffe bevor sie zu dem
+LLM kommen, welches zugriff auf die Tools hat als ANgriff zu klassifizieren. (QUELLE) Jedoch gibt es viele Beweise, dass die Maßnahmen
+nicht wirksam genug sind. Die Angreifer verändern ANgriffe immer weiter, damit genau diese umgangen werden (QUELLE). BEISPIEL 
+Viele der Arbeiten behandeln auch nicht direkt indirekte Prompt Injection Angriffe sondern häufig auch Jailbreaks. Der Unterschied ist, dass
+..., aber grob lassen sich die Ergebnisse häufig vergleichen. \\
+Anhand der Literatur wird bewusst das es noch sehr viel Verbesserungspotenzial bei den Schutzmaßnahmen gibt. Genau darum dreht sich diese 
+Abreit. Es wird sich auf indirekte Prompt Injectoin Angriffe fokussiert und versucht eine Schutzmaßnahme zu entwicklen, welche eine 
+generalisierte Lösung sin kann. Als Anwendungsfall wird der firmeninterne Chatvbot ChatBot4U der Firma Energy4U GmbH verwendet, welcher 
+auch dazu dienn soll als Unternhemenslösung für die Kommunkation mit Kunden zu dienen, somit ein praxisnaher anwendungsfallbeispiel ist.
+Im weiteren wird die genaue Zielsetzung, die Forschungsfrage und der Ablauf geklärt.
 
 \section{Zielsetzung}
 

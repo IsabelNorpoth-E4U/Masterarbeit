@@ -1,6 +1,14 @@
-# Shows the results of the Mistral guard runs as tables
-# and saves every picture in the results folder.
-# The diagrams and LaTeX tables for the thesis are saved in the folder results_diagramms.
+# Makes the tables and diagrams for the results chapter of the thesis.
+# Everything is saved in the folder results_diagramms:
+#   tabelle_ergebnisse.tex          all runs with all metrics
+#   tabelle_fpr_harmlos.tex         false positive rate per kind of harmless text
+#   recall_gesamt                   recall of every run, both data sets
+#   recall_pro_transformation       own data set, recall per transformation T00 ... T15
+#   recall_bipia_pro_aufgabe        BIPIA, recall per task (e-mail, table, code)
+#   recall_bipia_pro_position       BIPIA, recall per position of the attack
+#   recall_vs_fpr                   recall against false positive rate
+# The diagrams are saved as .pdf (for LaTeX) and .png.
+# Runs without a results file are skipped, so the script can run at any time.
 #
 # Requirement: python3 -m pip install matplotlib
 # Run:         python3 visualize_results.py
@@ -10,166 +18,190 @@ import os
 
 import matplotlib.pyplot as plt
 
-# Folder in which this script is located
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-RESULT_DIR = os.path.join(BASE_DIR, "results")
-DIAGRAM_DIR = os.path.join(BASE_DIR, "results_diagramms")
+import metrics
 
-# colors for the thesis: blue of the HSMW template, yellow of the Energy4u logo
+RESULT_DIR = "results"
+DIAGRAM_DIR = "results_diagramms"
+
+# colors: blue of the HSMW template, yellow of the Energy4u logo, gray.
+# The yellow is very light, so every bar gets a dark edge and a value label.
 HSMW_BLUE = "#0069b4"
 ENERGY4U_YELLOW = "#ffd23f"
 GRAY = "#9a9a9a"
+EDGE = "#333333"
 
-# runs in the thesis (test split): label, metrics file, color.
-# The hybrid is the own approach, so it gets the HSMW blue.
-THESIS_RUNS = [
-    ["Mistral Small 4", "mistral_small4_metrics.json", ENERGY4U_YELLOW],
-    ["Mistral Large 4", "mistral_large4_metrics.json", GRAY],
-    ["Mistral Small 4 (neuer Ansatz)", "mistral_small4_hybrid2_metrics.json", HSMW_BLUE],
-]
-
-# All runs that should be shown: name, model, results file, picture file.
-# Original approach = main_original_mistral.py, Hybrid = main_hybrid_mistral.py,
-# Large 4 = main_original_mistral_large4.py, BIPIA = main_bipia_*_mistral.py
-# (external test set, only test split). The older runs are in the folder archiv.
+# all runs: data set, label, file name (without _results.jsonl), color.
+# The new approach is the own approach, so it gets the HSMW blue.
 RUNS = [
-    ["Original approach", "Mistral Small 4", "mistral_small4_results.jsonl", "mistral_small4_tables.png"],
-    ["Hybrid", "Mistral Small 4", "mistral_small4_hybrid2_results.jsonl", "mistral_small4_hybrid2_tables.png"],
-    ["Large 4", "Mistral Large 4", "mistral_large4_results.jsonl", "mistral_large4_tables.png"],
-    ["BIPIA original approach", "Mistral Small 4", "bipia_mistral_small4_results.jsonl", "bipia_mistral_small4_tables.png"],
-    ["BIPIA hybrid", "Mistral Small 4", "bipia_mistral_small4_hybrid2_results.jsonl", "bipia_mistral_small4_hybrid2_tables.png"],
-    # version 2: prompt for external content
-    ["BIPIA prompt 2 original approach", "Mistral Small 4", "bipia_prompt2_mistral_small4_results.jsonl", "bipia_prompt2_mistral_small4_tables.png"],
-    ["BIPIA prompt 2 hybrid", "Mistral Small 4", "bipia_prompt2_mistral_small4_hybrid2_results.jsonl", "bipia_prompt2_mistral_small4_hybrid2_tables.png"],
-    # variant C (main_bipia_variant_c_mistral.py): existing approach OR variant C
-    ["BIPIA hybrid + variant C", "Mistral Small 4", "bipia_hybrid2_variant_c_mistral_small4_results.jsonl", "bipia_hybrid2_variant_c_mistral_small4_tables.png"],
-    ["BIPIA original + variant C", "Mistral Small 4", "bipia_original_variant_c_mistral_small4_results.jsonl", "bipia_original_variant_c_mistral_small4_tables.png"],
-]
-# runs that are compared with each other (dev and test split): run names, picture file
-COMPARISONS = [
-    [["Original approach", "Hybrid"], "mistral_small4_comparison.png"],
-    [["Original approach", "Large 4"], "mistral_small4_vs_large4_comparison.png"],
-    [["BIPIA original approach", "BIPIA hybrid"], "bipia_mistral_small4_comparison.png"],
-    [["BIPIA prompt 2 original approach", "BIPIA prompt 2 hybrid"], "bipia_prompt2_mistral_small4_comparison.png"],
-    [["BIPIA hybrid", "BIPIA hybrid + variant C"], "bipia_hybrid2_variant_c_comparison.png"],
+    ["eigen", "Original (Mistral Small 4)", "mistral_small4_original", ENERGY4U_YELLOW],
+    ["eigen", "Original (Mistral Large 4)", "mistral_large4_original", GRAY],
+    ["eigen", "Neuer Ansatz (Mistral Small 4)", "mistral_small4_new_approach", HSMW_BLUE],
+    ["bipia", "Original (Mistral Small 4)", "mistral_small4_bipia_original", ENERGY4U_YELLOW],
+    ["bipia", "Original (Mistral Large 4)", "mistral_large4_bipia_original", GRAY],
+    ["bipia", "Neuer Ansatz (Mistral Small 4)", "mistral_small4_bipia_new_approach", HSMW_BLUE],
 ]
 
-COLUMNS = ["n", "TP", "FP", "FN", "TN", "Accuracy", "Precision",
-           "Recall", "F1", "FPR", "Latency Ø (ms)"]
+DATA_SET_NAMES = {"eigen": "Eigener Datensatz", "bipia": "BIPIA + NotInject"}
 
 
-def divide(a, b):
-    if b == 0:
-        return "–"
-    return f"{a / b:.3f}"  # 3 decimals
+# ---------- reading ----------
 
-
-# calculates one table row for a group of results
-def table_row(rows):
-    tp, fp, fn, tn = 0, 0, 0, 0
-    latency = 0
-    for row in rows:
-        latency = latency + row["latency_ms"]
-        if row["label"] == "attack":
-            if row["flagged"]:
-                tp = tp + 1  # attack blocked
-            else:
-                fn = fn + 1  # attack got through
-        else:
-            if row["flagged"]:
-                fp = fp + 1  # harmless blocked
-            else:
-                tn = tn + 1  # harmless got through
-
-    # F1 = 2*TP / (2*TP + FP + FN), only if precision and recall exist
-    if tp + fp == 0 or tp + fn == 0:
-        f1 = "–"
-    else:
-        f1 = divide(2 * tp, 2 * tp + fp + fn)
-
-    n = len(rows)
-    return [str(n), str(tp), str(fp), str(fn), str(tn),
-            divide(tp + tn, n),     # accuracy
-            divide(tp, tp + fp),    # precision
-            divide(tp, tp + fn),    # recall
-            f1,
-            divide(fp, fp + tn),    # FPR
-            f"{latency / n:.0f}"]
-
-
-def add_to_group(groups, name, row):
-    if name not in groups:
-        groups[name] = []
-    groups[name].append(row)
-
-
-# reads all results from a jsonl file
-def read_results(results_file):
+# reads a jsonl file (one JSON per line)
+def load_jsonl(file_name):
     rows = []
-    with open(results_file, encoding="utf-8") as file:
+    with open(file_name, encoding="utf-8") as file:
         for line in file:
             if line.strip() != "":
                 rows.append(json.loads(line))
     return rows
 
 
-# draws one picture with several tables and saves it
-# tables: {table title: {row name: results in this row}}
-def draw_figure(tables, title, out_file):
-    heights = []
-    for table_title in tables:
-        heights.append(len(tables[table_title]) + 2)
-
-    figure, axes = plt.subplots(len(tables), 1, figsize=(14, 0.4 * sum(heights) + 1.5),
-                                gridspec_kw={"height_ratios": heights}, squeeze=False)
-    figure.suptitle(title, fontsize=14, fontweight="bold")
-
-    i = 0
-    for table_title in tables:
-        names = sorted(tables[table_title])
-        data = []
-        for name in names:
-            data.append(table_row(tables[table_title][name]))
-
-        ax = axes[i][0]
-        ax.axis("off")  # no axes, only the table
-        ax.set_title(table_title, fontsize=12, fontweight="bold", loc="left")
-        table = ax.table(cellText=data, rowLabels=names, colLabels=COLUMNS,
-                         loc="upper center", cellLoc="center")
-        table.auto_set_font_size(False)
-        table.set_fontsize(9)
-        table.scale(1, 1.4)
-        i = i + 1
-
-    figure.tight_layout()
-    figure.savefig(out_file, dpi=200, bbox_inches="tight")
-    print("Saved as", out_file)
+# reads the results and metrics of every run that exists.
+# Every run becomes a dictionary with its settings, results and metrics.
+def load_runs():
+    runs = []
+    for data_set, label, name, color in RUNS:
+        results_file = os.path.join(RESULT_DIR, name + "_results.jsonl")
+        if not os.path.exists(results_file):
+            print("Not found, skipped:", results_file)
+            continue
+        results = load_jsonl(results_file)
+        runs.append({
+            "data_set": data_set,
+            "label": label,
+            "name": name,
+            "color": color,
+            "results": results,
+            "metrics": metrics.compute(results, run=name),
+        })
+    return runs
 
 
-# ---------- Diagrams and tables for the thesis ----------
+# only the runs of one data set
+def runs_of(runs, data_set):
+    selected = []
+    for run in runs:
+        if run["data_set"] == data_set:
+            selected.append(run)
+    return selected
 
-# percent with German decimal comma for LaTeX, 0.731 -> '73{,}1'
+
+# recall per value of a field (for example "task" or "position"), test split only
+def recall_by_field(run, field, values):
+    recalls = []
+    for value in values:
+        k = 0
+        n = 0
+        for row in run["results"]:
+            if row["split"] == "test" and row["label"] == "attack" and row.get(field) == value:
+                n = n + 1
+                if row["flagged"]:
+                    k = k + 1
+        recalls.append(metrics.share(k, n))
+    return recalls
+
+
+# ---------- LaTeX tables ----------
+
+# 0.731 -> '73{,}1' (German decimal comma)
 def percent_tex(rate):
     return f"{100 * rate:.1f}".replace(".", "{,}")
 
 
-# rate with confidence interval for LaTeX, small and gray
+# rate with confidence interval, the interval small and gray
 def share_tex(share):
     return (percent_tex(share["rate"]) + r"\,\% {\scriptsize\color{gray}["
             + percent_tex(share["ci_low"]) + "; " + percent_tex(share["ci_high"]) + "]}")
 
 
-# distance from the rate to both ends of the confidence interval, in percent
-def error_bar(share):
-    return [100 * (share["rate"] - share["ci_low"]), 100 * (share["ci_high"] - share["rate"])]
+def number_tex(value):
+    return f"{value:.3f}".replace(".", "{,}")
 
 
-def save_diagram(figure, name):
-    for ending in [".pdf", ".png"]:
-        out_file = os.path.join(DIAGRAM_DIR, name + ending)
-        figure.savefig(out_file, dpi=200, bbox_inches="tight")
-        print("Saved as", out_file)
+def save_text(text, file_name):
+    path = os.path.join(DIAGRAM_DIR, file_name)
+    with open(path, "w", encoding="utf-8") as file:
+        file.write(text)
+    print("Saved as", path)
 
+
+# the label of a run for LaTeX, the new approach in bold
+def label_tex(run):
+    label = run["label"].replace("Small 4", "Small~4").replace("Large 4", "Large~4")
+    if "Neuer Ansatz" in label:
+        label = r"\textbf{" + label + "}"
+    return label
+
+
+# one big table with every run of both data sets
+def write_results_table(runs):
+    lines = [
+        r"\resizebox{\textwidth}{!}{%",
+        r"\begin{tabular}{l rrrr rr rr r}",
+        r"\toprule",
+        r"\textbf{Ansatz} & \textbf{TP} & \textbf{FN} & \textbf{FP} & \textbf{TN} & "
+        r"\textbf{Recall} & \textbf{FPR} & \textbf{Precision} & \textbf{F1} & "
+        r"\textbf{Latenz (Median)} \\",
+    ]
+    for data_set in ["eigen", "bipia"]:
+        selected = runs_of(runs, data_set)
+        if len(selected) == 0:
+            continue
+        cm = selected[0]["metrics"]["confusion_matrix"]
+        attacks = cm["tp"] + cm["fn"]
+        harmless = cm["fp"] + cm["tn"]
+        lines.append(r"\midrule")
+        lines.append(r"\multicolumn{10}{l}{\textit{" + DATA_SET_NAMES[data_set] + " (Test-Split, "
+                     + str(attacks) + " Angriffe, " + str(harmless) + " harmlose Texte)}} \\\\")
+        for run in selected:
+            m = run["metrics"]
+            cm = m["confusion_matrix"]
+            lines.append(label_tex(run)
+                         + " & " + str(cm["tp"]) + " & " + str(cm["fn"])
+                         + " & " + str(cm["fp"]) + " & " + str(cm["tn"])
+                         + " & " + share_tex(m["recall"]) + " & " + share_tex(m["fpr"])
+                         + " & " + number_tex(m["precision"]) + " & " + number_tex(m["f1"])
+                         + " & " + f"{m['latency_ms']['median']:.0f}" + r"\,ms \\")
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}}")
+    save_text("\n".join(lines) + "\n", "tabelle_ergebnisse.tex")
+
+
+# false positive rate per kind of harmless text
+def write_fpr_table(runs):
+    # own data set: normal, hard_negative, transformed
+    # BIPIA: normal = BIPIA texts without attack, hard_negative = NotInject
+    columns = [["normal", "Normal"], ["hard_negative", "Hard Negative"],
+               ["transformed", "Transformiert"]]
+    lines = [
+        r"\begin{tabular}{l rrr r}",
+        r"\toprule",
+        r"\textbf{Ansatz} & \textbf{Normal} & \textbf{Hard Negative} & "
+        r"\textbf{Transformiert} & \textbf{Gesamt} \\",
+    ]
+    for data_set in ["eigen", "bipia"]:
+        selected = runs_of(runs, data_set)
+        if len(selected) == 0:
+            continue
+        lines.append(r"\midrule")
+        lines.append(r"\multicolumn{5}{l}{\textit{" + DATA_SET_NAMES[data_set] + r"}} \\")
+        for run in selected:
+            cells = []
+            for level, title in columns:
+                s = run["metrics"]["fpr_by_level"][level]
+                if s["n"] == 0:
+                    cells.append("--")
+                else:
+                    cells.append(f"{s['k']}/{s['n']} ({percent_tex(s['rate'])}\\,\\%)")
+            s = run["metrics"]["fpr"]
+            cells.append(f"{s['k']}/{s['n']} ({percent_tex(s['rate'])}\\,\\%)")
+            lines.append(label_tex(run) + " & " + " & ".join(cells) + r" \\")
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}")
+    save_text("\n".join(lines) + "\n", "tabelle_fpr_harmlos.tex")
+
+
+# ---------- diagrams ----------
 
 # simple look: no frame on top and right, light grid behind the bars
 def thesis_style():
@@ -186,207 +218,128 @@ def thesis_style():
     })
 
 
-# grouped bars: recall per transformation for every run
-def draw_recall_per_transformation(runs):
-    transformations = list(runs[0][1]["recall_by_transformation"])
-    width = 0.8 / len(runs)
+def save_diagram(figure, name):
+    for ending in [".pdf", ".png"]:
+        path = os.path.join(DIAGRAM_DIR, name + ending)
+        figure.savefig(path, dpi=200, bbox_inches="tight")
+        print("Saved as", path)
+    plt.close(figure)
 
-    figure, ax = plt.subplots(figsize=(6.3, 3.0))
+
+# grouped bars: one group per entry of group_names, one bar per run.
+# values[r][g] is the share of run r in group g.
+def draw_grouped_bars(runs, group_names, values, x_label, name, value_labels=True, width_cm=16):
+    figure, ax = plt.subplots(figsize=(width_cm / 2.54, 7 / 2.54))
+    bar_width = 0.8 / len(runs)
 
     for r in range(len(runs)):
-        label, metrics, color = runs[r]
         positions = []
         heights = []
-        for i in range(len(transformations)):
-            share = metrics["recall_by_transformation"][transformations[i]]
-            positions.append(i - 0.4 + width / 2 + r * width)
-            heights.append(100 * share["rate"])
-        ax.bar(positions, heights, width, label=label, color=color,
-               edgecolor="#333333", linewidth=0.4)
+        for g in range(len(group_names)):
+            positions.append(g - 0.4 + bar_width / 2 + r * bar_width)
+            heights.append(100 * values[r][g]["rate"])
+        # a small gap between the bars (width * 0.9)
+        bars = ax.bar(positions, heights, bar_width * 0.9, label=runs[r]["label"],
+                      color=runs[r]["color"], edgecolor=EDGE, linewidth=0.6)
+        # value above the bar. A bar with 0 % cannot be seen, so it always gets a "0".
+        for bar, height in zip(bars, heights):
+            if value_labels or height == 0:
+                ax.text(bar.get_x() + bar.get_width() / 2, height + 1.5,
+                        f"{height:.0f}", ha="center", va="bottom", fontsize=7, color=EDGE)
 
-    ax.set_xticks(range(len(transformations)))
-    ax.set_xticklabels(transformations, fontsize=8)
-    ax.set_ylim(0, 105)
+    ax.set_xticks(range(len(group_names)))
+    ax.set_xticklabels(group_names)
+    ax.set_ylim(0, 110)
+    ax.set_yticks([0, 20, 40, 60, 80, 100])
     ax.set_ylabel("Recall (%)")
-    ax.set_xlabel("Transformation")
-
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=3, fontsize=8)
-
-    save_diagram(figure, "recall_pro_transformation")
+    ax.set_xlabel(x_label)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=2, fontsize=8)
+    save_diagram(figure, name)
 
 
-# recall against false positive rate, one point per run (top left is best)
-def draw_recall_vs_fpr(runs):
-    figure, ax = plt.subplots(figsize=(4.2, 3.2))
-    ax.grid(True, axis="both")
-
-    for label, metrics, color in runs:
-        recall = metrics["recall"]
-        fpr = metrics["fpr"]
-        ax.errorbar(100 * fpr["rate"], 100 * recall["rate"],
-                    xerr=[[error_bar(fpr)[0]], [error_bar(fpr)[1]]],
-                    yerr=[[error_bar(recall)[0]], [error_bar(recall)[1]]],
-                    fmt="o", markersize=8, color=color, markeredgecolor="#333333",
-                    ecolor="#555555", elinewidth=0.8, capsize=2, label=label)
-
-    ax.set_xlim(-1, 20)
-    ax.set_ylim(0, 100)
-    ax.set_xlabel("Falsch-Positiv-Rate (%)")
-    ax.set_ylabel("Recall (%)")
-    ax.legend(loc="lower right", fontsize=8)
-
-    save_diagram(figure, "recall_vs_fpr")
-
-
-def save_table(text, name):
-    out_file = os.path.join(DIAGRAM_DIR, name + ".tex")
-    with open(out_file, "w", encoding="utf-8") as file:
-        file.write(text)
-    print("Saved as", out_file)
-
-
-# LaTeX table with all runs. The own approach (hybrid) has a light blue row.
-def write_overview_table(runs):
-    lines = [
-        r"\begin{tabular}{l rr rr}",
-        r"\toprule",
-        r" & \multicolumn{2}{c}{\textbf{Erkennung}} & \multicolumn{2}{c}{\textbf{Gesamt}} \\",
-        r"\cmidrule(lr){2-3} \cmidrule(lr){4-5}",
-        r"\textbf{Ansatz} & \textbf{Recall} & \textbf{FPR} & \textbf{F1} & \textbf{Latenz (Median)} \\",
-        r"\midrule",
-    ]
-    for label, metrics, color in runs:
-        row = (label.replace("Small 4", r"Small~4").replace("Large 4", r"Large~4")
-               + " & " + share_tex(metrics["recall"])
-               + " & " + share_tex(metrics["fpr"])
-               + " & " + f"{metrics['f1']:.3f}".replace(".", "{,}")
-               + " & " + f"{metrics['latency_ms']['median']:.0f}" + r"\,ms \\")
-        if color == HSMW_BLUE:
-            row = r"\rowcolor{hsmw!10}" + "\n" + row
-        lines.append(row)
-    lines.append(r"\bottomrule")
-    lines.append(r"\end{tabular}")
-    save_table("\n".join(lines) + "\n", "tabelle_gesamtvergleich")
-
-
-# LaTeX table: false positive rate per kind of harmless request
-def write_fpr_table(runs):
-    levels = [["normal", "Normal"], ["hard_negative", "Hard Negative"],
-              ["transformed", "Transformiert"]]
-    lines = [
-        r"\begin{tabular}{l" + " r" * len(runs) + "}",
-        r"\toprule",
-    ]
-    # two header lines: model and "(neuer Ansatz)", which is empty for the other runs
-    models = []
-    approaches = []
-    for label, metrics, color in runs:
-        model = label
-        approach = ""
-        if " (" in label:
-            model, approach = label.split(" (")
-            approach = "(" + approach
-        models.append(r"\textbf{" + model.replace(" 4", "~4") + "}")
-        approaches.append(r"\textbf{" + approach + "}")
-    lines.append(r"\textbf{Art der harmlosen Anfrage} & " + " & ".join(models) + r" \\")
-    lines.append(r" & " + " & ".join(approaches) + r" \\")
-    lines.append(r"\midrule")
-    for level, name in levels:
-        cells = []
-        for label, metrics, color in runs:
-            share = metrics["fpr_by_level"][level]
-            cells.append(f"{share['k']}/{share['n']} ({percent_tex(share['rate'])}\\,\\%)")
-        lines.append(name + " & " + " & ".join(cells) + r" \\")
-    lines.append(r"\midrule")
-    cells = []
-    for label, metrics, color in runs:
-        share = metrics["fpr"]
-        cells.append(r"\textbf{" + f"{share['k']}/{share['n']} ({percent_tex(share['rate'])}\\,\\%)" + "}")
-    lines.append(r"\textbf{Gesamt} & " + " & ".join(cells) + r" \\")
-    lines.append(r"\bottomrule")
-    lines.append(r"\end{tabular}")
-    save_table("\n".join(lines) + "\n", "tabelle_fpr_harmlos")
-
-
-def create_thesis_figures():
-    runs = []
-    for label, metrics_file, color in THESIS_RUNS:
-        path = os.path.join(RESULT_DIR, metrics_file)
-        if not os.path.exists(path):
-            print("Not found, skipped:", path)
+# recall of every run, one group per data set
+def draw_recall_overview(runs):
+    for data_set in ["eigen", "bipia"]:
+        selected = runs_of(runs, data_set)
+        if len(selected) == 0:
             continue
-        with open(path, encoding="utf-8") as file:
-            runs.append([label, json.load(file), color])
-    if len(runs) == 0:
+        values = []
+        for run in selected:
+            values.append([run["metrics"]["recall"]])
+        draw_grouped_bars(selected, [DATA_SET_NAMES[data_set]], values, "",
+                          "recall_gesamt_" + data_set, width_cm=10)
+
+
+# own data set: recall per transformation T00 ... T15
+def draw_recall_per_transformation(runs):
+    selected = runs_of(runs, "eigen")
+    if len(selected) == 0:
+        return
+    transformations = list(selected[0]["metrics"]["recall_by_transformation"])
+    values = []
+    for run in selected:
+        row = []
+        for transformation in transformations:
+            row.append(run["metrics"]["recall_by_transformation"][transformation])
+        values.append(row)
+    draw_grouped_bars(selected, transformations, values, "Transformation",
+                      "recall_pro_transformation", value_labels=False)
+
+
+# BIPIA: recall per task and per position of the attack
+def draw_recall_bipia(runs):
+    selected = runs_of(runs, "bipia")
+    if len(selected) == 0:
         return
 
-    os.makedirs(DIAGRAM_DIR, exist_ok=True)
-    thesis_style()
-    draw_recall_per_transformation(runs)
-    draw_recall_vs_fpr(runs)
-    write_overview_table(runs)
-    write_fpr_table(runs)
+    values = []
+    for run in selected:
+        values.append(recall_by_field(run, "task", ["email", "table", "code"]))
+    draw_grouped_bars(selected, ["E-Mail", "Tabelle", "Code"], values,
+                      "Art des externen Inhalts", "recall_bipia_pro_aufgabe")
+
+    values = []
+    for run in selected:
+        values.append(recall_by_field(run, "position", ["start", "middle", "end"]))
+    draw_grouped_bars(selected, ["Anfang", "Mitte", "Ende"], values,
+                      "Position des Angriffs im Text", "recall_bipia_pro_position")
 
 
-# ---------- Main program ----------
-
-# results of every run, for the comparisons at the end
-all_rows = {}
-
-for run in RUNS:
-    name = run[0]
-    model_name = run[1]
-    results_file = os.path.join(RESULT_DIR, run[2])
-    out_file = os.path.join(RESULT_DIR, run[3])
-
-    # skip runs that do not exist yet
-    if not os.path.exists(results_file):
-        print("Not found, skipped:", results_file)
-        continue
-
-    rows = read_results(results_file)
-
-    tables = {"Total": {"all": rows}, "Per split": {}, "Per harmless_level": {}}
-    for row in rows:
-        add_to_group(tables["Per split"], "split = " + str(row["split"]), row)
-        add_to_group(tables["Per harmless_level"], "harmless_level = " + str(row["harmless_level"]), row)
-        # only the BIPIA runs have a task (email, table, code, prompt = NotInject)
-        if "task" in row:
-            if "Per task" not in tables:
-                tables["Per task"] = {}
-            add_to_group(tables["Per task"], "task = " + str(row["task"]), row)
-
-    draw_figure(tables, "Prompt injection detection with " + model_name + " – " + name, out_file)
-
-    # row name in the comparison tables, with model so runs of both models can be told apart
-    all_rows[name] = [model_name + " – " + name, rows]
-
-# one picture per comparison with the runs next to each other (dev and test split)
-for compare in COMPARISONS:
-    names = compare[0]
-    comparison = {"Dev split": {}, "Test split": {}}
-    for name in names:
-        if name not in all_rows:
+# recall against false positive rate, one diagram per data set (top left is best).
+# The lines show the 95 % confidence interval.
+def draw_recall_vs_fpr(runs):
+    for data_set in ["eigen", "bipia"]:
+        selected = runs_of(runs, data_set)
+        if len(selected) == 0:
             continue
-        label = all_rows[name][0]
-        for row in all_rows[name][1]:
-            if row["split"] == "dev":
-                add_to_group(comparison["Dev split"], label, row)
-            if row["split"] == "test":
-                add_to_group(comparison["Test split"], label, row)
+        figure, ax = plt.subplots(figsize=(10 / 2.54, 8 / 2.54))
+        ax.grid(True, axis="both")
+        for run in selected:
+            recall = run["metrics"]["recall"]
+            fpr = run["metrics"]["fpr"]
+            ax.errorbar(100 * fpr["rate"], 100 * recall["rate"],
+                        xerr=[[100 * (fpr["rate"] - fpr["ci_low"])], [100 * (fpr["ci_high"] - fpr["rate"])]],
+                        yerr=[[100 * (recall["rate"] - recall["ci_low"])], [100 * (recall["ci_high"] - recall["rate"])]],
+                        fmt="o", markersize=8, color=run["color"], markeredgecolor=EDGE,
+                        ecolor="#555555", elinewidth=0.8, capsize=2, label=run["label"])
+        ax.set_xlim(-1, 30)
+        ax.set_ylim(0, 100)
+        ax.set_xlabel("Falsch-Positiv-Rate (%)")
+        ax.set_ylabel("Recall (%)")
+        ax.set_title(DATA_SET_NAMES[data_set], fontsize=9)
+        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=1, fontsize=8)
+        save_diagram(figure, "recall_vs_fpr_" + data_set)
 
-    # the BIPIA runs have no dev split, an empty table cannot be drawn
-    if len(comparison["Dev split"]) == 0:
-        del comparison["Dev split"]
 
-    if len(comparison["Test split"]) > 1:
-        labels = []
-        for name in names:
-            labels.append(all_rows[name][0])
-        draw_figure(comparison, "Comparison: " + " vs. ".join(labels),
-                    os.path.join(RESULT_DIR, compare[1]))
+# ---------- start ----------
 
-# diagrams and tables for the results chapter of the thesis
-create_thesis_figures()
+os.makedirs(DIAGRAM_DIR, exist_ok=True)
+thesis_style()
+all_runs = load_runs()
 
-plt.show()
+write_results_table(all_runs)
+write_fpr_table(all_runs)
+draw_recall_overview(all_runs)
+draw_recall_per_transformation(all_runs)
+draw_recall_bipia(all_runs)
+draw_recall_vs_fpr(all_runs)

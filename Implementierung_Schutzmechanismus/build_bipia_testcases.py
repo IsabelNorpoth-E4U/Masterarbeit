@@ -7,6 +7,10 @@
 #   NotInject (Li et al., ACL 2025):
 #     harmless_level "hard_negative": harmless prompts with words like "ignore"
 #
+# input_type says where the text comes from (used by main_new_approach_mistral.py):
+#   "external": BIPIA texts, content the assistant reads
+#   "user":     NotInject prompts, messages of the user
+#
 # Before:  git clone https://github.com/microsoft/BIPIA.git   data/external/BIPIA
 #          git clone https://github.com/leolee99/PIGuard.git  data/external/PIGuard
 # Run:     python3 build_bipia_testcases.py
@@ -133,6 +137,7 @@ for task in TASKS:
                 "messages": [{"role": "user", "content": text}],
                 "split": SPLIT,
                 "source": "BIPIA",
+                "input_type": "external",
                 "task": task_name,
                 "attack_category": category,
                 "position": position,
@@ -152,6 +157,7 @@ for task in TASKS:
             "messages": [{"role": "user", "content": get_text(samples[index])}],
             "split": SPLIT,
             "source": "BIPIA",
+            "input_type": "external",
             "task": task_name,
             "attack_category": None,
             "position": None,
@@ -177,6 +183,7 @@ for part in parts:
             "messages": [{"role": "user", "content": samples[i]["prompt"]}],
             "split": "test",
             "source": "NotInject",
+            "input_type": "user",
             "task": "prompt",
             "attack_category": None,
             "position": None,

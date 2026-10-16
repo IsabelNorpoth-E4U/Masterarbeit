@@ -158,6 +158,56 @@ ausgeht. Danach wird der ANgegeben ob in dem Prompt ein entschlüsselungshinweis
 wird angegben welche Sprach es enthält, was für T09 notwendig ist, da dort die Anweisung im Prompt auf Zulu angegeben wird. Als letztes Parameter wird noch hinzugefügt 
 ob diese Eintrag im Datensatz zu dem dev oder test Aschnitt gehört. Hier sind es nun 330 mal dev Einträge und 660 test Einträge.
 
+\subsection{Externe Datensätze}
+
+
+
+Inhalt der einzelnen Teile
+a) Motivation: warum externe Daten? (1 Absatz)
+
+Der eigene Datensatz enthält Nutzernachrichten. Die Arbeit behandelt aber indirekte Prompt Injection, also Anweisungen in Inhalten, die der Assistent liest (E-Mails, Tabellen, Webseiten).
+Der eigene Datensatz ist selbst erstellt. Ein unabhängiger Datensatz prüft, ob die Ergebnisse übertragbar sind, und mildert das Problem der Zirkularität.
+Die Datensätze werden aus der Literatur übernommen statt selbst erstellt, damit die Ergebnisse mit anderen Arbeiten vergleichbar sind.
+b) BIPIA (1–2 Absätze)
+
+Herkunft: Yi et al., KDD 2025, ein Benchmark speziell für indirekte Prompt Injection
+Aufbau im Original: Aufgaben, in denen ein Modell externe Inhalte verarbeitet, und eine Sammlung von Angriffssätzen. Die genauen Zahlen zu Aufgaben und Angriffskategorien kannst du aus dem Paper übernehmen.
+Verwendete Auswahl: die drei Aufgaben E-Mail, Tabelle, Code. Code-Texte erhalten Code-Angriffe, die anderen Text-Angriffe, wie im Original.
+Konstruktion der Testfälle: Ein Angriffssatz wird an den Anfang, in die Mitte (vor einem zufälligen Satz) oder an das Ende des Textes eingefügt. Dazu kommen dieselben Textarten ohne Angriff als harmlose Fälle (normal). Fester Seed (2023, wie in BIPIA) für Reproduzierbarkeit.
+Die Positionen solltest du begründen, denn sie sind später für die Auswertung wichtig: Angriffe am Ende wurden laut Protokoll kaum erkannt.
+c) NotInject (1 Absatz)
+
+Herkunft: Li et al., ACL 2025, aus der Arbeit zu InjecGuard/PIGuard
+Zweck: Messung von Over-Defense. Das sind harmlose Prompts, die typische Auslösewörter wie „ignore“ enthalten.
+Verwendung: 339 Fälle als hard_negative, als Nutzernachrichten (input_type = user)
+Bezug zu deinem Datensatz: Sie entsprechen deinen eigenen Hard Negatives, stammen aber aus einer unabhängigen Quelle.
+d) Zusammenstellung und Aufteilung (Tabelle + 1 Absatz)
+
+Mit deinen tatsächlichen Zahlen:
+
+Entwicklung (BIPIA-train)	Test (BIPIA-test + NotInject)
+Angriffe E-Mail / Tabelle / Code	75 / 75 / 50	75 / 75 / 50
+Harmlos E-Mail / Tabelle / Code	39 / 50 / 50	50 / 50 / 50
+Harmlos NotInject (Hard Negatives)	–	339
+Gesamt	339	689
+Trennung von Entwicklung und Test: Entwickelt wurde nur auf BIPIA-train, BIPIA-test wurde einmalig nach dem Einfrieren des Ansatzes verwendet. Die 11 E-Mails, die in beiden Teilen vorkommen, wurden aus den Entwicklungsdaten entfernt. Daher 39 statt 50.
+Gleiches Format wie der eigene Datensatz, ergänzt um input_type (Herkunft: Nutzer oder extern), task, attack_category und position. Dadurch werden dieselben Metriken unverändert berechnet.
+e) Unterschiede zum eigenen Datensatz (kurze Aufzählung oder Tabelle)
+
+Eigener Datensatz	BIPIA + NotInject
+Art der Angriffe	direkt, in Nutzernachrichten	indirekt, in externen Inhalten
+Sprache	Deutsch	Englisch
+Verschleierung	15 Transformationen	keine, Angriffe im Klartext
+Erstellung	selbst	aus der Literatur
+Diese Tabelle ist wichtig, weil sie zeigt, dass beide Datensätze unterschiedliche Fragen beantworten. Das erklärt später, warum die Ergebnisse auseinandergehen. Die fehlende Verschleierung in BIPIA steht auch schon als Grenze in deinem Protokoll.
+
+Wo der Rest hingehört
+Die Weiterentwicklung (Prüfung nach Herkunft, Variante C, nummerierte Zeilen, verworfene Varianten, vorab festgelegte Entscheidungsregel) gehört in den Abschnitt „Überarbeitung des Ansatzes“, nicht in die Datensatzbeschreibung. Dein Entwicklungsprotokoll ist dafür eine sehr gute Vorlage. Die vorab festgelegte Entscheidungsregel ist methodisch ein starkes Argument und sollte unbedingt in die Arbeit.
+Die Ergebnisse auf BIPIA-test gehören in den Abschnitt „Ergebnisse“, getrennt vom eigenen Datensatz.
+Prüf außerdem, ob BIPIA (Yi et al.) und NotInject (Li et al.) schon mit diesen Angaben in meine-literatur.bib stehen. Beide sind laut deinem Skript begutachtet erschienen (KDD 2025 bzw. ACL 2025).
+
+Soll ich den Unterabschnitt nach dieser Gliederung ausformulieren?
+
 \subsection{Auswahl der Metriken}
 
 Da die Ergebnisse der implementierten Schutzmaßnahmen auf ihre wirksamkeit überprüft werden soll wurden mehrere Metriken verwendet, um einen Vergleich zu bekommen.
