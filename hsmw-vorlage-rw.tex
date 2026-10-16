@@ -88,6 +88,11 @@ glossaryfront,
 		{ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
 		{ß}{{\ss}}1
 		{–}{{--}}1 {—}{{---}}1
+		% weitere Sonderzeichen aus dem JSON der Multiturn Injection (Anhang)
+		{§}{{\S}}1 {°}{{\textdegree}}1 {ø}{{\o}}1 {„}{{\glqq}}1 {“}{{\grqq}}1 {→}{{$\rightarrow$}}1
+		% Emojis in den Log-Ausgaben von server.js (Anhang) werden ausgeblendet,
+		% pdflatex kann sie nicht darstellen
+		{🔎}{}0 {✅}{}0 {❌}{}0 {⚠}{}0 {️}{}0 {🌍}{}0 {🔁}{}0
 }
 
 % für das Literaturverzeichnis
@@ -216,5 +221,33 @@ Ich möchte an dieser Stelle Stefan Schildbach für die gute Vorlage danken, die
 \input{chapter/03_Prompt_Injection}
 \input{chapter/04_Analyse_Chatbot}
 \input{chapter/05_Schutzmassnahmen}
+
+%%% Anhang
+% \appendix
+% % Anhang A: Änderungen am Chatbot (Kapitel 4)
+% \input{appendix/server.js.tex}
+
+% % Anhang B und C: JSON der Multiturn Injection und Chatverläufe der Angriffe (Kapitel 4),
+% % erzeugt mit appendix/build_chat_appendix.py
+% \input{appendix/json_multiturn.tex}
+% \input{appendix/chats_angriffe.tex}
+
+% % Anhang D: Code der Schutzmaßnahme (Kapitel 5)
+% \chapter{Code}\label{ch:code}
+
+% \section{Original-Ansatz}\label{sec:code_original}
+% \lstinputlisting[language=Python, caption={Original-Ansatz (main\_original\_mistral.py)}, label={lst:code_original}]{Implementierung_Schutzmechanismus/main_original_mistral.py}
+
+% \section{Neuer Ansatz}\label{sec:code_new_approach}
+% \lstinputlisting[language=Python, caption={Neuer Ansatz (main\_new\_approach\_mistral.py)}, label={lst:code_new_approach}]{Implementierung_Schutzmechanismus/main_new_approach_mistral.py}
+
+% \section{Metriken}\label{sec:code_metrics}
+% \lstinputlisting[language=Python, caption={Berechnung der Metriken (metrics.py)}, label={lst:code_metrics}]{Implementierung_Schutzmechanismus/metrics.py}
+
+% \section{Externer Datensatz}\label{sec:code_bipia}
+% \lstinputlisting[language=Python, caption={Erzeugung des BIPIA-Datensatzes (build\_bipia\_testcases.py)}, label={lst:code_bipia}]{Implementierung_Schutzmechanismus/build_bipia_testcases.py}
+
+% \section{Auswertung}\label{sec:code_visualize}
+% \lstinputlisting[language=Python, caption={Tabellen und Diagramme (visualize\_results.py)}, label={lst:code_visualize}]{Implementierung_Schutzmechanismus/visualize_results.py}
 
 \end{document}

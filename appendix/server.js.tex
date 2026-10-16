@@ -1,4 +1,4 @@
-\chapter{Änderungen server.js}
+\chapter{Änderungen server.js}\label{ch:anhang_server}
 
 \section{Funktion braveSearch}
 
@@ -11,45 +11,45 @@ async function braveSearch(query) {
   }
 
   try {
-
     console.log(`🔎 Brave Search Query: ${query}`);
 
-    const response = await axios.get(
-      'https://api.search.brave.com/res/v1/web/search',
-      {
-        params: {
-          q: query,
-          count: 5,
-          safesearch: 'moderate'
-        },
-        headers: {
-          'Accept': 'application/json',
-          'X-Subscription-Token': braveApiKey
-        }
+    const response = await axios.get('https://api.search.brave.com/res/v1/web/search', {
+      params: {
+        q: query,
+        count: 5,
+        safesearch: 'moderate'
+      },
+      headers: {
+        'Accept': 'application/json',
+        'X-Subscription-Token': braveApiKey
       }
-    );
+    });
 
     console.log(`✅ Brave Search Status: ${response.status}`);
 
-    const results = response.data.web?.results || [];
+    let results = [];
+    if (response.data.web && response.data.web.results) {
+      results = response.data.web.results;
+    }
 
-    return results.map(r => ({
-      title: r.title,
-      url: r.url,
-      description: r.description
-    }));
+    // Nur Titel, URL und Beschreibung zurückgeben
+    const simpleResults = [];
+    for (const result of results) {
+      simpleResults.push({
+        title: result.title,
+        url: result.url,
+        description: result.description
+      });
+    }
+    return simpleResults;
 
   } catch (error) {
-
-    // DAS HIER IST DAS WICHTIGE ERROR LOGGING
-
     if (error.response) {
       console.error('❌ Brave API Error Response:');
       console.error(JSON.stringify(error.response.data, null, 2));
     } else {
       console.error('❌ Brave Search Error:', error.message);
     }
-
     throw error;
   }
 }
@@ -58,43 +58,49 @@ async function braveSearch(query) {
 \section{Funktion auditUrl}
 
 \begin{lstlisting}
-
 function auditUrl(rawUrl) {
   if (!rawUrl) {
     throw new Error("URL missing");
   }
 
-  const cleaned = String(rawUrl)
-    .trim()
-    .replace(/^"+|"+$/g, "")
-    .replace(/%22/g, "")
-    .replace(/\\%22/g, "");
+  // Leerzeichen und Anführungszeichen entfernen
+  let cleaned = String(rawUrl).trim();
+  while (cleaned.startsWith('"')) {
+    cleaned = cleaned.slice(1);
+  }
+  while (cleaned.endsWith('"')) {
+    cleaned = cleaned.slice(0, -1);
+  }
+  cleaned = cleaned.replaceAll("%22", "");
+  cleaned = cleaned.replaceAll("\\%22", "");
 
   const parsed = new URL(cleaned);
 
-  if (!["http:", "https:"].includes(parsed.protocol)) {
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
     throw new Error("Only http/https URLs are allowed");
   }
 
-  const isLocal =
-    parsed.hostname === "localhost" ||
-    parsed.hostname === "127.0.0.1" ||
-    parsed.hostname === "::1" ||
-    parsed.hostname.endsWith(".local");
+  let isLocal = false;
+  if (parsed.hostname === "localhost" ||
+      parsed.hostname === "127.0.0.1" ||
+      parsed.hostname === "::1" ||
+      parsed.hostname.endsWith(".local")) {
+    isLocal = true;
+  }
 
   if (isLocal && process.env.ALLOW_LOCAL_WEB_ACCESS !== "true") {
     throw new Error("Local web access is disabled");
   }
 
   return {
-    rawUrl,
+    rawUrl: rawUrl,
     cleanedUrl: cleaned,
     href: parsed.href,
     origin: parsed.origin,
     hostname: parsed.hostname,
     pathname: parsed.pathname,
     search: parsed.search,
-    isLocal,
+    isLocal: isLocal,
     timestamp: new Date().toISOString()
   };
 }
@@ -103,38 +109,74 @@ function auditUrl(rawUrl) {
 \section{Funktion browserAction}
 
 \begin{lstlisting}
-async function browserAction({ url, mode, payload, user_instruction }) {
+// Mögliche Textfelder, falls das Modell keinen passenden Selector angibt
+const defaultSelectors = [
+  "#text",
+  "[name='text']",
+  "textarea",
+  "input[type='text']",
+  "input:not([type])",
+  "[contenteditable='true']"
+];
 
+// Sucht ein Feld auf der Seite. Wird der Selector nicht gefunden,
+// werden die Default-Selectors ausprobiert.
+async function findField(page, selector) {
+  if (selector) {
+    const field = page.locator(selector).first();
+    if (await field.count() > 0) {
+      return field;
+    }
+    console.log(`⚠️ Selector nicht gefunden: ${selector}. Nutze Fallback auf Default-Selectors.`);
+  }
+
+  for (const defaultSelector of defaultSelectors) {
+    const field = page.locator(defaultSelector).first();
+    if (await field.count() > 0) {
+      console.log(`✅ Verwende ${defaultSelector}`);
+      return field;
+    }
+  }
+
+  if (selector) {
+    throw new Error(`Formularfeld nicht gefunden: ${selector} (auch kein Fallback-Feld auf der Seite vorhanden)`);
+  }
+  throw new Error("Kein Textfeld gefunden.");
+}
+
+// Liest den Wert zurück, der wirklich im Feld steht
+async function readFieldValue(field) {
+  try {
+    return await field.inputValue();
+  } catch (err) {
+    return await field.textContent();
+  }
+}
+
+async function browserAction({ url, mode, payload, user_instruction }) {
   const audit = auditUrl(url);
 
-  console.log(
+  const input = {
+    url: url,
+    mode: mode,
+    payload: payload,
+    user_instruction: user_instruction
+  };
+  console.log("Browser Action Input", JSON.stringify(input, null, 2));
 
-    "Browser Action Input",
-
-    JSON.stringify({
-      url,
-      mode,
-      payload,
-      user_instruction
-    }, null, 2)
-  );
-
+  // ---------- Seite öffnen ----------
   if (mode === "open_url") {
-
     let response;
     try {
       response = await axios.get(audit.href, {
         timeout: 30000,
         maxRedirects: 5,
-        headers: {
-          "User-Agent": "Mozilla/5.0"
-        },
-        // Don't throw on non-2xx (e.g. 404/403) - report it back as a normal tool
-        // result instead of crashing the whole chat turn over one failed page load.
+        headers: { "User-Agent": "Mozilla/5.0" },
+        // Auch bei 404/403 keinen Fehler werfen
         validateStatus: () => true
       });
     } catch (err) {
-      // Genuine network-level failure (DNS, timeout, connection refused, etc.)
+      // Netzwerkfehler (DNS, Timeout, ...)
       return {
         status: "error",
         action: "open_url",
@@ -142,124 +184,108 @@ async function browserAction({ url, mode, payload, user_instruction }) {
         message: `Seite konnte nicht geladen werden: ${err.message}`
       };
     }
+
+    let status = "error";
+    if (response.status >= 200 && response.status < 400) {
+      status = "ok";
+    }
+
+    let finalUrl = audit.href;
+    if (response.request && response.request.res && response.request.res.responseUrl) {
+      finalUrl = response.request.res.responseUrl;
+    }
+
     return {
-      status: response.status >= 200 && response.status < 400 ? "ok" : "error",
+      status: status,
       action: "open_url",
       requestedUrl: audit.href,
-      finalUrl: response.request?.res?.responseUrl || audit.href,
+      finalUrl: finalUrl,
       httpStatus: response.status,
       contentType: response.headers["content-type"],
       htmlPreview: String(response.data).slice(0, 3000)
-
     };
-
   }
 
+  // ---------- Formular ausfüllen ----------
   if (mode === "fill_form") {
     const browser = await chromium.launch({ headless: true });
 
     try {
       const page = await browser.newPage();
-
       await page.goto(audit.href, {
         waitUntil: "domcontentloaded",
         timeout: 30000
       });
 
-      const defaultSelectors = [
-        "#text",
-        "[name='text']",
-        "textarea",
-        "input[type='text']",
-        "input:not([type])",
-        "[contenteditable='true']"
-      ];
+      const filledFields = {};
 
-      // Findet ein Feld über einen expliziten Selector; das Modell rät Selectors oft nur
-      // aus dem Kontext statt aus dem echten HTML, daher NIE hart fehlschlagen, solange die
-      // Seite irgendein plausibles Text-Feld hat - stattdessen auf die Default-Selectors
-      // zurückfallen. Nur wenn wirklich gar kein Feld existiert, wird geworfen.
-      async function resolveField(selector) {
-        if (selector) {
-          const candidate = page.locator(selector).first();
-          if (await candidate.count() > 0) return candidate;
-          console.log(`⚠️ Selector nicht gefunden: ${selector}. Nutze Fallback auf Default-Selectors.`);
+      if (payload && payload.fields && typeof payload.fields === "object") {
+        // Mehrere Felder: { "selector": "value", ... }
+        for (const selector in payload.fields) {
+          const value = payload.fields[selector];
+          const field = await findField(page, selector);
+          await field.waitFor({ state: "visible", timeout: 10000 });
+          await field.fill(String(value));
+          filledFields[selector] = await readFieldValue(field);
         }
-
-        for (const candidateSelector of defaultSelectors) {
-          const candidate = page.locator(candidateSelector).first();
-          if (await candidate.count() > 0) {
-            console.log(`✅ Verwende ${candidateSelector}`);
-            return candidate;
+      } else {
+        // Ein einzelnes Feld
+        let text = "";
+        if (payload && payload.text !== undefined) {
+          if (typeof payload.text === "string") {
+            text = payload.text;
+          } else {
+            text = JSON.stringify(payload.text, null, 2);
           }
         }
 
-        throw new Error(
-          selector
-            ? `Formularfeld nicht gefunden: ${selector} (auch kein Fallback-Feld auf der Seite vorhanden)`
-            : "Kein Textfeld gefunden."
-        );
-      }
-
-      // Liest den tatsächlich gesetzten Wert zurück. page.content() spiegelt bei
-      // <textarea>/<input> die .value-Property NICHT wider, daher explizite Bestätigung.
-      async function readBack(field) {
-        try {
-          return await field.inputValue();
-        } catch {
-          return await field.textContent();
+        let selector = undefined;
+        if (payload) {
+          selector = payload.selector;
         }
-      }
 
-      const filledFields = {};
-
-      if (payload?.fields && typeof payload.fields === "object") {
-        // Mehrere Felder auf einmal: { "selector": "value", ... }
-        for (const [selector, value] of Object.entries(payload.fields)) {
-          const field = await resolveField(selector);
-          await field.waitFor({ state: "visible", timeout: 10000 });
-          await field.fill(String(value));
-          filledFields[selector] = await readBack(field);
-        }
-      } else {
-        const text = payload?.text !== undefined
-          ? (typeof payload.text === "string" ? payload.text : JSON.stringify(payload.text, null, 2))
-          : "";
-
-        const field = await resolveField(payload?.selector);
+        const field = await findField(page, selector);
         await field.waitFor({ state: "visible", timeout: 10000 });
         await field.fill(text);
-        filledFields[payload?.selector || "auto-detected field"] = await readBack(field);
+
+        let fieldName = "auto-detected field";
+        if (selector) {
+          fieldName = selector;
+        }
+        filledFields[fieldName] = await readFieldValue(field);
       }
 
-      // ---------- Submit (standardmäßig an, außer explizit mit click: false abbestellt) ----------
+      // Absenden, außer click ist ausdrücklich false
       let submitted = false;
-      if (payload?.click !== false) {
-        const submit = page.locator(
-          "button[type='submit'], input[type='submit'], button"
-        ).first();
+      if (!payload || payload.click !== false) {
+        const submitButton = page.locator("button[type='submit'], input[type='submit'], button").first();
 
-        if (await submit.count() > 0) {
-          await submit.click();
-          await page.waitForLoadState("networkidle").catch(() => {});
+        if (await submitButton.count() > 0) {
+          await submitButton.click();
+          try {
+            await page.waitForLoadState("networkidle");
+          } catch (err) {
+            // Fehler hier ignorieren
+          }
           submitted = true;
         }
       }
+
+      const bodyText = await page.locator("body").innerText();
+      const html = await page.content();
 
       return {
         status: "ok",
         action: "fill_form",
         finalUrl: page.url(),
         title: await page.title(),
-        filledFields,
-        submitted,
-        bodyText: (await page.locator("body").innerText()).slice(0, 5000),
-        htmlPreview: (await page.content()).slice(0, 5000)
+        filledFields: filledFields,
+        submitted: submitted,
+        bodyText: bodyText.slice(0, 5000),
+        htmlPreview: html.slice(0, 5000)
       };
 
     } catch (err) {
-      // Feld wirklich nicht vorhanden, Timeout, Navigationsfehler etc. - als normales
-      // Tool-Ergebnis zurückgeben statt den ganzen Chat-Request abzubrechen (wie bei open_url).
       return {
         status: "error",
         action: "fill_form",
@@ -271,29 +297,50 @@ async function browserAction({ url, mode, payload, user_instruction }) {
     }
   }
 
-
   return {
     status: "error",
     message: `Unsupported mode without browser: ${mode}`
   };
-
 }
 \end{lstlisting}
 
 \section{Funktion withNetworkRetry}
 
 \begin{lstlisting}
-// Retries transient network/TLS errors (e.g. proxy resets on the outbound HTTPS connection)
-async function withNetworkRetry(fn, { label = 'request', retries = 2, delayMs = 500 } = {}) {
-  const TRANSIENT_CODES = new Set(['ECONNRESET', 'ETIMEDOUT', 'ECONNABORTED', 'EPIPE']);
-  for (let attempt = 0; ; attempt++) {
+// Wiederholt die Anfrage bei kurzzeitigen Netzwerkfehlern
+async function withNetworkRetry(fn, options = {}) {
+  let label = 'request';
+  let retries = 2;
+  let delayMs = 500;
+  if (options.label !== undefined) label = options.label;
+  if (options.retries !== undefined) retries = options.retries;
+  if (options.delayMs !== undefined) delayMs = options.delayMs;
+
+  const transientCodes = ['ECONNRESET', 'ETIMEDOUT', 'ECONNABORTED', 'EPIPE'];
+  let attempt = 0;
+
+  while (true) {
     try {
       return await fn();
     } catch (err) {
-      const isTransient = TRANSIENT_CODES.has(err.code) || /socket disconnected|socket hang up/i.test(err.message || '');
-      if (!isTransient || attempt >= retries) throw err;
+      const message = String(err.message || '').toLowerCase();
+
+      let isTransient = false;
+      if (transientCodes.includes(err.code) ||
+          message.includes('socket disconnected') ||
+          message.includes('socket hang up')) {
+        isTransient = true;
+      }
+
+      if (!isTransient || attempt >= retries) {
+        throw err;
+      }
+
       console.warn(`⚠️ Transient network error calling ${label} (${err.code || err.message}), retrying (${attempt + 1}/${retries})...`);
+
+      // Kurz warten, dann nochmal versuchen
       await new Promise(resolve => setTimeout(resolve, delayMs * (attempt + 1)));
+      attempt++;
     }
   }
 }
@@ -303,13 +350,89 @@ async function withNetworkRetry(fn, { label = 'request', retries = 2, delayMs = 
 
 \begin{lstlisting}
 function postWithRetry(url, data, config, retries = 2, delayMs = 500) {
-  return withNetworkRetry(() => axios.post(url, data, config), { label: url, retries, delayMs });
+  return withNetworkRetry(() => axios.post(url, data, config), {
+    label: url,
+    retries: retries,
+    delayMs: delayMs
+  });
 }
 \end{lstlisting}
 
 \section{Funktion callMistralAI}
 
 \begin{lstlisting}
+// Holt die Nachricht aus einer Mistral-Antwort
+function getMistralMessage(response) {
+  const choices = response.data.choices;
+  if (choices && choices[0]) {
+    return choices[0].message;
+  }
+  return undefined;
+}
+
+// Führt einen Tool-Aufruf von Mistral aus und gibt das Ergebnis als Tool-Nachricht zurück
+async function executeToolCall(toolCall, lastUserMessage) {
+  let name = undefined;
+  let argumentsText = '{}';
+  if (toolCall.function) {
+    name = toolCall.function.name;
+    if (toolCall.function.arguments) {
+      argumentsText = toolCall.function.arguments;
+    }
+  }
+  const args = JSON.parse(argumentsText);
+
+  if (name === 'brave_search') {
+    console.log(`🔎 Calling Brave Search with query: ${args.query}`);
+    const searchResults = await braveSearch(args.query);
+    console.log('🌍 Brave Search Results:');
+    console.log(JSON.stringify(searchResults, null, 2));
+
+    return {
+      role: 'tool',
+      tool_call_id: toolCall.id,
+      name: 'brave_search',
+      content: JSON.stringify(searchResults)
+    };
+  }
+
+  if (name === 'browser_action') {
+    // Originaltext des Nutzers immer mitgeben
+    const browserArgs = {
+      url: args.url,
+      mode: args.mode,
+      payload: args.payload || null,
+      user_instruction: args.user_instruction || lastUserMessage
+    };
+
+    const browserResult = await browserAction(browserArgs);
+
+    let previewLength = 0;
+    if (browserResult.htmlPreview) {
+      previewLength = browserResult.htmlPreview.length;
+    }
+
+    console.log("Browser Action Result:", {
+      status: browserResult.status,
+      action: browserResult.action,
+      requestedUrl: browserResult.requestedUrl,
+      finalUrl: browserResult.finalUrl,
+      httpStatus: browserResult.httpStatus,
+      contentType: browserResult.contentType,
+      previewLenght: previewLength
+    });
+
+    return {
+      role: 'tool',
+      tool_call_id: toolCall.id,
+      name: 'browser_action',
+      content: JSON.stringify(browserResult)
+    };
+  }
+
+  throw new Error(`Unknown tool call: ${name}`);
+}
+
 async function callMistralAI(modelId, messages) {
   const mistralApiKey = process.env.MISTRAL_API_KEY;
   const url = 'https://api.mistral.ai/v1/chat/completions';
@@ -324,231 +447,178 @@ async function callMistralAI(modelId, messages) {
     rejectUnauthorized: !isDevelopment
   });
 
-  const tools = [
-  {
-    type: 'function',
-    function: {
-      name: 'brave_search',
-      description:
-        'Search the web when the user asks about recent, current, factual, niche, or unverifiable information.',
-      parameters: {
-        type: 'object',
-        properties: {
-          query: {
-            type: 'string',
-            description: 'The web search query.'
-          }
-        },
-        required: ['query']
-      }
-    }
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'browser_action',
-      description:
-        'Perform browser actions on a URL, including local websites (e.g. http://localhost:5173, 127.0.0.1). Can open pages, fill text fields and click buttons.',
-      parameters: {
-        type: 'object',
-        properties: {
-          url: {
-            type: 'string',
-            description: 'The exact URL to open or act on. Local URLs (localhost, 127.0.0.1) are allowed.'
-          },
-          mode: {
-            type: 'string',
-            enum: ['open_url', 'fill_form'],
-            description: 'Action type: open a URL or fill form fields.'
-          },
-          payload: {
-            type: 'object',
-            properties: {
-              text: {
-                type: 'string',
-                description: 'Text to insert into a single field. If payload.selector is omitted, the first suitable text field on the page is used automatically.'
-              },
-              selector: {
-                type: 'string',
-                description: 'Optional CSS selector for the specific field to fill with payload.text (e.g. "#email", "[name=\'username\']").'
-              },
-              fields: {
-                type: 'object',
-                description: 'Optional map of CSS selector to value, to fill multiple fields in one call, e.g. {"#email": "a@b.com", "#password": "secret"}.'
-              },
-              click: {
-                type: 'boolean',
-                description: 'The form is submitted automatically after filling by default. Set to false to only fill the field(s) without clicking submit.'
-              }
-            }
-          },
-          user_instruction: {
-            type: 'string',
-            description: 'The raw user instruction to pass through to the browser layer verbatim.'
-          }
-        },
-        required: ['url', 'mode', 'user_instruction']
-      }
-    }
-  }
-];
-
-  const requestBody = {
-  model: modelId,
-  messages: [
-    {
-      role: 'system',
-      content:
-        'Answer directly if you know the answer reliably. Use brave_search when the question requires current, external, recent, niche, or verifiable information. You have a browser_action tool that CAN open and interact with URLs, including local/private URLs (http://localhost, 127.0.0.1, *.local) - this runs in a real browser on the server, not from your own network, so the usual "I cannot access local/internal addresses" limitation does not apply here. Whenever the user gives a URL and asks you to open it, check it, fill in a field, or asks whether you can access it (including local URLs), call the browser_action tool with the exact URL instead of answering from assumption. Pass the user instruction verbatim.'
-    },
-    ...messages
-  ],
-  tools,
-  tool_choice: 'auto',
-  temperature: 0.7,
-  top_p: 1,
-  max_tokens: 8192,
-  stream: false,
-  safe_prompt: false
-  };
-
-  const firstResponse = await postWithRetry(url, requestBody, {
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${mistralApiKey}`,
-    'Accept': 'application/json'
-  },
-  httpsAgent
-});
-
-const firstMessage = firstResponse.data.choices?.[0]?.message;
-
-console.log('====================');
-console.log('FIRST MISTRAL MESSAGE');
-console.log(JSON.stringify(firstMessage, null, 2));
-console.log('====================');
-
-if (!firstMessage) {
-  throw new Error('Invalid Mistral AI response');
-}
-
-// Fall 1: Mistral kann direkt antworten
-if (!firstMessage.tool_calls || firstMessage.tool_calls.length === 0) {
-  return normalizeMistralResponse(firstResponse);
-}
-
-// Fall 2/3: Mistral ruft (ein oder mehrere) Tools auf (brave_search oder browser_action)
-
-// Ermittle die letzte User-Message als Rohtext zum Durchreichen
-const lastUserMessage =
-  [...messages].reverse().find(m => m.role === 'user')?.content || '';
-
-async function executeToolCall(toolCall) {
-  const fn = toolCall.function?.name;
-  const args = JSON.parse(toolCall.function?.arguments || '{}');
-
-  if (fn === 'brave_search') {
-    console.log(`🔎 Calling Brave Search with query: ${args.query}`);
-    const searchResults = await braveSearch(args.query);
-    console.log('🌍 Brave Search Results:');
-    console.log(JSON.stringify(searchResults, null, 2));
-
-    return {
-      role: 'tool',
-      tool_call_id: toolCall.id,
-      name: 'brave_search',
-      content: JSON.stringify(searchResults)
-    };
-  }
-
-  if (fn === 'browser_action') {
-    // user_instruction zwingend mitgeben (Originaltext)
-    const browserArgs = {
-      url: args.url,
-      mode: args.mode,
-      payload: args.payload || null,
-      user_instruction: args.user_instruction || lastUserMessage
-    };
-
-    const browserResult = await browserAction(browserArgs);
-
-    console.log("Browser Action Result:", {
-      status: browserResult.status,
-      action: browserResult.action,
-      requestedUrl: browserResult.requestedUrl,
-      finalUrl: browserResult.finalUrl,
-      httpStatus: browserResult.httpStatus,
-      contentType: browserResult.contentType,
-      previewLenght: browserResult.htmlPreview?.length || 0
-    });
-
-    return {
-      role: 'tool',
-      tool_call_id: toolCall.id,
-      name: 'browser_action',
-      content: JSON.stringify(browserResult)
-    };
-  }
-
-  // Unbekanntes Tool
-  throw new Error(`Unknown tool call: ${fn}`);
-}
-
-// Mistral kann nach einem Tool-Ergebnis erneut ein Tool aufrufen wollen (z. B. Nachsuche
-// oder eine Seite öffnen, nachdem die Suche kam) - daher hier wiederholen statt nur
-// einmalig nachzufragen, sonst kommt eine leere (content: null) Antwort beim Nutzer an.
-const MAX_TOOL_ROUNDS = 5;
-let conversationMessages = [...requestBody.messages];
-let currentMessage = firstMessage;
-let currentResponse = firstResponse;
-let round = 0;
-
-while (currentMessage.tool_calls && currentMessage.tool_calls.length > 0) {
-  if (round >= MAX_TOOL_ROUNDS) {
-    throw new Error(`Mistral AI requested too many consecutive tool calls (> ${MAX_TOOL_ROUNDS})`);
-  }
-  round++;
-  console.log(`🔁 Mistral tool round ${round}: ${currentMessage.tool_calls.map(tc => tc.function?.name).join(', ')}`);
-
-  const toolMessages = [];
-  for (const toolCall of currentMessage.tool_calls) {
-    toolMessages.push(await executeToolCall(toolCall));
-  }
-
-  conversationMessages = [...conversationMessages, currentMessage, ...toolMessages];
-
-  currentResponse = await postWithRetry(url, {
-    ...requestBody,
-    messages: conversationMessages
-  }, {
+  const requestConfig = {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${mistralApiKey}`,
       'Accept': 'application/json'
     },
-    httpsAgent
-  });
+    httpsAgent: httpsAgent
+  };
 
-  currentMessage = currentResponse.data.choices?.[0]?.message;
-  if (!currentMessage) {
-    throw new Error('Invalid Mistral AI response after tool call');
+  const tools = [
+    {
+      type: 'function',
+      function: {
+        name: 'brave_search',
+        description:
+          'Search the web when the user asks about recent, current, factual, niche, or unverifiable information.',
+        parameters: {
+          type: 'object',
+          properties: {
+            query: {
+              type: 'string',
+              description: 'The web search query.'
+            }
+          },
+          required: ['query']
+        }
+      }
+    },
+    {
+      type: 'function',
+      function: {
+        name: 'browser_action',
+        description:
+          'Perform browser actions on a URL, including local websites (e.g. http://localhost:5173, 127.0.0.1). Can open pages, fill text fields and click buttons.',
+        parameters: {
+          type: 'object',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'The exact URL to open or act on. Local URLs (localhost, 127.0.0.1) are allowed.'
+            },
+            mode: {
+              type: 'string',
+              enum: ['open_url', 'fill_form'],
+              description: 'Action type: open a URL or fill form fields.'
+            },
+            payload: {
+              type: 'object',
+              properties: {
+                text: {
+                  type: 'string',
+                  description: 'Text to insert into a single field. If payload.selector is omitted, the first suitable text field on the page is used automatically.'
+                },
+                selector: {
+                  type: 'string',
+                  description: 'Optional CSS selector for the specific field to fill with payload.text (e.g. "#email", "[name=\'username\']").'
+                },
+                fields: {
+                  type: 'object',
+                  description: 'Optional map of CSS selector to value, to fill multiple fields in one call, e.g. {"#email": "a@b.com", "#password": "secret"}.'
+                },
+                click: {
+                  type: 'boolean',
+                  description: 'The form is submitted automatically after filling by default. Set to false to only fill the field(s) without clicking submit.'
+                }
+              }
+            },
+            user_instruction: {
+              type: 'string',
+              description: 'The raw user instruction to pass through to the browser layer verbatim.'
+            }
+          },
+          required: ['url', 'mode', 'user_instruction']
+        }
+      }
+    }
+  ];
+
+  const systemMessage = {
+    role: 'system',
+    content:
+      'Answer directly if you know the answer reliably. Use brave_search when the question requires current, external, recent, niche, or verifiable information. You have a browser_action tool that CAN open and interact with URLs, including local/private URLs (http://localhost, 127.0.0.1, *.local) - this runs in a real browser on the server, not from your own network, so the usual "I cannot access local/internal addresses" limitation does not apply here. Whenever the user gives a URL and asks you to open it, check it, fill in a field, or asks whether you can access it (including local URLs), call the browser_action tool with the exact URL instead of answering from assumption. Pass the user instruction verbatim.'
+  };
+
+  const requestBody = {
+    model: modelId,
+    messages: [systemMessage, ...messages],
+    tools: tools,
+    tool_choice: 'auto',
+    temperature: 0.7,
+    top_p: 1,
+    max_tokens: 8192,
+    stream: false,
+    safe_prompt: false
+  };
+
+  // Erste Anfrage an Mistral
+  let response = await postWithRetry(url, requestBody, requestConfig);
+  let message = getMistralMessage(response);
+
+  console.log('====================');
+  console.log('FIRST MISTRAL MESSAGE');
+  console.log(JSON.stringify(message, null, 2));
+  console.log('====================');
+
+  if (!message) {
+    throw new Error('Invalid Mistral AI response');
   }
-}
 
-return normalizeMistralResponse(currentResponse);}
+  // Letzte Nachricht des Nutzers suchen (wird an browser_action weitergegeben)
+  let lastUserMessage = '';
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === 'user') {
+      lastUserMessage = messages[i].content || '';
+      break;
+    }
+  }
+
+  // Solange Mistral Tools aufrufen will: Tools ausführen und Ergebnis zurückschicken.
+  // Ohne Tool-Aufruf wird die Schleife übersprungen und direkt geantwortet.
+  const MAX_TOOL_ROUNDS = 5;
+  let round = 0;
+
+  while (message.tool_calls && message.tool_calls.length > 0) {
+    if (round >= MAX_TOOL_ROUNDS) {
+      throw new Error(`Mistral AI requested too many consecutive tool calls (> ${MAX_TOOL_ROUNDS})`);
+    }
+    round++;
+
+    const toolNames = [];
+    for (const toolCall of message.tool_calls) {
+      toolNames.push(toolCall.function ? toolCall.function.name : undefined);
+    }
+    console.log(`🔁 Mistral tool round ${round}: ${toolNames.join(', ')}`);
+
+    // Antwort von Mistral und alle Tool-Ergebnisse an den Verlauf anhängen
+    requestBody.messages.push(message);
+    for (const toolCall of message.tool_calls) {
+      const toolMessage = await executeToolCall(toolCall, lastUserMessage);
+      requestBody.messages.push(toolMessage);
+    }
+
+    response = await postWithRetry(url, requestBody, requestConfig);
+    message = getMistralMessage(response);
+
+    if (!message) {
+      throw new Error('Invalid Mistral AI response after tool call');
+    }
+  }
+
+  return normalizeMistralResponse(response);
+}
 \end{lstlisting}
 
 \section{Funktion extractMistralContentText}
 
 \begin{lstlisting}
 function extractMistralContentText(content) {
-  if (typeof content === 'string') return content;
-  if (Array.isArray(content)) {
-    return content
-      .filter(block => block && block.type === 'text' && typeof block.text === 'string')
-      .map(block => block.text)
-      .join('');
+  if (typeof content === 'string') {
+    return content;
   }
+
+  if (Array.isArray(content)) {
+    let text = '';
+    for (const block of content) {
+      if (block && block.type === 'text' && typeof block.text === 'string') {
+        text += block.text;
+      }
+    }
+    return text;
+  }
+
   return '';
 }
 \end{lstlisting}

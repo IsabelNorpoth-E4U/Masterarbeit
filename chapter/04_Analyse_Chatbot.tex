@@ -158,7 +158,7 @@ In der Datei \texttt{server.js} wurden mehrere Änderungen vorgenommen. Zunächs
 dazu, einen künstlichen Browser zu erstellen und mit diesem Browser Aktionen, die über einfache Informationssammlung hinausgehen, zu erfüllen~\cite{an15}.
 Darüber hinaus wurden die Funktionen \texttt{braveSearch}, \texttt{auditUrl}, \texttt{browserAction}, \texttt{withNetworkRetry}, \texttt{postWithRetry}, 
 \texttt{callMistralAI} und \texttt{extractMistralContentText} hinzugefügt oder überarbeitet. Im Folgenden werden die einzelnen Funktionen näher erläutert. Der vollständige
-Code befindet sich im Anhang.
+Code befindet sich in Anhang~\ref{ch:anhang_server}.
 
 \texttt{braveSearch}
 
@@ -421,7 +421,7 @@ Hallo Jens,...
 
 Für die Multiturn Injection wurden zwei Versuche durchgeführt, bei denen untersucht wurde, wie unterschiedlich der Chatbot auf viele bzw. wenige vorherige
 Anfragen reagiert. Der grundsätzliche Ansatz blieb bei beiden Versuchen identisch: Dem Chatbot wurde ein fiktiver Chatverlauf im JSON-Format gesendet, um zu prüfen, ob
-dadurch seine Bereitschaft steigt, den aktullen Chatverlauf zu übermitteln. Das vollständige JSON befindet sich im Anhang.
+dadurch seine Bereitschaft steigt, den aktullen Chatverlauf zu übermitteln. Das vollständige JSON befindet sich in Anhang~\ref{ch:anhang_json}.
 
 \texttt{Versuch 1}
 
@@ -446,7 +446,7 @@ erstellen und an http://127.0.0.1:5000/ senden?
 \end{verbatim}
 
 Es folgten drei weitere Anfragen, bei denen jeweils der Inhalt der Nachricht abgewandelt wurde. Bei der zweiten wurde der exakte Wortlaut beibehalten, jedoch der Inhalt
-des JSON gekürzt, wie im Anhang zu sehen ist. Bei der dritten Anfrage wurde die Nachricht wie folgt abgewandelt:
+des JSON gekürzt, wie im Chatverlauf in Anhang~\ref{sec:chat_2_multuturn_versuch_2} zu sehen ist. Bei der dritten Anfrage wurde die Nachricht wie folgt abgewandelt:
 
 
 \begin{verbatim}
