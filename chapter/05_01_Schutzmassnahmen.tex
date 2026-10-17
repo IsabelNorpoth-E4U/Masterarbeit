@@ -160,6 +160,7 @@ ob diese Eintrag im Datensatz zu dem dev oder test Aschnitt gehört. Hier sind e
 
 \subsection{Externe Datensätze}
 
+Im folgenden werden die anderen Datensätze vorgestellt, welche in dieser Arbeit verwendet wurden. Diese wurden 
 
 
 Inhalt der einzelnen Teile
@@ -208,7 +209,7 @@ Prüf außerdem, ob BIPIA (Yi et al.) und NotInject (Li et al.) schon mit diesen
 
 Soll ich den Unterabschnitt nach dieser Gliederung ausformulieren?
 
-\subsection{Auswahl der Metriken}
+\subsection{Metriken}
 
 Da die Ergebnisse der implementierten Schutzmaßnahmen auf ihre wirksamkeit überprüft werden soll wurden mehrere Metriken verwendet, um einen Vergleich zu bekommen.
 Zu den Metriken gehören True Positive, False Positive, False Negative, True Negtive, Accuracy, Precision, Recall, F1, False Positive Rate und Latenz. Im folgenden 
@@ -263,7 +264,9 @@ Latency Overhead = Defense inference time - Baseline inference time
 Bei dieser Metrik wird die Zeit für einen Aufruf des Schutzmechanismus gemessen
 
 
-\subsection{Durchführung des Ansatzes}
+\section{Durchführung und Weiterentwicklung}
+
+\subsection{Originalansatz}
 
 Wie in Abschnitt~\ref{konzept} erläutert, wird als Schutzmaßnahme ein vorgeschaltetes \ac{llm} eingesetzt, das als Klassifikator einschätzt, ob ein Nutzerprompt
 einen Angriff enthält. Als erster Schritt, wird der Klassifikator in einer einfachen Form umgesetzt, um eine Baseline zu erhalte: Es wird jeder Eintrag aus dem 

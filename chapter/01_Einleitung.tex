@@ -7,36 +7,44 @@ Heutzutage finden \ac{llm}s immer mehr Anwendung in der Praxis und in Unternehme
 über die Jahre dokumentiert. Dabei stellt das Statistische Bundesamt fest, das in den Jahren 2021 bis 2025 die die Prozentanteile der
 Unternehmen welche Künstliche Inteeligenz benutzen von 11 \% auf 26 \% gestiegen. Dabei ist zu beachten das verschiedene Größen von 
 Unternehmen miteinbezogen werden, auch welche mit 10-49 beschäftigte. Bei Unternehmen mit einer Beschäftigen Anzahl von 250 und mehr 
-stieg die Anzahl von 31 \% auf 57 \%. https://de.statista.com/statistik/daten/studie/1538416/umfrage/unternehmen-die-kuenstliche-intelligenz-verwenden-in-deutschland/
+stieg die Anzahl von 31 \% auf 57 \%~\cite{e01}.\\
 Das IFO Institut verzeichnete, dass im Mai 2026 54,5 \% der Unternehmen in Deutschland 
 KI verwenden und 16 \% dies planen. 21,6 \% haben bereits darüber diskutiert und nur 7,9 \% geben an, dass der Einsatz von 
-Künstlicher Intelligenz für sie keine rolle spielt. https://de.statista.com/statistik/daten/studie/1535661/umfrage/ki-einsatz-in-unternehmen-in-deutschland/
-Dadurch das LLMs immer häufiger in Unternhemn eingestezt werden greifen sie auch immer mehr auf Dokumete zu oder werden für
+Künstlicher Intelligenz für sie keine rolle spielt~\cite{e02}. \\
+Dadurch das \acp{llm}s immer häufiger in Unternhemn eingestezt werden greifen sie auch immer mehr auf Dokumete zu oder werden für
 Recherchen im Internet eingesetzt. Das wird auch deutlich in einer anderen Statistik des Statistischen Bundesamt von 2025, in welcher
 aufgezeichnet wird für welche Anwendungsbereiche KI in diesen unternehmen verwendet wird. Dabei ist die häufigste Anwendung Text Mining,
 also die Aufgabe große Mengen von unstrukturierten Daten zu strukturieren. 57 \% der unternehmen mit 250 oder mehr mitarbeitern verwendne 
-LLMs dafür. https://de.statista.com/statistik/daten/studie/1538431/umfrage/verwendung-von-ki-in-deutschen-unternehmen/
-Mit der Funktion auf immer mehr Daten zugreifen zu müssen kommt auch die Möglichkeit dazu, dass Tool Calls ausgeführt werden können. 
-Mit einem Tool Call werden einem LLM ermöglicht, dass mehr Aktionen ausgeführt werden können, beispielsweise den Zugriff auf externe Daten
-und Webseitem das ausfüllen von Formularen usw.. Es können beliebige Funktionen hinzugefügt werden. Jedoch entstehen durch 
-eben diese Funktionen auch Gefahren, da durch den Aufruf externer Quellen und verwendung großer Datenmengen auch Gefahren entstehen 
-können. Das geschieht beispielsweise dadurch, das LLMs nicht zuverlässig zwischen Anweisungen und Daten unterschieden könnn. Somit
-können sich in den Daten ebenfalls Anweisungen verstecken, welche dann von dem LLM ausgeführt werden. Diese Schwachstelle wird von 
+\acp{llm}s dafür~\cite{e03}. Dadurch wird deutlich, dass \ac{llm}s immer mehr Zugriff auf Datenmengen gegbene werden, auf welche sie auch 
+Aktionen ausführen können. Diese Aktionen werden auch Tool Calls genannt. \\
+Mit einem Tool Call werden einem \acp{llm} ermöglicht, dass mehr Aktionen ausgeführt werden können, beispielsweise den Zugriff auf externe Daten
+und Webseitem das ausfüllen von Formularen usw.. Es können beliebige Funktionen hinzugefügt werden. Durch diese Funktion entstehen Gefahren, 
+da durch den Aufruf externer Quellen und verwendung großer Datenmengen auch Gefahren entstehen 
+können. Das geschieht beispielsweise dadurch, das \acp{llm}s nicht zuverlässig zwischen Anweisungen und Daten unterschieden könnn. Somit
+können sich in den Daten ebenfalls Anweisungen verstecken, welche dann von dem \acp{llm} ausgeführt werden. Diese Schwachstelle wird von 
 Angreifern für sogenannte Prompt Injection angriffe ausgenutzt. Die Angreidfer verstecken Anweisungen in den externn Daten auf die ein
-LLM zugreift. So ist es möglich eschädliche Aktionen auszulösen, ohne direkt Zugriff auf ein LLM zu haben. (OWASP QUELLE) \\
+\acp{llm} zugreift. So ist es möglich eschädliche Aktionen auszulösen, ohne direkt Zugriff auf ein \acp{llm} zu haben~\cite{pi15}. \\
 Durch die Verwendung von Tool Calls wird dieses Risiko von Prompt Injeciton Angriffen verstärkt, da normalerweise nur eine flasche 
 Antwort ausgelöst werden kann, aber dadurch das mit einem Tool Call richtige Aktionen ausgeführt werden können werden 
 diese Art von Angriffen immer gefährlicher. Dies wird besonders gefährlich bei Firmeninternen Chatbots, da diese höufig auf viele 
 sensible intere Daten zugreifen können und beispielsweise firmengeheimnisse preisgeben können. \\
 Dieses Problem ist schon seit mehreren Jahren bekannt, dadurch gibt es auch bereits viele Versuche diese Angriffsfläche einzudämmen.
 Es werden teilweise zusätzliche Klassifikatoren, Filter oder Vorverarbeitungen eingesetzt, um zu versuchn die Angriffe bevor sie zu dem
-LLM kommen, welches zugriff auf die Tools hat als ANgriff zu klassifizieren. (QUELLE) Jedoch gibt es viele Beweise, dass die Maßnahmen
-nicht wirksam genug sind. Die Angreifer verändern ANgriffe immer weiter, damit genau diese umgangen werden (QUELLE). BEISPIEL 
+\acp{llm} kommen, welches zugriff auf die Tools hat als ANgriff zu klassifizieren~\cite[4]{pi9}~\cite[9]{sm10}. Jedoch gibt es viele Beweise, dass die Maßnahmen
+nicht wirksam genug sind. Die Angreifer verändern ANgriffe immer weiter, damit genau diese umgangen werden.  
+Ein bekanntes Beispiel aus dem Jahr 2025 ist der Echoleak von microsoft 365 Copilot, bei dem die Angereifer mithilfe einer vsteckten Anweisung 
+in einer E-Mail sensible Unternehmens daten exfiltrieren konnten und sie an einen Server der ANgreifer schickten. Für dieses Angriff wurde keine Nutzer
+Interaktion notwendig, sondern ausschließlich durch die E-Mail wurde ein Angriff ausgelöst. Dies stellt ein praxisnahes Beispiel für indirekte
+Prompt Injeciton dar~\cite{e06}. \\
 Viele der Arbeiten behandeln auch nicht direkt indirekte Prompt Injection Angriffe sondern häufig auch Jailbreaks. Der Unterschied ist, dass
-..., aber grob lassen sich die Ergebnisse häufig vergleichen. \\
+Prompt Injection darauf abzielt eine ANwednung welche auf einem \ac{llm} aufbauen, bei dem schädliche Anweisungen in einem vertrauenwürdigen Prompt versteckt werden. 
+Bei einem Jailbreak hineggebn wird versucht ie Sicherheitsfilter zu umgehen. Die Charakteristik, die Prompt Injection ausmacht ist somit, ob es eine Verkettung von 
+einem vertrauenwürdigen und nicht vertrauenswürdigen Prompt gibt~\cite{e05}.
+beim Jailbreak der Nutzer selbst versucht die Sicherheitsrichtlinien eines \ac{llm}s zu umgehen und bei Prompt Injecttion, aber grob lassen sich die Ergebnisse häufig vergleichen. \\
 Anhand der Literatur wird bewusst das es noch sehr viel Verbesserungspotenzial bei den Schutzmaßnahmen gibt. Genau darum dreht sich diese 
-Abreit. Es wird sich auf indirekte Prompt Injectoin Angriffe fokussiert und versucht eine Schutzmaßnahme zu entwicklen, welche eine 
-generalisierte Lösung sin kann. Als Anwendungsfall wird der firmeninterne Chatvbot ChatBot4U der Firma Energy4U GmbH verwendet, welcher 
+Abreit. Es wird sich auf indirekte Prompt Injectoin Angriffe fokussiert. Bei diesn Angriffen wird über externe Quellen ein Angriff ausgeführt, indem
+das Modell auf diese Daten zugreifen soll, zum Beispiel eine Websiten~\cite[2\psq]{pi6}. Es wird versucht eine Schutzmaßnahme zu entwickeln, die 
+genauf diese Angriffe abwehrt, welche auch generalisiert angwendet werden kann. Als Anwendungsfall wird der firmeninterne Chatvbot ChatBot4U der Firma Energy4U GmbH verwendet, welcher 
 auch dazu dienn soll als Unternhemenslösung für die Kommunkation mit Kunden zu dienen, somit ein praxisnaher anwendungsfallbeispiel ist.
 Im weiteren wird die genaue Zielsetzung, die Forschungsfrage und der Ablauf geklärt.
 
@@ -47,10 +55,18 @@ Prompt Injection Angriffe über Tool Call manipuliert werden kann. Dazu werden z
 lokalen Testumgebung aufgebaut wird. \\
 Angepasst an diese Schwachstellen wird eine geeignete Schutzmaßnahme entwicklet und implementiert. Es wird anhand mehrerer Datensätze getstet und mithilfe von Metriken
 die genaue Leistungsfähigkeit festgehalten. \\
-Mit dem Ergebnis der Arbeit soll es möglich sein einen konkreten Vergleich zwischen dem normlaen modell und mit der implementierten Schutzmaßnahme zu bekommen. Diese
+Mit dem Ergebnis der Arbeit soll es möglich sein einen konkreten Vergleich zwischen einer normal implemntierten Schutzmaßnahme und mit einer weiterentwickelten Schutzmaßnahme zu bekommen. Diese
 soll sowohl für den unternehmensinternen Chatbot der Energy4U GmbH dienen, sowie übertragbar sein auf andere praxisrelevante Chatbots.
 
 \section{Forschungsfrage}
+
+\begin{enumerate}
+    \item HF: inwieweit ein unternehmensinterner Chatvot mit implementierten Tool Calling gegen indirekte Prompt Injections angriffe abgesichert werden kann
+    \item TF1: welch Schwachstellen der Chatbot überhaupt aufweist im bezug auf indirekte Prompt injection angriffe
+    \item TF2: wie zuverlässig ein vorgeschaltetes \ac{llm} in bzug auf die Abwehr von Prompt injection angriffe ist
+    \item TF3: ob sich die Erkennung von Prompt Injection Angriffe verbessert, wenn neben einem vorgeschalteten Modells, auch die Schutzmaßnahme ausgebaut wird
+    \item TF4: Inwieweit lassen sich die Ergebnisse auf öffentliche Datensätze übertragen?
+\end{enumerate}
 
 Für diese Arbeit wurde ein Forschungsfrage definiert, die wiederrum in mehrere Teilfragen geteilt wurde. Die hauptfrage, welch in dieser Arbeit geklärt werden soll 
 ist, inwieweit ein unternehmensinterner Chatvot mit implementierten Tool Calling gegen indirekte Prompt Injections angriffe abgesichert werden kann. Dabei ist der 
