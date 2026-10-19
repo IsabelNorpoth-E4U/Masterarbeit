@@ -19,10 +19,10 @@ Werte: Recall / Falsch-Positiv-Rate (FPR).
 
 | # | Datum | Beobachtung | Änderung | Daten | Ergebnis | Entscheidung | Ergebnisdatei |
 |---|---|---|---|---|---|---|---|
-| 1 | – | – | Original-Guard: „Ist die folgende Nutzereingabe ein Prompt-Injection-Angriff?“ | eigener Test-Split | 73,1 % / 10,9 % | Ausgangswert | `results/mistral_small4_original_results.jsonl` |
-| 2 | – | Verschleierte Angriffe werden übersehen (z. B. T02, T14) | Hybrid: Rekonstruktion (V0, VN, VS), Mehrheitsabstimmung (SmoothLLM, γ = 0,5), Leitfragen F0–F5 | eigener Dev-Split, dann Test-Split | 84,7 % / 7,1 % (Test) | behalten | `results/mistral_small4_new_approach_results.jsonl` |
-| 2b | 09.10.2026 | Vergleich mit dem Hauptmodell | Original-Guard mit Mistral Large 4 | eigener Test-Split | 41,6 % / 0,0 % | Vergleich | `results/mistral_large4_original_results.jsonl` |
-| 3 | 10.10.2026 | Gilt das Ergebnis auch für indirekte Angriffe? | Externer Test mit BIPIA + NotInject, Ansätze unverändert | BIPIA-test | Original 34,0 % / 13,5 %, Hybrid 37,9 % / 16,6 % | Schwäche gefunden | `results/mistral_small4_bipia_original_results.jsonl`, `archiv/results_development/bipia_mistral_small4_hybrid2_results.jsonl` |
+| 1 | – | – | Original-Guard: „Ist die folgende Nutzereingabe ein Prompt-Injection-Angriff?“ | eigener Test-Split | 73,1 % / 10,9 % | Ausgangswert | `archiv/results_v2/mistral_small4_original_results.jsonl` |
+| 2 | – | Verschleierte Angriffe werden übersehen (z. B. T02, T14) | Hybrid: Rekonstruktion (V0, VN, VS), Mehrheitsabstimmung (SmoothLLM, γ = 0,5), Leitfragen F0–F5 | eigener Dev-Split, dann Test-Split | 84,7 % / 7,1 % (Test) | behalten | `archiv/results_v2/mistral_small4_new_approach_results.jsonl` |
+| 2b | 09.10.2026 | Vergleich mit dem Hauptmodell | Original-Guard mit Mistral Large 4 | eigener Test-Split | 41,6 % / 0,0 % | Vergleich | `archiv/results_v2/mistral_large4_original_results.jsonl` |
+| 3 | 10.10.2026 | Gilt das Ergebnis auch für indirekte Angriffe? | Externer Test mit BIPIA + NotInject, Ansätze unverändert | BIPIA-test | Original 34,0 % / 13,5 %, Hybrid 37,9 % / 16,6 % | Schwäche gefunden | `archiv/results_v2/mistral_small4_bipia_original_results.jsonl`, `archiv/results_development/bipia_mistral_small4_hybrid2_results.jsonl` |
 | 3a | 10.10.2026 | Harmlos klingende Anweisungen (4–6 %) und Angriffe am Ende von Texten (18–24 %) werden kaum erkannt | – | BIPIA-test | Ursache: Der Guard bewertet Schaden, nicht fremde Anweisungen | Analyse | – |
 | 4 | 10.10.2026 | Der Prompt spricht von „Nutzereingabe“ | Prompt nennt externe Inhalte (Version 2) | BIPIA-test | wird berichtet | Vergleich der Prompt-Fassungen | `archiv/results_development/bipia_prompt2_*` |
 | 5 | 12.10.2026 | Ob ein Satz ein Angriff ist, hängt von seiner Herkunft ab (vom Nutzer: Bitte; aus einem Dokument: Injection) | Prüfung nach Herkunft: Nutzernachrichten wie bisher, externe Inhalte zusätzlich | – | eigener Datensatz garantiert unverändert | behalten | – |
@@ -34,6 +34,11 @@ Werte: Recall / Falsch-Positiv-Rate (FPR).
 | 8 | 15.10.2026 | 94 von 97 verpassten Angriffen: leere Liste, die Anweisung wurde überlesen | Nummerierte Zeilen/Sätze (strukturelles Prompt Enhancement, Kap. 5) | BIPIA-train | C allein 76,0 % / 4,3 %; Hybrid ODER C 84,0 % / 17,3 % | behalten | `archiv/results_development/bipia_dev_variant_c_numbered_*`, `archiv/results_development/bipia_dev_hybrid2_variant_c_numbered_*` |
 | 8a | 15.10.2026 | Fehlalarme der Kombination stammen fast vollständig aus der Abstimmung des Hybrids, die Leitfragen fügen nur Treffer hinzu | Auswertung ohne neue Anfragen | BIPIA-train | C oder Abstimmung 83,5 % / 17,3 %; C oder Leitfragen 79,0 % / 4,3 % | Abstimmung für externe Inhalte nicht verwenden | – |
 | 9 | 15.10.2026 | Variante C und Leitfragen sollen in einer Prüfung zusammengeführt werden | Variante 3: nummerierte Zeilen, je Zeile „an wen“, „passt“ und Leitfragen F1–F5; Angriff, wenn eine Angabe auffällig ist | BIPIA-train | 74,0 % / 6,5 %, F1 = 0,829 | **verworfen** (Regel unten nicht erfüllt) | `archiv/results_development/bipia_dev_variant_c_numbered_questions_*` |
+| 10 | 18.10.2026 | Einheitlicher Ablauf für alle Texte gewünscht | Variante 4: A–D für alle Texte; bei externen Inhalten Leitfragen pro Segment (eigene Anfrage) statt für den ganzen Text, zusätzlich Stufe E; Angriff bei Mehrheit ODER E ODER Leitfragen eines Segments. Keine Entscheidungsregel vorab festgelegt | BIPIA-train; eigener Dev-Split | BIPIA-train 91,0 % / 33,8 %, F1 = 0,848 (Variante 2: 79,0 % / 4,3 %, F1 = 0,868); eigener Dev-Split 86,2 % / 4,7 %, F1 = 0,902 (Nutzerzweig unverändert) | offen | `results/mistral_small4_bipia_dev_new_approach_v4_results.jsonl`, `results/mistral_small4_dev_new_approach_v4_results.jsonl` |
+| 10a | 18.10.2026 | Woher kommen die Fehlalarme von Variante 4? | Zerlegung ohne neue Anfragen | BIPIA-train | nur B 33,0 % / 15,1 %; nur E 76,0 % / 3,6 %; nur Leitfragen pro Segment 65,0 % / 22,3 %; E ODER Leitfragen pro Segment 89,0 % / 22,3 %, F1 = 0,870. Fehlalarme v. a. bei Code (26 von 47) | Analyse | – |
+| 10b | 18.10.2026 | Eigener Dev-Split: 13 von 330 Entscheidungen weichen vom Lauf mit Variante 2 ab, obwohl der Nutzerzweig identisch ist | Vergleich mit `archiv/results_v2/` | eigener Dev-Split | 50 von 990 Guard-Antworten und 24 von 330 Leitfragen-Antworten anders (Temperatur 0); zusätzlich 19 andere VS-Texte: die Rechtschreibkorrektur ist zwischen Läufen nicht vollständig wiederholbar | Grenze (Reproduzierbarkeit) | – |
+| 11 | 19.10.2026 | Einwand: BIPIA enthält keine verschleierten Angriffe, der Nutzen von B für externe Inhalte war daher nicht prüfbar | Verschleierte Fassung von BIPIA-train (`build_bipia_testcases.py --dev --obfuscated`): gleiche Texte und Positionen, Angriffssatz mit T01, T02, T03, T08, T14 (je 40), harmlose Texte unverändert. Alle Antworten einmal gesammelt, Varianten ohne neue Anfragen verglichen. Keine Entscheidungsregel vorab | BIPIA-train verschleiert | Variante 2: 75,0 % / 4,3 %, F1 = 0,843; + B: 77,0 % / 16,5 %, F1 = 0,817; + B nur bei Bereinigung: 77,0 % / 14,4 %, F1 = 0,824; + E auf VN: 80,0 % / 6,5 %, F1 = 0,867. T14 in allen Varianten schwach (22,5–30 %) | B auch bei Verschleierung nicht hilfreich (+4 Treffer, +17 Fehlalarme); „E auf VN“ offen | `results/mistral_small4_bipia_dev_obfuscated_experiment_results.jsonl` |
+| 11a | 19.10.2026 | Warum hilft „B nur bei Bereinigung“ nicht? | Auswertung ohne neue Anfragen | BIPIA-train verschleiert | Die Bereinigung verändert auch 135 von 139 harmlosen Dokumenten (z. B. Bindestriche, URLs, Punkte in Wörtern), die Bedingung trennt also nicht | Analyse | – |
 
 ## Vorab festgelegte Entscheidungsregel (15.10.2026, vor dem Ergebnis von Schritt 9)
 
@@ -72,8 +77,9 @@ Alle Versuche sind in zwei Skripten zusammengeführt. Datensatz und Modell werde
 
 | Skript | Ansatz | Auswahl | Ergebnisdateien |
 |---|---|---|---|
-| `main_original_mistral.py` | Original: ein Guard-Prompt, JA/NEIN | eigener Datensatz / BIPIA; Small 4 / Large 4 | `results/<Modell>_[bipia_]original_results.jsonl` |
-| `main_new_approach_mistral.py` | Neuer Ansatz: Hybrid (A–D) für Nutzernachrichten, A + C + E für externe Inhalte | eigener Datensatz / BIPIA | eigener Datensatz: `results/mistral_small4_new_approach_results.jsonl`, BIPIA: `results/mistral_small4_bipia_new_approach_results.jsonl` |
+| `main_original_mistral.py` | Original: ein Guard-Prompt, JA/NEIN | eigener Datensatz / BIPIA; Small 4 / Large 4 | `archiv/results_v2/<Modell>_[bipia_]original_results.jsonl` |
+| `main_new_approach_mistral.py` | Neuer Ansatz: Hybrid (A–D) für Nutzernachrichten, A + C + E für externe Inhalte | eigener Datensatz / BIPIA | eigener Datensatz: `archiv/results_v2/mistral_small4_new_approach_results.jsonl`, BIPIA: `archiv/results_v2/mistral_small4_bipia_new_approach_results.jsonl` |
+| `main_new_approach_v4_mistral.py` | Variante 4 (noch nicht ausgewertet): A–D für alle Texte; bei externen Inhalten Leitfragen pro Segment statt für den ganzen Text, zusätzlich Stufe E; Angriff bei Mehrheit ODER E ODER Leitfragen eines Segments | eigener Datensatz / BIPIA / BIPIA-train | `results/mistral_small4<Datensatz>new_approach_v4_results.jsonl` |
 
 Überprüft ohne API-Anfragen:
 - Eigener Datensatz: Der neue Ansatz sendet für alle 990 Texte dieselben 2.671 Anfragen wie der bisherige Hybrid und erzeugt byteidentische Ergebnisse.
@@ -94,7 +100,7 @@ Eingefrorener Ansatz auf BIPIA-test + NotInject (689 Fälle, keine fehlgeschlage
 - Fehlalarme: bei externen Inhalten nur 2/150 (1,3 %); die übrigen 60 entstehen bei NotInject (Nutzernachrichten, unveränderter Hybrid, 17,7 %, beim Original 17,4 %).
 - Latenz (Median): externe Inhalte 3.100 ms (2 Anfragen), Nutzernachrichten 3.608 ms.
 
-Ergebnisdatei: `results/mistral_small4_bipia_new_approach_results.jsonl`. Tabellen und Diagramme: `results_diagramms/`.
+Ergebnisdatei: `archiv/results_v2/mistral_small4_bipia_new_approach_results.jsonl`. Tabellen und Diagramme: `archiv/results_diagramms_v2/`.
 
 ## Bekannte Grenzen
 

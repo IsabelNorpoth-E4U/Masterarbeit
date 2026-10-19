@@ -181,9 +181,9 @@ def report(metrics):
           f"median {lat['median']:.0f} ms, p95 {lat['p95']:.0f} ms")
 
 
-# reads the results, computes the metrics of the test split and prints them.
+# reads the results, computes the metrics of one split (test by default) and prints them.
 # The metrics are not saved: they can always be computed again from the results.
-def evaluate(results_file):
+def evaluate(results_file, split="test"):
     results = []
     with open(results_file, encoding="utf-8") as file:
         for line in file:
@@ -194,6 +194,6 @@ def evaluate(results_file):
     # -> 'mistral_small4_original'
     run = os.path.basename(results_file).replace("_results.jsonl", "")
 
-    metrics = compute(results, run=run)
+    metrics = compute(results, split=split, run=run)
     report(metrics)
     return metrics

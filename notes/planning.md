@@ -23,10 +23,13 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
 ## Inhaltverzeichnis
 
 1. Einleitung
-   - [ ] 1.1 Problemstellung und Motivation
-   - [ ] 1.2 Ziel der Arbeit
-   - [ ] 1.3 Forschungsfrage
-   - [ ] 1.4 Aufbau der Arbeit
+   - [ ] Fabio ok
+   - [ ] Überarbeitet
+   - [ ] Probegelesen
+   - [X] 1.1 Problemstellung und Motivation
+   - [X] 1.2 Ziel der Arbeit
+   - [X] 1.3 Forschungsfrage
+   - [X] 1.4 Aufbau der Arbeit
 
 2. Grundlagen 
    - [ ] 2.1 Large Language Models (LLMs) und Funktionsweise
@@ -51,14 +54,14 @@ diese "versteckten" Anweisungen aus großen Prompts extrahiert werden?
 4. Analyse der Verwundbarkeit eines internen Chatbots
    - [ ] Fabio ok
    - [ ] Überarbeitet
-   - [X] Probegelesen
+   - [ ] Probegelesen
    - [X] Alle Quellen/Informationen hinzugefügt
       - [X] 4.1 Beschreibung des untersuchten Systems 
       - [X] 4.2 Einrichtung der Umgebung
         - [X] 4.2.1 Installation/Implementierung des Repository 
       - [X] 4.3 Methodik zur Durchführung der Angriffe 
         - [X] 4.3.1 Ziel der Angriffe
-        - [ ] 4.3.2 Implementierung de Tools Calls/Browser Action -> CODE ÜBERARBEITEN UND TEXT MIT ÜBERARBEITEN !!!!!
+        - [X] 4.3.2 Implementierung de Tools Calls/Browser Action -> CODE ÜBERARBEITEN UND TEXT MIT ÜBERARBEITEN !!!!!
         - [X] 4.3.3 Aufbau lokale Website
       - [X] 4.4 Durchführung der ausgewählten Prompt-Injection Angriffe 
       - [X] 4.4.1 Identifikation der Schwachstellen
