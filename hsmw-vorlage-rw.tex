@@ -76,6 +76,7 @@ glossaryfront,
 ]{hsmw-vorlage-rw}
 
 \usepackage{alertmessage}
+\usetikzlibrary{shapes.geometric}
 \usepackage{listings}
 \lstset{
 	basicstyle=\ttfamily\small, % Monospace-Schrift für Code
@@ -90,9 +91,6 @@ glossaryfront,
 		{–}{{--}}1 {—}{{---}}1
 		% weitere Sonderzeichen aus dem JSON der Multiturn Injection (Anhang)
 		{§}{{\S}}1 {°}{{\textdegree}}1 {ø}{{\o}}1 {„}{{\glqq}}1 {“}{{\grqq}}1 {→}{{$\rightarrow$}}1
-		% Emojis in den Log-Ausgaben von server.js (Anhang) werden ausgeblendet,
-		% pdflatex kann sie nicht darstellen
-		{🔎}{}0 {✅}{}0 {❌}{}0 {⚠}{}0 {️}{}0 {🌍}{}0 {🔁}{}0
 }
 
 % für das Literaturverzeichnis

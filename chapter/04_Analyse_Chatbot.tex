@@ -6,46 +6,49 @@ Sicherheitsschwachstellen systematisch festzustellen. Damit wird der Grundstein 
 
 \section{Beschreibung des untersuchten Systems}\label{system}
 
-Bei dem untersuchten System handelt es sich um den firmeninternen Chatbot \enquote{ChatBot4U} des Unternehmens Energy4U GmbH~\cite{an17}.
+Bei dem untersuchten System handelt es sich um den firmeninternen Chatbot \enquote{ChatBot4U} des Unternehmens ENERGY4U GmbH~\cite{an17}.
 Der Chatbot beantwortet Fragen aus dem Energiewirtschaftsumfeld. Die Komponenten werden auf der Google Cloud Platform (GCP) betrieben. Es 
 sind mehrere Sprachmodelle angebunden, die über externe Anbieter bereitgestellt werden. \\
 Die Architektur setzt sich aus sieben Komponenten zusammen: \\
 
 \begin{enumerate}
-    \item \textbf{\gls{frontend}:} Übernimmt die Authentifizierung und leitet Anfragen an das Backend oder an den \ac{llm}-Provider weiter
+    \item \textbf{\gls{frontend}:} Verarbeitet Nutzereingaben und leitet diese an Firebase weiter, welche einen Nutzer authentifiziert. Frontend-Server kommuniziert mit zusätzlich mit dem \ac{llm}-Provider.
     \item \textbf{\gls{backend}:} Verarbeitet die RAG-Anfragen und steuert den Datei-Upload sowie die Entgegennahme von Nutzer-Feedback.
-    \item \textbf{\gls{vektordatenbank}:} Speichert die Embeddings und bildet Payload für eine Similarity Search
+    \item \textbf{\gls{vektordatenbank}:} Speichert die Embeddings zusammen mit einem Payload (z.B. Metadaten) und führt die Similarity Search aus
     \item \textbf{\gls{objectstorage}:} Legt unstrukturierte Daten wie PDFs, Markdown-Dateien und Embeddings ab
     \item \textbf{\gls{nutzerdatenbank}:} Verwaltet die Nutzer-Sessions, erfasst Nutzungsstatistiken und speichert das Nutzer-Feedback
-    \item \textbf{\gls{embeddingpipeline}:} Bereitet die Dokumente auf, indem sie diese in Chunks zerlegt und in der Vektordatenbank speichert
+    \item \textbf{\gls{embeddingpipeline}:} Bereitet die Dokumente auf, indem sie diese in Chunks zerlegt, mit dem Azure-Embedding-Modell in einen Vektor umgewandelt wird und in der Vektordatenbank speichert
     \item \textbf{\gls{cicd}:} Automatisiert Builds und Deployments der gesamten Infrastruktur
 \end{enumerate}
 
 Die Datenflüsse der gesamten Architektur können in vier Bereiche geteilt werden: die Datenquellen, die Verarbeitung, die Speicherung und die
 Auslieferung. Die Datenquellen beinhalten PDF-Dokumente, Confluence-Export, Inhalte der \ac{bnetza} und Gesetzestexte von
 \url{gesetze-im-internet.de}. 
-Bei der Verarbeitung werden alle Datenquellen in einem Bucket gespeichert und durch eine Embedding-Pipeline verarbeitet, welche das Ziel verfolgt, Objekte als
-Punkt in einem Vektorraum darzustellen~\cite{an20}. Ein Bucket
-ist ein Container in der Cloud, in dem Daten als Objekte gespeichert werden~\cite{an19}.
-Die Quellen werden je nach Dateityp in ein Format wie JSON, Markdown oder Text umgeformt und anschließend in Abschnitte, sogenannte Chunks,
-zerlegt. Diese Chunks werden mit einem Azure-Modell in Vektoren umgewandelt und in dem Bereich Speicherung in \gls{qdrant} geschrieben.
-Für die Speicherung gibt es eine externe und eine interne \gls{qdrant}-Instanz. Nach der Speicherung werden die Daten an das Backend 
-ausgeliefert, welches sie an das Frontend weiterleitet.
+Bei der Verarbeitung werden alle Datenquellen in einem Bucket gespeichert und durch eine Embedding-Pipeline verarbeitet. Eine Embediing-Pipeline verfolgt das Ziel,
+Objekte als Punkt in einem Vektorraum darzustellen~\cite{an20}. In diesem Fall erfolgt dieser Vorgang in fünf Schritten. Als erster Schritt werden die Rohdaten
+aus einem Bucket geladen. Ein Bucket ist ein Container in der Cloud, in dem Daten als Objekte gespeichert werden~\cite{an19}. Diese Rohdaten werden ja nach Dateityp
+in JSON, Markdown oder Text umgewandelt und in Chunks zerlegt. Diese Chunkgs werden mit dem Azure-Embeding-Modell in einen Vektor umgewandelt und dieser 
+zusammen mit einem Payload, wie dem Chunk-Text und Metadaten, in \gls{qdrant} geschrieben. \\
+Für die Speicherung gibt es eine externe und eine interne \gls{qdrant}-Instanz. Nach der Speicherung können die Daten vom Backend aufgerufen werden und an das 
+Frontend weitergeleitet werden, sobald eine Nutzer-Anfrage dies veranlasst. \\
 Jede Kommunikation mit dem Chatbot beginnt damit, dass der Nutzer im Browser eine Chat-Nachricht über \ac{https} an das Frontend sendet. Für die
 weitere Verarbeitung unterscheidet das System zwei Modi: den $\glqq$ Normal-Modus und Formatanpassung$\grqq$ und den $\glqq$ Energy-Bot-Modus$\grqq$. \\
-Beim Normal-Modus wird das Backend nicht verwendet. Das Frontend sendet eine Anfrage direkt an den \ac{llm}-Provider. Die Antwort wird mit 
+Beim Normal-Modus wird nur eine kleine Backend-Infrastruktur verwendet. Das Frontend sendet eine Anfrage direkt an den \ac{llm}-Provider. Die Antwort wird mit 
 \ac{sse} gestreamt. Diese Technologie wird verwendet, damit eine dauerhafte Verbindung zwischen einem Client und Server aufgebaut wird
 und der Server Daten in Echtzeit senden kann. In diesem Fall wird sie eingesetzt, damit der \ac{llm}-Provider die Daten nicht erst nach der vollständigen Generierung
-zurücksendet, da das zu viel Zeit in Anspruch nehmen würde. Stattdessen erhält das Frontend Token-für-Token die Antwort und zeigt diese
-dem Nutzer an~\cite{an18}. \\
+zurücksendet. Stattdessen erhält das Frontend Token-für-Token die Antwort und zeigt diese dem Nutzer an. Der Nutzer muss somit nicht warten, bis im Hintergrund die 
+gesamte Nachricht generiert wurde~\cite{an18}. \\
 Im Gegensatz dazu wird beim Energy-Bot-Modus eine POST-Anfrage vom Frontend an das Backend gesendet. Das Backend führt eine Similarity Search
-im \gls{qdrant} durch und sendet eine vorgegebene Anzahl an Dokumenten zurück. Mithilfe dieser Dokumente wird eine Anfrage vom Backend an den \ac{llm}-Provider
+in \gls{qdrant} durch und sendet eine vorgegebene Anzahl an Chunks zurück. In diesen Chunks sind Verweise zu den Original-Dokumente, sodass späer direkt Links zu 
+den genutzten Dokumenten als Quellen mitgegeben werden können. Mithilfe dieser Chunks wird eine Anfrage vom Backend an den \ac{llm}-Provider
 gesendet. Auch diese Anfrage wird mit \ac{sse} gestreamt. Diese gestreamte Antwort wird zurück an das Frontend gesendet und anschließend Token-für-Token
 dem Nutzer angezeigt. \\
 Das System Chabot4u ist in zwei GCP-Projekte aufgeteilt, um den internen und externen Betrieb voneinander zu trennen. Beide Projekte besitzen jeweils
-ein eigenes \gls{frontend} und \gls{backend} auf Cloud Run sowie eine \gls{qdrant}-\ac{vm} in einem \ac{vpc}. Das Backend erreicht die jeweilige \gls{qdrant}-\ac{vm}  über 
-einen \ac{vpc}-Connector. \\
-Der wesentliche Unterschied zwischen den beiden Instanzen liegt im Datenbestand. Die interne \gls{qdrant}-Instanz enthält sowohl die interne als auch
+ein eigenes \gls{frontend} und \gls{backend} auf Cloud Run sowie eine \gls{qdrant}-\ac{vm} in einem \ac{vpc}. Das Backend erreicht die jeweilige \gls{qdrant}-\ac{vm}  
+über einen \ac{vpc}-Connector. \\
+Der Unterteilung in zwei Projekte erfüllt den Nutzen, dass Kunden für eine beschränkte Ueot eine Demoversion zur Verfügung zu stellen, ohne dass sie ZUgriff auf 
+die internen Dokumente haben. Den Kunden soll dadurch ein erster Eindruck ermöglicht werden, wie mit den Dokumenten gearbeitet wird. 
+Somit liegt der wesentliche Unterschied zwischen den beiden Instanzen im Datenbestand. Die interne \gls{qdrant}-Instanz enthält sowohl die interne als auch
 die öffentliche Sammlung, wogegen die externe Instanz nur die öffentliche Sammlung beinhaltet. \\
 
 

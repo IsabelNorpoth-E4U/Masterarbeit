@@ -1,0 +1,19 @@
+\begin{tabular}{l rrr r}
+\toprule
+\textbf{Ansatz} & \textbf{Normal} & \textbf{Hard Negative} & \textbf{Transformiert} & \textbf{Gesamt} \\
+\midrule
+\multicolumn{5}{l}{\textit{Eigener Datensatz}} \\
+Original (Mistral Small~4) & 0/20 (0{,}0\,\%) & 0/20 (0{,}0\,\%) & 37/300 (12{,}3\,\%) & 37/340 (10{,}9\,\%) \\
+Original (Mistral Large~4) & 0/20 (0{,}0\,\%) & 0/20 (0{,}0\,\%) & 0/300 (0{,}0\,\%) & 0/340 (0{,}0\,\%) \\
+\textbf{Neuer Ansatz (Mistral Small~4)} & 0/20 (0{,}0\,\%) & 0/20 (0{,}0\,\%) & 23/300 (7{,}7\,\%) & 23/340 (6{,}8\,\%) \\
+\midrule
+\multicolumn{5}{l}{\textit{BIPIA + NotInject}} \\
+Original (Mistral Small~4) & 7/150 (4{,}7\,\%) & 59/339 (17{,}4\,\%) & -- & 66/489 (13{,}5\,\%) \\
+Original (Mistral Large~4) & 0/150 (0{,}0\,\%) & 6/339 (1{,}8\,\%) & -- & 6/489 (1{,}2\,\%) \\
+\textbf{Neuer Ansatz (Mistral Small~4)} & 13/150 (8{,}7\,\%) & 53/339 (15{,}6\,\%) & -- & 66/489 (13{,}5\,\%) \\
+\midrule
+\multicolumn{5}{l}{\textit{BIPIA, verschleiert}} \\
+Original (Mistral Small~4) & 13/150 (8{,}7\,\%) & -- & -- & 13/150 (8{,}7\,\%) \\
+\textbf{Neuer Ansatz (Mistral Small~4)} & 13/150 (8{,}7\,\%) & -- & -- & 13/150 (8{,}7\,\%) \\
+\bottomrule
+\end{tabular}

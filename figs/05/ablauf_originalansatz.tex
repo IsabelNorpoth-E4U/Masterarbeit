@@ -1,0 +1,41 @@
+\begin{tikzpicture}[
+    font=\small,
+    >=latex,
+    box/.style={draw, rounded corners=2pt, align=center, minimum height=1cm, text width=5.4cm, fill=gray!8},
+    llm/.style={box, fill=blue!10, draw=blue!60!black, thick},
+    dec/.style={draw, diamond, aspect=2.2, align=center, inner sep=1pt, fill=gray!8},
+    result/.style={box, text width=2.4cm},
+    note/.style={draw=gray, dashed, align=left, font=\footnotesize, text width=3.6cm},
+    arr/.style={->, thick}
+]
+  % Hauptpfad
+  \node[box] (data) at (0,0) {\textbf{Datensätze}\\eigener + externe Datensätze};
+  \node[box] (loop) at (0,-1.7) {Nächster Eintrag\\(Prompt + Label)};
+  \node[box] (req)  at (0,-3.6) {\textbf{Anfrage aufbauen}\\System: \texttt{GUARD\_PROMPT}\\User: \enquote{Nutzereingabe: } + Prompt};
+  \node[llm] (llm)  at (0,-5.6) {\textbf{Mistral Small 4}\\(vorgeschaltetes \ac{llm})};
+  \node[dec] (dec)  at (0,-7.5) {Antwort\\= JA?};
+  \node[result, fill=red!12]   (atk) at (-3.2,-9.2) {\textbf{Angriff}};
+  \node[result, fill=green!12] (ok)  at ( 3.2,-9.2) {\textbf{Harmlos}};
+  \node[box] (save) at (0,-10.8) {Speichern:\\Vorhersage, Label, Antwortzeit};
+  \node[dec] (more) at (0,-12.6) {Weitere\\Einträge?};
+  \node[box, fill=yellow!15] (met) at (0,-14.4) {\textbf{Metriken berechnen}};
+
+  % Pfeile
+  \draw[arr] (data) -- (loop);
+  \draw[arr] (loop) -- (req);
+  \draw[arr] (req)  -- (llm);
+  \draw[arr] (llm)  -- node[right] {JA / NEIN} (dec);
+  \draw[arr] (dec.west) -| node[above, pos=0.3] {ja} (atk.north);
+  \draw[arr] (dec.east) -| node[above, pos=0.3] {nein} (ok.north);
+  \draw[arr] (atk.south) |- (save.west);
+  \draw[arr] (ok.south)  |- (save.east);
+  \draw[arr] (save) -- (more);
+  \draw[arr] (more) -- node[right] {nein} (met);
+  \draw[arr] (more.west) -- node[above] {ja} ++(-4,0) |- (loop.west);
+
+  % Fehler -> Wiederholung
+  \draw[arr, dashed] (llm.east) -- ++(0.6,0) |- node[right, pos=0.25, font=\footnotesize, align=left] {Fehler:\\Wiederholung} (req.east);
+
+  % Parameter
+  \node[note, anchor=west] at (5.6,-5.6) {\textbf{Parameter}\\temperature $=0$\\max\_tokens $=10$\\reasoning\_effort $=$ none};
+\end{tikzpicture}

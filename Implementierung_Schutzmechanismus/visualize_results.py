@@ -1,12 +1,14 @@
-# Makes the tables and diagrams for the results chapter of the thesis.
-# Everything is saved in the folder results_diagramms:
-#   tabelle_ergebnisse.tex          all runs with all metrics
-#   tabelle_fpr_harmlos.tex         false positive rate per kind of harmless text
-#   recall_gesamt                   recall of every run, both data sets
-#   recall_pro_transformation       own data set, recall per transformation T00 ... T15
-#   recall_bipia_pro_aufgabe        BIPIA, recall per task (e-mail, table, code)
-#   recall_bipia_pro_position       BIPIA, recall per position of the attack
-#   recall_vs_fpr                   recall against false positive rate
+# Makes the tables and diagrams for the results chapter of the thesis (test split).
+# Everything is saved in the folder results_diagramms. The file names start like the
+# result files (model, split, approaches), followed by the data set and the content:
+#   ..._tabelle_ergebnisse.tex                     all runs with all metrics
+#   ..._tabelle_fpr_harmlos.tex                    false positive rate per kind of harmless text
+#   ..._<data set>_recall_gesamt                   recall of every run
+#   ..._eigen_recall_pro_transformation            own data set, recall per transformation T00 ... T15
+#   ..._bipia_obfuscated_recall_pro_transformation obfuscated BIPIA, recall per transformation
+#   ..._bipia_recall_pro_aufgabe                   BIPIA, recall per task (e-mail, table, code)
+#   ..._bipia_recall_pro_position                  BIPIA, recall per position of the attack
+#   ..._<data set>_recall_vs_fpr                   recall against false positive rate
 # The diagrams are saved as .pdf (for LaTeX) and .png.
 # Runs without a results file are skipped, so the script can run at any time.
 #
@@ -30,18 +32,27 @@ ENERGY4U_YELLOW = "#ffd23f"
 GRAY = "#9a9a9a"
 EDGE = "#333333"
 
-# all runs: data set, label, file name (without _results.jsonl), color.
+# all runs on the test split: data set, label, file name (without _results.jsonl), color.
 # The new approach is the own approach, so it gets the HSMW blue.
 RUNS = [
-    ["eigen", "Original (Mistral Small 4)", "mistral_small4_original", ENERGY4U_YELLOW],
-    ["eigen", "Original (Mistral Large 4)", "mistral_large4_original", GRAY],
-    ["eigen", "Neuer Ansatz (Mistral Small 4)", "mistral_small4_new_approach", HSMW_BLUE],
-    ["bipia", "Original (Mistral Small 4)", "mistral_small4_bipia_original", ENERGY4U_YELLOW],
-    ["bipia", "Original (Mistral Large 4)", "mistral_large4_bipia_original", GRAY],
-    ["bipia", "Neuer Ansatz (Mistral Small 4)", "mistral_small4_bipia_new_approach", HSMW_BLUE],
+    ["eigen", "Original (Mistral Small 4)", "mistral_small4_test_original_eigen", ENERGY4U_YELLOW],
+    ["eigen", "Original (Mistral Large 4)", "mistral_large4_test_original_eigen", GRAY],
+    ["eigen", "Neuer Ansatz (Mistral Small 4)", "mistral_small4_test_new_approach_eigen", HSMW_BLUE],
+    ["bipia", "Original (Mistral Small 4)", "mistral_small4_test_original_bipia", ENERGY4U_YELLOW],
+    ["bipia", "Original (Mistral Large 4)", "mistral_large4_test_original_bipia", GRAY],
+    ["bipia", "Neuer Ansatz (Mistral Small 4)", "mistral_small4_test_new_approach_bipia", HSMW_BLUE],
+    ["bipia_obfuscated", "Original (Mistral Small 4)",
+     "mistral_small4_test_original_bipia_obfuscated", ENERGY4U_YELLOW],
+    ["bipia_obfuscated", "Neuer Ansatz (Mistral Small 4)",
+     "mistral_small4_test_new_approach_bipia_obfuscated", HSMW_BLUE],
 ]
 
-DATA_SET_NAMES = {"eigen": "Eigener Datensatz", "bipia": "BIPIA + NotInject"}
+DATA_SETS = ["eigen", "bipia", "bipia_obfuscated"]
+DATA_SET_NAMES = {"eigen": "Eigener Datensatz", "bipia": "BIPIA + NotInject",
+                  "bipia_obfuscated": "BIPIA, verschleiert"}
+
+# start of every file name: model, split, the compared approaches
+PREFIX = "mistral_small4_test_new_approach_vs_original_"
 
 
 # ---------- reading ----------
@@ -143,7 +154,7 @@ def write_results_table(runs):
         r"\textbf{Recall} & \textbf{FPR} & \textbf{Precision} & \textbf{F1} & "
         r"\textbf{Latenz (Median)} \\",
     ]
-    for data_set in ["eigen", "bipia"]:
+    for data_set in DATA_SETS:
         selected = runs_of(runs, data_set)
         if len(selected) == 0:
             continue
@@ -164,7 +175,7 @@ def write_results_table(runs):
                          + " & " + f"{m['latency_ms']['median']:.0f}" + r"\,ms \\")
     lines.append(r"\bottomrule")
     lines.append(r"\end{tabular}}")
-    save_text("\n".join(lines) + "\n", "tabelle_ergebnisse.tex")
+    save_text("\n".join(lines) + "\n", PREFIX + "tabelle_ergebnisse.tex")
 
 
 # false positive rate per kind of harmless text
@@ -179,7 +190,7 @@ def write_fpr_table(runs):
         r"\textbf{Ansatz} & \textbf{Normal} & \textbf{Hard Negative} & "
         r"\textbf{Transformiert} & \textbf{Gesamt} \\",
     ]
-    for data_set in ["eigen", "bipia"]:
+    for data_set in DATA_SETS:
         selected = runs_of(runs, data_set)
         if len(selected) == 0:
             continue
@@ -198,7 +209,7 @@ def write_fpr_table(runs):
             lines.append(label_tex(run) + " & " + " & ".join(cells) + r" \\")
     lines.append(r"\bottomrule")
     lines.append(r"\end{tabular}")
-    save_text("\n".join(lines) + "\n", "tabelle_fpr_harmlos.tex")
+    save_text("\n".join(lines) + "\n", PREFIX + "tabelle_fpr_harmlos.tex")
 
 
 # ---------- diagrams ----------
@@ -226,6 +237,15 @@ def save_diagram(figure, name):
     plt.close(figure)
 
 
+# the value above a bar with one decimal and a German decimal comma,
+# without ",0": 82.5 -> "82,5", 100.0 -> "100"
+def value_label(value):
+    text = f"{value:.1f}".replace(".", ",")
+    if text.endswith(",0"):
+        text = text[:-2]
+    return text
+
+
 # grouped bars: one group per entry of group_names, one bar per run.
 # values[r][g] is the share of run r in group g.
 def draw_grouped_bars(runs, group_names, values, x_label, name, value_labels=True, width_cm=16):
@@ -245,7 +265,7 @@ def draw_grouped_bars(runs, group_names, values, x_label, name, value_labels=Tru
         for bar, height in zip(bars, heights):
             if value_labels or height == 0:
                 ax.text(bar.get_x() + bar.get_width() / 2, height + 1.5,
-                        f"{height:.0f}", ha="center", va="bottom", fontsize=7, color=EDGE)
+                        value_label(height), ha="center", va="bottom", fontsize=7, color=EDGE)
 
     ax.set_xticks(range(len(group_names)))
     ax.set_xticklabels(group_names)
@@ -259,7 +279,7 @@ def draw_grouped_bars(runs, group_names, values, x_label, name, value_labels=Tru
 
 # recall of every run, one group per data set
 def draw_recall_overview(runs):
-    for data_set in ["eigen", "bipia"]:
+    for data_set in DATA_SETS:
         selected = runs_of(runs, data_set)
         if len(selected) == 0:
             continue
@@ -267,23 +287,26 @@ def draw_recall_overview(runs):
         for run in selected:
             values.append([run["metrics"]["recall"]])
         draw_grouped_bars(selected, [DATA_SET_NAMES[data_set]], values, "",
-                          "recall_gesamt_" + data_set, width_cm=10)
+                          PREFIX + data_set + "_recall_gesamt", width_cm=10)
 
 
-# own data set: recall per transformation T00 ... T15
+# recall per transformation: own data set (T00 ... T15) and obfuscated BIPIA
+# (T01, T02, T03, T08, T14)
 def draw_recall_per_transformation(runs):
-    selected = runs_of(runs, "eigen")
-    if len(selected) == 0:
-        return
-    transformations = list(selected[0]["metrics"]["recall_by_transformation"])
-    values = []
-    for run in selected:
-        row = []
-        for transformation in transformations:
-            row.append(run["metrics"]["recall_by_transformation"][transformation])
-        values.append(row)
-    draw_grouped_bars(selected, transformations, values, "Transformation",
-                      "recall_pro_transformation", value_labels=False)
+    for data_set in ["eigen", "bipia_obfuscated"]:
+        selected = runs_of(runs, data_set)
+        if len(selected) == 0:
+            continue
+        transformations = list(selected[0]["metrics"]["recall_by_transformation"])
+        values = []
+        for run in selected:
+            row = []
+            for transformation in transformations:
+                row.append(run["metrics"]["recall_by_transformation"][transformation])
+            values.append(row)
+        draw_grouped_bars(selected, transformations, values, "Transformation",
+                          PREFIX + data_set + "_recall_pro_transformation",
+                          value_labels=(data_set != "eigen"))
 
 
 # BIPIA: recall per task and per position of the attack
@@ -296,19 +319,19 @@ def draw_recall_bipia(runs):
     for run in selected:
         values.append(recall_by_field(run, "task", ["email", "table", "code"]))
     draw_grouped_bars(selected, ["E-Mail", "Tabelle", "Code"], values,
-                      "Art des externen Inhalts", "recall_bipia_pro_aufgabe")
+                      "Art des externen Inhalts", PREFIX + "bipia_recall_pro_aufgabe")
 
     values = []
     for run in selected:
         values.append(recall_by_field(run, "position", ["start", "middle", "end"]))
     draw_grouped_bars(selected, ["Anfang", "Mitte", "Ende"], values,
-                      "Position des Angriffs im Text", "recall_bipia_pro_position")
+                      "Position des Angriffs im Text", PREFIX + "bipia_recall_pro_position")
 
 
 # recall against false positive rate, one diagram per data set (top left is best).
 # The lines show the 95 % confidence interval.
 def draw_recall_vs_fpr(runs):
-    for data_set in ["eigen", "bipia"]:
+    for data_set in DATA_SETS:
         selected = runs_of(runs, data_set)
         if len(selected) == 0:
             continue
@@ -328,7 +351,7 @@ def draw_recall_vs_fpr(runs):
         ax.set_ylabel("Recall (%)")
         ax.set_title(DATA_SET_NAMES[data_set], fontsize=9)
         ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=1, fontsize=8)
-        save_diagram(figure, "recall_vs_fpr_" + data_set)
+        save_diagram(figure, PREFIX + data_set + "_recall_vs_fpr")
 
 
 # ---------- start ----------

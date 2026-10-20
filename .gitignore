@@ -32,3 +32,5 @@
 mistral_key.txt
 
 edge_profile*/
+
+__pycache__/

@@ -1,0 +1,4231 @@
+import express from 'express';
+import bodyParser from 'body-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import multer from 'multer';
+import axios from 'axios';
+import fs from 'fs';
+import dotenv from 'dotenv';
+import { createCanvas } from 'canvas';
+import { createServer } from 'http';
+import admin from "firebase-admin";
+import { GoogleAuth } from 'google-auth-library';
+import FormData from 'form-data';
+import stream from 'stream';
+import { getFirestore, AggregateField } from "firebase-admin/firestore"; // <--- Wichtig
+import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
+import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
+import { parseString } from 'xml2js';
+import unzipper from 'unzipper';
+import { getFormatanpassungPrompt } from './formatanpassung_knowledge.js';
+import { encoding_for_model } from '@dqbd/tiktoken';
+import { chromium } from 'playwright';
+
+// Load environment variables
+dotenv.config();
+
+// Constants
+
+const apiKey = process.env.AZURE_OPENAI_API_KEY;
+const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
+const version = process.env.AZURE_OPENAI_API_VERSION;
+const vision_version = process.env.AZURE_OPENAI_VISION_API_VERSION || "2024-02-15-preview";
+const deployment = process.env.AZURE_OPENAI_DEPLOYMENT;
+const BACKEND_URL = process.env.BACKEND_URL || "https://imsbot4u-dev-1050760314511.europe-west3.run.app";
+const PORT = process.env.PORT || 8080;
+const MAX_PARALLEL = process.env.MAX_PARALLEL || 5;
+const BUCKET_NAME = process.env.GCS_BUCKET || "bot4u_temp_data_storage";
+
+// Model Pricing (USD per 1K tokens)
+const MODEL_PRICING = {
+    // Azure OpenAI
+    'gpt-4o': {'input': 0.0025, 'output': 0.01},
+    'gpt-4o-mini': {'input': 0.00015, 'output': 0.0006},
+    'gpt-4-turbo': {'input': 0.01, 'output': 0.03},
+    'gpt-4': {'input': 0.03, 'output': 0.06},
+    'gpt-3.5-turbo': {'input': 0.0005, 'output': 0.0015},
+    
+    // Anthropic Claude (via Vertex AI)
+    'claude-3-5-sonnet-20241022': {'input': 0.003, 'output': 0.015},
+    'claude-3-5-sonnet': {'input': 0.003, 'output': 0.015},
+    'claude-3-opus': {'input': 0.015, 'output': 0.075},
+    'claude-3-sonnet': {'input': 0.003, 'output': 0.015},
+    'claude-3-haiku': {'input': 0.00025, 'output': 0.00125},
+    
+    // Google Gemini (via Vertex AI)
+    'gemini-1.5-pro': {'input': 0.00125, 'output': 0.005},
+    'gemini-1.5-flash': {'input': 0.000075, 'output': 0.0003},
+    'gemini-1.0-pro': {'input': 0.0005, 'output': 0.0015},
+    
+    // Mistral AI (prices per 1M tokens)
+    'mistral-large-2512': {'input': 0.0005, 'output': 0.0015},  // Mistral Large 3: $0.5/$1.5 per 1M tokens
+    'mistral-large-latest': {'input': 0.0005, 'output': 0.0015},
+    'mistral-large-2411': {'input': 0.002, 'output': 0.006},
+    'mistral-small-latest': {'input': 0.0002, 'output': 0.0006},
+    'mistral-medium-latest': {'input': 0.00275, 'output': 0.0081},
+    
+    // Embeddings
+    'text-embedding-3-large': {'input': 0.00013, 'output': 0.0},
+    'text-embedding-ada-002': {'input': 0.0001, 'output': 0.0},
+
+    // Local models (Ollama, LM Studio) - no cost
+    'llama3.2': {'input': 0.0, 'output': 0.0},
+    'llama3.1': {'input': 0.0, 'output': 0.0},
+    'mistral': {'input': 0.0, 'output': 0.0},
+    'qwen2.5': {'input': 0.0, 'output': 0.0},
+    
+    // Default for unknown models
+    'default': {'input': 0.001, 'output': 0.002},
+
+    // User Config Mappings
+    'GPT-4.1': {'input': 0.0025, 'output': 0.01}, // gpt-4o
+    'GPT-OSS 20B': {'input': 0.0005, 'output': 0.0015}, // gpt-oss-20b
+    'Gemini 3 Pro': {'input': 0.00125, 'output': 0.005}, // gemini-3-pro
+    'Claude Sonnet 4.5': {'input': 0.003, 'output': 0.015}, // claude-sonnet-4-5
+    'Gemini 2.5 Pro': {'input': 0.00125, 'output': 0.005}, // gemini-2-5-pro
+    'Gemini 2.5 Flash': {'input': 0.000075, 'output': 0.0003}, // gemini-2-5-flash
+    'Mistral Large (Mistral AI)': {'input': 0.0005, 'output': 0.0015}, // mistral-large-2512
+    'Llama 3.2 1B (Ollama)': {'input': 0.0, 'output': 0.0}, // llama1b
+    'Ministral 3B (LM Studio)': {'input': 0.0, 'output': 0.0} // ministral
+};
+
+function calculateCost(modelId, promptTokens, completionTokens) {
+    const pricing = MODEL_PRICING[modelId] || MODEL_PRICING['default'];
+    const inputCost = (promptTokens / 1000) * pricing.input;
+    const outputCost = (completionTokens / 1000) * pricing.output;
+    return inputCost + outputCost;
+}
+
+function calculateCostBreakdownFromTokens(costBreakdownTokens) {
+    if (!costBreakdownTokens) return null;
+    const result = {
+        llm: 0,
+        embedding: 0,
+        vision: 0,
+        energie: 0,
+        rag: 0,
+        hyde: 0
+    };
+
+    if (costBreakdownTokens.rag_llm) {
+        result.rag = calculateCost(
+            costBreakdownTokens.rag_llm.model,
+            costBreakdownTokens.rag_llm.prompt_tokens,
+            costBreakdownTokens.rag_llm.completion_tokens
+        );
+    }
+    
+    if (costBreakdownTokens.formatanpassung_llm) {
+        result.llm += calculateCost(
+            costBreakdownTokens.formatanpassung_llm.model,
+            costBreakdownTokens.formatanpassung_llm.prompt_tokens,
+            costBreakdownTokens.formatanpassung_llm.completion_tokens
+        );
+    }
+
+    if (costBreakdownTokens.hyde_1) {
+        result.hyde += calculateCost(
+            costBreakdownTokens.hyde_1.model,
+            costBreakdownTokens.hyde_1.prompt_tokens,
+            costBreakdownTokens.hyde_1.completion_tokens
+        );
+    }
+    
+    if (costBreakdownTokens.hyde_2) {
+        result.hyde += calculateCost(
+            costBreakdownTokens.hyde_2.model,
+            costBreakdownTokens.hyde_2.prompt_tokens,
+            costBreakdownTokens.hyde_2.completion_tokens
+        );
+    }
+
+    if (costBreakdownTokens.embeddings) {
+        // Embeddings only have input cost typically (text-embedding-3-large is ~0.00013 per 1k)
+        result.embedding += calculateCost(
+            costBreakdownTokens.embeddings.model,
+            costBreakdownTokens.embeddings.prompt_tokens,
+            costBreakdownTokens.embeddings.completion_tokens
+        );
+    }
+
+    return result;
+}
+
+// External Version Config
+const IS_EXTERNAL_VERSION = process.env.IS_EXTERNAL_VERSION === 'true';
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
+  .split(",")
+  .map(e => e.trim().toLowerCase())
+  .filter(e => e.length > 0);
+
+// File paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const distPath = path.join(__dirname, 'dist');
+
+
+// Initialize Express app and server
+const app = express();
+const server = createServer(app);
+const upload = multer({
+  dest: "/tmp/uploads/",
+  limits: { fileSize: 100 * 1024 * 1024 } // z.B. 100 MB
+}); const filePathMap = new Map();
+
+// Middleware
+const bodyLimit = '50mb'; // oder '20mb', was du brauchst
+
+app.use(bodyParser.json({ limit: bodyLimit }));
+app.use(bodyParser.urlencoded({ extended: true, limit: bodyLimit }));
+app.use(express.json({ limit: bodyLimit }));
+
+app.use(express.static(distPath, {
+  fallthrough: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+    if (filePath.endsWith('index.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.too.large') {
+    console.error("❌ Body zu groß:", err.message);
+    return res.status(413).json({ error: "Body zu groß. Bitte kürzen." });
+  }
+  next(err);
+});
+// Public endpoints (no auth required)
+const INTERNAL_DOMAINS = ["@eviden.com", "@atos.net", "@energy4u.org", "@alten-worldgrid.com"];
+
+app.post('/api/validate-registration', async (req, res) => {
+  const { email, code } = req.body;
+
+  if (!email) return res.status(400).json({ valid: false, error: "Email required" });
+
+  // Check if internal
+  const isInternal = INTERNAL_DOMAINS.some(d => email.toLowerCase().endsWith(d));
+  const isGlobalAllowed = ADMIN_EMAILS.includes(email.toLowerCase());
+
+  if (isInternal || isGlobalAllowed) {
+    return res.json({ valid: true });
+  }
+
+  // External registration
+  if (!code) {
+    return res.json({ valid: false, error: "Registrierung nicht möglich!" });
+  }
+
+  try {
+    const snapshot = await db.collection("companies").where("code", "==", code).limit(1).get();
+    
+    if (snapshot.empty) {
+      return res.json({ valid: false, error: "Registrierung nicht möglich!" });
+    }
+
+    const company = snapshot.docs[0].data();
+    const now = new Date();
+
+    // Check validity
+    if (company.valid_from && now < company.valid_from.toDate()) {
+       return res.json({ valid: false, error: "Registrierung nicht möglich!" });
+    }
+    if (company.valid_until && now > company.valid_until.toDate()) {
+       const endOfDay = new Date(company.valid_until.toDate());
+       endOfDay.setHours(23, 59, 59, 999);
+       if (now > endOfDay) {
+         return res.json({ valid: false, error: "Registrierung nicht möglich!" });
+       }
+    }
+
+    // Check domain
+    if (company.allowed_domains && company.allowed_domains.length > 0) {
+      const userDomain = email.split('@')[1].toLowerCase();
+      const allowed = company.allowed_domains.map(d => d.toLowerCase().trim());
+      if (!allowed.includes(userDomain)) {
+        return res.json({ valid: false, error: "Registrierung nicht möglich!" });
+      }
+    }
+    
+    // Check max users
+    if (company.current_users >= company.max_users) {
+        return res.json({ valid: false, error: "Registrierung nicht möglich!" });
+    }
+
+    res.json({ valid: true });
+
+  } catch (err) {
+    console.error("Error validating registration:", err);
+    res.status(500).json({ error: "Validation failed" });
+  }
+});
+
+// Protected endpoints (auth required)
+app.use("/api", verifyFirebaseUser);
+
+app.get('/api/model-config', async (req, res) => {
+  try {
+    let modelConfig;
+    const modelConfigB64 = process.env.MODEL_CONFIG_B64;
+    const modelConfigStr = process.env.MODEL_CONFIG;
+    
+    if (modelConfigB64) {
+      // Decode base64-encoded config (from GitHub Actions)
+      const decoded = Buffer.from(modelConfigB64, 'base64').toString('utf-8');
+      modelConfig = JSON.parse(decoded);
+    } else if (modelConfigStr) {
+      // Direct JSON (for local development)
+      modelConfig = JSON.parse(modelConfigStr);
+    } else {
+      modelConfig = {};
+    }
+    
+    // Filter if external version and user has company
+    if (IS_EXTERNAL_VERSION && req.userData && req.userData.company_id) {
+       try {
+         const companyDoc = await db.collection("companies").doc(req.userData.company_id).get();
+         if (companyDoc.exists) {
+            const companyData = companyDoc.data();
+            if (companyData.allowed_models && companyData.allowed_models.length > 0) {
+               const allowed = companyData.allowed_models;
+               const filteredConfig = {};
+               for (const [key, config] of Object.entries(modelConfig)) {
+                  // Check against key or name
+                  if (allowed.includes(key) || allowed.includes(config.name)) {
+                     filteredConfig[key] = config;
+                  }
+               }
+               modelConfig = filteredConfig;
+            }
+         }
+       } catch (err) {
+         console.error('Error filtering models:', err);
+       }
+    }
+    
+    // Sanitize config - remove potentially sensitive fields like api_key, endpoint
+    const safeConfig = {};
+    for (const [key, config] of Object.entries(modelConfig)) {
+      safeConfig[key] = {
+        name: config.name,
+        provider: config.provider,
+        deployment: config.deployment,
+        description: config.description
+      };
+    }
+    
+    res.json(safeConfig);
+  } catch (err) {
+    console.error('Error parsing MODEL_CONFIG:', err);
+    res.status(500).json({ error: 'Failed to load model configuration' });
+  }
+});
+
+// Public/Protected file access
+app.get('/api/files/*', async (req, res, next) => {
+  // Bearer Token Auth via Middleware (req.user is set)
+  // Cookies are explicitly disabled for security
+  if (!req.user) {
+     return res.status(404).send('Not Found');
+  }
+  return handleFileRequest(req, res);
+});
+
+// Helper for file serving
+async function handleFileRequest(req, res) {
+  const filePath = req.params[0]; // Captures everything after /api/files/
+  
+  if (!filePath) {
+    return res.status(400).send('Invalid path');
+  }
+
+  // Security Check: Directory Traversal
+  if (filePath.includes('..')) {
+      return res.status(400).send('Invalid path');
+  }
+
+  // External Version Check
+  const isExternal = process.env.VITE_IS_EXTERNAL_VERSION === 'true';
+  if (isExternal && !filePath.startsWith('public/')) {
+      // Return 404 to hide existence of internal files
+      return res.status(404).send('Not Found');
+  }
+
+  const bucketName = process.env.GCS_BUCKET_INTERNAL || 'e4u-internal-knowledge-bucket';
+  const bucket = admin.storage().bucket(bucketName);
+  const file = bucket.file(filePath);
+
+  try {
+      const [exists] = await file.exists();
+      if (!exists) {
+          return res.status(404).send('Not Found');
+      }
+
+      const [metadata] = await file.getMetadata();
+      const contentType = metadata.contentType || 'application/pdf';
+
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `inline; filename="${path.basename(filePath)}"`);
+
+      file.createReadStream()
+          .on('error', (err) => {
+              console.error('Stream Error:', err);
+              if (!res.headersSent) {
+                res.status(500).end();
+              }
+          })
+          .pipe(res);
+
+  } catch (error) {
+      console.error('GCS Error:', error);
+      if (!res.headersSent) {
+        res.status(404).send('Not Found');
+      }
+  }
+}
+
+// Protected endpoints (auth required) - Redundant middleware removed
+let ENCRYPTION_KEY = null; // Wird später geladen
+
+async function loadEncryptionKey() {
+  if (process.env.USE_LOCAL_ENCRYPTION_KEY === 'true') {
+    console.warn("⚠️ Using LOCAL dummy encryption key. Do not use in production!");
+    ENCRYPTION_KEY = Buffer.alloc(32, 'a'); // 32 bytes of 'a'
+    return;
+  }
+
+  try {
+    const client = new SecretManagerServiceClient();
+    const projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT || 'ai-tools-436214';
+    console.log(`Loading encryption key from project: ${projectId}`);
+    const [version] = await client.accessSecretVersion({
+      name: `projects/${projectId}/secrets/DB_ENCRYPTION_KEY_GLOBAL/versions/latest`
+    });
+    ENCRYPTION_KEY = Buffer.from(version.payload.data.toString('utf8'), 'base64');
+    if (ENCRYPTION_KEY.length !== 32) {
+      throw new Error("ENCRYPTION_KEY must be 32 bytes (256 bit) for AES-256-GCM");
+    }
+  } catch (err) {
+    console.warn("⚠️ Failed to load encryption key from Secret Manager:", err.message);
+    if (process.env.IS_EXTERNAL_VERSION === 'true' || process.env.NODE_ENV === 'development') {
+      console.warn("⚠️ Falling back to dummy encryption key for DEV/DEMO mode.");
+      ENCRYPTION_KEY = Buffer.alloc(32, 'a');
+    } else {
+      throw err;
+    }
+  }
+}
+const IV_LENGTH = 12; // GCM empfiehlt 12 bytes
+
+
+
+function encrypt(data) {
+  const input = Buffer.isBuffer(data)
+    ? data
+    : typeof data === "string"
+      ? data
+      : JSON.stringify(data);
+ 
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv(
+    "aes-256-gcm",
+    Buffer.from(ENCRYPTION_KEY),
+    iv
+  );
+ 
+  let encrypted;
+  if (Buffer.isBuffer(input)) {
+    encrypted = Buffer.concat([cipher.update(input), cipher.final()]).toString("base64");
+  } else {
+    encrypted = cipher.update(input, "utf8", "base64") + cipher.final("base64");
+  }
+ 
+  const tag = cipher.getAuthTag();
+  return `${iv.toString("base64")}:${tag.toString("base64")}:${encrypted}`;
+}
+
+function decrypt(data) {
+  const [ivB64, tagB64, encrypted] = data.split(':');
+  const iv = Buffer.from(ivB64, 'base64');
+  const tag = Buffer.from(tagB64, 'base64');
+  const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(ENCRYPTION_KEY), iv);
+  decipher.setAuthTag(tag);
+  let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
+/**
+ * Count tokens in a text string using tiktoken
+ */
+function countTokens(text) {
+  try {
+    const safeText =
+      typeof text === "string"
+        ? text
+        : JSON.stringify(text ?? "");
+ 
+    const enc = encoding_for_model("gpt-4");
+    const tokens = enc.encode(safeText);
+    const count = tokens.length;
+    enc.free();
+    return count;
+  } catch (err) {
+    console.error("Error counting tokens:", err);
+    return 0;
+  }
+}
+
+/**
+ * Extract attachments with token counts from additionalContent
+ */
+function extractAttachmentsWithTokens(additionalContent) {
+  const attachments = [];
+  if (!additionalContent || !additionalContent.trim()) {
+    return attachments;
+  }
+  
+  try {
+    // Split by file markers
+    const filePattern = /File: ([^;]+); Size: ([^;]+); Content:\s*([\s\S]*?)(?=File: |$)/g;
+    let match;
+    
+    while ((match = filePattern.exec(additionalContent)) !== null) {
+      const filename = match[1].trim();
+      const size = match[2].trim();
+      const content = match[3].trim();
+      
+      const tokens = countTokens(content);
+      
+      attachments.push({
+        filename: encrypt(filename),
+        size: size,
+        tokens: tokens
+      });
+    }
+  } catch (err) {
+    console.error('Error extracting attachments with tokens:', err);
+  }
+  
+  return attachments;
+}
+
+/**
+ * Calculate token breakdown from attachments and messages
+ */
+function calculateTokenBreakdown(attachments, currentMessage, additionalContent, systemPrompt, messageHistory, historyLimit = 20) {
+  const attachment_tokens = attachments.reduce((sum, att) => sum + (att.tokens || 0), 0);
+  const user_request_tokens = countTokens(currentMessage);
+  const system_prompt_tokens = systemPrompt ? countTokens(systemPrompt) : 0;
+
+  // Calculate conversation history tokens
+  let conversation_history_tokens = 0;
+  if (messageHistory && messageHistory.length > 0) {
+    const relevantHistory = historyLimit != null ? messageHistory.slice(-historyLimit) : messageHistory;
+    for (const msg of relevantHistory) {
+      conversation_history_tokens += countTokens(msg.text || '');
+    }
+  }
+  
+  return {
+    system_prompt_tokens: system_prompt_tokens,
+    context_tokens: 0,  // Will be set by backend for RAG queries (energy-bot mode)
+    conversation_history_tokens: conversation_history_tokens,
+    user_request_tokens: user_request_tokens,
+    attachment_tokens: attachment_tokens
+  };
+}
+
+async function generateTitleWithOpenAI(userMessage, assistantResponse) {
+
+  const prompt = `Lies dir die folgende Unterhaltung zwischen einem Nutzer und einem KI-Assistenten durch. Gib basierend auf dem Inhalt einen kurzen, prägnanten Titel zurück – in derselben Sprache wie die Unterhaltung. Antworte nur mit dem Titel, ohne weitere Erklärungen.
+
+  User: ${userMessage}
+  Assistant: ${assistantResponse}
+  
+  Titel:`;
+  const url = `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${version}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': apiKey
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: prompt }
+        ],
+        max_tokens: 100, // Limit the response to a short title
+        temperature: 0.5, // Adjust temperature for creativity
+        top_p: 0.95,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data || !data.choices || !data.choices[0]?.message?.content) {
+      console.warn("⚠️ OpenAI returned unexpected format:", data);
+      throw new Error("Invalid response from OpenAI");
+    }
+
+    return data.choices[0].message.content.trim();
+  } catch (err) {
+    console.error("❌ OpenAI title generation error:", err);
+    throw err;
+  }
+}
+
+// Firebase initialisation
+if (!admin.apps.length) {
+  const projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT || 'ai-tools-436214';
+  console.log(`Initializing Firebase Admin with Project ID: ${projectId}`);
+  admin.initializeApp({
+    credential: admin.credential.applicationDefault(), // nutzt gcloud
+    projectId: projectId, 
+  });
+}
+const db = admin.firestore();
+const FIRESTORE_DB_NAME = process.env.FIRESTORE_DB_NAME || "bot4u-userdata";
+console.log(`Using Firestore Database ID: ${FIRESTORE_DB_NAME}`);
+db.settings({ databaseId: FIRESTORE_DB_NAME });
+
+/**
+ * Log activity event to Firestore for analytics
+ * @param {Object} eventData - Event data to log
+ */
+async function logActivityEvent(eventData) {
+  try {
+    const {
+      uid,
+      session_id,
+      event_type,
+      model,
+      usage,
+      timings,
+      result,
+      attachments
+    } = eventData;
+
+    // Validate required fields
+    if (!uid || !event_type) {
+      console.warn('⚠️ Activity event missing required fields (uid, event_type)');
+      return;
+    }
+
+    // Build the event document
+    const eventDoc = {
+      uid,
+      session_id: session_id || null,
+      event_type, // 'chat_turn' or 'rag_turn'
+      ts_server: admin.firestore.FieldValue.serverTimestamp(),
+      
+      model: {
+        id: model?.id || 'unknown',
+        provider: model?.provider || 'unknown',
+        name: model?.name || 'unknown'
+      },
+      
+      usage: {
+        prompt_tokens: usage?.prompt_tokens || 0,
+        completion_tokens: usage?.completion_tokens || 0,
+        total_tokens: usage?.total_tokens || 0
+      },
+      
+      cost: {
+        total: eventData.cost?.total || 0,
+        llm: eventData.cost?.llm || 0,
+        embedding: eventData.cost?.embedding || 0,
+        vision: eventData.cost?.vision || 0,
+        energie: eventData.cost?.energie || 0,
+        rag: eventData.cost?.rag || 0,
+        hyde: eventData.cost?.hyde || 0,
+      },
+      
+      timings: {
+        total_ms: timings?.total_ms || 0,
+        ttft_ms: timings?.ttft_ms || null,
+        chunks_count: timings?.chunks_count || 0
+      },
+      
+      result: {
+        status: result?.status || 'ok',
+        http_status: result?.http_status || 200,
+        error_message: result?.error_message || null
+      },
+      
+      attachments: {
+        count: attachments?.count || 0,
+        total_bytes: attachments?.total_bytes || 0
+      }
+    };
+
+    // Log to Firestore activity_events collection
+    await db.collection('activity_events').add(eventDoc);
+    
+  } catch (err) {
+    // Don't fail the main request if logging fails
+    console.error('❌ Failed to log activity event:', err.message);
+  }
+}
+
+// NodeCanvasFactory class
+class NodeCanvasFactory {
+  create(width, height) {
+    const canvas = createCanvas(width, height);
+    const context = canvas.getContext('2d');
+    return { canvas, context };
+  }
+
+  reset(canvasAndContext, width, height) {
+    canvasAndContext.canvas.width = width;
+    canvasAndContext.canvas.height = height;
+  }
+
+  destroy(canvasAndContext) {
+    canvasAndContext.canvas = null;
+    canvasAndContext.context = null;
+  }
+}
+
+
+async function callBackend(method, path, data = undefined) {
+  const auth = new GoogleAuth();
+  const client = await auth.getIdTokenClient(BACKEND_URL);
+  const config = {
+    url: `${BACKEND_URL}${path}`,
+    method,
+  };
+  if (data && method !== 'GET') {
+    config.data = data;
+  }
+  return await client.request(config);
+}
+
+async function verifyFirebaseToken(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Kein gültiger Token übermittelt" });
+  }
+
+  const idToken = authHeader.split(" ")[1];
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    req.user = decodedToken; // Nutzer-Info für später
+    next();
+  } catch (error) {
+    console.error("Token ungültig:", error.message);
+    return res.status(401).json({ error: "Tokenprüfung fehlgeschlagen" });
+  }
+}
+// Utility to forward headers safely
+const getAuthHeader = (req) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  return token ? `Bearer ${token}` : null;
+};
+
+app.post('/api/upload-pptx', upload.single('file'), async (req, res) => {
+  try {
+    const filePath = req.file.path;
+    const textParts = [];
+
+    fs.createReadStream(filePath)
+      .pipe(unzipper.Parse())
+      .on('entry', async function (entry) {
+        const fileName = entry.path;
+        if (fileName.startsWith("ppt/slides/slide") && fileName.endsWith(".xml")) {
+          const xml = await entry.buffer();
+          parseString(xml, (err, result) => {
+            if (err) return;
+            const paragraphs = result['p:sld']['p:cSld'][0]['p:spTree'][0]['p:sp'] || [];
+            for (const p of paragraphs) {
+              try {
+                const runs = p['p:txBody'][0]['a:p'];
+                for (const r of runs) {
+                  const texts = r['a:r']?.map(rt => rt['a:t']?.[0]).filter(Boolean) || [];
+                  textParts.push(...texts);
+                }
+              } catch (e) { /* ignore errors per slide */ }
+            }
+          });
+        } else {
+          entry.autodrain();
+        }
+      })
+      .on('close', () => {
+        fs.unlinkSync(filePath); // cleanup
+        res.json({ text: textParts.join(' ') });
+      });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Fehler beim Verarbeiten der PPTX-Datei." });
+  }
+});
+
+app.post('/api/upload-image', upload.single('file'), async (req, res) => {
+  try {
+    const filePath = req.file.path;
+
+    const formData = new FormData();
+    formData.append('image', fs.createReadStream(filePath));
+
+    const auth = new GoogleAuth();
+    const client = await auth.getIdTokenClient(BACKEND_URL);
+    const headers = formData.getHeaders();
+    const googleHeaders = await client.getRequestHeaders();
+    Object.assign(headers, googleHeaders);
+    const response = await axios.post(`${BACKEND_URL}/api/process-image`, formData, {
+      headers,
+    });
+    fs.unlinkSync(filePath); // cleanup
+
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    console.error('Error processing image:', err?.response?.data || err);
+    res.status(500).json({ error: 'Fehler beim Verarbeiten des Bildes.' });
+  }
+});
+// Proxy: Parse PDF
+app.post('/api/parse-pdf', verifyFirebaseToken, upload.single('pdf'), async (req, res) => {
+  const uploadId = req.headers['x-upload-id'] || '';
+
+  try {
+    const form = new FormData();
+    form.append('pdf', fs.createReadStream(req.file.path));
+
+    const auth = new GoogleAuth();
+    const client = await auth.getIdTokenClient(BACKEND_URL);
+
+    const headers = form.getHeaders({ 'x-upload-id': uploadId });
+
+    // 👉 Workaround für axios + google-auth-client: Stream manuell senden
+    const response = await axios({
+      method: 'post',
+      url: `${BACKEND_URL}/api/parse-pdf`,
+      headers: {
+        ...headers,
+        ...(await client.getRequestHeaders())
+      },
+      data: form
+    });
+
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    console.error('❌ Proxy error: /parse-pdf', err.message);
+    res.status(500).json({ error: 'Failed to forward to backend' });
+  } finally {
+    fs.unlink(req.file.path, () => { });
+  }
+});
+
+// Proxy: Init Upload
+app.post('/api/init-upload', verifyFirebaseToken, async (req, res) => {
+  try {
+    const response = await callBackend('POST', '/api/init-upload');
+
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    console.error('❌ Proxy error: /init-upload', err.message);
+    res.status(500).json({ error: 'Failed to forward to backend' });
+  }
+});
+
+// Proxy: Get Progress
+app.get('/api/progress/:id', async (req, res) => {
+  try {
+    const auth = new GoogleAuth();
+    const client = await auth.getIdTokenClient(BACKEND_URL);
+    const response = await client.request({
+      url: `${BACKEND_URL}/api/progress/${req.params.id}`,
+      method: 'GET',
+    });
+
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    console.error('❌ Proxy error: /progress', err.message);
+    res.status(500).json({ error: 'Failed to forward to backend' });
+  }
+});
+
+app.get('/api/wake-up', async (req, res) => {
+  try {
+    const auth = new GoogleAuth();
+    const client = await auth.getIdTokenClient(BACKEND_URL);
+    const response = await client.request({
+      url: `${BACKEND_URL}/api/wake-up`,
+      method: 'GET',
+    });
+
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to forward to backend' });
+  }
+});
+
+
+// Proxy: Result
+app.get('/api/result/:uploadId', verifyFirebaseToken, async (req, res) => {
+  try {
+    const response = await callBackend('GET', `/api/result/${req.params.uploadId}`);
+
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    console.error('❌ Proxy error: /result', err.message);
+    res.status(500).json({ error: 'Failed to forward to backend' });
+  }
+});
+
+// Proxy: Abort
+app.post('/api/abort/:uploadId', verifyFirebaseToken, async (req, res) => {
+  try {
+    const response = await callBackend('POST', `/api/abort/${req.params.uploadId}`);
+
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    console.error('❌ Proxy error: /abort', err.message);
+    res.status(500).json({ error: 'Failed to forward to backend' });
+  }
+});
+
+// Proxy: Confirm received
+app.post('/api/confirm-received/:uploadId', verifyFirebaseToken, async (req, res) => {
+  try {
+    const response = await callBackend('POST', `/api/confirm-received/${req.params.uploadId}`);
+
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    console.error('❌ Proxy error: /confirm-received', err.message);
+    res.status(500).json({ error: 'Failed to forward to backend' });
+  }
+});
+
+async function saveMessage(
+  uid,
+  sessionId,
+  role,
+  content,
+  model,
+  type,
+  mode,
+  mail,
+  title,
+  tokens_input = 0,
+  tokens_output = 0,
+  attachments = [],
+  http_response_code = null,
+  token_breakdown = null,
+  cost_breakdown = null
+) {
+  try {
+    let sessionRef;
+    const safeContent =
+      typeof content === "string"
+        ? content
+        : JSON.stringify(content, null, 2);
+ 
+    const safeTitle =
+      title == null
+        ? ""
+        : typeof title === "string"
+          ? title
+          : JSON.stringify(title);
+ 
+    const encryptedTitle = safeTitle ? encrypt(safeTitle) : "";
+    const encryptedContent = encrypt(safeContent);
+ 
+    if (!sessionId) {
+      sessionRef = await db.collection("users").doc(uid).collection("chat_sessions").add({
+          session_id: uuidv4(),
+          title: encryptedTitle,
+          status: "open",
+          created_at: new Date(),
+          last_updated: new Date(),
+
+
+        });
+    } else {
+      const existing = await db.collection("users").doc(uid).collection("chat_sessions").doc(sessionId).get();
+      if (!existing.exists) {
+        console.warn(`⚠️ Session ${sessionId} not found (likely DB switch). Creating new session.`);
+        sessionRef = await db.collection("users").doc(uid).collection("chat_sessions").add({
+            session_id: uuidv4(),
+            title: encryptedTitle || encrypt("Neue Unterhaltung"),
+            status: "open",
+            created_at: new Date(),
+            last_updated: new Date(),
+          });
+      } else {
+        sessionRef = existing.ref;
+        await sessionRef.update({ last_updated: new Date() });
+      }
+    }
+ 
+    const messageData = {
+      message_id: uuidv4(),
+      role,
+      model,
+      type,
+      content: encryptedContent,
+      created_at: new Date(),
+      mode,
+      tokens_input,
+      tokens_output,
+      attachments: attachments || []
+    };
+ 
+    // Add HTTP response code if provided (for assistant messages)
+    if (http_response_code !== null) {
+      messageData.http_response_code = http_response_code;
+    }
+ 
+    // Add detailed token breakdown as separate fields for easier querying/aggregation
+    if (token_breakdown) {
+      messageData.token_system_prompt = token_breakdown.system_prompt_tokens || 0;
+      messageData.token_context = token_breakdown.context_tokens || 0;
+      messageData.token_conversation_history = token_breakdown.conversation_history_tokens || 0;
+      messageData.token_user_request = token_breakdown.user_request_tokens || 0;
+      messageData.token_attachments = token_breakdown.attachment_tokens || 0;
+      messageData.token_total = (
+        (token_breakdown.system_prompt_tokens || 0) +
+        (token_breakdown.context_tokens || 0) +
+        (token_breakdown.conversation_history_tokens || 0) +
+        (token_breakdown.user_request_tokens || 0) +
+        (token_breakdown.attachment_tokens || 0)
+      );
+    }
+ 
+    if (cost_breakdown) {
+      messageData.cost_llm = cost_breakdown.llm || 0;
+      messageData.cost_embedding = cost_breakdown.embedding || 0;
+      messageData.cost_vision = cost_breakdown.vision || 0;
+      messageData.cost_energie = cost_breakdown.energie || 0;
+      messageData.cost_rag = cost_breakdown.rag || 0;
+      messageData.cost_hyde = cost_breakdown.hyde || 0;
+      messageData.cost_total = (
+        (cost_breakdown.llm || 0) +
+        (cost_breakdown.embedding || 0) +
+        (cost_breakdown.vision || 0) +
+        (cost_breakdown.energie || 0) +
+        (cost_breakdown.rag || 0) +
+        (cost_breakdown.hyde || 0)
+      );
+    } else {
+      // Set to 0 to prevent double-counting via fallback in metric calculations
+      // (because the exact cost is fully aggregated on the assistant message)
+      messageData.cost_total = 0;
+    }
+ 
+    await sessionRef.collection("messages").add(messageData);
+ 
+    return sessionRef.id;
+  } catch (err) {
+    console.error("Fehler beim Speichern der Nachricht:", err);
+    throw err;
+  }
+}
+
+/**
+ * Call AI provider based on MODEL_CONFIG
+ * Providers: Azure (GPT), Vertex AI (Gemini + Claude), Ollama (WSL), and LM Studio (Windows)
+ */
+async function callAIProvider(modelInfo, messages) {
+  const { provider, deployment } = modelInfo;
+
+  switch (provider) {
+    case 'azure':
+      return await callAzureOpenAI(deployment, messages);
+    
+    case 'vertex':
+      return await callVertexAI(deployment, messages);
+    
+    case 'mistral':
+      return await callMistralAI(deployment, messages);
+    
+    case 'ollama':
+      return await callOllama(deployment, messages);
+    
+    case 'lmstudio':
+      return await callLMStudio(deployment, messages);
+    
+    default:
+      throw new Error(`Unknown provider: ${provider}`);
+  }
+}
+
+/**
+ * Call Azure OpenAI API
+ */
+async function callAzureOpenAI(deploymentName, messages) {
+  const url = `${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${version}`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': apiKey
+    },
+    body: JSON.stringify({
+      messages,
+      temperature: 0.7,
+      top_p: 0.95,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+    })
+  });
+
+  const data = await response.json();
+  data._httpStatus = response.status; // Store HTTP status for tracking
+  return data;
+}
+
+/**
+ * Call Google Vertex AI API
+ * Handles both Gemini models and Claude (Anthropic) models via Vertex AI
+ */
+async function callVertexAI(modelId, messages) {
+  const projectId = process.env.VERTEX_PROJECT_ID;
+  const location = process.env.VERTEX_LOCATION || 'us-central1';
+
+  if (!projectId) {
+    throw new Error('Vertex AI credentials not configured (VERTEX_PROJECT_ID)');
+  }
+
+  // Get access token using Application Default Credentials
+  const auth = new GoogleAuth({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform']
+  });
+  const client = await auth.getClient();
+  const accessToken = await client.getAccessToken();
+  
+  if (!accessToken.token) {
+    throw new Error('Failed to obtain access token from Application Default Credentials');
+  }
+
+  // Determine if this is a Claude model, an OpenAI model, or a Gemini model
+  const isClaudeModel = modelId.startsWith('claude-');
+  const isOpenAIModel = modelId.startsWith('openai/');
+  
+  // For 'global' location, use different hostname format
+  const hostname = location === 'global'
+    ? 'aiplatform.googleapis.com'
+    : `${location}-aiplatform.googleapis.com`;
+
+  if (isClaudeModel) {
+    // Claude (Anthropic) via Vertex AI
+    const anthropicMessages = [];
+    let systemPrompt = '';
+    
+    for (const msg of messages) {
+      if (msg.role === 'system') {
+        systemPrompt = msg.content;
+      } else {
+        anthropicMessages.push({
+          role: msg.role === 'assistant' ? 'assistant' : 'user',
+          content: msg.content
+        });
+      }
+    }
+
+    const url = `https://${hostname}/v1/projects/${projectId}/locations/${location}/publishers/anthropic/models/${modelId}:streamRawPredict`;
+    console.log(`🔍 Vertex AI (Claude) Request URL: ${url}`);
+
+    const requestBody = {
+      anthropic_version: "vertex-2023-10-16",
+      messages: anthropicMessages,
+      max_tokens: 16384,
+      temperature: 0.7,
+    };
+
+    if (systemPrompt) {
+      requestBody.system = systemPrompt;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    console.log(`🔍 Vertex AI (Claude) Response Status: ${response.status}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Vertex AI (Claude) Error Response: ${errorText}`);
+      throw new Error(`Vertex AI API error (${response.status}): ${errorText.substring(0, 200)}`);
+    }
+
+    const data = await response.json();
+
+    // Convert Anthropic response to OpenAI format
+    if (data.content && data.content[0] && data.content[0].text) {
+      return {
+        choices: [{
+          message: {
+            role: 'assistant',
+            content: data.content[0].text
+          },
+          finish_reason: data.stop_reason || 'stop'
+        }],
+        usage: {
+          prompt_tokens: data.usage?.input_tokens || 0,
+          completion_tokens: data.usage?.output_tokens || 0,
+          total_tokens: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0)
+        },
+        _httpStatus: response.status
+      };
+    }
+
+    console.error(`❌ Invalid Vertex AI (Claude) response structure:`, data);
+    throw new Error(`Invalid Vertex AI response: ${JSON.stringify(data).substring(0, 200)}`);
+    
+  } else if (isOpenAIModel) {
+    // OpenAI models via Vertex AI (GPT-OSS)
+    // Endpoint: https://${ENDPOINT}/v1/projects/${PROJECT_ID}/locations/${REGION}/endpoints/openapi/chat/completions
+    
+    const url = `https://${hostname}/v1/projects/${projectId}/locations/${location}/endpoints/openapi/chat/completions`;
+    console.log(`🔍 Vertex AI (OpenAI) Request URL: ${url}`);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: modelId,
+        messages: messages,
+        stream: false
+      })
+    });
+
+    console.log(`🔍 Vertex AI (OpenAI) Response Status: ${response.status}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Vertex AI (OpenAI) Error Response: ${errorText}`);
+      throw new Error(`Vertex AI API error (${response.status}): ${errorText.substring(0, 200)}`);
+    }
+
+    const data = await response.json();
+    data._httpStatus = response.status; // Store HTTP status for tracking
+    return data; // Already in OpenAI format
+
+  } else {
+    // Gemini models via Vertex AI
+    const contents = messages.map(msg => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    }));
+
+    const url = `https://${hostname}/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
+    console.log(`🔍 Vertex AI (Gemini) Request URL: ${url}`);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents,
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.95,
+          maxOutputTokens: 16384,
+        }
+      })
+    });
+
+    console.log(`🔍 Vertex AI (Gemini) Response Status: ${response.status}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Vertex AI (Gemini) Error Response: ${errorText}`);
+      throw new Error(`Vertex AI API error (${response.status}): ${errorText.substring(0, 200)}`);
+    }
+
+    const data = await response.json();
+
+    // Convert Vertex AI response to OpenAI format
+    if (data.candidates && data.candidates[0]) {
+      return {
+        choices: [{
+          message: {
+            role: 'assistant',
+            content: data.candidates[0].content.parts[0].text
+          },
+          finish_reason: 'stop'
+        }],
+        usage: {
+          prompt_tokens: data.usageMetadata?.promptTokenCount || 0,
+          completion_tokens: data.usageMetadata?.candidatesTokenCount || 0,
+          total_tokens: data.usageMetadata?.totalTokenCount || 0
+        },
+        _httpStatus: response.status
+      };
+    }
+
+    console.error(`❌ Invalid Vertex AI (Gemini) response structure:`, data);
+    throw new Error(`Invalid Vertex AI response: ${JSON.stringify(data).substring(0, 200)}`);
+  }
+}
+
+/**
+ * Call Google AI Studio API (DEPRECATED - kept for backward compatibility)
+ */
+async function callAIStudio(modelId, messages) {
+  const apiKey = process.env.AI_STUDIO_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('AI Studio API key not configured (AI_STUDIO_API_KEY)');
+  }
+
+  // Convert OpenAI format to AI Studio format
+  const contents = messages.map(msg => ({
+    role: msg.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: msg.content }]
+  }));
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
+
+  console.log(`🔍 AI Studio Request URL: ${url.replace(apiKey, '***')}`);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents,
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.95,
+        maxOutputTokens: 16384,
+      }
+    })
+  });
+
+  console.log(`🔍 AI Studio Response Status: ${response.status}`);
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`❌ AI Studio Error Response: ${errorText}`);
+    throw new Error(`AI Studio API error (${response.status}): ${errorText.substring(0, 200)}`);
+  }
+
+  const data = await response.json();
+
+  // Convert AI Studio response to OpenAI format
+  if (data.candidates && data.candidates[0]) {
+    return {
+      choices: [{
+        message: {
+          role: 'assistant',
+          content: data.candidates[0].content.parts[0].text
+        },
+        finish_reason: 'stop'
+      }],
+      usage: {
+        prompt_tokens: data.usageMetadata?.promptTokenCount || 0,
+        completion_tokens: data.usageMetadata?.candidatesTokenCount || 0,
+        total_tokens: data.usageMetadata?.totalTokenCount || 0
+      }
+    };
+  }
+
+  console.error(`❌ Invalid AI Studio response structure:`, data);
+  throw new Error(`Invalid AI Studio response: ${JSON.stringify(data).substring(0, 200)}`);
+}
+
+/**
+ * Call Ollama API (OpenAI-compatible local server in WSL)
+ * Ollama runs on port 11434 by default
+ * Supports both streaming and non-streaming modes
+ */
+async function callOllama(modelId, messages, stream = false) {
+  const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+  const url = `${ollamaUrl}/v1/chat/completions`;
+
+  console.log(`🔍 Ollama Request URL: ${url}`);
+  console.log(`🔍 Ollama Model: ${modelId}`);
+  console.log(`🔍 Ollama Stream: ${stream}`);
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: modelId,
+        messages,
+        temperature: 0.7,
+        stream: stream
+      })
+    });
+
+    console.log(`🔍 Ollama Response Status: ${response.status}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Ollama Error Response: ${errorText}`);
+      throw new Error(`Ollama API error (${response.status}): ${errorText.substring(0, 200)}`);
+    }
+
+    // If streaming, return the response object for SSE handling
+    if (stream) {
+      return response;
+    }
+
+    // Non-streaming mode
+    const data = await response.json();
+
+    // Ollama uses OpenAI-compatible format
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      return {
+        choices: [{
+          message: {
+            role: 'assistant',
+            content: data.choices[0].message.content
+          },
+          finish_reason: data.choices[0].finish_reason || 'stop'
+        }],
+        usage: {
+          prompt_tokens: data.usage?.prompt_tokens || 0,
+          completion_tokens: data.usage?.completion_tokens || 0,
+          total_tokens: data.usage?.total_tokens || 0
+        },
+        _httpStatus: response.status
+      };
+    }
+
+    console.error(`❌ Invalid Ollama response structure:`, data);
+    throw new Error(`Invalid Ollama response: ${JSON.stringify(data).substring(0, 200)}`);
+  } catch (error) {
+    // Check if it's a connection error
+    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch failed')) {
+      console.error(`❌ Ollama connection error:`, error);
+      throw new Error(`Failed to connect to Ollama at ${ollamaUrl}. Make sure Ollama is running: ollama serve`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Call LM Studio API (OpenAI-compatible local server on Windows)
+ * LM Studio runs on port 1234 by default on Windows host
+ */
+async function callLMStudio(modelId, messages) {
+  const lmstudioUrl = process.env.LMSTUDIO_URL || 'http://172.31.96.1:1234';
+  const url = `${lmstudioUrl}/v1/chat/completions`;
+
+  console.log(`🔍 LM Studio Request URL: ${url}`);
+  console.log(`🔍 LM Studio Model: ${modelId}`);
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: modelId,
+        messages,
+        temperature: 0.7,
+        max_tokens: 2000,
+        stream: false
+      })
+    });
+
+    console.log(`🔍 LM Studio Response Status: ${response.status}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ LM Studio Error Response: ${errorText}`);
+      throw new Error(`LM Studio API error (${response.status}): ${errorText.substring(0, 200)}`);
+    }
+
+    const data = await response.json();
+
+    // LM Studio uses OpenAI-compatible format
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      return {
+        choices: [{
+          message: {
+            role: 'assistant',
+            content: data.choices[0].message.content
+          },
+          finish_reason: data.choices[0].finish_reason || 'stop'
+        }],
+        usage: {
+          prompt_tokens: data.usage?.prompt_tokens || 0,
+          completion_tokens: data.usage?.completion_tokens || 0,
+          total_tokens: data.usage?.total_tokens || 0
+        },
+        _httpStatus: response.status
+      };
+    }
+
+    console.error(`❌ Invalid LM Studio response structure:`, data);
+    throw new Error(`Invalid LM Studio response: ${JSON.stringify(data).substring(0, 200)}`);
+  } catch (error) {
+    // Check if it's a connection error
+    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch failed')) {
+      console.error(`❌ LM Studio connection error:`, error);
+      throw new Error(`Failed to connect to LM Studio at ${lmstudioUrl}. Make sure LM Studio is running on Windows with the model loaded.`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Call Mistral AI API
+ * Uses Mistral AI's chat completions endpoint
+ */
+// async function callMistralAI(modelId, messages) {
+//   const mistralApiKey = process.env.MISTRAL_API_KEY;
+//   const url = 'https://api.mistral.ai/v1/chat/completions';
+
+//   if (!mistralApiKey) {
+//     throw new Error('Mistral AI API key not configured (MISTRAL_API_KEY)');
+//   }
+
+//   console.log(`🔍 Mistral AI Request URL: ${url}`);
+//   console.log(`🔍 Mistral AI Model: ${modelId}`);
+
+//   try {
+//     // Use axios with SSL verification disabled ONLY in development
+//     const https = await import('https');
+//     const isDevelopment = process.env.NODE_ENV !== 'production';
+//     const httpsAgent = new https.Agent({
+//       rejectUnauthorized: !isDevelopment  // Only disable in development
+//     });
+    
+//     const response = await axios.post(url, {
+//       model: modelId,
+//       messages,
+//       temperature: 0.7,
+//       top_p: 1,
+//       max_tokens: 8192,
+//       stream: false,
+//       safe_prompt: false
+//     }, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${mistralApiKey}`,
+//         'Accept': 'application/json'
+//       },
+//       httpsAgent: httpsAgent
+//     });
+
+//     console.log(`🔍 Mistral AI Response Status: ${response.status}`);
+    
+//     const data = response.data;
+
+//     // Mistral AI uses OpenAI-compatible format
+//     if (data.choices && data.choices[0] && data.choices[0].message) {
+//       return {
+//         choices: [{
+//           message: {
+//             role: 'assistant',
+//             content: data.choices[0].message.content
+//           },
+//           finish_reason: data.choices[0].finish_reason || 'stop'
+//         }],
+//         usage: {
+//           prompt_tokens: data.usage?.prompt_tokens || 0,
+//           completion_tokens: data.usage?.completion_tokens || 0,
+//           total_tokens: data.usage?.total_tokens || 0
+//         },
+//         _httpStatus: response.status
+//       };
+//     }
+
+//     console.error(`❌ Invalid Mistral AI response structure:`, data);
+//     throw new Error(`Invalid Mistral AI response: ${JSON.stringify(data).substring(0, 200)}`);
+//   } catch (error) {
+//     // Handle axios errors
+//     if (error.response) {
+//       // Server responded with error status
+//       console.error(`❌ Mistral AI Error Response (${error.response.status}):`, error.response.data);
+//       throw new Error(`Mistral AI API error (${error.response.status}): ${JSON.stringify(error.response.data).substring(0, 200)}`);
+//     } else if (error.request) {
+//       // Request made but no response
+//       console.error(`❌ Mistral AI connection error:`, error.message);
+//       throw new Error(`Failed to connect to Mistral AI. Please check your API key and network connection.`);
+//     } else {
+//       // Other errors
+//       console.error(`❌ Mistral AI error:`, error);
+//       throw error;
+//     }
+//   }
+// }
+
+async function braveSearch(query) {
+  const braveApiKey = process.env.BRAVE_SEARCH_API_KEY;
+
+  if (!braveApiKey) {
+    throw new Error('Brave Search API key not configured (BRAVE_SEARCH_API_KEY)');
+  }
+
+  try {
+
+    console.log(`🔎 Brave Search Query: ${query}`);
+
+    const response = await withNetworkRetry(() => axios.get(
+      'https://api.search.brave.com/res/v1/web/search',
+      {
+        params: {
+          q: query,
+          count: 5,
+          safesearch: 'moderate'
+        },
+        headers: {
+          'Accept': 'application/json',
+          'X-Subscription-Token': braveApiKey
+        }
+      }
+    ), { label: 'Brave Search' });
+
+    console.log(`✅ Brave Search Status: ${response.status}`);
+
+    const results = response.data.web?.results || [];
+
+    return results.map(r => ({
+      title: r.title,
+      url: r.url,
+      description: r.description
+    }));
+
+  } catch (error) {
+
+    // DAS HIER IST DAS WICHTIGE ERROR LOGGING
+
+    if (error.response) {
+      console.error('❌ Brave API Error Response:');
+      console.error(JSON.stringify(error.response.data, null, 2));
+    } else {
+      console.error('❌ Brave Search Error:', error.message);
+    }
+
+    throw error;
+  }
+}
+
+function auditUrl(rawUrl) {
+  if (!rawUrl) {
+    throw new Error("URL missing");
+  }
+ 
+  const cleaned = String(rawUrl)
+    .trim()
+    .replace(/^"+|"+$/g, "")
+    .replace(/%22/g, "")
+    .replace(/\\%22/g, "");
+ 
+  const parsed = new URL(cleaned);
+ 
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new Error("Only http/https URLs are allowed");
+  }
+ 
+  const isLocal =
+    parsed.hostname === "localhost" ||
+    parsed.hostname === "127.0.0.1" ||
+    parsed.hostname === "::1" ||
+    parsed.hostname.endsWith(".local");
+ 
+  if (isLocal && process.env.ALLOW_LOCAL_WEB_ACCESS !== "true") {
+    throw new Error("Local web access is disabled");
+  }
+ 
+  return {
+    rawUrl,
+    cleanedUrl: cleaned,
+    href: parsed.href,
+    origin: parsed.origin,
+    hostname: parsed.hostname,
+    pathname: parsed.pathname,
+    search: parsed.search,
+    isLocal,
+    timestamp: new Date().toISOString()
+  };
+}
+
+async function browserAction({ url, mode, payload, user_instruction }) {
+
+  const audit = auditUrl(url);
+ 
+  console.log(
+
+    "Browser Action Input",
+
+    JSON.stringify({
+
+      url,
+
+      mode,
+
+      payload,
+
+      user_instruction
+
+    }, null, 2)
+
+  );
+ 
+  if (mode === "open_url") {
+
+    let response;
+    try {
+      response = await axios.get(audit.href, {
+        timeout: 30000,
+        maxRedirects: 5,
+        headers: {
+          "User-Agent": "Mozilla/5.0"
+        },
+        // Don't throw on non-2xx (e.g. 404/403) - report it back as a normal tool
+        // result instead of crashing the whole chat turn over one failed page load.
+        validateStatus: () => true
+      });
+    } catch (err) {
+      // Genuine network-level failure (DNS, timeout, connection refused, etc.)
+      return {
+        status: "error",
+        action: "open_url",
+        requestedUrl: audit.href,
+        message: `Seite konnte nicht geladen werden: ${err.message}`
+      };
+    }
+
+    return {
+
+      status: response.status >= 200 && response.status < 400 ? "ok" : "error",
+
+      action: "open_url",
+
+      requestedUrl: audit.href,
+
+      finalUrl: response.request?.res?.responseUrl || audit.href,
+
+      httpStatus: response.status,
+
+      contentType: response.headers["content-type"],
+
+      htmlPreview: String(response.data).slice(0, 3000)
+
+    };
+
+  }
+ 
+  if (mode === "fill_form") {
+    const browser = await chromium.launch({ headless: true });
+
+    try {
+      const page = await browser.newPage();
+
+      await page.goto(audit.href, {
+        waitUntil: "domcontentloaded",
+        timeout: 30000
+      });
+
+      const defaultSelectors = [
+        "#text",
+        "[name='text']",
+        "textarea",
+        "input[type='text']",
+        "input:not([type])",
+        "[contenteditable='true']"
+      ];
+
+      // Findet ein Feld über einen expliziten Selector; das Modell rät Selectors oft nur
+      // aus dem Kontext statt aus dem echten HTML, daher NIE hart fehlschlagen, solange die
+      // Seite irgendein plausibles Text-Feld hat - stattdessen auf die Default-Selectors
+      // zurückfallen. Nur wenn wirklich gar kein Feld existiert, wird geworfen.
+      async function resolveField(selector) {
+        if (selector) {
+          const candidate = page.locator(selector).first();
+          if (await candidate.count() > 0) return candidate;
+          console.log(`⚠️ Selector nicht gefunden: ${selector}. Nutze Fallback auf Default-Selectors.`);
+        }
+
+        for (const candidateSelector of defaultSelectors) {
+          const candidate = page.locator(candidateSelector).first();
+          if (await candidate.count() > 0) {
+            console.log(`✅ Verwende ${candidateSelector}`);
+            return candidate;
+          }
+        }
+
+        throw new Error(
+          selector
+            ? `Formularfeld nicht gefunden: ${selector} (auch kein Fallback-Feld auf der Seite vorhanden)`
+            : "Kein Textfeld gefunden."
+        );
+      }
+
+      // Liest den tatsächlich gesetzten Wert zurück. page.content() spiegelt bei
+      // <textarea>/<input> die .value-Property NICHT wider, daher explizite Bestätigung.
+      async function readBack(field) {
+        try {
+          return await field.inputValue();
+        } catch {
+          return await field.textContent();
+        }
+      }
+
+      const filledFields = {};
+
+      if (payload?.fields && typeof payload.fields === "object") {
+        // Mehrere Felder auf einmal: { "selector": "value", ... }
+        for (const [selector, value] of Object.entries(payload.fields)) {
+          const field = await resolveField(selector);
+          await field.waitFor({ state: "visible", timeout: 10000 });
+          await field.fill(String(value));
+          filledFields[selector] = await readBack(field);
+        }
+      } else {
+        const text = payload?.text !== undefined
+          ? (typeof payload.text === "string" ? payload.text : JSON.stringify(payload.text, null, 2))
+          : "";
+
+        const field = await resolveField(payload?.selector);
+        await field.waitFor({ state: "visible", timeout: 10000 });
+        await field.fill(text);
+        filledFields[payload?.selector || "auto-detected field"] = await readBack(field);
+      }
+
+      // ---------- Submit (standardmäßig an, außer explizit mit click: false abbestellt) ----------
+      let submitted = false;
+      if (payload?.click !== false) {
+        const submit = page.locator(
+          "button[type='submit'], input[type='submit'], button"
+        ).first();
+
+        if (await submit.count() > 0) {
+          await submit.click();
+          await page.waitForLoadState("networkidle").catch(() => {});
+          submitted = true;
+        }
+      }
+
+      return {
+        status: "ok",
+        action: "fill_form",
+        finalUrl: page.url(),
+        title: await page.title(),
+        filledFields,
+        submitted,
+        bodyText: (await page.locator("body").innerText()).slice(0, 5000),
+        htmlPreview: (await page.content()).slice(0, 5000)
+      };
+
+    } catch (err) {
+      // Feld wirklich nicht vorhanden, Timeout, Navigationsfehler etc. - als normales
+      // Tool-Ergebnis zurückgeben statt den ganzen Chat-Request abzubrechen (wie bei open_url).
+      return {
+        status: "error",
+        action: "fill_form",
+        requestedUrl: audit.href,
+        message: `Formular konnte nicht ausgefüllt werden: ${err.message}`
+      };
+    } finally {
+      await browser.close();
+    }
+  }
+ 
+ 
+  return {
+
+    status: "error",
+
+    message: `Unsupported mode without browser: ${mode}`
+
+  };
+
+}
+ 
+// Retries transient network/TLS errors (e.g. proxy resets on the outbound HTTPS connection)
+async function withNetworkRetry(fn, { label = 'request', retries = 2, delayMs = 500 } = {}) {
+  const TRANSIENT_CODES = new Set(['ECONNRESET', 'ETIMEDOUT', 'ECONNABORTED', 'EPIPE']);
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const isTransient = TRANSIENT_CODES.has(err.code) || /socket disconnected|socket hang up/i.test(err.message || '');
+      if (!isTransient || attempt >= retries) throw err;
+      console.warn(`⚠️ Transient network error calling ${label} (${err.code || err.message}), retrying (${attempt + 1}/${retries})...`);
+      await new Promise(resolve => setTimeout(resolve, delayMs * (attempt + 1)));
+    }
+  }
+}
+
+function postWithRetry(url, data, config, retries = 2, delayMs = 500) {
+  return withNetworkRetry(() => axios.post(url, data, config), { label: url, retries, delayMs });
+}
+
+async function callMistralAI(modelId, messages) {
+  const mistralApiKey = process.env.MISTRAL_API_KEY;
+  const url = 'https://api.mistral.ai/v1/chat/completions';
+
+  if (!mistralApiKey) {
+    throw new Error('Mistral AI API key not configured (MISTRAL_API_KEY)');
+  }
+
+  const https = await import('https');
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  const httpsAgent = new https.Agent({
+    rejectUnauthorized: !isDevelopment
+  });
+
+  const tools = [
+  {
+    type: 'function',
+    function: {
+      name: 'brave_search',
+      description:
+        'Search the web when the user asks about recent, current, factual, niche, or unverifiable information.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: 'The web search query.'
+          }
+        },
+        required: ['query']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'browser_action',
+      description:
+        'Perform browser actions on a URL, including local websites (e.g. http://localhost:5173, 127.0.0.1). Can open pages, fill text fields and click buttons.',
+      parameters: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            description: 'The exact URL to open or act on. Local URLs (localhost, 127.0.0.1) are allowed.'
+          },
+          mode: {
+            type: 'string',
+            enum: ['open_url', 'fill_form'],
+            description: 'Action type: open a URL or fill form fields.'
+          },
+          payload: {
+            type: 'object',
+            properties: {
+              text: {
+                type: 'string',
+                description: 'Text to insert into a single field. If payload.selector is omitted, the first suitable text field on the page is used automatically.'
+              },
+              selector: {
+                type: 'string',
+                description: 'Optional CSS selector for the specific field to fill with payload.text (e.g. "#email", "[name=\'username\']").'
+              },
+              fields: {
+                type: 'object',
+                description: 'Optional map of CSS selector to value, to fill multiple fields in one call, e.g. {"#email": "a@b.com", "#password": "secret"}.'
+              },
+              click: {
+                type: 'boolean',
+                description: 'The form is submitted automatically after filling by default. Set to false to only fill the field(s) without clicking submit.'
+              }
+            }
+          },
+          user_instruction: {
+            type: 'string',
+            description: 'The raw user instruction to pass through to the browser layer verbatim.'
+          }
+        },
+        required: ['url', 'mode', 'user_instruction']
+      }
+    }
+  }
+];
+
+  const requestBody = {
+  model: modelId,
+  messages: [
+    {
+      role: 'system',
+      content:
+        'Answer directly if you know the answer reliably. Use brave_search when the question requires current, external, recent, niche, or verifiable information. You have a browser_action tool that CAN open and interact with URLs, including local/private URLs (http://localhost, 127.0.0.1, *.local) - this runs in a real browser on the server, not from your own network, so the usual "I cannot access local/internal addresses" limitation does not apply here. Whenever the user gives a URL and asks you to open it, check it, fill in a field, or asks whether you can access it (including local URLs), call the browser_action tool with the exact URL instead of answering from assumption. Pass the user instruction verbatim.'
+    },
+    ...messages
+  ],
+  tools,
+  tool_choice: 'auto',
+  temperature: 0.7,
+  top_p: 1,
+  max_tokens: 8192,
+  stream: false,
+  safe_prompt: false
+  };
+
+  const firstResponse = await postWithRetry(url, requestBody, {
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${mistralApiKey}`,
+    'Accept': 'application/json'
+  },
+  httpsAgent
+});
+ 
+const firstMessage = firstResponse.data.choices?.[0]?.message;
+ 
+console.log('====================');
+console.log('FIRST MISTRAL MESSAGE');
+console.log(JSON.stringify(firstMessage, null, 2));
+console.log('====================');
+ 
+if (!firstMessage) {
+  throw new Error('Invalid Mistral AI response');
+}
+ 
+// Fall 1: Mistral kann direkt antworten
+if (!firstMessage.tool_calls || firstMessage.tool_calls.length === 0) {
+  return normalizeMistralResponse(firstResponse);
+}
+ 
+// Fall 2/3: Mistral ruft (ein oder mehrere) Tools auf (brave_search oder browser_action)
+
+// Ermittle die letzte User-Message als Rohtext zum Durchreichen
+const lastUserMessage =
+  [...messages].reverse().find(m => m.role === 'user')?.content || '';
+
+async function executeToolCall(toolCall) {
+  const fn = toolCall.function?.name;
+  const args = JSON.parse(toolCall.function?.arguments || '{}');
+
+  if (fn === 'brave_search') {
+    console.log(`🔎 Calling Brave Search with query: ${args.query}`);
+    const searchResults = await braveSearch(args.query);
+    console.log('🌍 Brave Search Results:');
+    console.log(JSON.stringify(searchResults, null, 2));
+
+    return {
+      role: 'tool',
+      tool_call_id: toolCall.id,
+      name: 'brave_search',
+      content: JSON.stringify(searchResults)
+    };
+  }
+
+  if (fn === 'browser_action') {
+    // user_instruction zwingend mitgeben (Originaltext)
+    const browserArgs = {
+      url: args.url,
+      mode: args.mode,
+      payload: args.payload || null,
+      user_instruction: args.user_instruction || lastUserMessage
+    };
+
+    const browserResult = await browserAction(browserArgs);
+
+    console.log("Browser Action Result:", {
+      status: browserResult.status,
+      action: browserResult.action,
+      requestedUrl: browserResult.requestedUrl,
+      finalUrl: browserResult.finalUrl,
+      httpStatus: browserResult.httpStatus,
+      contentType: browserResult.contentType,
+      previewLenght: browserResult.htmlPreview?.length || 0
+    });
+
+    return {
+      role: 'tool',
+      tool_call_id: toolCall.id,
+      name: 'browser_action',
+      content: JSON.stringify(browserResult)
+    };
+  }
+
+  // Unbekanntes Tool
+  throw new Error(`Unknown tool call: ${fn}`);
+}
+
+// Mistral kann nach einem Tool-Ergebnis erneut ein Tool aufrufen wollen (z. B. Nachsuche
+// oder eine Seite öffnen, nachdem die Suche kam) - daher hier wiederholen statt nur
+// einmalig nachzufragen, sonst kommt eine leere (content: null) Antwort beim Nutzer an.
+const MAX_TOOL_ROUNDS = 5;
+let conversationMessages = [...requestBody.messages];
+let currentMessage = firstMessage;
+let currentResponse = firstResponse;
+let round = 0;
+
+while (currentMessage.tool_calls && currentMessage.tool_calls.length > 0) {
+  if (round >= MAX_TOOL_ROUNDS) {
+    throw new Error(`Mistral AI requested too many consecutive tool calls (> ${MAX_TOOL_ROUNDS})`);
+  }
+  round++;
+  console.log(`🔁 Mistral tool round ${round}: ${currentMessage.tool_calls.map(tc => tc.function?.name).join(', ')}`);
+
+  const toolMessages = [];
+  for (const toolCall of currentMessage.tool_calls) {
+    toolMessages.push(await executeToolCall(toolCall));
+  }
+
+  conversationMessages = [...conversationMessages, currentMessage, ...toolMessages];
+
+  currentResponse = await postWithRetry(url, {
+    ...requestBody,
+    messages: conversationMessages
+  }, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${mistralApiKey}`,
+      'Accept': 'application/json'
+    },
+    httpsAgent
+  });
+
+  currentMessage = currentResponse.data.choices?.[0]?.message;
+  if (!currentMessage) {
+    throw new Error('Invalid Mistral AI response after tool call');
+  }
+}
+
+return normalizeMistralResponse(currentResponse);}
+
+// When Mistral cites brave_search results, it returns message.content as an array of typed
+// blocks (e.g. [{type:"text", text:"..."}, {type:"reference", reference_ids:[...]}]) instead
+// of a plain string. Everything downstream (DB storage, frontend rendering) expects a string.
+function extractMistralContentText(content) {
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content
+      .filter(block => block && block.type === 'text' && typeof block.text === 'string')
+      .map(block => block.text)
+      .join('');
+  }
+  return '';
+}
+
+function normalizeMistralResponse(response) {
+  const data = response.data;
+
+  if (data.choices && data.choices[0] && data.choices[0].message) {
+    return {
+      choices: [{
+        message: {
+          role: 'assistant',
+          content: extractMistralContentText(data.choices[0].message.content)
+        },
+        finish_reason: data.choices[0].finish_reason || 'stop'
+      }],
+      usage: {
+        prompt_tokens: data.usage?.prompt_tokens || 0,
+        completion_tokens: data.usage?.completion_tokens || 0,
+        total_tokens: data.usage?.total_tokens || 0
+      },
+      _httpStatus: response.status
+    };
+  }
+
+  throw new Error(`Invalid Mistral AI response: ${JSON.stringify(data).substring(0, 200)}`);
+}
+
+app.post('/api/chat', verifyFirebaseToken, async (req, res) => {
+  const {
+    currentMessage,
+    messages: messageHistory = [],
+    sessionId,
+    mode,
+    additionalContent,
+    model_id = 'gpt-4o'  // Default to gpt-4o for backward compatibility
+  } = req.body;
+  const { uid } = req.user;
+
+  // Check Limits for Demo Version
+  const creditsDeducted = calculateCredits(typeof chat_mode !== "undefined" ? chat_mode : (mode || "normal"), model_id);
+  const limitCheck = await checkDemoLimits(uid, req.user.email, creditsDeducted);
+  if (!limitCheck.allowed) {
+    return res.status(403).json({
+      error: limitCheck.reason,
+      limitReached: true
+    });
+  }
+
+  if (!currentMessage) {
+    return res.status(400).json({ error: 'Missing user message' });
+  }
+  
+  // Support both plain JSON and base64-encoded config
+  let modelConfig;
+  const modelConfigB64 = process.env.MODEL_CONFIG_B64;
+  const modelConfigStr = process.env.MODEL_CONFIG;
+  
+  try {
+    if (modelConfigB64) {
+      const decoded = Buffer.from(modelConfigB64, 'base64').toString('utf-8');
+      modelConfig = JSON.parse(decoded);
+    } else if (modelConfigStr) {
+      modelConfig = JSON.parse(modelConfigStr);
+    } else {
+      modelConfig = {};
+    }
+  } catch (err) {
+    console.error('Error parsing MODEL_CONFIG:', err);
+    modelConfig = {};
+  }
+  
+  const modelInfo = modelConfig[model_id];
+  
+  
+  if (!modelInfo) {
+    console.error(`❌ Model ${model_id} not found in MODEL_CONFIG`);
+    return res.status(400).json({
+      error: 'Invalid model',
+      choices: [{
+        message: {
+          content: `Das gewählte Modell "${model_id}" ist nicht konfiguriert. Dieser Service ist aktuell nicht erreichbar.`
+        }
+      }]
+    });
+  }
+  let userPrompt = currentMessage;
+  if (additionalContent && additionalContent.trim()) {
+    userPrompt = `Frage:\n${currentMessage}\n\nZusätzlich wurden folgende Dateien mitgeschickt. Falls deren Inhalt hilfreich zur Beantwortung der Frage ist, kannst du diese Informationen berücksichtigen:\n\n${additionalContent}`;
+  }
+
+  // System Prompt Logic based on Version
+  let systemPromptContent = "";
+  
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = today.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const dateTimeContext = `Aktuelles Datum: ${dateStr}, ${timeStr} Uhr. Berücksichtige dies bei zeitlichen Einordnungen.\n\n`;
+  
+  const contactInfo = `Falls du nach deinen Kontaktdaten gefragt wirst, antworte ausschließlich mit folgenden Daten:
+ENERGY4U GmbH
+Albert-Nestler-Str. 17, 76131 Karlsruhe
+fon: +49 (0) 721-61052100
+fax: +49 (0) 721-61052105
+email: energy4u@alten-worldgrid.com
+Web: https://www.energy4u.org
+\n\n`;
+
+  if (IS_EXTERNAL_VERSION) {
+    // EXTERNAL VERSION: Generic Energy Assistant (No E4U references)
+    systemPromptContent = "Du bist ein kompetenter, hilfsbereiter KI-Assistent für die Energiewirtschaft. Antworte freundlich, fachlich fundiert, klar strukturiert und – sofern relevant – mit Bezug zu energiewirtschaftlichen Regelwerken und Prozessen (z. B. Marktkommunikation, MaKo, MaBiS etc.).\n\n" + dateTimeContext + contactInfo;
+  } else {
+    // INTERNAL VERSION: Energy4U Corporate Assistant
+    systemPromptContent = "Du bist ein kompetenter, hilfsbereiter KI-Assistent der Firma Energy4U GmbH (kurz E4U). Antworte freundlich, fachlich fundiert, klar strukturiert und – sofern relevant – mit Bezug zu energiewirtschaftlichen Regelwerken, Prozessen und SAP-Lösungen (z. B. S/4 Utilities, IS‑U, Marktkommunikation, MaKo 2020, MaBiS etc.).\n\nEnergy4U ist ein IT-Beratungsunternehmen mit Fokus auf die Energiewirtschaft. Es gehört zur ALTEN-Gruppe, hat über 150 Mitarbeitende an 8 Standorten und bietet Leistungen u. a. in SAP-Implementierung, Cloud-Lösungen, KI/ML, Prozessberatung und Marktkommunikation an. Projekte werden meist über Analyse, Konzeption, Realisierung und Betrieb hinweg begleitet.\n\n" + dateTimeContext + contactInfo;
+  }
+
+  // Shared Instructions (Markdown, Mermaid, etc.)
+  systemPromptContent += "Das Chat-Frontend unterstützt die einfache Übernahme von Inhalten aus Markdown-Codeblöcken (```), daher:\n\n– Verwende **Codeblöcke immer dann**, wenn der Inhalt **zum Kopieren geeignet ist** – z. B. Textbausteine, Vorlagen, E-Mail-Texte, Konfigurationsanleitungen, Listen zur Weiterverarbeitung, Gedichte oder Code.\n– Verwende **keine Codeblöcke** für normale Erläuterungen, klassische Konversationen oder einfache Aufzählungen ohne Kopierabsicht.\n\n**Mermaid-Diagramme**: Du kannst interaktive Diagramme direkt im Chat erstellen! Wenn der User nach Diagrammen fragt (z.B. \"Balkendiagramm\", \"Säulendiagramm\", \"Prozessdiagramm\", \"Flussdiagramm\"), erstelle SOFORT ein passendes Mermaid-Diagramm mit sinnvollen Beispieldaten aus dem Energiebereich. Frage NICHT nach Daten!\n\n**WICHTIG für alle Diagramme**:\n- Setze Texte von Knoten und Subgraphen IMMER in Anführungszeichen (z. B. A[\"Mein Text\"] statt A[Mein Text]), besonders wenn sie Leerzeichen oder Sonderzeichen enthalten.\n- Verwende für Zeilenumbrüche in Labels IMMER <br/> anstelle von \\n.\n- **xychart-beta**: Setze x-axis Labels IMMER in Anführungszeichen, um UTF-8 Zeichen zu unterstützen!\n\nVerfügbare Diagrammtypen:\n- **xychart-beta**: Für Balken-, Säulen- und Liniendiagramme\n- **pie**: Für Kreisdiagramme\n- **flowchart TD**: Für Prozess- und Flussdiagramme (immer mit Richtung TD oder LR!)\n- **sequenceDiagram**: Für Ablaufdiagramme\n- **stateDiagram-v2**: Für Zustandsdiagramme (nutze v2!)\n- **gantt**: Für Zeitpläne\n- **classDiagram, erDiagram, journey, quadrantChart, mindmap, timeline, gitGraph**\n\nBeispiele:\n```mermaid\nxychart-beta\n    title \"Stromverbrauch nach Sektor\"\n    x-axis [\"Haushalte\", \"Gewerbe\", \"Industrie\", \"Verkehr\"]\n    y-axis \"Verbrauch (TWh)\" 0 --> 300\n    bar [120, 85, 250, 45]\n```\n\n```mermaid\nflowchart TD\n    A[\"Marktanfrage<br/>vom Kunden\"] --> B{\"Prüfung<br/>erfolgreich?\"}\n    B -->|OK| C[\"Angebotserstellung\"]\n    B -->|Fehler| D[\"Absage\"]\n```\n\nAntworte stets **situationsgerecht** und denke mit: Wenn ein Inhalt praktisch übernommen oder weiterverarbeitet werden kann, verwende einen Codeblock. Andernfalls formatiere für gute Lesbarkeit.";
+
+  const messages = [
+    {
+      role: "system",
+      content: systemPromptContent
+    },
+    ...messageHistory.map(msg => ({
+      role: msg.isUser ? "user" : "assistant",
+      content: msg.text
+    })),
+    { role: "user", content: userPrompt }
+  ];
+
+  try {
+    
+    // Enable streaming for Ollama provider
+    const enableStreaming = modelInfo.provider === 'ollama';
+    
+    if (enableStreaming) {
+      // Streaming mode for Ollama
+      console.log(`🌊 Streaming enabled for ${modelInfo.name}`);
+      
+      // Set headers for SSE
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      
+      const streamResponse = await callOllama(modelInfo.deployment, messages, true);
+      const httpResponseCode = streamResponse.status || 200;
+      
+      if (!streamResponse.body) {
+        throw new Error('No stream body available');
+      }
+      
+      let fullContent = '';
+      let promptTokens = 0;
+      let completionTokens = 0;
+      
+      // Save user message first
+      let newSessionId = sessionId;
+      // Extract attachments with token counts from additionalContent if present
+      const attachments = extractAttachmentsWithTokens(additionalContent);
+      
+      // Use model name instead of model_id for better readability
+      const modelName = modelInfo?.name || model_id;
+      
+      // Calculate token breakdown for user message
+      const systemPrompt = messages[0].content; // First message is always system prompt
+      const tokenBreakdown = calculateTokenBreakdown(attachments, currentMessage, additionalContent, systemPrompt, messageHistory, null);
+      
+      if (sessionId === null) {
+        // We'll generate title after getting the full response
+        newSessionId = await saveMessage(uid, sessionId, "user", currentMessage, modelName, "chat", mode, req.user.email, "Neue Unterhaltung", 0, 0, attachments, null, tokenBreakdown);
+      } else {
+        newSessionId = await saveMessage(uid, sessionId, "user", currentMessage, modelName, "chat", mode, req.user.email, "", 0, 0, attachments, null, tokenBreakdown);
+      }
+      
+      // Send session ID immediately
+      res.write(`data: ${JSON.stringify({ sessionId: newSessionId, type: 'session' })}\n\n`);
+      
+      // Process the stream
+      const reader = streamResponse.body.getReader();
+      const decoder = new TextDecoder();
+      
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+          
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              
+              if (data === '[DONE]') {
+                continue;
+              }
+              
+              try {
+                const parsed = JSON.parse(data);
+                
+                if (parsed.choices && parsed.choices[0]) {
+                  const delta = parsed.choices[0].delta;
+                  
+                  if (delta && delta.content) {
+                    fullContent += delta.content;
+                    // Forward to client
+                    res.write(`data: ${JSON.stringify({ content: delta.content, type: 'content' })}\n\n`);
+                  }
+                  
+                  if (parsed.choices[0].finish_reason) {
+                    // Stream is done
+                    if (parsed.usage) {
+                      promptTokens = parsed.usage.prompt_tokens || 0;
+                      completionTokens = parsed.usage.completion_tokens || 0;
+                    }
+                  }
+                }
+              } catch (parseErr) {
+                console.error('Error parsing SSE data:', parseErr);
+              }
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
+      
+      const exactCost = calculateCost(modelName, promptTokens, completionTokens);
+      const costBreakdown = {
+        llm: exactCost,
+        embedding: 0,
+        vision: 0,
+        energie: 0,
+        rag: 0,
+        hyde: 0
+      };
+
+      // Save the assistant's complete response (modelName already declared above)
+      await saveMessage(uid, newSessionId, "assistant", fullContent, modelName, "chat", mode, req.user.email, "", 0, completionTokens, [], httpResponseCode, null, costBreakdown);
+
+      // Log activity event
+      await logActivityEvent({
+          uid,
+          session_id: newSessionId,
+          event_type: 'chat_turn',
+          model: {
+              id: model_id,
+              name: modelName,
+              provider: modelInfo.provider
+          },
+          usage: {
+              prompt_tokens: promptTokens,
+              completion_tokens: completionTokens,
+              total_tokens: promptTokens + completionTokens
+          },
+          cost: {
+              total: costBreakdown.llm + costBreakdown.embedding + costBreakdown.vision + costBreakdown.energie + costBreakdown.rag + costBreakdown.hyde,
+              llm: costBreakdown.llm,
+              embedding: costBreakdown.embedding,
+              vision: costBreakdown.vision,
+              energie: costBreakdown.energie,
+              rag: costBreakdown.rag,
+              hyde: costBreakdown.hyde
+          },
+          timings: { total_ms: 0 }, // Streaming timings hard to track here accurately without start time
+          result: { status: 'ok', http_status: httpResponseCode },
+          attachments: { count: attachments.length, total_bytes: 0 }
+      });
+      
+      // Generate title if new session
+      if (sessionId === null && fullContent) {
+        try {
+          const generatedTitle = await generateTitleWithOpenAI(currentMessage, fullContent);
+          const sessionRef = await db.collection("users").doc(uid).collection("chat_sessions").doc(newSessionId);
+          await sessionRef.update({ title: encrypt(generatedTitle) });
+        } catch (titleErr) {
+          console.error('Error generating title:', titleErr);
+        }
+      }
+      
+      // Send completion signal
+      res.write(`data: ${JSON.stringify({ type: 'done', sessionId: newSessionId, usage: { prompt_tokens: promptTokens, completion_tokens: completionTokens } })}\n\n`);
+      res.end();
+      
+      console.log(`✅ Streaming Response from ${modelInfo?.name || model_id} - ${completionTokens} tokens\n`);
+      
+    } else {
+      // Non-streaming mode (existing logic)
+      const data = await callAIProvider(modelInfo, messages);
+
+      if (!data || !data.choices || !data.choices[0]?.message?.content) {
+        console.error(`❌ Empty/invalid response from ${modelInfo?.name || model_id}:`, JSON.stringify(data));
+        throw new Error('AI provider returned an empty response');
+      }
+      // Token-Counts auslesen
+      const promptTokens = data.usage?.prompt_tokens || 0;
+      const completionTokens = data.usage?.completion_tokens || 0;
+      const httpResponseCode = data._httpStatus || 200;
+
+      // Extract attachments with token counts from additionalContent if present
+      const attachments = extractAttachmentsWithTokens(additionalContent);
+
+      // Use model name instead of model_id for better readability
+      const modelName = modelInfo?.name || model_id;
+
+      // Calculate token breakdown for user message
+      const systemPrompt = messages[0].content; // First message is always system prompt
+      const tokenBreakdown = calculateTokenBreakdown(attachments, currentMessage, additionalContent, systemPrompt, messageHistory, null);
+
+      let newSessionId = sessionId;
+      if (sessionId === null) {
+        let generatedTitle = "";
+        try {
+          generatedTitle = await generateTitleWithOpenAI(currentMessage, data.choices[0].message.content);
+        } catch (titleErr) {
+          console.error('Error generating title:', titleErr);
+        }
+        newSessionId = await saveMessage(uid, sessionId, "user", currentMessage, modelName, "chat", mode, req.user.email, generatedTitle, promptTokens, 0, attachments, null, tokenBreakdown);
+      } else {
+        newSessionId = await saveMessage(uid, sessionId, "user", currentMessage, modelName, "chat", mode, req.user.email, "", promptTokens, 0, attachments, null, tokenBreakdown);
+      }
+      const exactCost = calculateCost(modelName, promptTokens, completionTokens);
+      const costBreakdown = {
+        llm: exactCost,
+        embedding: 0,
+        vision: 0,
+        energie: 0,
+        rag: 0,
+        hyde: 0
+      };
+
+      // Save the bot response
+      await saveMessage(uid, newSessionId, "assistant", data.choices[0].message.content, modelName, "chat", mode, req.user.email, "", 0, completionTokens, [], httpResponseCode, null, costBreakdown);
+
+      // Log activity event
+      await logActivityEvent({
+          uid,
+          session_id: newSessionId,
+          event_type: 'chat_turn',
+          model: {
+              id: model_id,
+              name: modelName,
+              provider: modelInfo.provider
+          },
+          usage: {
+              prompt_tokens: promptTokens,
+              completion_tokens: completionTokens,
+              total_tokens: promptTokens + completionTokens
+          },
+          cost: {
+              total: costBreakdown.llm + costBreakdown.embedding + costBreakdown.vision + costBreakdown.energie + costBreakdown.rag + costBreakdown.hyde,
+              llm: costBreakdown.llm,
+              embedding: costBreakdown.embedding,
+              vision: costBreakdown.vision,
+              energie: costBreakdown.energie,
+              rag: costBreakdown.rag,
+              hyde: costBreakdown.hyde
+          },
+          timings: { total_ms: 0 },
+          result: { status: 'ok', http_status: httpResponseCode },
+          attachments: { count: attachments.length, total_bytes: 0 }
+      });
+
+      return res.status(200).json({ ...data, sessionId: newSessionId, costBreakdown }); // Return the session ID
+    }
+  } catch (err) {
+    console.error(`❌ Error with ${modelInfo?.name || model_id}:`, err);
+    await refundDemoCredits(uid, req.user.email, typeof creditsDeducted !== 'undefined' ? creditsDeducted : 0);
+    return res.status(500).json({ error: 'Failed to call AI provider' });
+  }
+});
+
+app.post('/api/chat-formatanpassung', verifyFirebaseToken, async (req, res) => {
+  const {
+    currentMessage,
+    messages: messageHistory = [],
+    sessionId,
+    mode,
+    model_id = 'gpt-4o'
+  } = req.body;
+  const { uid } = req.user;
+
+  // Check Limits for Demo Version
+  const creditsDeducted = calculateCredits("formatanpassung", model_id);
+  const limitCheck = await checkDemoLimits(uid, req.user.email, creditsDeducted);
+  if (!limitCheck.allowed) {
+    return res.status(403).json({
+      error: limitCheck.reason,
+      limitReached: true
+    });
+  }
+
+  if (!currentMessage) {
+    return res.status(400).json({ error: 'Missing user message' });
+  }
+  
+  let modelConfig;
+  const modelConfigB64 = process.env.MODEL_CONFIG_B64;
+  const modelConfigStr = process.env.MODEL_CONFIG;
+  
+  try {
+    if (modelConfigB64) {
+      const decoded = Buffer.from(modelConfigB64, 'base64').toString('utf-8');
+      modelConfig = JSON.parse(decoded);
+    } else if (modelConfigStr) {
+      modelConfig = JSON.parse(modelConfigStr);
+    } else {
+      modelConfig = {};
+    }
+  } catch (err) {
+    console.error('Error parsing MODEL_CONFIG:', err);
+    modelConfig = {};
+  }
+  
+  const modelInfo = modelConfig[model_id];
+  
+  
+  if (!modelInfo) {
+    console.error(`❌ Model ${model_id} not found in MODEL_CONFIG`);
+    return res.status(400).json({
+      error: 'Invalid model',
+      choices: [{
+        message: {
+          content: `Das gewählte Modell "${model_id}" ist nicht konfiguriert.`
+        }
+      }]
+    });
+  }
+
+  const formatanpassungPrompt = getFormatanpassungPrompt(IS_EXTERNAL_VERSION);
+
+
+  const messages = [
+    {
+      role: "system",
+      content: formatanpassungPrompt
+    },
+    ...messageHistory.slice(-20).map(msg => ({
+      role: msg.isUser ? "user" : "assistant",
+      content: msg.text
+    })),
+    { role: "user", content: currentMessage }
+  ];
+
+  try {
+    const data = await callAIProvider(modelInfo, messages);
+
+    if (!data || !data.choices || !data.choices[0]?.message?.content) {
+      throw new Error("Invalid response from AI provider");
+    }
+
+    const promptTokens = data.usage?.prompt_tokens || 0;
+    const completionTokens = data.usage?.completion_tokens || 0;
+    const httpResponseCode = data._httpStatus || 200;
+
+    // Use model name instead of model_id for better readability
+    const modelName = modelInfo?.name || model_id;
+
+    // Calculate token breakdown for Formatanpassung
+    const systemPrompt = messages[0].content; // First message is always system prompt
+    const tokenBreakdown = calculateTokenBreakdown([], currentMessage, null, systemPrompt, messageHistory);
+
+    const exactCost = calculateCost(modelName, promptTokens, completionTokens);
+    const costBreakdown = {
+      llm: exactCost,
+      embedding: 0,
+      vision: 0,
+      energie: 0,
+      rag: 0,
+      hyde: 0
+    };
+
+    let newSessionId = sessionId;
+    if (sessionId === null) {
+      const generatedTitle = await generateTitleWithOpenAI(currentMessage, data.choices[0].message.content);
+      newSessionId = await saveMessage(uid, sessionId, "user", currentMessage, modelName, "chat", mode, req.user.email, generatedTitle, promptTokens, 0, [], null, tokenBreakdown);
+    } else {
+      newSessionId = await saveMessage(uid, sessionId, "user", currentMessage, modelName, "chat", mode, req.user.email, "", promptTokens, 0, [], null, tokenBreakdown);
+    }
+
+    await saveMessage(uid, newSessionId, "assistant", data.choices[0].message.content, modelName, "chat", mode, req.user.email, "", 0, completionTokens, [], httpResponseCode, null, costBreakdown);
+
+    // Log activity event
+    await logActivityEvent({
+        uid,
+        session_id: newSessionId,
+        event_type: 'format_turn',
+        model: {
+            id: model_id,
+            name: modelName,
+            provider: modelInfo.provider
+        },
+        usage: {
+            prompt_tokens: promptTokens,
+            completion_tokens: completionTokens,
+            total_tokens: promptTokens + completionTokens
+        },
+        cost: {
+            total: costBreakdown.llm + costBreakdown.embedding + costBreakdown.vision + costBreakdown.energie + costBreakdown.rag + costBreakdown.hyde,
+            llm: costBreakdown.llm,
+            embedding: costBreakdown.embedding,
+            vision: costBreakdown.vision,
+            energie: costBreakdown.energie,
+            rag: costBreakdown.rag,
+            hyde: costBreakdown.hyde
+        },
+        timings: { total_ms: 0 },
+        result: { status: 'ok', http_status: httpResponseCode },
+        attachments: { count: 0, total_bytes: 0 }
+    });
+
+    return res.status(200).json({ ...data, sessionId: newSessionId, costBreakdown });
+  } catch (err) {
+    console.error(`❌ Error with Formatanpassung (${modelInfo?.name || model_id}):`, err);
+    await refundDemoCredits(uid, req.user.email, typeof creditsDeducted !== 'undefined' ? creditsDeducted : 0);
+    return res.status(500).json({ error: 'Failed to process Formatanpassung request' });
+  }
+});
+
+app.post('/api/call-cloud-run', verifyFirebaseToken, async (req, res) => {
+  const {
+    sessionId,
+    role,
+    content,
+    model,
+    type,
+    mode,
+    mail,
+    request_type,
+    user_question,
+    messages,
+    model_id = 'gpt-4o'  // Default to gpt-4o for backward compatibility
+  } = req.body;
+  
+  // Map mode to chat_mode for backend
+  const chat_mode = mode || 'normal';
+  const { uid } = req.user;
+
+  // Check Limits for Demo Version
+  const creditsDeducted = calculateCredits(typeof chat_mode !== "undefined" ? chat_mode : (mode || "normal"), model_id);
+  const limitCheck = await checkDemoLimits(uid, req.user.email, creditsDeducted);
+  if (!limitCheck.allowed) {
+    return res.status(403).json({
+      error: limitCheck.reason,
+      limitReached: true
+    });
+  }
+  
+  // Support both plain JSON and base64-encoded config
+  let modelConfig;
+  const modelConfigB64 = process.env.MODEL_CONFIG_B64;
+  const modelConfigStr = process.env.MODEL_CONFIG;
+  
+  try {
+    if (modelConfigB64) {
+      const decoded = Buffer.from(modelConfigB64, 'base64').toString('utf-8');
+      modelConfig = JSON.parse(decoded);
+    } else if (modelConfigStr) {
+      modelConfig = JSON.parse(modelConfigStr);
+    } else {
+      modelConfig = {};
+    }
+  } catch (err) {
+    console.error('Error parsing MODEL_CONFIG:', err);
+    modelConfig = {};
+  }
+  
+  const modelInfo = modelConfig[model_id];
+  
+  let data = "";
+  let tokenBreakdown = null;
+  
+  try {
+    // Use callBackend function to make the request
+    const cloudRunResponse = await callBackend('POST', '/', {
+      request_type,
+      user_question,
+      messages,
+      model_id,  // Pass model_id to backend
+      chat_mode  // Pass chat_mode to backend
+    });
+    
+    let costBreakdown = null;
+    // Backend returns { response: string, token_breakdown: object, cost_breakdown_tokens: object }
+    if (typeof cloudRunResponse.data === 'object' && cloudRunResponse.data.response) {
+      data = cloudRunResponse.data.response;
+      tokenBreakdown = cloudRunResponse.data.token_breakdown || null;
+      if (cloudRunResponse.data.cost_breakdown_tokens) {
+        costBreakdown = calculateCostBreakdownFromTokens(cloudRunResponse.data.cost_breakdown_tokens);
+      }
+    } else {
+      // Fallback for old backend response format (just string)
+      data = cloudRunResponse.data;
+    }
+    
+    // Use model name instead of model_id for better readability
+    const modelName = modelInfo?.name || model_id;
+
+    let newSessionId = sessionId;
+    
+    if (sessionId === null) {
+      const generatedTitle = await generateTitleWithOpenAI(content, data);
+      newSessionId = await saveMessage(uid, sessionId, "user", user_question, modelName, "chat", mode, req.user.email, generatedTitle, 0, 0, [], null, tokenBreakdown);
+    } else {
+      newSessionId = await saveMessage(uid, sessionId, "user", user_question, modelName, "chat", mode, req.user.email, "", 0, 0, [], null, tokenBreakdown);
+    }
+
+    // Save the bot response
+    await saveMessage(uid, newSessionId, "assistant", data, modelName, "chat", mode, req.user.email, "", 0, 0, [], null, null, costBreakdown);
+
+    // Log activity event
+    // Note: Token counts are not readily available in the simple response format unless we parse tokenBreakdown
+    // We try to use tokenBreakdown if available
+    let promptTokens = 0;
+    let completionTokens = 0;
+    
+    if (tokenBreakdown) {
+        promptTokens = (
+            (tokenBreakdown.system_prompt_tokens || 0) +
+            (tokenBreakdown.context_tokens || 0) +
+            (tokenBreakdown.conversation_history_tokens || 0) +
+            (tokenBreakdown.user_request_tokens || 0) +
+            (tokenBreakdown.attachment_tokens || 0)
+        );
+    }
+    // Completion tokens are approximated if not returned (countTokens on data)
+    completionTokens = countTokens(data);
+
+    await logActivityEvent({
+        uid,
+        session_id: newSessionId,
+        event_type: 'rag_turn',
+        model: {
+            id: model_id,
+            name: modelName,
+            provider: modelInfo.provider
+        },
+        usage: {
+            prompt_tokens: promptTokens,
+            completion_tokens: completionTokens,
+            total_tokens: promptTokens + completionTokens
+        },
+        cost: costBreakdown ? {
+            total: costBreakdown.llm + costBreakdown.embedding + costBreakdown.vision + costBreakdown.energie + costBreakdown.rag + costBreakdown.hyde,
+            llm: costBreakdown.llm,
+            embedding: costBreakdown.embedding,
+            vision: costBreakdown.vision,
+            energie: costBreakdown.energie,
+            rag: costBreakdown.rag,
+            hyde: costBreakdown.hyde
+        } : { total: 0, llm: 0, embedding: 0, vision: 0, energie: 0, rag: 0, hyde: 0 },
+        timings: { total_ms: 0 },
+        result: { status: 'ok', http_status: 200 },
+        attachments: { count: 0, total_bytes: 0 }
+    });
+
+    res.status(cloudRunResponse.status).json({ data: data, sessionId: newSessionId, costBreakdown }); // Return the session ID
+  } catch (err) {
+    console.error(`❌ RAG Error with ${modelInfo?.name || model_id}:`, err);
+    await refundDemoCredits(uid, req.user.email, typeof creditsDeducted !== 'undefined' ? creditsDeducted : 0);
+    res.status(500).send(err.toString());
+  }
+});
+
+/**
+ * 🧠 Prompt speichern
+ */
+app.post("/api/prompts", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  const { title, description, prompt } = req.body;
+
+  try {
+    await db.collection("users").doc(uid).collection("prompts").add({
+      prompt_id: uuidv4(),
+      title,
+      description,
+      prompt,
+      created_at: new Date(),
+    });
+
+    res.status(201).json({ success: true });
+  } catch (err) {
+    console.error("Fehler beim Speichern des Prompts:", err);
+    res.status(500).json({ error: "Fehler beim Speichern des Prompts" });
+  }
+});
+
+
+async function verifyFirebaseUser(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Kein gültiger Token übermittelt" });
+  }
+
+  const idToken = authHeader.split(" ")[1];
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const uid = decodedToken.uid;
+    const email = decodedToken.email || "";
+    const emailVerified = decodedToken.email_verified || false;
+    const displayName = decodedToken.name || "";
+
+    // Nutzer-Dokument abrufen
+    const userRef = db.collection("users").doc(uid);
+    const userDoc = await userRef.get();
+
+    // Security: Check if user is disabled in Firebase (e.g. fired employees)
+    try {
+      const userRecord = await admin.auth().getUser(uid);
+      if (userRecord.disabled) {
+        console.warn(`⛔ Blocked disabled user: ${email}`);
+        return res.status(403).json({ error: "Account deaktiviert." });
+      }
+    } catch (e) {
+      console.warn("⚠️ Could not verify user status via admin SDK:", e.message);
+    }
+
+    // Check allowlist for external version
+    if (IS_EXTERNAL_VERSION) {
+      const isGlobalAllowed = email && ADMIN_EMAILS.includes(email.toLowerCase());
+      console.log(`[AUTH] Checking access for ${email}. GlobalAllowed: ${isGlobalAllowed}`);
+      
+      if (!isGlobalAllowed) {
+        let accessGranted = true;
+        let rejectReason = "Zugriff verweigert.";
+
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          console.log(`[AUTH] User exists. Company ID: ${userData.company_id}`);
+          
+          if (userData.company_id) {
+             const companyRef = db.collection("companies").doc(userData.company_id);
+             const companyDoc = await companyRef.get();
+             if (companyDoc.exists) {
+               const companyData = companyDoc.data();
+               const now = new Date();
+               console.log(`[AUTH] Company found: ${companyData.name}. Valid: ${companyData.valid_from?companyData.valid_from.toDate():'null'} - ${companyData.valid_until?companyData.valid_until.toDate():'null'}`);
+               
+               // Check validity
+               if (companyData.valid_from && now < companyData.valid_from.toDate()) {
+                 accessGranted = false;
+                 rejectReason = "Der Zugang für Ihre Firma ist noch nicht aktiv.";
+               } else if (companyData.valid_until) {
+                 const endOfDay = new Date(companyData.valid_until.toDate());
+                 endOfDay.setHours(23, 59, 59, 999);
+                 if (now > endOfDay) {
+                   accessGranted = false;
+                   rejectReason = "Der Zugang für Ihre Firma ist abgelaufen.";
+                 }
+               } else {
+                 // Check domain (if restricted)
+                 if (companyData.allowed_domains && companyData.allowed_domains.length > 0) {
+                   const userDomain = email.split('@')[1].toLowerCase();
+                   const allowed = companyData.allowed_domains.map(d => d.toLowerCase().trim());
+                   console.log(`[AUTH] Checking domain ${userDomain} against ${allowed}`);
+                   if (!allowed.includes(userDomain)) {
+                     accessGranted = false;
+                     rejectReason = `Ihre E-Mail-Domain (${userDomain}) ist für diesen Firmencode nicht freigeschaltet.`;
+                   }
+                 }
+               }
+             } else {
+                console.warn(`[AUTH] Company ${userData.company_id} NOT found. Allowing re-registration.`);
+                accessGranted = true;
+             }
+          } else {
+            console.log(`[AUTH] User has no company_id. Checking path: ${req.path}`);
+            if (!req.path.includes('/register-demo')) {
+                accessGranted = false;
+                rejectReason = "Bitte registrieren Sie sich zuerst mit einem Firmencode.";
+             }
+          }
+        } else {
+            console.log(`[AUTH] User doc does not exist. Checking path: ${req.path}`);
+            if (!req.path.includes('/register-demo')) {
+               accessGranted = false;
+               rejectReason = "Bitte registrieren Sie sich zuerst mit einem Firmencode.";
+            }
+        }
+
+        if (!accessGranted) {
+           console.warn(`⛔ Blocked access for ${email}: ${rejectReason}`);
+           return res.status(403).json({ error: rejectReason });
+        } else {
+           console.log(`[AUTH] Access granted for ${email}`);
+        }
+      }
+    } else {
+      // INTERNAL VERSION STRICT CHECK
+      // Must be in INTERNAL_DOMAINS or ADMIN_EMAILS
+      const isInternal = INTERNAL_DOMAINS.some(d => email.toLowerCase().endsWith(d));
+      const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+
+      if (!isInternal && !isAdmin) {
+          console.warn(`⛔ Blocked external access to internal version for ${email}`);
+          return res.status(403).json({ error: "Zugriff verweigert. Dies ist ein internes System." });
+      }
+    }
+
+    // Wenn Nutzer existiert → Update Timestamp
+    if (userDoc.exists) {
+      await userRef.update({
+        updated_at: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    const userData = (await userRef.get()).data();
+
+    // Allow register-demo even if email not verified (to link company immediately)
+    if (!decodedToken.email_verified && req.path !== '/register-demo') {
+      console.warn(`⛔ Blocked access for ${email}: E-Mail nicht verifiziert`);
+      return res.status(403).json({ error: "E-Mail nicht verifiziert" });
+    }
+
+    req.user = decodedToken;
+    req.userData = userData;
+    next();
+  } catch (error) {
+    console.error("Tokenprüfung fehlgeschlagen:", error.message);
+    return res.status(401).json({ error: "Tokenprüfung fehlgeschlagen" });
+  }
+}
+
+// Middleware to verify if user is admin
+async function verifyAdmin(req, res, next) {
+  if (!req.user || !req.user.email) {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+  if (!ADMIN_EMAILS.includes(req.user.email.toLowerCase())) {
+    return res.status(403).json({ error: "Access denied. Admin only." });
+  }
+  next();
+}
+
+/**
+ * Check limits for demo users
+ */
+function calculateCredits(chat_mode, model_id) {
+  let baseCredits = 1;
+  if (chat_mode === "energy-bot") baseCredits = 2;
+  else if (chat_mode === "formatanpassung") baseCredits = 3;
+  
+  let multiplier = 1;
+  if (model_id && typeof model_id === "string") {
+     const lower = model_id.toLowerCase();
+     if (lower.includes("claude")) multiplier = 3;
+     else if (lower.includes("gpt")) multiplier = 2;
+     else if (lower.includes("gemini")) multiplier = 1;
+  }
+  return baseCredits * multiplier;
+}
+
+async function checkDemoLimits(uid, email, creditsToDeduct = 0) {
+  if (!IS_EXTERNAL_VERSION) return { allowed: true };
+  
+  // Admins bypass limits
+  if (email && ADMIN_EMAILS.includes(email.toLowerCase())) return { allowed: true };
+
+  try {
+    const userRef = db.collection("users").doc(uid);
+    const userDoc = await userRef.get();
+    const userData = userDoc.data();
+
+    if (!userData || !userData.company_id) {
+      return { allowed: false, reason: "Kein Firmencode hinterlegt. Bitte registrieren Sie sich erneut." };
+    }
+
+    const companyRef = db.collection("companies").doc(userData.company_id);
+    const companyDoc = await companyRef.get();
+    
+    if (!companyDoc.exists) {
+      return { allowed: false, reason: "Ungültige Firmenkonfiguration." };
+    }
+    
+    const companyData = companyDoc.data();
+    const now = new Date();
+
+    // Check validity dates
+    if (companyData.valid_from && now < companyData.valid_from.toDate()) {
+      return { allowed: false, reason: "Der Testzeitraum hat noch nicht begonnen." };
+    }
+    if (companyData.valid_until) {
+      const endOfDay = new Date(companyData.valid_until.toDate());
+      endOfDay.setHours(23, 59, 59, 999);
+      if (now > endOfDay) {
+        return { allowed: false, reason: "Der Testzeitraum ist abgelaufen." };
+      }
+    }
+
+    // Check daily limit
+    const today = new Date().toISOString().split('T')[0];
+    const usageRef = userRef.collection("usage_logs").doc(today);
+    
+    // Use transaction for atomic increment/check
+    return await db.runTransaction(async (t) => {
+      const usageDoc = await t.get(usageRef);
+      const currentUsage = usageDoc.exists ? usageDoc.data().count : 0;
+      const limit = companyData.daily_msg_limit || 20;
+      
+      if (creditsToDeduct > 0 && currentUsage + creditsToDeduct > limit) {
+          return { allowed: false, reason: `Nicht genügend Credits. Benötigt: ${creditsToDeduct}, Verfügbar: ${limit - currentUsage}` };
+      } else if (creditsToDeduct === 0 && currentUsage >= limit) {
+          return { allowed: false, reason: "Tägliches Creditlimit erreicht.", remaining: 0, limit, valid_until: companyData.valid_until?.toDate() };
+      }
+      
+      if (creditsToDeduct > 0) {
+        t.set(usageRef, { count: currentUsage + creditsToDeduct, date: today }, { merge: true });
+        return { allowed: true, remaining: limit - (currentUsage + creditsToDeduct), limit, valid_until: companyData.valid_until?.toDate() };
+      } else {
+        return { allowed: true, remaining: limit - currentUsage, limit, valid_until: companyData.valid_until?.toDate() };
+      }
+    });
+  } catch (err) {
+    console.error("Error checking demo limits:", err);
+    // Fail safe: Allow if error? Or block? Block is safer for costs.
+    return { allowed: false, reason: "Fehler bei der Limit-Prüfung." };
+  }
+}
+
+async function refundDemoCredits(uid, email, creditsToRefund = 0) {
+  if (!IS_EXTERNAL_VERSION || creditsToRefund <= 0) return { success: true };
+  if (email && ADMIN_EMAILS.includes(email.toLowerCase())) return { success: true };
+
+  try {
+    const userRef = db.collection("users").doc(uid);
+    const today = new Date().toISOString().split('T')[0];
+    const usageRef = userRef.collection("usage_logs").doc(today);
+    
+    return await db.runTransaction(async (t) => {
+      const usageDoc = await t.get(usageRef);
+      if (usageDoc.exists) {
+        const currentUsage = usageDoc.data().count || 0;
+        const newUsage = Math.max(0, currentUsage - creditsToRefund);
+        t.set(usageRef, { count: newUsage }, { merge: true });
+        return { success: true };
+      }
+      return { success: false };
+    });
+  } catch (err) {
+    console.error("Error refunding credits:", err);
+    return { success: false };
+  }
+}
+
+// --- Metrics Endpoint (Admin Only) ---
+app.get('/api/metrics', verifyFirebaseToken, verifyAdmin, async (req, res) => {
+  try {
+    const { uid } = req.user;
+    const today = new Date().toISOString().split('T')[0];
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    let stats = {
+      users_today: 0,
+      messages_today: 0,
+      tokens_today: 0,
+      cost_today: 0,
+      users_total: 0,
+      messages_total: 0,
+      tokens_total: 0,
+      cost_total: 0,
+      scope: 'personal' // 'global', 'company', 'personal'
+    };
+
+    // Always use Global Stats for Admins
+    if (true) {
+      stats.scope = 'global';
+      
+      // 1. Get Today's Activity (Users, Messages, Tokens, Cost)
+      // Strategy: Iterative Check (Robust & No Extra Index Required)
+      // 1. Find users active today (via updated_at) - narrows search space
+      // 2. For each, find sessions updated today
+      // 3. For each session, count messages created today
+      
+      const potentialUsersSnap = await db.collection('users')
+        .where('updated_at', '>=', startOfDay)
+        .get();
+      
+      // Initialize breakdown stats
+      stats.users_today_internal = 0;
+      stats.users_today_external = 0;
+      stats.tokens_today_internal = 0;
+      stats.tokens_today_external = 0;
+      
+      // Process users in parallel
+      const userPromises = potentialUsersSnap.docs.map(async (userDoc) => {
+          const uid = userDoc.id;
+          const userData = userDoc.data();
+          const isExternal = !!userData.company_id;
+          
+          let userHasActivity = false;
+          let userTokens = 0;
+          let userMessages = 0;
+          let userCost = 0;
+
+          // Get sessions updated today
+          const sessionsSnap = await userDoc.ref.collection('chat_sessions')
+              .where('last_updated', '>=', startOfDay)
+              .get();
+          
+          if (sessionsSnap.empty) return;
+
+          const sessionPromises = sessionsSnap.docs.map(async (sessionDoc) => {
+              const messagesSnap = await sessionDoc.ref.collection('messages')
+                  .where('created_at', '>=', startOfDay)
+                  .get();
+              
+              if (!messagesSnap.empty) {
+                  userHasActivity = true;
+                  
+                  messagesSnap.forEach(msgDoc => {
+                      const data = msgDoc.data();
+                      if (data.role === 'user') {
+                          userMessages++;
+                      }
+                      
+                      const input = data.tokens_input || 0;
+                      const output = data.tokens_output || 0;
+                      const total = input + output;
+                      userTokens += total;
+                      
+                      if (data.cost_total !== undefined) {
+                           userCost += data.cost_total;
+                      } else if (data.model) {
+                           let modelKey = data.model;
+                           if (!MODEL_PRICING[modelKey]) {
+                               modelKey = modelKey.toLowerCase();
+                               if (modelKey.includes('gpt-4o')) modelKey = 'gpt-4o';
+                               else if (modelKey.includes('gpt-4')) modelKey = 'gpt-4';
+                               else if (modelKey.includes('gpt-3.5')) modelKey = 'gpt-3.5-turbo';
+                               else if (modelKey.includes('gemini')) modelKey = 'gemini-1.5-pro';
+                               else if (modelKey.includes('claude')) modelKey = 'claude-3-sonnet';
+                               else modelKey = 'default';
+                           }
+                           userCost += calculateCost(modelKey, input, output);
+                      }
+                  });
+              }
+          });
+          
+          await Promise.all(sessionPromises);
+          
+          if (userHasActivity) {
+              if (isExternal) {
+                  stats.users_today_external++;
+                  stats.tokens_today_external += userTokens;
+              } else {
+                  stats.users_today_internal++;
+                  stats.tokens_today_internal += userTokens;
+              }
+              stats.messages_today += userMessages;
+              stats.tokens_today += userTokens;
+              stats.cost_today += userCost;
+          }
+      });
+      
+      await Promise.all(userPromises);
+      stats.users_today = stats.users_today_internal + stats.users_today_external;
+
+      // Total Users (Registered)
+      const totalUsersSnap = await db.collection('users').count().get();
+      stats.users_total = totalUsersSnap.data().count;
+
+      // 4. Get Total Tokens & Messages (All Time)
+      // Using Aggregation for efficiency
+      try {
+        const coll = db.collection('activity_events');
+        
+        // Split aggregations to avoid composite index requirements
+        // Count should work without specific index
+        const countSnapshot = await coll.count().get();
+        stats.messages_total = countSnapshot.data().count || 0;
+
+        // Try to sum tokens and cost (might require index)
+        try {
+          const sumSnapshot = await coll.aggregate({
+             totalTokens: AggregateField.sum('usage.total_tokens'),
+             totalCost: AggregateField.sum('cost.total')
+          }).get();
+          stats.tokens_total = sumSnapshot.data().totalTokens || 0;
+          stats.cost_total = sumSnapshot.data().totalCost || 0;
+        } catch (sumErr) {
+           console.warn("Token sum aggregation failed (likely missing index):", sumErr.message);
+           // Fallback to 0 if index missing
+        }
+
+        // Fallback estimate total cost if exact cost is 0
+        if (stats.cost_total === 0 && stats.tokens_total > 0) {
+            stats.cost_total = (stats.tokens_total / 1000) * 0.005;
+        }
+
+      } catch (aggErr) {
+        console.warn("Aggregation failed:", aggErr);
+      }
+
+    }
+
+    res.json(stats);
+  } catch (err) {
+    console.error("Error fetching metrics:", err);
+    res.status(500).json({ error: "Failed to fetch metrics" });
+  }
+});
+
+// --- Admin Endpoints ---
+
+// Create Company
+app.post('/api/admin/companies', verifyFirebaseToken, verifyAdmin, async (req, res) => {
+  try {
+    const { name, code, max_users, daily_msg_limit, valid_from, valid_until, allowed_models, allowed_domains } = req.body;
+    
+    // Logging für Debug
+    console.log('[ADMIN] CreateCompany:', {
+      name, code, max_users, daily_msg_limit, valid_from, valid_until, allowed_models, allowed_domains,
+      user: req.user?.email,
+      projectId: admin.app().options.projectId,
+      dbName: FIRESTORE_DB_NAME
+    });
+
+    if (!name || !code) {
+      return res.status(400).json({ error: "Name and Code are required" });
+    }
+
+    // Check if code exists
+    const existing = await db.collection("companies").where("code", "==", code).get();
+    if (!existing.empty) {
+      return res.status(400).json({ error: "Code already exists" });
+    }
+
+    const companyData = {
+      name,
+      code,
+      max_users: parseInt(max_users) || 5,
+      daily_msg_limit: parseInt(daily_msg_limit) || 20,
+      valid_from: valid_from ? new Date(valid_from) : null,
+      valid_until: valid_until ? new Date(valid_until) : null,
+      allowed_models: allowed_models || ["gemini-pro"],
+      allowed_domains: Array.isArray(allowed_domains) ? allowed_domains : (typeof allowed_domains === 'string' ? allowed_domains.split(',').map(d => d.trim().toLowerCase()).filter(Boolean) : []),
+      current_users: 0,
+      created_at: admin.firestore.FieldValue.serverTimestamp(),
+      created_by: req.user.email
+    };
+
+    const ref = await db.collection("companies").add(companyData);
+    res.status(201).json({ id: ref.id, ...companyData });
+  } catch (err) {
+    console.error("Error creating company:", err);
+    res.status(500).json({ error: "Failed to create company" });
+  }
+});
+
+// List Companies
+app.get('/api/admin/companies', verifyFirebaseToken, verifyAdmin, async (req, res) => {
+  try {
+    // Logging für Debug
+    console.log('[ADMIN] ListCompanies:', {
+      user: req.user?.email,
+      projectId: admin.app().options.projectId,
+      dbName: FIRESTORE_DB_NAME
+    });
+    const snapshot = await db.collection("companies").orderBy("created_at", "desc").get();
+    const companies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json(companies);
+  } catch (err) {
+    console.error("Error listing companies:", err);
+    res.status(500).json({ error: "Failed to list companies" });
+  }
+});
+
+// Update Company
+app.put('/api/admin/companies/:id', verifyFirebaseToken, verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, code, max_users, daily_msg_limit, valid_from, valid_until, allowed_models, allowed_domains } = req.body;
+    
+    // Logging für Debug
+    console.log(`[ADMIN] UpdateCompany ${id}:`, {
+      name, code, max_users, daily_msg_limit, valid_from, valid_until, allowed_models, allowed_domains,
+      user: req.user?.email
+    });
+
+    const companyRef = db.collection("companies").doc(id);
+    const companyDoc = await companyRef.get();
+    
+    if (!companyDoc.exists) {
+      return res.status(404).json({ error: "Company not found" });
+    }
+
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (code) updateData.code = code; // Check uniqueness if changed? Assuming admin knows what they do.
+    if (max_users !== undefined) updateData.max_users = parseInt(max_users);
+    if (daily_msg_limit !== undefined) updateData.daily_msg_limit = parseInt(daily_msg_limit);
+    if (valid_from) updateData.valid_from = new Date(valid_from);
+    if (valid_until) updateData.valid_until = new Date(valid_until);
+    if (allowed_models) updateData.allowed_models = allowed_models;
+    
+    if (allowed_domains !== undefined) {
+      updateData.allowed_domains = Array.isArray(allowed_domains) 
+        ? allowed_domains 
+        : (typeof allowed_domains === 'string' ? allowed_domains.split(',').map(d => d.trim().toLowerCase()).filter(Boolean) : []);
+    }
+
+    updateData.updated_at = admin.firestore.FieldValue.serverTimestamp();
+    updateData.updated_by = req.user.email;
+
+    await companyRef.update(updateData);
+    res.json({ success: true, ...updateData });
+  } catch (err) {
+    console.error("Error updating company:", err);
+    res.status(500).json({ error: "Failed to update company" });
+  }
+});
+
+// Delete Company
+app.delete('/api/admin/companies/:id', verifyFirebaseToken, verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`[ADMIN] DeleteCompany ${id} requested by ${req.user.email}`);
+
+    const companyRef = db.collection("companies").doc(id);
+    const companyDoc = await companyRef.get();
+    
+    if (!companyDoc.exists) {
+      return res.status(404).json({ error: "Company not found" });
+    }
+
+    // Check if users exist for this company?
+    // Optionally remove company_id from users?
+    // For now, just delete the company. Users will be orphaned (will fall into "no company" state in verifyFirebaseUser, allowing them to re-register)
+    
+    // We should probably unlink users to be clean.
+    const usersSnap = await db.collection("users").where("company_id", "==", id).get();
+    
+    const batch = db.batch();
+    batch.delete(companyRef);
+    
+    usersSnap.docs.forEach(doc => {
+        batch.update(doc.ref, { 
+            company_id: admin.firestore.FieldValue.delete(),
+            demo_active: false
+        });
+    });
+    
+    await batch.commit();
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error deleting company:", err);
+    res.status(500).json({ error: "Failed to delete company" });
+  }
+});
+
+// Get Company Users & Usage
+app.get('/api/admin/companies/:id/users', verifyFirebaseToken, verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 1. Get all users for this company
+    const usersSnap = await db.collection("users").where("company_id", "==", id).get();
+    
+    const today = new Date().toISOString().split('T')[0];
+    
+    const users = await Promise.all(usersSnap.docs.map(async (doc) => {
+       const userData = doc.data();
+       const uid = doc.id;
+       
+       // 2. Get usage for today
+       const usageDoc = await db.collection("users").doc(uid).collection("usage_logs").doc(today).get();
+       const usageToday = usageDoc.exists ? usageDoc.data().count : 0;
+       
+       // 3. Calculate detailed stats from sessions/messages
+       let total_input = 0;
+       let total_output = 0;
+       let total_cost = 0;
+       let session_count = 0;
+       let model_counts = {};
+       let mode_counts = {};
+       
+       const sessionsSnap = await db.collection("users").doc(uid).collection("chat_sessions").get();
+       session_count = sessionsSnap.size;
+
+       // Fetch messages for all sessions in parallel
+       const sessionPromises = sessionsSnap.docs.map(async sessionDoc => {
+           const msgsSnap = await sessionDoc.ref.collection("messages").get();
+           msgsSnap.forEach(msgDoc => {
+               const msg = msgDoc.data();
+               const input = msg.tokens_input || 0;
+               const output = msg.tokens_output || 0;
+               total_input += input;
+               total_output += output;
+               
+               const model = msg.model || 'unknown';
+               
+               if (msg.cost_total !== undefined) {
+                   total_cost += msg.cost_total;
+               } else {
+                   // Use calculateCost helper
+                   let modelKey = model;
+                   if (!MODEL_PRICING[modelKey]) {
+                       modelKey = model.toLowerCase();
+                       if (!MODEL_PRICING[modelKey]) {
+                           if (modelKey.includes('gpt-4o')) modelKey = 'gpt-4o';
+                           else if (modelKey.includes('gpt-4')) modelKey = 'gpt-4';
+                           else if (modelKey.includes('gpt-3.5')) modelKey = 'gpt-3.5-turbo';
+                           else if (modelKey.includes('gemini')) modelKey = 'gemini-1.5-pro';
+                           else if (modelKey.includes('claude')) modelKey = 'claude-3-sonnet';
+                           else modelKey = 'default';
+                       }
+                   }
+                   total_cost += calculateCost(modelKey, input, output);
+               }
+
+               // Count stats only for User messages (Requests) to match user expectation
+               if (msg.role === 'user') {
+                   model_counts[model] = (model_counts[model] || 0) + 1;
+                   const mode = msg.mode || 'normal';
+                   mode_counts[mode] = (mode_counts[mode] || 0) + 1;
+               }
+           });
+       });
+       
+       await Promise.all(sessionPromises);
+       
+       const total_messages = Object.values(model_counts).reduce((a, b) => a + b, 0);
+
+       let limit_request_count = 0;
+       try {
+           const limitSnap = await db.collection("users").doc(uid).collection("limit_requests").get();
+           limit_request_count = limitSnap.size;
+       } catch (e) {
+           console.error('Error fetching limit requests:', e);
+       }
+
+       return {
+         uid,
+         email: userData.email,
+         registered_at: userData.registered_at ? (userData.registered_at.toDate ? userData.registered_at.toDate() : userData.registered_at) : null,
+         usage_today: usageToday,
+         last_active: userData.updated_at ? (userData.updated_at.toDate ? userData.updated_at.toDate() : userData.updated_at) : null,
+         stats: {
+             total_input_tokens: total_input,
+             total_output_tokens: total_output,
+             total_cost: total_cost,
+             session_count: session_count,
+             model_count: Object.keys(model_counts).length,
+             model_breakdown: model_counts,
+             mode_breakdown: mode_counts,
+             total_messages: total_messages,
+             limit_request_count: limit_request_count
+         }
+       };
+    }));
+
+    res.json(users);
+  } catch (err) {
+    console.error("Error fetching company users:", err);
+    res.status(500).json({ error: "Failed to fetch company users" });
+  }
+});
+
+// --- Demo Registration Endpoint ---
+
+app.post('/api/register-demo', verifyFirebaseToken, async (req, res) => {
+  const { code } = req.body;
+  const { uid, email } = req.user;
+
+  console.log(`[REGISTER-DEMO] Called by ${email} with code ${code}`);
+
+  if (!code) return res.status(400).json({ error: "Code is required" });
+
+  try {
+    // Find company by code
+    const companiesSnap = await db.collection("companies").where("code", "==", code).limit(1).get();
+    
+    if (companiesSnap.empty) {
+      console.warn(`[REGISTER-DEMO] Code ${code} not found in DB.`);
+      return res.status(400).json({ error: "Ungültiger Code." });
+    }
+
+    const companyDoc = companiesSnap.docs[0];
+    const companyData = companyDoc.data();
+    const companyId = companyDoc.id;
+
+    // Logging für Debug
+    console.log('[REGISTER-DEMO] Attempt:', {
+      user: email,
+      code,
+      companyId,
+      current_users: companyData.current_users,
+      max_users: companyData.max_users,
+      allowed_domains: companyData.allowed_domains,
+      user_domain: email.split('@')[1],
+      projectId: admin.app().options.projectId,
+      dbName: FIRESTORE_DB_NAME
+    });
+
+    // Validation
+    const now = new Date();
+    if (companyData.valid_until && now > companyData.valid_until.toDate()) {
+      return res.status(400).json({ error: "Dieser Code ist abgelaufen." });
+    }
+
+    // Check allowed_domains
+    if (companyData.allowed_domains && companyData.allowed_domains.length > 0) {
+      const userDomain = email.split('@')[1].toLowerCase();
+      const allowed = companyData.allowed_domains.map(d => d.toLowerCase().trim());
+      if (!allowed.includes(userDomain)) {
+        return res.status(400).json({ error: `Ihre E-Mail-Domain (${userDomain}) ist für diesen Code nicht freigeschaltet.` });
+      }
+    }
+
+    // Check max users
+    if (companyData.current_users >= companyData.max_users) {
+      return res.status(400).json({ error: "Es gibt keine freien Plätze mehr für die Demo-Version ihrer Firma" });
+    }
+
+    // Check if user is already registered (idempotency)
+    const userRef = db.collection("users").doc(uid);
+    const userSnap = await userRef.get();
+    if (userSnap.exists && userSnap.data().company_id) {
+       // Already registered?
+       if (userSnap.data().company_id === companyId) {
+         return res.json({ success: true, message: "Bereits registriert." });
+       }
+       return res.status(400).json({ error: "Nutzer ist bereits einem anderen Code zugewiesen." });
+    }
+
+    // Run transaction to link user and increment counter
+    await db.runTransaction(async (t) => {
+      const coDoc = await t.get(companyDoc.ref);
+      const current = coDoc.data().current_users || 0;
+      
+      if (current >= companyData.max_users) {
+        throw new Error("Es gibt keine freien Plätze mehr für die Demo-Version ihrer Firma");
+      }
+
+      const userDocTr = await t.get(userRef);
+      const isNewUser = !userDocTr.exists;
+
+      const updateData = {
+        company_id: companyId,
+        demo_active: true,
+        registered_at: admin.firestore.FieldValue.serverTimestamp(),
+        email: email,
+        updated_at: admin.firestore.FieldValue.serverTimestamp()
+      };
+
+      if (isNewUser) {
+        updateData.created_at = admin.firestore.FieldValue.serverTimestamp();
+      }
+
+      t.update(companyDoc.ref, { current_users: current + 1 });
+      t.set(userRef, updateData, { merge: true });
+    });
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("Error registering demo user:", err);
+    res.status(500).json({ error: err.message || "Registrierung fehlgeschlagen." });
+  }
+});
+
+// Get Usage Stats
+app.get('/api/user/usage', verifyFirebaseToken, async (req, res) => {
+  const { uid, email } = req.user;
+  try {
+    const limitCheck = await checkDemoLimits(uid, email, 0);
+    
+    res.json({
+      remaining: limitCheck.remaining,
+      allowed: limitCheck.allowed,
+      reason: limitCheck.reason,
+      limit: limitCheck.limit,
+      valid_until: limitCheck.valid_until
+    });
+  } catch (err) {
+    console.error("Error checking usage:", err);
+    res.status(500).json({ error: "Fehler beim Abrufen des Status." });
+  }
+});
+
+/**
+ * 💬 Neue Chat-Session erstellen
+ */
+app.post("/api/sessions", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  const { title } = req.body;
+
+  try {
+    const ref = await db.collection("users").doc(uid).collection("chat_sessions").add({
+      session_id: uuidv4(),
+      title,
+      auto_title: title || "Neue Sitzung",
+      status: "open",
+      total_tokens_input: 0,
+      total_tokens_output: 0,
+      created_at: new Date(),
+      closed_at: null,
+    });
+
+    res.status(201).json({ sessionId: ref.id });
+  } catch (err) {
+    console.error("Fehler beim Erstellen der Sitzung:", err);
+    res.status(500).json({ error: "Fehler beim Erstellen der Sitzung" });
+  }
+});
+
+app.get("/api/sessions/:sessionId/pdf", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  const { sessionId } = req.params;
+
+  try {
+    // Session-Titel und Nachrichten holen
+    const sessionSnap = await db
+      .collection("users")
+      .doc(uid)
+      .collection("chat_sessions")
+      .doc(sessionId)
+      .get();
+
+    if (!sessionSnap.exists) {
+      return res.status(404).json({ error: "Session nicht gefunden" });
+    }
+    const sessionData = sessionSnap.data();
+    let sessionTitle = "Chat";
+    if (sessionData?.title) {
+      try {
+        sessionTitle = decrypt(sessionData.title);
+      } catch (e) {
+        console.error("Fehler beim Entschlüsseln des Titels:", e);
+        sessionTitle = "Chat";
+      }
+    }
+    // Nachrichten holen
+    const messagesSnap = await db
+      .collection("users")
+      .doc(uid)
+      .collection("chat_sessions")
+      .doc(sessionId)
+      .collection("messages")
+      .orderBy("created_at")
+      .get();
+
+    const messages = messagesSnap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        text: decryptedContent,
+        isUser: data.role === "user",
+        mode: data.mode || "normal",
+        mail: data.metadata?.mail || "",
+        timestamp: data.created_at?.toDate ? data.created_at.toDate() : data.created_at
+      };
+    });
+
+    // HTML generieren mit Mermaid-Rendering
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>${sessionTitle}</title>
+        <style>
+          body { font-family: Arial, sans-serif; background: #f9f9f9; color: #222; margin: 0; padding: 2em; }
+          h1 { font-size: 1.5em; margin-bottom: 0.5em; }
+          .msg { margin-bottom: 1.5em; }
+          .meta { color: #888; font-size: 0.9em; margin-bottom: 0.2em; }
+          .user { font-weight: bold; }
+          .assistant { color: #1976d2; }
+          .bubble { background: #fff; border-radius: 8px; padding: 1em; box-shadow: 0 1px 4px #0001; }
+          .mermaid-diagram { text-align: center; margin: 1rem 0; }
+          .mermaid-diagram svg { max-width: 100%; height: auto; }
+        </style>
+        <script type="module">
+          import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+          mermaid.initialize({ startOnLoad: false, theme: 'default' });
+          
+            window.addEventListener('DOMContentLoaded', async () => {
+              const mermaidBlocks = document.querySelectorAll('code.language-mermaid');
+              for (let i = 0; i < mermaidBlocks.length; i++) {
+                const block = mermaidBlocks[i];
+                const code = block.textContent;
+                const id = 'mermaid-' + i;
+                try {
+                  const { svg } = await mermaid.render(id, code);
+                  const wrapper = document.createElement('div');
+                  wrapper.className = 'mermaid-diagram';
+                  wrapper.innerHTML = svg;
+                  block.parentElement.replaceWith(wrapper);
+                } catch (e) {
+                  console.error('Mermaid error:', e);
+                }
+              }
+              window.mermaidDone = true;
+            });
+          </script>
+        </head>
+        <body>
+        <h1>Chat: ${sessionTitle}</h1>
+        <div>
+          ${messages.map((msg) => {
+            // Convert markdown code blocks to HTML - handle mermaid specially
+            let content = msg.text;
+            
+            // First, replace mermaid blocks
+            content = content.replace(/```mermaid\s*\n([\s\S]*?)```/g, '<pre><code class="language-mermaid">$1</code></pre>');
+            
+            // Then other code blocks
+            content = content.replace(/```(\w+)?\s*\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+            
+            // Finally, replace newlines
+            content = content.replace(/\n/g, "<br>");
+            
+            return `
+            <div class="msg">
+              <div class="meta">
+                <span class="${msg.isUser ? "user" : "assistant"}">
+                  ${msg.isUser ? "User" : (msg.mode === "energy-bot" ? "Energiemarkt" : "Standard-Bot")}
+                </span>
+                ${msg.isUser && msg.mail ? ` | ${msg.mail}` : ""}
+                ${!msg.isUser && msg.mail && msg.mail !== "bot" ? ` | ${msg.mail}` : ""}
+                ${msg.timestamp ? ` | ${new Date(msg.timestamp).toLocaleString()}` : ""}
+              </div>
+              <div class="bubble">${content}</div>
+            </div>
+          `;
+          }).join("")}
+        </div>
+      </body>
+      </html>
+    `.trim();
+
+    // Puppeteer: Render Mermaid diagrams server-side
+    let page;
+    try {
+      const browser = await getBrowser();
+      page = await browser.newPage();
+      
+      await page.setContent(html, { waitUntil: "networkidle0" });
+      
+      // Wait for Mermaid to render all diagrams
+      try {
+        await page.waitForFunction('window.mermaidDone === true', { timeout: 30000 });
+      } catch (e) {
+        console.warn('Timeout waiting for Mermaid rendering, proceeding anyway...');
+      }
+      
+      // Get the final HTML with rendered SVGs
+      const renderedHtml = await page.content();
+      
+      const pdfBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" }
+      });
+      
+      // PDF als Download senden
+      const safeTitle = sessionTitle ? sessionTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase() : "chat";
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${safeTitle}.pdf"`
+      });
+      res.end(pdfBuffer);
+    } catch (err) {
+      console.error("Fehler beim PDF-Export:", err);
+      res.status(500).json({ error: "Fehler beim PDF-Export", details: err.message });
+    } finally {
+      if (page) await page.close();
+    }
+  } catch (err) {
+    console.error("Fehler beim PDF-Export (allgemein):", err);
+    res.status(500).json({ error: "Fehler beim PDF-Export", details: err.message });
+  }
+});
+
+/**
+ * ✉️ Neue Nachricht in Chat-Session speichern
+ */
+app.post("/api/sessions/:sessionId/messages", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  const { sessionId } = req.params;
+  const { role, model, type, content, tokens_input, tokens_output, metadata } = req.body;
+
+  try {
+    await db
+      .collection("users")
+      .doc(uid)
+      .collection("chat_sessions")
+      .doc(sessionId)
+      .collection("messages")
+      .add({
+        message_id: uuidv4(),
+        role,
+        model,
+        type,
+        content,
+        tokens_input,
+        tokens_output,
+        metadata,
+        created_at: new Date(),
+      });
+
+    res.status(201).json({ success: true });
+  } catch (err) {
+    console.error("Fehler beim Speichern der Nachricht:", err);
+    res.status(500).json({ error: "Fehler beim Speichern der Nachricht" });
+  }
+});
+
+
+app.get("/api/sessions", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+
+  try {
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("chat_sessions")
+      .orderBy("last_updated", "desc")
+      .get();
+
+    const sessions = snapshot.docs.map(doc => {
+      const data = doc.data();
+      let decryptedTitle = "";
+      if (data.title) {
+        try {
+          decryptedTitle = decrypt(data.title);
+        } catch (e) {
+          console.warn(`Fehler beim Entschlüsseln des Titels für Session ${doc.id}:`, e.message);
+          decryptedTitle = "Chat"; // Fallback oder unverschlüsselt anzeigen
+        }
+      }
+      return {
+        sessionId: doc.id,
+        ...data,
+        title: decryptedTitle
+      };
+    }).filter(session => session.status !== "Deleted");
+
+    res.json(sessions);
+  } catch (err) {
+    console.error("Fehler beim Laden der Sessions:", err);
+    res.status(500).json({ error: "Fehler beim Laden der Sessions" });
+  }
+});
+app.get("/api/sessions/:sessionId/messages", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  const { sessionId } = req.params;
+
+  try {
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("chat_sessions")
+      .doc(sessionId)
+      .collection("messages")
+      .orderBy("created_at")
+      .get();
+
+      const messages = snapshot.docs.map(doc => {
+        const data = doc.data();
+        // Decrypt attachment filenames - do NOT include token counts in response
+        let decryptedContent = "";
+        try {
+          decryptedContent = data.content ? decrypt(data.content) : "";
+        } catch (e) {
+          console.warn(`Fehler beim Entschlüsseln der Nachricht ${doc.id}:`, e.message);
+          decryptedContent = "Inhalt konnte nicht entschlüsselt werden.";
+        }
+
+        const decryptedAttachments = (data.attachments || []).map(att => {
+          try {
+            return {
+              filename: decrypt(att.filename),
+              size: att.size
+              // tokens are stored in DB but NOT returned to client
+            };
+          } catch (err) {
+            console.error('Error decrypting attachment filename:', err);
+            return { filename: 'Unknown file', size: 0 };
+          }
+        });
+        
+        // Token breakdown is stored in DB but NOT returned to client
+        
+        return {
+          text: decryptedContent,
+          isUser: data.role === "user",
+          mode: data.mode || "normal",
+          mail: data.metadata?.mail || "bot",
+          timestamp: data.created_at ? (data.created_at.toDate ? data.created_at.toDate() : data.created_at) : null,
+          attachments: decryptedAttachments,
+          http_response_code: data.http_response_code || null
+          // tokenBreakdown is NOT included in response
+        };
+      });
+
+    res.json(messages);
+  } catch (err) {
+    console.error("Fehler beim Laden der Nachrichten:", err);
+    res.status(500).json({ error: "Fehler beim Laden der Nachrichten" });
+  }
+});
+
+
+app.post("/api/messages", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  const { sessionId, role, content, model, type, mode, mail } = req.body;
+
+  try {
+    let sessionRef;
+    if (!sessionId) {
+      // Create a new session
+      sessionRef = await db.collection("users").doc(uid).collection("chat_sessions").add({
+        session_id: uuidv4(),
+        title: content.slice(0, 20),
+        status: "open",
+        created_at: new Date(),
+        closed_at: null,
+        messages: [
+          {
+            message_id: uuidv4(),
+            role,
+            model,
+            type,
+            content,
+            created_at: new Date(),
+            mode,
+            mail,
+          }
+        ]
+      });
+
+    } else {
+      const existing = await db.collection("users").doc(uid).collection("chat_sessions").doc(sessionId).get();
+      if (!existing.exists) {
+        return res.status(404).json({ error: "Session nicht gefunden" });
+      }
+      sessionRef = existing.ref;
+    }
+
+    // Save the message
+    await sessionRef.collection("messages").add({
+      message_id: uuidv4(),
+      role,
+      model,
+      type,
+      content,
+      created_at: new Date(),
+    });
+
+    res.status(201).json({ success: true, sessionId: sessionRef.id });
+  } catch (err) {
+    console.error("Fehler beim Senden der Nachricht:", err);
+    res.status(500).json({ error: "Fehler beim Senden der Nachricht" });
+  }
+});
+
+
+app.get("/api/prompts", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+
+  try {
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("prompts")
+      .orderBy("created_at", "desc")
+      .get();
+
+    const prompts = snapshot.docs.map(doc => ({
+      promptId: doc.id,
+      ...doc.data()
+    }));
+
+    res.json(prompts);
+  } catch (err) {
+    console.error("Fehler beim Laden der Prompts:", err);
+    res.status(500).json({ error: "Fehler beim Laden der Prompts" });
+  }
+});
+// Get user profile (for doNotMigrate flag & roles)
+app.get("/api/user/profile", verifyFirebaseUser, async (req, res) => {
+  const { uid, email } = req.user;
+  try {
+    const userDoc = await db.collection("users").doc(uid).get();
+    
+    // Determine Admin Status server-side
+    const isAdmin = email && ADMIN_EMAILS.includes(email.toLowerCase());
+    
+    // Determine External Status (server-side source of truth)
+    const isExternal = IS_EXTERNAL_VERSION;
+
+    if (!userDoc.exists) {
+      // Return default profile for new users (before they are created in DB fully)
+      return res.status(200).json({ 
+        doNotMigrate: false,
+        isAdmin: !!isAdmin,
+        isExternal: !!isExternal 
+      });
+    }
+    
+    const data = userDoc.data();
+    res.status(200).json({ 
+      doNotMigrate: !!data?.doNotMigrate,
+      isAdmin: !!isAdmin,
+      isExternal: !!isExternal
+    });
+  } catch (err) {
+    console.error("Fehler beim Abrufen des Nutzerprofils:", err);
+    res.status(500).json({ error: "Fehler beim Abrufen des Nutzerprofils" });
+  }
+});
+
+// Update Privacy Consent
+app.post("/api/user/privacy-consent", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  try {
+    await db.collection("users").doc(uid).set(
+      { 
+        privacy_policy_accepted: true, 
+        privacy_policy_accepted_at: admin.firestore.FieldValue.serverTimestamp(),
+        updated_at: admin.firestore.FieldValue.serverTimestamp() 
+      },
+      { merge: true }
+    );
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Fehler beim Speichern der Datenschutzeinwilligung:", err);
+    res.status(500).json({ error: "Fehler beim Speichern der Datenschutzeinwilligung" });
+  }
+});
+
+// Set "doNotMigrate" flag in user document
+app.post("/api/user/do-not-migrate", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  try {
+    await db.collection("users").doc(uid).set(
+      { doNotMigrate: true, updated_at: admin.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Fehler beim Setzen des doNotMigrate-Flags:", err);
+    res.status(500).json({ error: "Fehler beim Setzen des doNotMigrate-Flags" });
+  }
+});
+
+// Check access (lightweight endpoint for frontend validaton)
+app.get("/api/user/access", (req, res) => {
+  res.status(200).json({ access: true });
+});
+
+
+app.delete("/api/prompts/:promptId", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  const { promptId } = req.params;
+
+  try {
+    await db.collection("users")
+      .doc(uid)
+      .collection("prompts")
+      .doc(promptId)
+      .delete();
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Fehler beim Löschen des Prompts:", err);
+    res.status(500).json({ error: "Fehler beim Löschen des Prompts" });
+  }
+});
+
+app.post('/api/track-limit-request', verifyFirebaseUser, async (req, res) => {
+  const { uid, email } = req.user;
+  try {
+      await db.collection("users").doc(uid).collection("limit_requests").add({
+          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          email: email,
+          status: 'open'
+      });
+      res.json({ success: true });
+  } catch (err) {
+      console.error("Error tracking limit request:", err);
+      res.status(500).json({ error: "Failed to track" });
+  }
+});
+
+app.patch("/api/sessions/:sessionId/title", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  const { sessionId } = req.params;
+  const { newTitle } = req.body;
+
+  if (!newTitle) {
+    return res.status(400).json({ error: "Missing new title" });
+  }
+
+  try {
+    const sessionRef = db.collection("users")
+      .doc(uid)
+      .collection("chat_sessions")
+      .doc(sessionId);
+
+    const sessionSnap = await sessionRef.get();
+
+    if (!sessionSnap.exists) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    // HIER: Titel verschlüsseln!
+    const encryptedTitle = encrypt(newTitle);
+
+    await sessionRef.update({
+      title: encryptedTitle,
+      last_updated: new Date()
+    });
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Error updating session title:", err);
+    res.status(500).json({ error: "Failed to update session title" });
+  }
+});
+app.delete("/api/sessions/:sessionId", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  const { sessionId } = req.params;
+
+  try {
+    const sessionRef = db.collection("users")
+      .doc(uid)
+      .collection("chat_sessions")
+      .doc(sessionId);
+
+    const sessionSnap = await sessionRef.get();
+    if (!sessionSnap.exists) {
+      return res.status(404).json({ error: "Session nicht gefunden" });
+    }
+
+    const messagesRef = sessionRef.collection("messages");
+    const messagesSnap = await messagesRef.get();
+
+    const batch = db.batch();
+
+    // 1. Soft-delete messages (remove content field, keep tokens)
+    messagesSnap.docs.forEach(doc => {
+      batch.update(doc.ref, {
+        content: admin.firestore.FieldValue.delete(), // Remove content field completely
+        attachments: admin.firestore.FieldValue.delete(), // Remove attachments field
+        isDeleted: true
+      });
+    });
+
+    // 2. Soft-delete session (remove title, set status to Deleted, keep tokens)
+    batch.update(sessionRef, {
+      status: "Deleted",
+      title: admin.firestore.FieldValue.delete(), // Remove title field completely
+      isDeleted: true,
+      last_updated: new Date()
+    });
+
+    await batch.commit();
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Fehler beim Löschen der Session:", err);
+    res.status(500).json({ error: "Fehler beim Löschen der Session" });
+  }
+});
+
+app.delete("/api/sessions/:sessionId/messages/:messageId", verifyFirebaseUser, async (req, res) => {
+  const { uid } = req.user;
+  const { sessionId, messageId } = req.params;
+
+  try {
+    await db.collection("users")
+      .doc(uid)
+      .collection("chat_sessions")
+      .doc(sessionId)
+      .collection("messages")
+      .doc(messageId)
+      .delete();
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Fehler beim Löschen der Nachricht:", err);
+    res.status(500).json({ error: "Fehler beim Löschen der Nachricht" });
+  }
+});
+
+
+app.get('/readiness_check', (req, res) => res.status(200).send("OK"));
+app.get('/liveness_check', (req, res) => res.status(200).send("OK"));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
+async function startServer() {
+  try {
+    await loadEncryptionKey();
+    console.log("Encryption key loaded ✅");
+
+    // Danach Express starten
+    server.listen(PORT, () => {
+      console.log(`✅ Server listening on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error("Fehler beim Laden des ENCRYPTION_KEY:", err);
+    process.exit(1); // Bricht bei Fehler sauber ab
+  }
+}
+
+startServer();

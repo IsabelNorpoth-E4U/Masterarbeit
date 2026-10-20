@@ -2,12 +2,13 @@
 #
 # Choose the data set and the model by commenting in/out (each choice has its own
 # result files):
-#   data set: own data set (data/testcases.jsonl) or BIPIA + NotInject
+#   data set: own data set (dev or test split), BIPIA + NotInject, obfuscated BIPIA
 #   model:    Mistral Small 4 (guard) or Mistral Large 4 (main model, for comparison)
 #
 # Requirement: python3 -m pip install mistralai
 #              and the API key in the file mistral_key.txt in this folder
-# BIPIA data:  python3 build_bipia_testcases.py
+# BIPIA data:  python3 build_bipia_testcases.py               (test data)
+#              python3 build_bipia_testcases.py --obfuscated  (obfuscated test data)
 # Run:         python3 main_original_mistral.py
 
 import json
@@ -19,14 +20,29 @@ from mistralai.client import Mistral
 import metrics
 
 # ---------- data set ----------
+# file names: model, split (dev/test), approach, data set,
+# for example "results/mistral_small4_test_original_eigen_results.jsonl"
 
-# own data set
-TESTCASES_FILE = "data/testcases.jsonl"
-DATA_NAME = "_"
+# only the test cases of this split are checked, None: all test cases of the file
+ONLY_SPLIT = None
 
-# BIPIA + NotInject (indirect prompt injection)
+# own data set, development split
+# TESTCASES_FILE = "data/testcases.jsonl"
+# ONLY_SPLIT = "dev"
+# RUN_NAME = "dev_original_eigen"
+
+# own data set, test split
+# TESTCASES_FILE = "data/testcases.jsonl"
+# ONLY_SPLIT = "test"
+# RUN_NAME = "test_original_eigen"
+
+# BIPIA test (external content) and NotInject (messages of the user)
 # TESTCASES_FILE = "data/bipia_testcases.jsonl"
-# DATA_NAME = "_bipia_"
+# RUN_NAME = "test_original_bipia"
+
+# BIPIA test with obfuscated attacks (external content)
+TESTCASES_FILE = "data/bipia_obfuscated_testcases.jsonl"
+RUN_NAME = "test_original_bipia_obfuscated"
 
 # ---------- model ----------
 
@@ -38,8 +54,7 @@ MODEL_NAME = "mistral_small4"
 # MODEL = "mistral-large-4-0"
 # MODEL_NAME = "mistral_large4"
 
-# model, data set, approach, for example "results/mistral_small4_bipia_original_results.jsonl"
-RESULTS_FILE = "results/" + MODEL_NAME + DATA_NAME + "original_results.jsonl"
+RESULTS_FILE = "results/" + MODEL_NAME + "_" + RUN_NAME + "_results.jsonl"
 
 KEY_FILE = "mistral_key.txt"
 
@@ -92,7 +107,10 @@ def load_jsonl(file_name):
     return rows
 
 
-testcases = load_jsonl(TESTCASES_FILE)
+testcases = []
+for testcase in load_jsonl(TESTCASES_FILE):
+    if ONLY_SPLIT is None or testcase["split"] == ONLY_SPLIT:
+        testcases.append(testcase)
 os.makedirs("results", exist_ok=True)
 
 # ids of the test cases that are already in the results file
@@ -129,8 +147,8 @@ for testcase in testcases:
         "score": None,
         "latency_ms": latency_ms,
     }
-    # only BIPIA has these fields, for the analysis per task, attack and position
-    for field in ["source", "task", "attack_category", "position"]:
+    # only BIPIA has these fields, for the analysis per task, attack, position and transformation
+    for field in ["source", "task", "attack_category", "position", "transformation"]:
         if field in testcase:
             result[field] = testcase[field]
 
@@ -140,5 +158,8 @@ for testcase in testcases:
 
     print(number, "/", len(testcases), testcase["id"], answer)
 
-# metrics on the test split
-metrics.evaluate(RESULTS_FILE)
+# metrics on the test split (on the development split, if only that was checked)
+split = "test"
+if ONLY_SPLIT == "dev":
+    split = "dev"
+metrics.evaluate(RESULTS_FILE, split)

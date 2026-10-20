@@ -205,6 +205,24 @@ sind sie in externe Inhalte eingebettet. Die Sprache ist bei den slebst erstellt
 
 \subsection{Metriken}\label{subsec:metrics}
 
+Was du ergänzen solltest
+1. Konfidenzintervalle nach Wilson. Bei 20 bzw. 40 Angriffen pro Transformation sind Unterschiede ohne Intervall kaum zu beurteilen. Die Methode stammt von Wilson (1927), Journal of the American Statistical Association. Im Kapitel genügt ein Satz.
+
+2. Anzahl der Anfragen pro Text. Das ist keine Standardmetrik, aber „Kosten“ ist eines deiner Auswahlkriterien in 5.2. Variante 2, 4 und 5 unterscheiden sich gerade darin (2 bis 5 Anfragen). Ohne diese Angabe lässt sich das Kriterium nicht belegen. Sie lässt sich aus den gespeicherten Ergebnissen zählen.
+
+Was du weglassen kannst
+Accuracy ist bei deinen Daten irreführend, weil die Klassen ungleich verteilt sind. Bei BIPIA-test + NotInject stehen 200 Angriffe 489 harmlosen Texten gegenüber. Ein Guard, der nie anschlägt, käme dort schon auf 71 % Accuracy. Das kannst du im Kapitel so begründen und Accuracy streichen. Recall, FPR und F1 beschreiben dasselbe aussagekräftiger.
+
+ROC-AUC lässt sich nur mit Wahrscheinlichkeiten berechnen. Deine Ansätze liefern JA/NEIN, bei Variante 5 gibt es gar keinen Score. Da es nicht im Kapitel steht, einfach weglassen.
+
+Zum Unterschied zwischen Analyse und Metrik
+Recall pro Transformation, pro Aufgabe (E-Mail/Tabelle/Code) und pro Position (Anfang/Mitte/Ende) sowie FPR pro Art der harmlosen Anfrage sind keine neuen Metriken, sondern dieselben Metriken auf Teilgruppen. Sie müssen nicht im Metrikkapitel stehen, wohl aber im Ergebnisteil kurz eingeführt werden.
+
+Für den Vergleich Variante 5 gegen Variante 2 verwende ich nur Recall, FPR, Precision, F1, Latenz (Median) und die Anzahl der Anfragen. Das passt zu deinem Kapitel, wenn du die Anzahl der Anfragen dort ergänzt.
+
+Der Lauf auf deinem Dev-Split läuft weiter. Ich melde mich mit den Ergebnissen.
+
+
 Da die Ergebnisse der implementierten Schutzmaßnahmen auf ihre wirksamkeit überprüft werden soll wurden mehrere Metriken verwendet, um einen Vergleich zu bekommen.
 Zu den Metriken gehören True Positive, False Positive, False Negative, True Negtive, Accuracy, Precision, Recall, F1, False Positive Rate und Latenz. Im folgenden 
 wird zu den einzelnen Metriekn geklärt, was gemessen wird um im welchen Bezug sie verwendet werden sollen. Bei den Datensätzen BIPIA und NotInject werden in den 
@@ -271,11 +289,11 @@ Erkennungsleistung des Modells zu erlangen. \\
 Die Implementierung erfolgte in Python zusammen mit dem Modell Mistral Small 4. Der vollständige Quellcode befindet sich im Anhang. In der folgenden Grafik
 ist der Ablauf grafisch dargestellt: \\
 
-% \begin{figure}[h]
-% \centering
-% \includegraphics[width=0.7\textwidth]{figs/05/ansatz_idee}
-% \caption{Konzept}
-% \end{figure}
+\begin{figure}[h]
+\centering
+\resizebox{0.85\textwidth}{!}{\input{figs/05/ablauf_originalansatz}}
+\caption{Ablauf des Originalansatzes}\label{fig:ablauf_original}
+\end{figure}
 
 Als Eingabe werden die Nutzeranfragen aus dem in Abschnitten~\ref{subsec:datensatz} und~\ref{subsec:externerdatensatz} beschriebenen Datensätzen verwendet. Es wird mit 
 jeder Anfrage zuerst der Prompt als 
