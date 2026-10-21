@@ -223,6 +223,34 @@ Ich möchte an dieser Stelle Stefan Schildbach für die gute Vorlage danken, die
 
 %%% Anhang
 % \appendix
+
+% \chapter{Einrichtung der lokalen Umgebung}\label{ch:anhang_setup}
+
+% \begin{tabularx}{\textwidth}{l X}
+% \toprule
+% \textbf{Befehl} & \textbf{Zweck} \\
+% \midrule
+% \multicolumn{2}{l}{\textit{Backend}} \\
+% \texttt{python -m venv .venv} & Virtuelle Umgebung anlegen \\
+% \texttt{source .venv/bin/activate} & Umgebung aktivieren \\
+% \texttt{pip install -r requirements.txt} & Abhängigkeiten installieren \\
+% \texttt{gcloud auth login} & Nutzer bei GCP anmelden \\
+% \texttt{gcloud auth application-default login} & Application Default Credentials anlegen \\
+% \texttt{gcloud auth print-access-token} & Token für \texttt{QDRANT\_LOCAL\_TOKEN} in \texttt{.env} \\
+% \texttt{gcloud config set project \textless id\textgreater} & Aktives Projekt setzen \\
+% \texttt{gcloud auth application-default set-quota-project \textless id\textgreater} & Projekt für Quoten und Kosten \\
+% \texttt{python main.py} & Backend starten \\
+% \midrule
+% \multicolumn{2}{l}{\textit{Frontend}} \\
+% \texttt{unset HTTP\_PROXY HTTPS\_PROXY ALL\_PROXY} & Proxy-Variablen entfernen \\
+% \texttt{sudo mv Zscaler-Root-CA.crt /usr/local/share/ca-certificates/} & Zscaler-Zertifikat hinterlegen \\
+% \texttt{sudo update-ca-certificates} & Zertifikatsspeicher aktualisieren \\
+% \texttt{npm install} & Abhängigkeiten installieren \\
+% \texttt{npm run dev} & Frontend starten \\
+% \bottomrule
+% \end{tabularx}
+
+
 % % Anhang A: Änderungen am Chatbot (Kapitel 4)
 % \input{appendix/server.js.tex}
 

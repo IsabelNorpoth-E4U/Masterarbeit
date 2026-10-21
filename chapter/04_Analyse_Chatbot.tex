@@ -1,8 +1,11 @@
 \chapter{Analyse der Verwundbarkeit eines internen Chatbots}\label{ch:methodik}
 
 In diesem Kapitel wird die Vorarbeit für den praktischen Teil dieser Arbeit beschrieben. Zunächst wird die Testumgebung eingerichtet, um anschließend deren 
-Sicherheitsschwachstellen systematisch festzustellen. Damit wird der Grundstein für die spätere Analyse gelegt, mit der herausgefunden werden soll,
- wie sich diese Schwachstellen verhindern lassen.
+Sicherheitsschwachstellen systematisch festzustellen. Die Schwachstellen werden mit ausgewählten Angriffen erfasst. Damit wird der Grundstein für die spätere Analyse gelegt, 
+mit der herausgefunden werden soll, wie sich diese Schwachstellen verhindern lassen. Dafür wird zuerst das untersuchte System, der Chatbot beschrieben, die lokale
+Implementierung beschrieben und der Aufbau der Testumgebung näher erläutert. Auf dieser Grundlage wird anschließend die Durchführung der Angriffe beschrieben und 
+die Ergebnisse zusammengefasst, aus welchen sich abschließend Schwachstellen ableiten lassen. Mit diesen Ergebnissen ist die Grundlage für~\ref{ch:schutzmassnahmen}
+definiert.
 
 \section{Beschreibung des untersuchten Systems}\label{system}
 
@@ -51,117 +54,95 @@ die internen Dokumente haben. Den Kunden soll dadurch ein erster Eindruck ermög
 Somit liegt der wesentliche Unterschied zwischen den beiden Instanzen im Datenbestand. Die interne \gls{qdrant}-Instanz enthält sowohl die interne als auch
 die öffentliche Sammlung, wogegen die externe Instanz nur die öffentliche Sammlung beinhaltet. \\
 
-
-
 \section{Untersuchungsziel und Vorgehensweise}\label{sec:untersuchungsziel}
 
 Wie im Kapitel~\ref{system} erläutert, greift der Chatbot auf externe Daten zu. Durch einen solchen Zugriff entsteht die in Kapitel~\ref{ch:promptinjection} 
-beschriebene
-Angriffsfläche, womit indirekte Prompt-Injection-Angriffe möglich werden. In diesem Kapitel soll untersucht werden, in welchem Maße der Chatbot durch solche Angriffe
-manipuliert werden kann. Dafür wurden die in Kapitel~\ref{ch:promptinjection} vorgestellten Angriffe ausgewählt. \\
+beschriebene Angriffsfläche, womit indirekte Prompt-Injection-Angriffe möglich werden. In diesem Kapitel soll untersucht werden, in welchem Maße der Chatbot durch solche 
+Angriffe manipuliert werden kann und damit die Teilforschungsfrage \glqq Welche Schwachstellen weist der Chatbot in Bezug auf indirekte Prompt-Injection-Angriffe auf?\grqq beantwortet
+werden. \\
+Dafür wurden die in Kapitel~\ref{ch:promptinjection} vorgestellten indirekte Prompt-Injection-Angriffe ausgewählt. \\
 Es wird eine Testumgebung aufgebaut, in der die Angriffe durchgeführt werden. Die Testumgebung besteht aus einer lokalen Instanz des Chatbots,
 die um die Funktionalität des  $\glqq$Tool Callings$\grqq$ erweitert wird. Dadurch kann der Chatbot nicht nur auf externe Daten zugreifen, sondern auch
-Aktionen auf Webseiten durchführen. Für die Angriffe wurde einheitlich ein Szenario gewählt, in dem versucht wird, sensible Informationen,
+Aktionen auf Webseiten durchführen. Es wurden sieben Angriffsarten ausgwählt, für die ein Szenario gewählt wurde, in dem versucht wird, sensible Informationen,
 genauer den Chatverlauf des Nutzers, ohne dessen Wissen an ein externes Ziel zu übermitteln. Als externes Ziel dient eine Webseite,
 die ebenfalls lokal gehostet wird. \\
+Als Modell für die Testumgebung wurde das Modell Mistral Large 4 ausgewählt mit einer Temperatur von 0.7. \\
 Es soll die Frage geklärt werden, welche Schwachstellen im System durch diese Angriffe festgestellt werden können. \\
 Die identifizierten Schwachstellen sollen anschließend als Grundlage für die Auswahl und Implementierung geeigneter Schutzmaßnahmen dienen.
 
-\section{Einrichtung der Umgebung}\label{sec:einrichtung}
+\section{Aufbau der Testumgebung}\label{sec:einrichtung}
 
-\subsection{Installation/Implementierung des Repository}
+\subsection{Lokale Inbetriebnahme}
 
-Für die Implementierung des Chatbots wurde das folgende Repository geklont:
-
-\begin{lstlisting}
-    https://github.com/DE-E4U-AI/ChatBot4U.git
-\end{lstlisting}
-
-Anschließend wurde mit dem Befehl \texttt{cd Chatbot4U} in das entsprechende Verzeichnis gewechselt. Wie bereits in \ref{system} beschrieben, besteht der Chatbot
-aus einem Frontend- und einem Backend-Teil, die getrennt gestartet werden müssen, weshalb zwei Terminals benötigt werden, um den Chatbot zum Laufen zu bringen.
-Das Backend kann sowohl lokal als auch in der Cloud deployt werden; für diese Arbeit wurde die Umgebung lokal gestartet. \\
-Zunächst wurde das Backend gestartet. Dafür wurde zuerst mit dem Befehl \texttt{cd backend\_cloud/} in das entsprechende Verzeichnis gewechselt. Das Verzeichnis trägt zwar
-den Namen \texttt{backend\_cloud}, wird jedoch identisch für das lokale Deployment verwendet. Im nächsten Schritt wurde mit \texttt{python -m venv .venv} eine virtuelle
-Umgebung erstellt und anschließend mit \texttt{source .venv/bin/activate} aktiviert. \\
-Bei einer virtuellen Umgebung handelt es sich um einen von der Basisumgebung getrennten Bereich, der dazu dient, spezifische Softwarebibliotheken zu verwenden, 
-die nur für ein Projekt benötigt werden. Sie können nicht aus dem erstellten Projekt verschoben werden und können, wenn sie nicht mehr benötigt werden, gelöscht werden~\cite{an1}. \\
-Nach der Aktivierung der Umgebung wurden die notwendigen Pakete mit \texttt{pip install -r requirements.txt} installiert. Mit diesem Befehl werden die in der Datei
-\verb|requirements.txt| definierten Softwarepakete installiert~\cite{an2}. Diese Funktion wird von dem Package Installer PIP 
-bereitgestellt~\cite{an3}.
-Da die Umgebung auf der Google Cloud läuft, ist es notwendig, das lokale Gerät mit dem Projekt zu verbinden. Dafür sind fünf Schritte erforderlich:
-
-\begin{enumerate}
-    \item \texttt{gcloud auth login}: Dieser Befehl authentifiziert das lokale Gerät als Benutzer, damit auf Google-Cloud-Ressourcen zugegriffen werden kann~\cite{an4}.
-    \item \texttt{auth application-default login}: Dieser Befehl ist speziell für den eigenen Code. Er holt Anmeldeinformationen und speichert sie lokal in einer Standarddatei. Wird lokal ein Skript geschrieben, das auf Google-Cloud-APIs zugreift, sucht die Google-Cloud-Client-Library automatisch nach dieser Datei (Application Default Credentials)~\cite{an5}.
-    \item \texttt{gcloud auth print-access-token}: Dieser Befehl zeigt das temporäre Zugriffs-Token (Access Token) an. Dieses muss in der Environment-Datei (\texttt{.venv}) als \texttt{QDRANT\_LOCAL\_TOKEN} hinterlegt werden~\cite{an6}.
-    \item \texttt{gcloud config set project ai-tools-436214}: Damit wird das aktive Standardprojekt für die gcloud-Kommandozeile gesetzt. Alle weiteren gcloud-Befehle beziehen sich anschließend automatisch auf dieses Google-Cloud-Projekt~\cite{an7}.
-    \item \texttt{gcloud auth application-default set-quota-project ai-tools-436214}: Dieser Befehl legt fest, welches Projekt für Quoten und die Kosten verwendet wird. Mit diesem Projekt werden die anfallenden Kosten verwaltet und welche Ressourcen verwendet werden dürfen~\cite{an8}.
-\end{enumerate}
-
-Nach erfolgreicher Authentifizierung kann das Backend mit \texttt{main.py} gestartet werden. \\
-Nachdem mit dem Befehl \texttt{cd ../frontend} in das Frontend-Verzeichnis gewechselt wurde, wurden mit dem Befehl \texttt{unset} mehrere Umgebungsvariablen für den Internetverkehr
-gelöscht, die andernfalls zu Fehlern führen könnten. Dieser Schritt ist notwendig, da Proxys, Vermittler zwischen einem internen Servernetzwerk und dem Internet~\cite{an9}, häufig Störungen verursachen, wenn sich die Google Cloud mit Google-Servern 
-verbindet. Firmenproxys brechen teilweise die \acsp{ssl}-Verschlüsselung auf, was zu Zertifikatsfehlern führt oder den gesamten Verkehr stört. Mit den folgenden Befehlen werden
-die entsprechenden Variablen temporär für das aktuelle Terminal-Fenster bzw. die aktuelle Sitzung gelöscht:
-
-\begin{enumerate}
-    \item \texttt{HTTP\_PROXY}: Umgebungsvariable für den unverschlüsselten Web-Verkehr
-    \item \texttt{HTTPS\_PROXY}: Umgebungsvariable für den verschlüsselten Web-Verkehr
-    \item \texttt{ALL\_PROXY}: Eine Alternativmöglichkeit für alle anderen Protokolle
-\end{enumerate}
-
-Auch beim Frontend ist eine Anmeldung bei der Google Cloud erforderlich. Mit \texttt{gcloud auth login} wird der Nutzer bei der Google Cloud angemeldet, anschließend werden
-mit \texttt{gcloud auth application-default login} die Anmeldedaten geholt und lokal gespeichert, identisch wie beim Backend. Danach wird das Softwareregister NPM installiert,
-welches dazu dient, Softwarepakete zu teilen und zu verwenden~\cite{an10}, (\texttt{sudo apt install npm}). \\
-Das Zertifikat der Firewall Zscaler wurde an einen anderen Ort verschoben:
-\texttt{sudo mv Zscaler-Root-CA.crt /usr/local/share/\allowbreak ca-certificates/}. \\
-Das Zertifikat wird verschoben, da bei \ac{https}-Verkehr der Zscaler das originale Server-Zertifikat gegen ein Zscaler-Root-Zertifikat austauscht. Dadurch entsteht ein
-\ac{ssl}-Fehler, da das System dem neuen Zertifikat nicht vertraut. Wenn das Zertifikat in den System‑Zertifikatsspeicher verschoben wird, verhindert dies weitere Fehler~\cite{an11}. \\
-Anschließend werden die Zertifikate mit \texttt{sudo update-ca-certificates} aktualisiert und dann wird mit \texttt{cd -} in das Frontend-Verzeichnis zurückgewechselt. Dort werden mit
-\texttt{npm install} die im Projektverzeichnis definierten Abhängigkeiten und Pakete installiert~\cite{an12} und das Projekt mit \texttt{npm run dev} gestartet. \\
-Nach diesen Schritten kann lokal über die URL \url{http://localhost:5173/} auf den Chatbot zugegriffen werden. Er sieht wie folgt aus:
-
+Für die Implementierung des Chatbots wurde das folgende Repository geklont: \texttt{https://github.com/DE-E4U-AI/ChatBot4U.git}. Wie bereits in \ref{system} beschrieben, 
+besteht der Chatbot aus einem Frontend- und einem Backend-Teil, die getrennt gestartet werden. \\
+Für die Testumgebung wurde ein lokales Implementierung gewählt, bei der sich das Aufsetzen des Backends unterscheidet. Bevor das Backend implementiert wurde, wurde 
+eine virtuelle Python-Umgebung. Bei einer virtuellen Umgebung handelt es sich um einen von der Basisumgebung getrennten Bereich, der dazu dient, spezifische 
+Softwarebibliotheken zu verwenden, die nur für ein Projekt benötigt werden. Sie können nicht aus dem erstellten Projekt verschoben werden und können, wenn sie nicht 
+mehr benötigt werden, gelöscht werden~\cite{an1}. In dieser Umgebung werden die benötigten Abhängigkeiten installiert~\cite{an2}. Da das Backend auf der Google Cloud 
+läuft, musste sich das lokale Gerät vorab über die Google Cloud CLI authentifizieren. Dabei handelt es sich um eine Menge von Tools die dafür dienen Google Cloud
+Ressourcen zu erstellen und verwalten~\cite{an30}. Für die Authentifizierung muss ein Nutzer angemeldet werden und lokale Anmeldeinformationen auf dem Gerät abgespeichert
+werden~\cite{an4}~\cite{an6}. Zusätzlich wurde ein Zugriffstoken für \gls{qdrant} hinterlegt und ein Standardprojekt definiert, wodurch alle ausgeführten Befehle 
+automatisch auf dieses Projekt beziehen~\cite{an6}~\cite{an7}. \\
+Das Frontend basiert auf Node.js, eine OpenSource JavaScript-Laufzeitumgebung, mit der JavaScript außerhalb des Browsers ausgeführt werden kann~\cite{an31}. Es wird
+über NPM installiert und gestartet~\cite{an10}~\cite{an12}. Da die Testumgebung in der Unternehmensinfrastruktur aufgesetzt wurde, waren Anpassung bei der Firewall
+Zscaler notwendig. Das Zertifikat der Firewall wurde an einen anderen Ort verschoben, da bei \ac{https}-Verkehr der Zscaler das originale Server-Zertifikat gegen ein 
+Zscaler-Root-Zertifikat austauscht. Dadurch entsteht ein \ac{ssl}-Fehler, da das System dem neuen Zertifikat nicht vertraut. Wenn das Zertifikat in den 
+System‑Zertifikatsspeicher verschoben wird, verhindert dies weitere Fehler~\cite{an11}. Zusätzlich wurden die Proxy-Umgebungsvariablen entfernt.
+Dieser Schritt ist notwendig, da Proxys, Vermittler zwischen einem internen Servernetzwerk und dem Internet~\cite{an9}, häufig Störungen verursachen, wenn sich die 
+Google Cloud mit Google-Servern verbindet. Firmenproxys brechen teilweise die \acsp{ssl}-Verschlüsselung auf, was zu Zertifikatsfehlern führt oder den gesamten Verkehr 
+stört. \\
+Die vollständige Befehlsfolge befindet sich in Anhang~\ref{ch:anhang_setup}. \\
+Abschließend war der Chatbot lokal unter \url{http://localhost:5173/} erreichbar (Abbildung~\ref{fig:chatbot_login} und~\ref{fig:chatbot_chat}).
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.7\textwidth]{figs/04/chatbot_visual_login}
 \caption{Chatbot Login}
+\label{fig:chatbot_login}
 \end{figure}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.7\textwidth]{figs/04/chatbot_visual}
 \caption{Chatbot Chat}
+\label{fig:chatbot_chat}
 \end{figure}
 
+\subsection{Erweiterung um Tool Calling}
 
-\section{Methodik zur Durchführung der Angriffe}\label{sec:methodik_angriffe}
+Für den Aufbau der Testumgebung musst die ursprüngliche Version des Chatbots, um die Fähigkeit erweitern Aktionen außerhalb des Chats durchzuführen, Tool Calls. 
+Beispielsweise das Ausfüllen von Formularen auf Webseiten oder der Zugriff auf externe Quellen. Diese Aktionen waren notwendig, um das in 
+Abschnitt~\ref{sec:untersuchungsziel} beschriebene Angriffsszenario, die Übermittlung des Chatverlaufs an eine externe Webseite, zu ermöglichen. Dabei entscheidet 
+das \ac{llm} eigenständi, welche Tools er aufruft, um eine Nutzeranfrage auszuführen. \\
 
-\subsection{Ziel der Angriffe} ÜBERARBEITEN
+\paragrap{Änderungen am System}
 
-Die geplanten Angriffe verfolgen das Ziel, aufzuzeigen, welche Schwachstellen sich in dem System, welches in \ref{system} vorgestellt wird, identifizieren lassen.
-Die Ergebnisse dienen dann als Grundlage zur Recherche und Entwicklung geeigneter Sicherheitsmaßnahmen. Es wurden sieben aktuelle indirekte Prompt-Injection-Angriffe ausgewählt
-und lokal getestet, welche bereits in Kapitel~\ref{subsec:indirektepi} beschrieben wurden. 
-Für diesen Zweck wurde eine lokale Webseite erstellt sowie eine neue Funktion implementiert, die es dem Chatbot ermöglicht, Tool Calls auszuführen.
-Bei einem Tool Call interagiert ein \ac{llm} mit einem externen Tool oder einer \ac{api}, um seine eigene Funktionalität zu verbessern, indem zum Beispiel mehr
-Informationen gesammelt werden~\cite{an13}. 
-Dieser Funktion wurde die Fähigkeit hinzugefügt, Aktionen im Browser auf einer Webseite durchzuführen, beispielsweise das Ausfüllen eines Formulars bzw. Textfelds.
+Um das \ac{llm} um Tool Calls zu erweitern, mussten am Frontend mehrere Änderungen vorgenommen werden, genauer in den Dateien \texttt{.env}, welche die 
+Umgebungsvariablen enthält sowie die \texttt{server.js}. Am Backend waren keine Anpassungen notwendig. In der \texttt{.env} wurde der API-Schlüssel für die 
+Brave Browser Search APi hinterlegt, sowie mit \texttt{ALLOW\_LOCAL\_WEB\_ACCESS=true} dem Chatbot Zugriff auf lokale Webseiten ermöglicht. In der \texttt{server.js}
+wurde \texttt{chromium} von Playwright eingebunden, mit der ein künstlicher Browser erstellt werden kann, in welchem Browseraktionen aufgeführt werden kann~\cite{an15}.
+Als \ac{llm} für den Chatbot wurde Mistral Large 4 verwendet. 
 
-- Mit Mistral Large implementiert
+\paragrap{Bereitgestellte Tools}
+
+In der Testumgebung wurden dem \ac{llm} zwei Tools definiert, auf welche es eigenständig zugreifen kann: 
+
+\begin{enumerate}
+    \item \texttt{brave_search}: führt eine Websuche über de Brave Search \ac{api} aus und gibt die ersten fünf Treffer mit Titel, \ac{url} und Kurzbeschreibung zurück.
+    \item \texttt{browser_action}: kann mit zwei Modi verschiedene Aktionen auf einer mitgegebenen \ac{url} ausführen. Im Modus \texttt{open\_url} wird die Seite 
+    per \ac{http}-GET geladen und der Inhalt als \ac{html} zurückgegeben. Mit dem Modus \texttt{fill\_form} wird die Seite in einem Playwright-Browser geöffnet, beliebig 
+    viele Felder befüllt und das Formular abgeschickt, außer es wird vom \ac{llm} untersagt.
+\end{enumerate}
+
+Zusätzlich erhält das \ac{llm} einen Systemprompt, mit dem festgelegt wird, wann welche Tools verwendet werden sollen. Mt einem weiteren Hinweis wird der Zugriff
+auf lokale Adressen erlaubt.
+
+\paragrap{Ablauf einer Anfrage}
+
+Abbildung~\ref{fig:ablauf-mistral} zeigt den Ablauf einer Anfrage. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-\subsection{Implementierung der Tool Calls/Browser Action}
-
-Für die Implementierung eines Tool Calls wurde eine Verbindung zum Brave Browser hergestellt~\cite{an14}. Der dafür hinzugefügte und geänderte Code wird in diesem Abschnitt
-näher erläutert. Neben den neu erstellten Funktionen waren dafür auch Änderungen am bereits bestehenden Code notwendig. Diese betrafen zwei Dateien im Frontend,
-die \texttt{.env}, welche die Umgebungsvariablen enthält sowie die \texttt{server.js}. Am Backend waren keine Anpassungen notwendig. \\
-In der Datei \texttt{.env} wurden die Änderung vorgenommen, dass dem Chatbot der Zugriff auf lokale Webseiten ermöglicht wird. Dies wurde über \texttt{ALLOW\_LOCAL\_WEB\_ACCESS=true}
-umgesetzt. Zusätzlich wurde API-Schlüssel für den Brave Browser hinterlegt, über den die Verbindung zum Browser aufgebaut wird: \texttt{BRAVE\_SEARCH\_API\_KEY}. \\
-In der Datei \texttt{server.js} wurden mehrere Änderungen vorgenommen. Zunächst wurde die Bibliothek \texttt{chromium} von Playwright eingebunden. Diese Bibliothek dient
-dazu, einen künstlichen Browser zu erstellen und mit diesem Browser Aktionen, die über einfache Informationssammlung hinausgehen, zu erfüllen~\cite{an15}.
-Darüber hinaus wurden die Funktionen \texttt{braveSearch}, \texttt{auditUrl}, \texttt{browserAction}, \texttt{withNetworkRetry}, \texttt{postWithRetry}, 
-\texttt{callMistralAI} und \texttt{extractMistralContentText} hinzugefügt oder überarbeitet. Im Folgenden werden die einzelnen Funktionen näher erläutert. Der vollständige
-Code befindet sich in Anhang~\ref{ch:anhang_server}.
 
 \texttt{braveSearch}
 
@@ -212,13 +193,6 @@ Andernfalls wird ein neuer Versuch gestartet, dem jeweils eine dynamische Wartez
 Die Verwendung von exponentiell steigenden Wartezeiten ist Teil des Backoff Algorithmus, der das Ziel verfolgt Kollisionen zu verhindern und Netzwerk Performance zu
 optimieren~\cite{an16}.
 
-\texttt{postWithRetry}
-
-Diese Funktion dient dazu, Daten an eine Webadresse zu senden und den Versand bei einem Fehlschlag automatisch zu wiederholen. Als Eingabewerte dienen unter anderem 
-die \ac{url}, die zu sendenden Daten, zusätzlich Versandeinstellungen wie ein \ac{http}-Header sowie die Anzahl der Wiederholungsversuche, deren Standardwert bei zwei 
-liegt. Die eigentliche Anfrage wird in einer Arrow-Function gekapselt und an die Funktion \texttt{withNetworkRetry} übergeben, die daraufhin den entsprechenden 
-\texttt{axios.post}-Aufruf ausführt.
-
 \texttt{callMistralAI}
 
 Diese Funktion bildet den Kernpunkt der Kommunikation zwischen dem System und Mistral Large. Hier werden die verfügbaren Tools definiert, zwischen denen das \ac{llm}
@@ -265,11 +239,7 @@ Im letzten Schritt werden diese Strings zusammengefügt.
 
 Den Ausgangspunkt bildet die Funktion \texttt{callMistralAI}. Diese Funktion steuert den gesamten Ablauf und ist die einzige, die direkt mit dem Sprachmodell kommuniziert. Sie
 ergänzt die Nachrichten des Nutzers um einen System-Prompt sowie die Beschreibung der beiden verfügbaren Werkzeuge, der Websuche und der Browsersteuerung und steuert die 
-Anfrage an die Mistral-API. Das Versenden übernimmt sie jedoch nicht selbst, sondern überlässt das der Funktion \texttt{postWithRetry}. Diese Funktion kapselt lediglich 
-den \ac{http}-Aufruf und übergibt ihn an \texttt{withNetworkRetry}, in der die eigentliche Wiederholungslogik liegt: Tritt ein vorübergehender Netzwerkfehler auf, etwa ein
-Verbindungsabbruch oder eine Zeitüberschreitung, wird der Aufruf bis zu zweimal mit ansteigender Wartezeit wiederholt. Erst wenn auch diese Versuche scheitern, wird der 
-Fehler an \texttt{callMistralAI} weitergegeben. Die Trennung in zwei Funktionen hat den Vorteil, dass \texttt{withNetworkRetry} unabhängig von der Mistral-API ist und daher
-auch an anderen Stellen eingesetzt werden kann. \\
+Anfrage an die Mistral-API. \\
 Anhand der Antwort des Modells entscheidet \texttt{callMistralAI}, was der nächste Schritt ist. Enthält sie bereit einen Antworttext, war kein Werkzeug erforderlich und die 
 Verarbeitung kann abgeschlossen werden. Fordert das Modell dagegen ein Werkzeug an, liest \texttt{callMistralAI} den Funktionsnamen und die übergegebenen Argumente aus und ruft
 die entsprechende Funktion auf. Für eine Websuche ist dies \texttt{braveSearch}. Diese Funktion übermittelt die vom Modell formulierte Suchanfrage an die Brave Search API und greift dabei
