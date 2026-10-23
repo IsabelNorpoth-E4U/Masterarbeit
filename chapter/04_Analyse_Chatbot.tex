@@ -116,7 +116,7 @@ Beispielsweise das Ausfüllen von Formularen auf Webseiten oder der Zugriff auf 
 Abschnitt~\ref{sec:untersuchungsziel} beschriebene Angriffsszenario, die Übermittlung des Chatverlaufs an eine externe Webseite, zu ermöglichen. Dabei entscheidet 
 das \ac{llm} eigenständi, welche Tools er aufruft, um eine Nutzeranfrage auszuführen. \\
 
-\paragrap{Änderungen am System}
+\paragraph{Änderungen am System}
 
 Um das \ac{llm} um Tool Calls zu erweitern, mussten am Frontend mehrere Änderungen vorgenommen werden, genauer in den Dateien \texttt{.env}, welche die 
 Umgebungsvariablen enthält sowie die \texttt{server.js}. Am Backend waren keine Anpassungen notwendig. In der \texttt{.env} wurde der API-Schlüssel für die 
@@ -124,13 +124,13 @@ Brave Browser Search APi hinterlegt, sowie mit \texttt{ALLOW\_LOCAL\_WEB\_ACCESS
 wurde \texttt{chromium} von Playwright eingebunden, mit der ein künstlicher Browser erstellt werden kann, in welchem Browseraktionen aufgeführt werden kann~\cite{an15}.
 Als \ac{llm} für den Chatbot wurde Mistral Large 4 verwendet. 
 
-\paragrap{Bereitgestellte Tools}
+\paragraph{Bereitgestellte Tools}
 
 In der Testumgebung wurden dem \ac{llm} zwei Tools definiert, auf welche es eigenständig zugreifen kann: 
 
 \begin{enumerate}
-    \item \texttt{brave_search}: führt eine Websuche über de Brave Search \ac{api} aus und gibt die ersten fünf Treffer mit Titel, \ac{url} und Kurzbeschreibung zurück.
-    \item \texttt{browser_action}: kann mit zwei Modi verschiedene Aktionen auf einer mitgegebenen \ac{url} ausführen. Im Modus \texttt{open\_url} wird die Seite 
+    \item \texttt{brave\_search}: führt eine Websuche über de Brave Search \ac{api} aus und gibt die ersten fünf Treffer mit Titel, \ac{url} und Kurzbeschreibung zurück.
+    \item \texttt{browser\_action}: kann mit zwei Modi verschiedene Aktionen auf einer mitgegebenen \ac{url} ausführen. Im Modus \texttt{open\_url} wird die Seite 
     per \ac{http}-GET geladen und der Inhalt als \ac{html} zurückgegeben. Mit dem Modus \texttt{fill\_form} wird die Seite in einem Playwright-Browser geöffnet, beliebig 
     viele Felder befüllt und das Formular abgeschickt, außer es wird vom \ac{llm} untersagt.
 \end{enumerate}
@@ -138,7 +138,7 @@ In der Testumgebung wurden dem \ac{llm} zwei Tools definiert, auf welche es eige
 Zusätzlich erhält das \ac{llm} einen Systemprompt, mit dem festgelegt wird, wann welche Tools verwendet werden sollen. Mt einem weiteren Hinweis wird der Zugriff
 auf lokale Adressen erlaubt.
 
-\paragrap{Ablauf einer Anfrage}
+\paragraph{Ablauf einer Anfrage}
 
 Abbildung~\ref{fig:ablauf-mistral} zeigt den Ablauf einer Anfrage. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -262,7 +262,7 @@ an den Chat-Endpunkt zurück.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.7\textwidth]{ablauf_callMistralAI.pdf}
+\includegraphics[width=0.7\textwidth]{figs/05/ablauf_callMistralAI.pdf}
 \caption{Ablauf der Anfrageverarbeitung in \texttt{callMistralAI}}
 \label{fig:ablauf-mistral}
 \end{figure}

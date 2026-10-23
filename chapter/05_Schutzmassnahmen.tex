@@ -5,6 +5,23 @@ in diesem Kapitel bekannte Schutzmaßnahmen gesammelt und Kategorien eingeordnet
 Maßnahme zu wählen, welche am passendesten ist für den Anwendungsfall dieser Arbeit. Diese Maßnahme wird anschließend implementiert. Da das Ziel dieser Arbeit die
 Entwicklung eines neun Ansatzes ist, wird die ausgewählte Maßnahme weiterentwickelt und die Leistung beider Varianten verglichen.
 
+\section{Klassifikation bestehender Schutzmaßnahmen}\label{sec:klassifikation_schutzmassnahmen}
+
+Mit der zunehmenden Verbreitung von \acp{llm} wurde in den vergangenen Jahren eine Vielzahl von Schutzmaßnahmen vorgeschlagen und umgesetzt. In der Literatur finden sich
+verschiedene Ansätze, diese Maßnahmen zu systematisieren, wobei sich die verwendeten Kategorien je nach Quelle deutlich unterscheiden. Im Folgenden werden die
+Einteilungen der betrachteten Quellen daher zu einer gemeinsamen Klassifikation zusammengeführt, die vier Kategorien umfasst:
+
+\begin{enumerate}
+    \item eingabeseitige Maßnahmen,
+    \item ausgabeseitige Maßnahmen,
+    \item systemseitige Maßnahmen und
+    \item modellseitige Maßnahmen.
+\end{enumerate}
+
+Darüber hinaus lassen sich übergeordnete Grundsätze formulieren, die keiner einzelnen Kategorie zugeordnet sind. Hierzu zählt zunächst die Wahl eines möglichst robusten
+Modells, das in einer aktuellen Version vorliegt und auf den jeweiligen Einsatzbereich abgestimmt ist. Zudem sollte die Angriffsfläche bereits durch die Gestaltung des
+Systems so weit wie möglich reduziert werden, damit zusätzliche Schutzmaßnahmen nicht in übermäßigem Umfang erforderlich sind~\cite{sm04}.
+
 \subsection{Eingabeseitige Maßnahmen}
 
 Der Großteil der bisher entwickelten Schutzmaßnahmen setzt auf der Eingabeseite an. Dies ist vor allem darauf zurückzuführen, dass sich solche Maßnahmen vergleichsweise
@@ -317,11 +334,11 @@ gemessen werden.  \\
 Die Implementierung erfolgte in Python mit dem Modell Mistral Small~4. Der vollständige Quellcode befindet sich im Anhang. Abbildung~\ref{fig:ablauf_original} zeigt
 den vollständigen Ablauf. 
 
-\begin{figure}[h]
-\centering
-\resizebox{0.85\textwidth}{!}{\input{figs/05/ablauf_originalansatz}}
-\caption{Ablauf des Originalansatzes}\label{fig:ablauf_original}
-\end{figure}
+% \begin{figure}[h]
+% \centering
+% \resizebox{0.85\textwidth}{!}{\input{figs/05/ablauf_original}}
+% \caption{Ablauf des Originalansatzes}\label{fig:ablauf_original}
+% \end{figure}
 
 Als Eingabe werden die Einträge der in den Abschnitten~\ref{subsec:datensatz} und~\ref{subsec:externerdatensatz} beschriebenen verwendet. Es wird bei jeder Anfrage
 die Anweisung als Systemprompt und der Datensatzeintrag als Nutzerprompt übergeben. Dadurch werden der zu prüfende Text und die Anweisung voneinander getrennt, 
@@ -370,11 +387,11 @@ implementierte Ansatz erweitert. Als Modell wird weiterhin Mistral Small~4 mit d
 die Ergebnisse nach der Implementierung direkt vergleichbar sind. Die Abbildung~\ref{fig:ablauf_massnahme} zeigt den Ablauf und das Zusammenspiel der einzelnen 
 Funktionen. Der vollständige Code befindet sich im Anhang.
 
-% \begin{figure}[h]
-% \centering
-% \resizebox{0.85\textwidth}{\input{figs/05/ablauf_v5_1}}
-% \caption{Ablauf des Schutzmaßnahme}\label{fig:ablauf_massnahme}
-% \end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figs/05/ablauf_weiterentwicklung}
+\caption{Ablauf des Schutzmaßnahme}\label{fig:ablauf_massnahme}
+\end{figure}
 
 Die Weiterentwicklung kombiniert Prompt-Filterung, Input-Modifizierung und Prompt-Enhancement. Die Ideen stammen aus verschiedenen Arbeiten. \\
 Die Prompt-Filterung orientiert sich an den Arbeiten PIGuard und DataSentinel. Beide setzen ein vorgeschaltetes \ac{llm} ein, um Eingaben auf schädliche
