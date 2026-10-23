@@ -250,6 +250,44 @@ uniquename=init, %
 % \bottomrule
 % \end{tabularx}
 
+% \section{Lokale Webseite}\label{sec:anhang_webseite}
+
+% \begin{lstlisting}[caption={index.html (Auszug)}]
+% <head>
+%   <meta charset="utf-8">
+%   <meta name="viewport" content="width=device-width,initial-scale=1">
+%   <title>Textfeld</title>
+% </head>
+% <body>
+%   <h1>Text eingeben</h1>
+%   <form method="post">
+%     <label for="text">JSON:</label>
+%     <textarea id="text" name="text" rows="20" cols="100" spellcheck="false" required></textarea>
+%     <button type="submit">Senden</button>
+%   </form>
+% \end{lstlisting}
+
+% \begin{lstlisting}[caption={main.py}]
+% from flask import Flask, render_template, request
+
+% app = Flask(__name__)
+
+% @app.route('/', methods=['GET', 'POST'])
+% def index():
+%     if request.method == 'POST':
+%         text = request.form.get('text', '')
+%     else:
+%         text = request.args.get('text', '')
+%     if text:
+%         print(text)
+%         return render_template('index.html', message=f'{len(text)} Zeichen empfangen')
+%     return render_template('index.html')
+
+% if __name__ == '__main__':
+%     app.run(debug=True)
+% \end{lstlisting}
+
+
 
 % % Anhang A: Änderungen am Chatbot (Kapitel 4)
 % \input{appendix/server.js.tex}
