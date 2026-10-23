@@ -24,6 +24,15 @@ Die Architektur setzt sich aus sieben Komponenten zusammen: \\
     \item \textbf{\gls{cicd}:} Automatisiert Builds und Deployments der gesamten Infrastruktur
 \end{enumerate}
 
+
+Frontend: Stellt die Chat-Oberfläche bereit und nimmt die Nutzereingaben entgegen. Die Authentifizierung der Nutzer erfolgt über Firebase Authentication. Im Energy-Bot-Modus leitet das Frontend Anfragen an das Backend weiter, im Normal-Modus kommuniziert der Frontend-Server direkt mit dem LLM-Provider.
+Backend: Verarbeitet die RAG-Anfragen und steuert den Datei-Upload sowie die Entgegennahme von Nutzer-Feedback.
+Vektordatenbank (Qdrant): Speichert die Embeddings zusammen mit einem Payload (Chunk-Text und Metadaten) und führt die Similarity Search aus.
+Object Storage: Legt die Originaldokumente (z. B. PDFs und Markdown-Dateien) ab. Über Verlinkungen in den Quellenangaben können Nutzer das Dokument direkt aus dem Chat im Browser öffnen, und zwar an der passenden Seite.
+Nutzerdatenbank (Firestore): Speichert Nutzer-Metadaten und die Chatverläufe pro Nutzer verschlüsselt, erfasst Nutzungsstatistiken und speichert das Nutzer-Feedback.
+Embedding-Pipeline: Wandelt die Dokumente je nach Dateityp in ein einheitliches Format um, zerlegt sie in Chunks, wandelt jeden Chunk mit dem Azure-Embedding-Modell in einen Vektor um und speichert diesen zusammen mit dem Payload in der Vektordatenbank.
+CI/CD: Automatisiert Builds und Deployments der Anwendungen.
+
 Die Datenflüsse der gesamten Architektur können in vier Bereiche geteilt werden: die Datenquellen, die Verarbeitung, die Speicherung und die
 Auslieferung. Die Datenquellen beinhalten PDF-Dokumente, Confluence-Export, Inhalte der \ac{bnetza} und Gesetzestexte von
 \url{gesetze-im-internet.de}. 
