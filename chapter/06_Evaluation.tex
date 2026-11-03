@@ -15,3 +15,25 @@ Ein kurzes Beispiel für eine Abkürzung: Ein Large Language Model (LLM) wird im
 
 
 
+Kapitel 6: Evaluation (≈ 12–14 Seiten)
+Die Gliederung beantwortet TF2–TF4 und schließt die wichtigste Grenze aus 5.6: Die Schutzmaßnahme wurde nie im echten Chatbot getestet.
+
+Abschnitt	Seiten	Inhalt
+6.1 Evaluationsaufbau	1	Was wird womit evaluiert: Testsplit der drei Datensätze, Vergleich Original vs. neuer Ansatz, Integration in die Testumgebung. Verweis auf die Metriken in 5.3.4
+6.2 Ergebnisse auf den Datensätzen	4–5	
+6.2.1 Gesamtergebnisse	1	Tabelle aus 5.5, Konfusionsmatrizen, Recall und FPR mit Wilson-Konfidenzintervallen
+6.2.2 Eigener Datensatz	1–1,5	Recall je Transformation. Welche Verschleierungen werden noch übersehen?
+6.2.3 BIPIA und NotInject	1–1,5	Recall je Aufgabe und Position. Das Positionsproblem des Originalansatzes ist gelöst, die FPR bleibt bei 13,5 %. Warum?
+6.2.4 Verschleiertes BIPIA	0,5–1	
+6.3 Fehleranalyse	2	Qualitative Auswertung: typische False Positives (Triggerwörter, Over-Defense nach Harmlosigkeitsstufe) und typische False Negatives mit 2–3 konkreten Beispielen. Welche Regel wurde wie oft ausgelöst?
+6.4 Latenz und Kosten	1–1,5	Median und Streuung der Latenz, Anzahl API-Aufrufe pro Anfrage, Kosten pro 1000 Anfragen für Original, neuen Ansatz und Prüfung durch das Hauptmodell. Damit prüfst du dein eigenes Kriterium „kostengünstig“ aus 5.2
+6.5 Wirksamkeit in der Testumgebung	3–4	Neu und das stärkste Argument der Arbeit: Schutzmaßnahme vor callMistralAI bzw. vor die Tool-Ergebnisse schalten und die Angriffe aus Kapitel 4 wiederholen, idealerweise 3–5 Durchläufe pro Variante. Tabelle wie in 4.5.2 mit Spalten „ohne Schutz“ und „mit Schutz“. Löst auch die Einschränkung „nur einmal durchgeführt“ aus Kapitel 4
+6.6 Grenzen	1,5	Aus 5.6 hierher verschieben und um die Erkenntnisse aus 6.5 ergänzen
+Falls 6.5 zeitlich nicht reicht: Füttere die Schutzmaßnahme offline mit den Payloads aus Kapitel 4 (E-Mail, Webseite, Dokument, URL). Das geht schnell und deckt zugleich die Webseiten-Lücke der öffentlichen Datensätze ab.
+
+Kapitel 7: Diskussion und Fazit (≈ 5–6 Seiten)
+Abschnitt	Seiten	Inhalt
+7.1 Beantwortung der Forschungsfragen	2–2,5	TF1–TF4 einzeln, dann die Hauptfrage
+7.2 Einordnung in die Literatur	1–1,5	Vergleich mit PIGuard, DataSentinel und SmoothLLM: Was ist besser, was schlechter, was neu?
+7.3 Handlungsempfehlungen für ChatBot4U	1	Aus den 5 Schwachstellen ableiten: Allowlist für URLs, Bestätigung durch den Nutzer vor dem Absenden, Schutzmaßnahme vorschalten
+7.4 Ausblick	1	Andere Modelle, Konfidenzwerte statt JA/NEIN, automatische Erkennung externer Inhalte, adaptive Angreifer

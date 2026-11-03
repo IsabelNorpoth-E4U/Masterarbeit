@@ -3,7 +3,7 @@
 
 \section{Problemstellung und Motivation}
 
-\acp{llm} finden in der Praxis und insbesondere in Unternehmen zunehmend Anwendung. Diese Entwicklung lässt sich in zahlreichen Statistiken der vergangenen 
+\acf{llm} finden in der Praxis und insbesondere in Unternehmen zunehmend Anwendung. Diese Entwicklung lässt sich in zahlreichen Statistiken der vergangenen 
 Jahre verfolgen. So stellt das Statistische Bundesamt fest, dass der Anteil der Unternehmen, die \ac{ki} einsetzen, im Zeitraum von 2021 bis 2025 von 
 11\,\% auf 26\,\% gestiegen ist. Dabei ist zu beachten, dass Unternehmen aller Größenklassen in diese Statistik einbezogen wurden, auch solche mit 10 bis 
 49 Beschäftigten. Bei Unternehmen mit 250 und mehr Beschäftigten stieg der Anteil im selben Zeitraum von 31\,\% auf 57\,\%~\cite{e01}. \\
@@ -11,16 +11,18 @@ Das ifo Institut verzeichnet für Mai 2026, dass 54,5\,\% der Unternehmen in Deu
 bereits diskutiert und nur 7,9\,\% geben an, dass \ac{ki} für sie keine Rolle spielt~\cite{e02}. Der deutlich höhere Anteil gegenüber den Zahlen des 
 Statistischen Bundesamtes ist auf die unterschiedliche Erhebungsmethodik zurückzuführen, insbesondere auf eine abweichende Zusammensetzung der befragten Unternehmen
 und eine weiter gefasste Definition der \ac{ki}-Nutzung. Beide Erhebungen zeigen jedoch übereinstimmend einen deutlichen Anstieg. \\
-Mit dem zunehmenden Einsatz von \acp{llm} in Unternehmen greifen diese auch vermehrt auf Dokumente zu oder werden für weiterführende Aktionen wie Internetrecherchen 
-eingesetzt. Dies spiegelt sich auch im Bericht der Organisation OWASP aus dem Jahr 2026 wider, in dem die zehn größten Risiken für \acp{llm} definiert werden. Darin wird
+Mit dem zunehmenden und immer umfangreicherem Einsatz von \acp{llm} in Unternehmen wird diesen vermehrt Zugriff auf Dokumente gewährt oder si werden für weiterführende 
+Aktionen wie Internetrecherchen eingesetzt, was immer größere Gefahren mit sich bringt.
+Dies spiegelt sich auch im Bericht der Organisation OWASP aus dem Jahr 2026 wider, in dem die zehn größten Risiken für \acp{llm} definiert werden. Darin wird
 das Risiko \enquote{Excessive Agency} auf Platz~3 eingeordnet, während es 2025 noch auf Platz~6 lag~\cite{pi24}. Dieses Risiko beschreibt die Gefahr, die 
 entsteht, wenn ein \ac{llm} auf zu viele Funktionalitäten zugreifen kann und über zu viele Berechtigungen verfügt. \\
-Es zeigt sich somit, dass \acp{llm} zunehmend Zugriff auf große Datenmengen erhalten, auf deren Grundlage sie auch Aktionen ausführen können. Diese Aktionen werden als
-Tool Calls bezeichnet. Durch Tool Calls wird es \acp{llm} ermöglicht, beliebige Funktionen auszuführen, beispielsweise auf externe Daten und Webseiten zuzugreifen 
-oder Formulare auszufüllen. Es können unbegrenzt viele dieser Funktionen hinzugefügt werden. Mit dieser Erweiterung entstehen jedoch auch Gefahren, da durch den Aufruf 
-externer Quellen und die Verarbeitung großer Datenmengen neue Angriffsflächen entstehen. Eine Ursache liegt darin, dass \acp{llm} nicht zuverlässig zwischen Anweisungen 
-und Daten unterscheiden können. Dadurch können in den verarbeiteten Daten Anweisungen enthalten sein, die das \ac{llm} anschließend ausführt. Diese Schwachstelle
-wird von Angreifern bei sogenannten Prompt-Injection-Angriffen ausgenutzt. Dabei werden Anweisungen in externen Daten platziert, auf die ein \ac{llm} zugreift.
+Es zeigt sich somit, dass \acp{llm} zunehmend Zugriff auf große Datenmengen erhalten, auf deren Grundlage sie Aktionen ausführen können. Diese Aktionen werden als
+Tool Calls bezeichnet. Durch \glqq Tool Calls\grqq wird es \acp{llm} ermöglicht, beliebige Funktionen auszuführen, beispielsweise auf externe Daten und Webseiten zuzugreifen 
+oder Formulare auszufüllen. Es können unbegrenzt viele dieser Funktionen hinzugefügt werden. \\
+Mit dieser Erweiterung entstehen jedoch auch Gefahren, da durch den Aufruf 
+externer Quellen und die Verarbeitung großer Datenmengen neue Angriffsflächen entstehen. \acp{llm} können nicht zuverlässig zwischen Anweisungen 
+und Daten unterscheiden . Dadurch können in den verarbeiteten Daten Anweisungen enthalten sein, die das \ac{llm} anschließend ausführt. Diese Schwachstelle
+wird von Angreifern bei sogenannten \glqq Prompt-Injection-Angriffen\grqq ausgenutzt. Dabei werden Anweisungen in externen Daten platziert, auf die ein \ac{llm} zugreift.
 Auf diese Weise lassen sich schädliche Aktionen auslösen, ohne dass ein direkter Zugriff auf das \ac{llm} notwendig ist~\cite{pi15}. \\
 Durch den Einsatz von Tool Calls wird dieses Risiko verstärkt. Während ein erfolgreicher Angriff ohne Tool Call lediglich eine fehlerhafte Antwort erzeugt, können
 mithilfe von Tool Calls reale Aktionen ausgeführt werden. Dadurch nimmt die Bedrohung dieser Angriffe deutlich zu. Besonders kritisch ist dies bei Chatbots, die 
@@ -29,27 +31,29 @@ Das Problem ist bereits seit mehreren Jahren bekannt, weshalb bereits zahlreiche
 Klassifikatoren, Filter oder Vorverarbeitungsschritte implementiert, um Angriffe zu erkennen, bevor sie das \ac{llm} mit Zugriff auf die Tools erreichen~\cite[4]{pi9}~\cite[9]{sm10}.
 Es gibt jedoch Belege dafür, dass diese Maßnahmen nicht ausreichend wirksam sind~\cite{sm22}. Angreifer entwickeln ihre Angriffe stetig weiter, um genau diese 
 Schutzmechanismen zu umgehen. \\
-Ein bekanntes Beispiel aus dem Jahr 2025 ist die Schwachstelle EchoLeak, welche Microsoft 365 Copilot betraf. Dabei gelang es Angreifern, mithilfe einer in einer E-Mail
+Ein bekanntes Beispiel aus dem Jahr 2025 ist die Schwachstelle \glqq EchoLeak\grqq, welche Microsoft 365 Copilot betraf. Dabei gelang es Angreifern, mithilfe einer in einer E-Mail
 versteckten Anweisung sensible Unternehmensdaten zu exfiltrieren und an einen eigenen Server zu übermitteln~\cite{e07}. Für diesen Angriff war keine Interaktion des
 Nutzers erforderlich, sondern der Angriff wurde nur durch die E-Mail ausgelöst. EchoLeak stellt damit ein praxisnahes Beispiel für eine indirekte Prompt Injection
 dar~\cite{e06}. \\
-Einige der in dieser Arbeit berücksichtigten Arbeiten behandeln nicht ausschließlich indirekte Prompt-Injection-Angriffe, sondern teilweise Jailbreaks. Der Unterschied
+Einige der berücksichtigten Arbeiten behandeln nicht ausschließlich indirekte Prompt-Injection-Angriffe, sondern auch teilweise Jailbreaks. Der Unterschied
 besteht darin, dass sich Prompt Injection gegen Anwendungen richtet, die auf einem \ac{llm} aufbauen und bei denen nicht vertrauenswürdige Anweisungen mit einem 
 vertrauenswürdigen Prompt verkettet werden. Bei einem Jailbreak wird hingegen versucht, die Sicherheitsfilter des Modells selbst zu umgehen. Das Merkmal, welches 
 ausschlaggebend für Prompt Injection ist, ist somit die Verkettung eines vertrauenswürdigen mit einem nicht vertrauenswürdigen Inhalt kombiniert in einem Prompt~\cite{e05}. \\
 Die Literatur zeigt, dass bei den bestehenden Schutzmaßnahmen noch erhebliches Verbesserungspotenzial besteht. An diesem Punkt setzt die vorliegende Arbeit an. Der 
 Fokus liegt auf indirekten Prompt-Injection-Angriffen, bei denen der Angriff über externe Quellen erfolgt, auf die das \ac{llm} zugreift, beispielsweise eine Webseite~\cite[2\psq]{pi6}.
 Ziel ist die Entwicklung einer Schutzmaßnahme, die genau diese Angriffe abwehrt und zugleich eine praxisnahe Anwendung ermöglicht und damit eine Anwendung bei verschiedenen
-Chatbots. Die Schutzmaßnahme wird zunächst anhand eines selbst erstellten Datensatzes entwickelt, dessen Angriffe aus indirekten Angriffsszenarien abgeleitet sind, zur
-Vereinfachung jedoch direkt im Nutzerprompt übergeben werden. Anschließend wird sie mit den öffentlichen Datensätzen BIPIA und NotInject überprüft. In dem Datensatz
+Chatbots. \\
+Die Schutzmaßnahme wird zunächst anhand eines selbst erstellten Datensatzes entwickelt. Die darin enthaltenen Angriffe wurden aus indirekten Angriffsszenarien abgeleitet, zur
+Vereinfachung jedoch als Nutzerprompt angegeben. Anschließend wird die Schutzmaßnahme mit den öffentlichen Datensätzen BIPIA und NotInject überprüft. In dem Datensatz
 BIPIA sind die Angriffe in externen Inhalten wie E-Mails, Tabellen oder Code positioniert. \\
 Als Anwendungsfall dient der Chatbot ChatBot4U der Energy4U GmbH, der zudem als Unternehmenslösung für die Kommunikation mit Kunden vorgesehen ist und damit ein 
 praxisnahes Anwendungsbeispiel darstellt. Im Folgenden werden die Zielsetzung, die Forschungsfragen sowie der Aufbau der Arbeit erläutert.
 
 \section{Zielsetzung}
 
-Ziel dieser Arbeit ist es zu untersuchen, inwieweit ein Chatbot, konkret der unternehmensinterne Chatbot der Energy4U GmbH, durch eine selbst entwickelte 
-Schutzmaßnahme vor indirekten Prompt-Injection-Angriffen abgesichert werden kann. Als Vorstufe wird eine Schwachstellenanalyse durchgeführt, um die Angriffsfläche 
+Ziel dieser Arbeit ist es, zu untersuchen, inwieweit ein Chatbot, konkret der unternehmensinterne Chatbot der Energy4U GmbH, durch eine selbst entwickelte 
+Schutzmaßnahme vor indirekten Prompt-Injection-Angriffen abgesichert werden kann. \\
+Als Vorstufe wird eine Schwachstellenanalyse durchgeführt, um die Angriffsfläche 
 zu identifizieren. Hierfür wird eine lokale Testumgebung aufgebaut. \\
 Auf Grundlage der identifizierten Schwachstellen wird eine geeignete Schutzmaßnahme entwickelt und implementiert. Diese wird anhand mehrerer Datensätze getestet und 
 ihre Leistungsfähigkeit mithilfe geeigneter Metriken festgehalten. \\
@@ -69,7 +73,7 @@ auch auf andere praxisrelevante Chatbots übertragbar sein.
 
 Für diese Arbeit wurde eine Hauptforschungsfrage definiert, die in mehrere Teilfragen untergliedert ist. Die Hauptfrage lautet, inwieweit ein unternehmensinterner 
 Chatbot mit implementiertem Tool Calling gegen indirekte Prompt-Injection-Angriffe abgesichert werden kann. Der unternehmensinterne Chatbot ist dabei das Testsystem.
-Die Beantwortung der Frage soll allgemein gemacht werden. Zur Beantwortung der Hauptfrage wurden mehrere Teilfragen formuliert. Zunächst soll geklärt werden, welche 
+Die Beantwortung der Frage soll allgemein erfolgen. Zur Beantwortung der Hauptfrage wurden mehrere Teilfragen formuliert. Zunächst soll geklärt werden, welche 
 Schwachstellen der Chatbot in Bezug auf indirekte Prompt-Injection-Angriffe aufweist. Während der Implementierung der Schutzmaßnahme wird untersucht, wie zuverlässig
 ein vorgeschaltetes \ac{llm} Prompt-Injection-Angriffe abwehrt. Auf diesen Ergebnissen aufbauend soll geprüft werden, ob sich die Erkennung verbessert, wenn die 
 Schutzmaßnahme in Kombination mit dem vorgeschalteten Modell um Rekonstruktionsmaßnahmen und eine Segmentierung der Daten erweitert wird. Abschließend wird untersucht,
