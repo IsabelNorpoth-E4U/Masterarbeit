@@ -436,24 +436,81 @@ Beide Versuche waren erfolgreich, ohne dass der Chatbot eine Warnung ausgab. All
 
 \section{Schwachstellen der untersuchten Umgebung}\label{sec:schwachstellen_umgebung}
 
-Aus den Ergebnissen lassen sich folgende Schwachstellen festhalten:
+Bei der Auswertung der Ergebnisse wird deutlich, dass eine Kombination von Ursachen die Angriffsfläche ermöglichen. Verschiedene Eigenschaften des Modell und der 
+Testumgebung tragen dazu bei. Im Folgenden wird aus mithilfe dieser erfassten Eigenschaften allgemeine Schwachstellen definiert und mit Beobachtungen aus den
+Angriffsdurchführungen kombiniert. Zusätzlich erfolgt eine Einordnung in die in Abschnitt~\ref{subsec:sicherheitsbedrohungen} definierten Sicherheitsbedrohungen.
+Bei der Erfassung wird eine Abgrenzung zwischen Schwachstellen des Modells und Schwachstellen der Systemarchitektur gemacht.
 
-\begin{enumerate}
-    \item \textbf{Fehlende Trennung von Anweisungen und Daten:} Das Modell unterscheidet nicht zwischen Anweisungen des Nutzers und zu verarbeitenden Inhalten wie
-    E-Mails oder Webseiten. Anweisungen werden in diesen Inhalten wie Nutzeranweisungen behandelt.
-    \item \textbf{Übermäßige Funktionalitäten:} Der Chatbot kann beliebige \ac{url}s aufrufen und Inhalte auf Webseiten einfügen.
-    \item \textbf{Fehlende Kontrolle des Datenabflusses:} Der Chatbot kann den vollständigen Chatverlauf ohne Einschränkung an externe Ziele weitergeben. Es findet keine Prüfung statt, welche Daten das System verlassen dürfen.
-    \item \textbf{Keine Vorverarbeitung externer Inhalte:} Für Menschen unsichtbare Elemente in externen Inhalten werden weder entfernt noch markiert.
-    \item \textbf{Eingeschränkte Nachvollziehbarkeit:} Je nach Anweisung bleibt eine Datenübermittlung in der Antwort an den Nutzer unerwähnt.
-\end{enumerate}
+\subsection{Fehlende Trennung von Anweisungen und Daten}
 
-Es kann jedoch gleichzeitig ein Schutz des \ac{llm} festgestellt werden. Kodierte Anweisungen und versteckter Text in Bildern wurden erkannt und dem Nutzer gemeldet.
-Ob sich dieser Schutz durch geeignete Formulierungen umgehen lässt, wurde nicht untersucht.
+Das \ac{llm} unterscheidet nicht zwischen Anweisungen de Nutzers und zu verarbeitenden Inhalten. Anweisungen, die in E-Mails, Webseiten oder Dokumenten enthalten sind
+werden wie Nutzeranweisungen behandelt und ausgeführt. Dies wurde in mehreren Angriffen deutlich, vor allem bei der E-Mail Injection und Website Injection, die in 
+allen Versuchen erfolgreich waren. \\
+Durch den Aufbau der Testumgebung wurde die Schwachstelle zusätlich unterstützt, da alle Ergebnisse eines Tool Calls mit der Bezeichnung \texttt{tool} zusammen mit 
+dem Chatverlauf an das \ac{llm} gesendet werden. Somit findet keine Kennzeichnung von externen Inhalten statt. 
+Im Abschnitt~\ref{subsec:sicherheitsbedrohungen} wird diese Sicherheitsbedrohung als konkreter Fall besprochen. Durch die fehlende Trennung von Daten und Code kann
+das \ac{llm} nicht vertrauenswürdige Inhalte verarbeiten. \\
+Dadurch das diese Schwachstelle teilweise durch die Funtionsweise eines \ac{llm} begründet ist, kann das Risiko dafür nicht vollstädnig behoben werden. Jedoch ist es
+möglich Änderungen bei der Verarbeitung Einschränkungen vorgenommen werden, welche Inhalte in den Kontext aufgenommen werden und welche mögliche Folgen es gibt.
+Die Angriffe lassen sich in die drei Kategorien des Lethal Trifecta zuordnen, womit die Vorraussetzungen für eine Datenkomprommitierung durch indirekte Prompt-Injection
+gegeben ist[18, S. 13].
 
-\paragraph{Einschränkungen}
+\subsection{Übermäßige Funktionalitäten}
 
-Die erkannten Schwachstellen unterliegen drei Einschränkungen. Es wurde zum einen jede Variante nur einmal durchgeführt. Da \ac{llm}s auf dieselbe Eingabe
-unterschiedlich antworten können, lässt sich aus den Ergebnissen zeigen, dass ein Angriff möglich ist, jedoch nicht, mit welcher Wahrscheinlichkeit. Die zweite
-Einschränkung ist, dass zwischen den Versuchen teilweise mehrere Parameter gleichzeitig verändert wurden, etwa die Formulierung des Angriffs und die Anzahl
-der vorherigen Anfragen, ohne dass ein Einfluss erkennbar war. Drittens richteten sich die Angriffe gegen eine lokale Webseite. Wie sich das \ac{llm} bei einer
-öffentlich erreichbaren Zieladresse verhalten würde, lässt sich daher nicht abschätzen.
+Mit dem Tool \texttt{browser\_action} wird es \ac{llm} ermöglich eigenständig beliebige \ac{url}s aufrufen und Daten in Webseiten einzufügen. Dabei wird zwar
+eine Überprüfung mittels der Funktion \texttt{auditUrl} durchgeführt, jedoch wird nur geguckt welches Protokoll verwendet wird und ob es sich um eine lokale 
+oder öffentliche Webseite handelt. Auch eine einfache Einschränkung, mit einer Liste erlaubter Zieladressen von Webseiten auf die zugegriffen werden darf existiert
+nicht. Nach der Einordnung der OWASP liegt eine übermäßige Funktionalität vor~\cite[23]{pi24}. \\
+Das \ac{llm} hat Zugriff auf alle Tools und es muss keine menschliche Zustimmung erfragt, um ein Tool auszuführen. Bei allen erfolgreichen Angriffen gab es keine 
+Möglichkeit für den Nutzer die Aktion zu unterbrechen und den Angriff abzuwehren. Darch die Funktion eine Aktion auf der Webseite auszuführen ist die mögliche 
+Angriffsfläche nicht mehr auf die Chatoberfläche begrenzt, sondern wird zu einer Möglichkeit für Datenexflitration und andere schädliche Aktionen.
+
+\subsection{Fehlende Kontrolle des Datenabflusses}
+
+Das ausgewählte \ac{llm} Mistral Large~4 ist zustandslos. Es speichert keine vorherigen Anfragen, wodurch für jede neue Anfrage der gesamte Chatverlauf an das \ac{llm}
+gesendet wird. Es kann jederzeit eigenständig Tool Calls ausführen und alle bereitstehenden Informationen ohne Einschränkungen verwenden. Dies wird auch durch die 
+erfolgreichen Durchführungen bei der E-Mail Injection, Multi-Modal Injection und Document Injection deutlich. Es wurde der vollständige Chatverlauf an eine Zielwebseite
+weitergegeben. Durch die \ac{url}-Parameter Injection wird deutlich, das auch bereits durch den Aufruf einer Webseite Daten extrahiert werden können.\\
+Wenn ein solcher Angriff praxisnah durchgeführt werden würde, dann könnten durch so einen Angriff interne Unternehmensdaten extrahiert werden, auf die der Chatbot
+zugreifen kann.
+
+\subsection{Keine Vorverarbeitung externer Inhalte}
+
+Externe Inhalte werden nicht überprüft, bevor sie in den Kontext ausgenommen werden. Bei dem Zugriff auf eine Webseite wird die als im Ganzen als \ac{html}-Quelltext
+zurückgegeben. Inhalte, die für Nutzer unsichtbar oder unauffällig sind werden somit weder entfernt noch markiert. Dies wird bei der Multi Modal Injection, der 
+Website Injection und der Document Injection deutlich. Bei der Multi Modal Injection und Website Injection sind die schädlichen Anweisungen in einem Textblock mit 
+der Schriftgröße null oder in einem für den Nutzer unsichtbaren Bereich platziert. Bei der Document Injection ist der Inhalt unaffällig für den Nutzer, da der Inhalt des
+Dokuments nicht vom Chatbot angezeigt wird. \\
+Während Nutzer externe Inhalte als unauffällig betrachten, kann das \ac{llm} gleichzeitig versteckte Anweisungen ausführen und den Nutzer darüber nicht in Kenntnis
+setzen. Als möglicher Schutz reicht bei dieser Schwachstelle keine menschliche Validierung aus, da in vielen Fällen diese Anweisungen unsichtbar sind.
+
+\subsection{Eingeschränkte Nachvollziehbarkeit}
+
+Ein Nutzer ist darauf angewiesen in einer Antwort vom \ac{llm} darüber in Kenntnis gesetzt zu werden, welche Schritte durchgeführt wurden. Auf den genauen Ablauf 
+einer Anfrage und dan dafür ausgeführten Tools hat der Nutzer keinen Einblick. \\
+Auch in den Versuchen wird deutlich, das bei häufig bei expliziten Angaben, den Nutzer nicht über die Aktionen zu unterrichten, dieser Aufforderungen vom \ac{llm}
+nachgegangen wird. Besonders deutlich wird das bei der E-Mail Injection und bei der Document Injection. Dahingegen wird beim Jailbreak Prompt dies Aufforderungen
+in keinen Versuch nachgegangen.
+Der Erfolg eines Angriffs hängt somit stark von dem Modell selbst ab und er kann durch diese Schwachstelle somit über einen langen Zeitraum unentdeckt bleiben.
+
+\subsection{Einschränkungen}
+
+Die erkannten Schwachstellen unterliegen folgenden Einschränkungen:
+
+\begin{itemize}
+    \item  Es wurde zum einen jede Variante nur einmal durchgeführt. Da \ac{llm}s auf dieselbe Eingabe
+    unterschiedlich antworten können, lässt sich aus den Ergebnissen zeigen, dass ein Angriff möglich ist, jedoch nicht, mit welcher Wahrscheinlichkeit.
+    \item  Zwischen den Versuchen wurden teilweise mehrere Parameter gleichzeitig verändert wurden, etwa die Formulierung des Angriffs und die Anzahl
+    der vorherigen Anfragen, ohne dass ein Einfluss bestimmt wurde.
+    \item Die Angriffe richteten sich gegen eine lokale Webseite. Wie sich das \ac{llm} bei einer öffentlich erreichbaren Zieladresse verhalten würde, 
+    lässt sich daher nicht abschätzen.
+    \item Alle Versuche wurden mit dem \ac{llm} Mistral Large 4 durchgeführt. Andere Modelle könnten mögliche Angriffe besser identifizieren.
+    \item Die Funktion einen Tool Call wurde in der Testumgebung für diese Arbeit hinzugefügt und existiert nicht in der Version des Chatbot4U welche im Kundenservice
+    verwendet wird
+    \item Szenarien konnten teilweise nicht akkurat dargestellt werden. Bei der E-Mail Injection konnten die versteckten Anweisungen durch die Formatierungsvorgaben
+    des Chatbots nicht unsichtbar eingefügt werden. Die \ac{url} bei der \ac{url}-Parameter Injection war zu auffällig für den Nutzer formuliert.
+\end{itemize}
+
+Trotz dieser Einschränkungen lässt sich die Teilforschungsfragen 1 beantworte und Schwachstellen bei dem untersuchten System im Bezug auf indirekte Prompt-Injection
+Angriffe feststellen. Das \ac{llm} hat versteckte Anweisungen ausgeführt, den Nutzer darüber nicht in Kenntniss gesetzt und Daten an externe Systeme übermittelt.
+Diese Schwachstellen bilden die Grundlage für die Auswahl der Schutzmaßnahme in Kapitel~\ref{ch:schutzmassnahmen}.
