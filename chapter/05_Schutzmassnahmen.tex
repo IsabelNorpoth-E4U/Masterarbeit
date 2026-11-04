@@ -98,30 +98,74 @@ erneutes Fine-Tuning erforderlich ist.
 
 \section{Auswahl und Konzeption einer Schutzmaßnahme}\label{konzept}
 
+Im Folgenden wird der Prozess der Entwicklung einer Schutzmaßnahme dokumentiert. Dafür werden zu Beginn Anforderungen definiert, die als Orientierungshilfe 
+dienen sollen. Anschließend wird das Vorgehen bei der Konzipierung beschrieben und das daraus entstehende Konzept vorgestellt.
+
+\subsection{Anforderungen der Schutzmaßnahme}
+
 Für die in dieser Arbeit ausgewählte Schutzmaßnahme wurden mehrere Kriterien definiert:
 
 \begin{itemize}
-    \item Sie soll sich leicht integrieren lassen, sodass der Chatbot in seiner Struktur nicht verändert werden muss. 
-    \item Um eine hohe Anzahl von Nutzeranfragen zu ermöglichen, soll sie kostengünstig sein und ohne Training des Hauptmodells verwendet werden können.
-    \item Die Entscheidungen sollen nachvollziehbar sein und die Anzahl der fälschlich als Angriff eingestuften Anfragen minimiert werden.
+    \item Sie soll sich leicht integrieren lassen, sodass der Chatbot in seiner Struktur und die Systemarchitektur nicht verändert werden muss. 
+    \item Um eine hohe Anzahl von Nutzeranfragen zu ermöglichen, soll die Maßnahme kostengünstig sein und ohne Training des Hauptmodells verwendet werden können.
+    Die Maßnahme soll zudem mit einem kleinen Modell ausgeführt werden können.
+    \item Die Entscheidungen sollen nachvollziehbar sein, sodass für die als Angriff klassifizierten Anfragen die Entschiedung rekonstruiert werden kann. Zusätzlich
+    soll die Anzahl der fälschlich als Angriff eingestuften Anfragen minimiert werden.
 \end{itemize}
 
-Auf Grundlage dieser Kriterien wurde eine eingabeseitige Maßnahme gewählt, da weder auf die Struktur des Modells noch auf das System zugegriffen werden sollte.
-Es wurde keine ausgabeseitige Maßnahme gewählt, da keine geeignete identifiziert werden konnte, welche auf den Anwendungsfall des Chatbots passend hätte
-weiterentwickelt werden können. Für die Maßnahme wurde eine Kombination aus Prompt-Filterung, Input-Modifizierung und Prompt-Enhancement gewählt. \\
+Für die Konzeption der Schutzmaßnahme wurde eine eingabeseitige Maßnahme gewählt. Diese Auswahl wurde anhand der definierten Kategorien gemacht. \\
+Es wurde keine ausgabeseitige Maßnahme ausgewählt, da die Antwort erst geprüft wird, wenn sie bereits vom Hauptmodell verarbeitet wurde. Mit dieser Eigenschaft
+konnte keine geeignete Maßnahme identifiziert werden, die zu dem Anwendunsdall des Chatbots passt. \\
+Mit einer Modellseitigen Maßnahme wäre es erforderlich gewesen zusätzliches Training durchzuführen, jedoch wurde dies mit der ersten Kategorie ausgeschlossen. 
+Auch die systemseitigen Maßnahmen wurden aufgrund der Kategorien ausgeschlossen, da durch Rechteverwaltung oder menschliche Freigabe die Architektur des Systems
+verändert werden müsste. \\
+Die eingabeseitige Maßnahme überprüft jede Nutzeranfrage, bevor sie von dem Haupt~\ac{llm} verarbeitet wird. Sie kann als zusätzliche Komponente verwendet werden und 
+hängt nicht von der übrigen Systemstruktur ab. Auch bei den eingabeseitigen Maßnahmen konnten nicht alle als mögliche Lösung betrachtet werden, da durch Maßnahmen
+wie Sandboxing und die kryptografische Signieren Eingriffe in das System durchgeführt hätten müssen. \\
+Für die Maßnahme wurde eine Kombination aus Prompt-Filterung, Input-Modifizierung und Prompt-Enhancement gewählt. \\
+
+\subsection{Entwicklung der Maßnahme}
+
+Die Maßnahme wurde in mehreren Schritten entwickelt. Für die Entwicklung wurde ausschließlich der Dev-Abschnitt der Datensätzn verwedet, damit das Ergebnis bei 
+der Auswertung nicht verfälscht wird. Im Folgenden werden die durchgeführten Schritte erläuert:
+
+\begin{enumerate} 
+    \item \textbf{Originalansatz:} Mit einem vorgeschalteten \ac{llm} wird für mehrere Datensätze mit einer binären Klassifikation (JA oder NEIN) eine 
+    Einschätzung durchgeführt, ob ein Prompt-Injection-Angiff erkannt wird. Dieser Ansatz dient als Baseline, mit der die allgemeine Ausgangserkennungsfähigkeit
+    festgehalten wird.
+    \item \textbf{Promptvariation beim Originalansatz:} Es wird verglichen, inwieweit die Erkennungsfähigkeit des \ac{llm} vom mitgegebenen Prompt abhängig ist.
+    \item \textbf{Überarbeitung des Ansatzes:} Der Originalansatz wird anhand der Ergebnisse und den dadurch festgestellten Schwachstellen überarbeitet. Der 
+    Fokus liegt auf die Auswirkungen durch verschleierte Angriffe, die Positionierung von schädlichen Anweisungen und der Art von Daten (z.B. Tabellen)
+\end{enumerate}
+
 Die gesamte Maßnahme wurde von einem vorgeschalteten \ac{llm} ausgeführt. Diess \ac{llm} prüft jede Anfrage und leitet sie dann weiter an das Hauptmodell, wenn sie nicht
 als Angriff eingestuft wird (Prompt-Filterung). Vor der Prüfung wird festgestellt, ob die Anfrage externe Inhalte wie eine Webseite oder E-Mail enthält oder 
 ausschließlich aus einem Nutzerprompt besteht. Dies wird in dieser Arbeit nicht selbstständig integriert, sondern bereits in den Datensatzeinträgen angegeben.
-Die Prüfung der beiden Kategorien unterscheidet sich in mehreren Punkten. \\
+Der Ablauf der Maßnahme unterteilt sich in vier Stufen. \\
+
+\paragraph{Stufe 1: Erstellung der Versionen}
+
 Im ersten Schritt wird die Anfrage durch mehrere Modifizierungen verändert, die mögliche Verschleierungen rückgängig machen sollen (Input-Modifizierungen). Der daraus
 entstehende Prompt ist die Version V1. Auf diese Version wird eine zusätzliche Rechtschreibkorrektur durchgeführt, um die Version V2 zu erstellen. Zusammen mit 
-dem Originalprompt V0 werden für die weitere Prüfung drei Versionen der Anfrage verwendet. Für jede Version wird eine Anfrage an das vorgeschaltete \ac{llm} 
-gesendet, in dem sechs Leitfragen gestellt werden, um das Ziel der Anfrage zu ermitteln. \\
+dem Originalprompt V0 werden für die weitere Prüfung drei Versionen der Anfrage verwendet. Mit dieser Stufe wird versucht der bei dem Originalansatz festgestellte
+Schwäche bei der Erkennung von verschleierten Nutzeranfragen entgegenzugehen. 
+
+\paragraph{Stufe 2: Leitfragen}
+
+Für jede Version wird eine Anfrage an das vorgeschaltete \ac{llm} gesendet, in dem sechs Leitfragen gestellt werden, um das Ziel der Anfrage zu ermitteln. Mit der
+ersten Leitfrage F0 wird abgefragt, ob es sich bei der Nutzeranfrage um eine Verständnisfrage handelt. Mit restlichen fünf Leitfragen werden verschieden 
+Absichten angefragt werden.
+
+\paragraph{Stufe 3: Formprüfung und Strukturpüfung}
+
 Ab diesem Schritt unterscheidet sich die weitere Prüfung. Bei einer Nutzeranfrage werden drei weitere Anfragen an das vorgeschaltete \ac{llm} gesendet, in denen für
 jede Version die Frage gestellt wird, ob es sich um einen Prompt-Injection-Angriff handelt. Bei externen Inhalten wird stattdessen jede Zeile nummeriert und in 
 einer Anfrage für jede Zeile gefragt, an wen sie sich richtet und ob sie inhaltlich zu der Nutzeranfrage beziehungsweise zu dem übrigen Inhalt der externen Daten
 passt. Diese Prüfung wird nur für die Versionen V0 und V1 durchgeführt, wodurch verhindert werden soll, dass durch eine fehlerhafte Rechtsschreibkorrektur die 
 Bedeutung des gesamten Textes verändert wird. \\
+
+\paragraph{Stufe 4: Entscheidungsreglen}
+
 Abschließend wird anhand definierter Regeln entschieden, ob ein Angriff vorliegt. Je nachdem, ob es sich bei der Anfrage um externen Inhalt oder eine Nutzeranfrage 
 handelt, werden verschiedene Regeln verwendet. Bei der Nutzeranfrage wird zunächst geprüft, ob mehr als die Hälfte der Versionen von dem vorgeschalteten \ac{llm}
 als Angriff eingestuft wird. Zusätzlich wird überprüft, ob die erste Leitfrage, welche klärt, ob es sich bei der Nutzeranfrage um eine Verständnisfrage handelt, mit 
@@ -129,13 +173,18 @@ NEIN beantwortet wurde und mindestens eine der anderen fünf Leitfragen mit JA b
 füllt wurden. \\
 Bei externen Inhalten wird ebenfalls die Regel mit der Überprüfung der Leitfragen angewendet. Statt der Abfrage, ob die Hälfte der Versionen als Angriff gewertet wurden,
 wird überprüft, ob eine Zeile der externen Daten nicht zum Rest passt oder an die KI gerichtet ist. Ist mindestens eine der beiden Regeln erfüllt, wird die Anfrage
-als Angriff gewertet.
+als Angriff gewertet.\\
+Durch die Verknüpfung von zwei Regeln soll das \ac{llm} eine höhere Erkennungsrate erlangen. Die Anwendung der Leitfrage F0 verfolgt das Ziel, dass Nutzeranfrage, die
+sich nur über Themen informieren möchten, nicht direkt als Angriff gewertet wird. Die Ergebnisse, welche Regel ausgelöst wird, wird gespeichert, damit bei 
+der~\ref{ch:evaluation} Auswertung die Begündungen nachvollziehbar sind. \\
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.7\textwidth]{figs/05/ansatz_idee}
 \caption{Konzept Schutzmaßnahme}
 \end{figure}
+
+Die konkreten Schritte der Maßnahme werden in Abschnitt{subsec:ueberarbeitung} erläutert.
 
 \section{Aufbau der Umgebung}
 
@@ -436,7 +485,7 @@ wird die \ac{fpr} dargestellt, damit ein Vergleich zwischen dem Recall und den F
 \caption{Ablauf des Schutzmaßnahme}\label{fig:promptvariation_fpr}
 \end{figure}
 
-\subsection{Überarbeitung des Ansatzes und erneute Durchführung}
+\subsection{Überarbeitung des Ansatzes und erneute Durchführung}\label{subsec:ueberarbeitung} 
 
 Die Ergebnisse des Originalansatzes des vorgeschalteten \ac{llm} zeigen mehrere Schwächen in der Klassifikation. Im eigenen Datensatz werden verschleierte 
 Angriffe häufig falsch eingeschätzt. Beispielsweise wurden von dem Test-Abschnitt bei T02 nur 6 von 20 und bei T14 nur 7 von 20 Angriffen erkannt. Insgesamt wurden
