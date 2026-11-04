@@ -12,7 +12,7 @@ Diese Eigenschaft eröffnet Angriffsflächen, die gerade für Prompt-Injection-A
 zunächst die Definition dieser Angriffsform und anschließend ihre verschiedenen Ausprägungen erläutert.
 
 
-\section{Definition und Klassifizierung von Prompt-Injection}
+\section{Definition und Klassifizierung von Prompt-Injection-Angriffen}
 
 Prompt-Injection bezeichnet eine Angriffsart, die \ac{llm}s gefährdet~\cite[54]{pi1}. Dabei wird versucht, das Verhalten eines Sprachmodells zu manipulieren und dessen
 Sicherheitsrichtlinien zu umgehen und das \ac{llm} so dazu zu bringen, schädigende Antworten an einen Nutzer auszugeben
@@ -86,7 +86,7 @@ beschränken: \\
 In der Praxis werden direkte und indirekte Angriffsarten häufig miteinander kombiniert, sogenannte Combined Attacks~\cite[2\psq]{pi3}. Auch in dieser Arbeit kommen fast ausschließlich solche kombinierten Angriffe zum Einsatz.
 
 
-\section{Beispiele bekannter Angriffe und die Auswirkungen}\lablel{sec:beispiele_angriffe}
+\section{Beispiele bekannter Angriffe und die Auswirkungen}\label{sec:beispiele_angriffe}
 
 Die Zahl der Prompt-Injection-Angriffe nimmt von Jahr zu Jahr zu. Laut OWASP standen Prompt-Injection-Angriffe 2025 wie auch
 2026 an erster Stelle der Gefahren für \ac{llm} Anwendungen. Eine Studie des Unternehmens Axis Intelligence vom Juni 2026 zeigt
@@ -94,11 +94,23 @@ zudem, dass indirekte Prompt-Injection-Angriffe eine Erfolgsquote von bis zu 68,
 Obwohl kontinuierlich daran gearbeitet wird, LLMs robuster zu gestalten und Sicherheitsrichtlinien so zu formulieren,
 dass Prompt-Injection-Angriffe zuverlässig erkannt werden, gelingt es einem Großteil der Angriffe dennoch, diese Maßnahmen
 zu umgehen~\cite{pi14}. \\
-Ein bekanntes Beispiel hierfür ist der sogenannte Bing-Chat-$\glqq$Sydney$\grqq$-Incident an der Stanford University:
-Einem Studenten gelang es, die Sicherheitsrichtlinien von Microsoft Copilot, damals noch unter dem Namen Bing Chat bekannt,
-mithilfe der Anweisung $\glqq$ignore prior directives$\grqq$ zu umgehen. Der Chatbot gab darauf sowohl seine internen
-Richtlinien als auch seinen Codenamen $\glqq$Sydney$\grqq$ preis~\cite{pi14}. \\
-Dieser Vorfall steht exemplarisch für zahlreiche vergleichbare Angriffe, die ein erhebliches Schadenspotenzial haben
-können, sobald Zugriff auf Firmengeheimnisse oder sensible Daten erlangt wird~\cite{pi1}.
+Im Folgenden werden vier bekannte Beispiele vorgestellt, mit denen die Bedeutung dieser Bedrohung deutlich wird. Es wird ein direkter Angriff auf einen 
+öffentlichen Chatbot, zwei indirekte Angriffe auf Systeme mit Zugriff auf Unternehmensdaten und ein Fall, der zeigt, zu welchen Folgen es im Zuge eines Angriffs
+kommen kann. Anhand dieser Angriffe werden die Auswirkungen solcher Angriffe auf Unternehmen dokumentiert.
+
+\subsection{Bing Chat \glqq Sydney\grqq}\label{subsec:sydney}
+
+Ein bekanntes Beispiel hierfür ist der sogenannte Bing-Chat-$\glqq$Sydney$\grqq$-Incident an der Stanford University. Einem Studenten gelang es, die 
+Sicherheitsrichtlinien von Microsoft Copilot, damals noch unter dem Namen Bing Chat bekannt, mithilfe der Anweisung $\glqq$ignore prior directives$\grqq$ zu umgehen. 
+Der Chatbot gab darauf sowohl seine internen Richtlinien als auch seinen Codenamen $\glqq$Sydney$\grqq$ preis~\cite{pi14}. \\
+Dieser Vorfall steht exemplarisch für zahlreiche vergleichbare Angriffe, die ein erhebliches Schadenspotenzial haben können, sobald Zugriff auf Firmengeheimnisse oder 
+sensible Daten erlangt wird~\cite{pi1}.
+
+\subsection{EchoLeak}\label{subsec:echoleak}
+
+\subsection{GitHub-MCP-Server}\label{subsec:github_mcp}
+
+\subsection{Chatbot eines Autohändlers}\label{subsec:echoleak}
 
 
+\subsection{Auswirkungen auf Unternehmen}\label{subsec:auswirkungen}

@@ -281,7 +281,7 @@ Recall, F1, False Positive Rate, Latenz sowie Konfidenzintervalle nach Wilson. I
 im welchem Bezug sie verwendet werden sollen. Für die Datensätze BIPIA und NotInject werden zusätzlich die Aufgabe (E-Mail, Tabelle, Code) und die Position 
 (Anfang, Mitte, Ende) festgehalten. Bei dem verschleierten BIPIA Datensatz und dem eigenen werden zusätzlich die Tranformationen dokumentiert.
 
-\textbf{Konfusionsmatrix}~\cite[75]{sm28}
+\paragraph{Konfusionsmatrix}~\cite[75]{sm28}
 
 In dieser Matrix werden vier verschiedene Kennzahlen dargestellt: \\
 
@@ -292,43 +292,62 @@ In dieser Matrix werden vier verschiedene Kennzahlen dargestellt: \\
     \item False Negative (FN): Anzahl der als harmlos klassifizierten Einträge, die tatsächlich Angriffe sind
 \end{enumerate}
 
-\textbf{Precision}~\cite[227]{sm29}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{figs/05/confusion_matrix}
+\caption{Konfusionsmatrix}
+\end{figure}
 
-Mit der Precision wird der Anteil der als Angriff klassifizierten Einträge, die tatsächlich ein Angriff sind angegeben.
 
-\[ P = \frac{TP}{TP + FP} \]
+\paragraph{Precision}~\cite[227]{sm29}
 
-\textbf{Recall/Sensitivity}~\cite[227]{sm29}
+Mit der Precision wird der Anteil der als Angriff klassifizierten Einträge, die tatsächlich ein Angriff sind angegeben
 
-Der Recall (auch \textit{Sensitivity} oder \textit{True Positive Rate}) gibt an, welcher Anteil der tatsächlichen Angriffe als solche erkannt werden:
+\begin{equation}
+  P = \frac{TP}{TP + FP} .
+\end{equation}
 
-\[ R = \frac{TP}{TP + FN} \]
+\paragraph{Recall/Sensitivity}~\cite[227]{sm29}
 
-\textbf{F1~\cite[227]{sm29}}
+Der Recall (auch \textit{Sensitivity} oder \textit{True Positive Rate}) gibt an, welcher Anteil der tatsächlichen Angriffe als solche erkannt werden
 
-Der F1-Wert ist das harmonische Mittel aus Precision und Recall.
+\begin{equation}
+  R = \frac{TP}{TP + FN} .
+\end{equation}
 
-\[ F_1 = \frac{2}{\frac{1}{R} + \frac{1}{P}} \]
+\paragraph{F1~\cite[227]{sm29}}
 
-\textbf{False Positive Rate~\cite[22]{sm27}}
+Der F1-Wert ist das harmonische Mittel aus Precision und Recall
 
-Die False Positive Rate gibt den Anteil der harmlosen Prompts an, die fälschlicherweise blockiert werden:
+\begin{equation}
+  F_1 = \frac{2 \cdot P \cdot R}{P + R} .
+\end{equation}
 
-\[ \mathit{FPR} = \frac{\text{fälschlich abgewiesene harmlose Prompts}}{\text{alle harmlosen Prompts}} \]
+\paragraph{False Positive Rate~\cite[22]{sm27}}
 
-\textbf{Latenz~\cite[22]{sm27}}
+Die False Positive Rate gibt den Anteil der harmlosen Prompts an, die fälschlicherweise blockiert werden
 
-Gemessen wird die gesamte Dauer der Prüfung pro Text, angegeben wird der Median. Der Median entspricht dem Overhead, den die Schutzmaßnahme verursacht.
+\begin{equation}
+  \mathit{FPR} = \frac{FP}{FP + TN} .
+\end{equation}
 
-\[ \text{Latenz-Overhead} = \text{Laufzeit mit Schutzmaßnahme} - \text{Laufzeit ohne Schutzmaßnahme} \]
+\paragraph{Latenz~\cite[22]{sm27}}
 
-\textbf{Konfidenzintervalle nach Wilson~\cite{sm44}}
+Gemessen wird die gesamte Dauer der Prüfung pro Text, angegeben wird der Median. Der Median entspricht dem Overhead, den die Schutzmaßnahme verursacht
+
+\begin{equation}
+  \mathit{Latency Overhead} = \mathit{Defense inference time} - \mathit{Baseline inference time} .
+\end{equation}
+
+\paragraph{Konfidenzintervalle nach Wilson~\cite{sm44}}
 
 Das Wilson-Intervall berechnet ein Konfidenzintervall für einen Anteil in einer statistischen Population. Dabei ist  \(\hat{p}\) der Stichprobenanteil, \(n\) 
 die Stichprobengröße und \(z\) der z-Wert des gewünschten Konfidenzniveaus. Da dieses Intervall eine bessere Schätzung nahe 0 oder 1 liefert, ist es damit
-besonders geeignet bei binären Ergebnisse wie JA/NEIN.
+besonders geeignet bei binären Ergebnisse wie JA/NEIN
 
-\[ \frac{\hat{p} + \frac{z^2}{2n} \pm z\sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac{z^2}{4n^2}}}{1+\frac{z^2}{n}} \]
+\begin{equation}
+  \mathit{Wilson Score} = \frac{\hat{p} + \frac{z^2}{2n} \pm z\sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac{z^2}{4n^2}}}{1+\frac{z^2}{n}} .
+\end{equation}
 
 \section{Durchführung und Weiterentwicklung}
 

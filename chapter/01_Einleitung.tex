@@ -14,7 +14,7 @@ und eine weiter gefasste Definition der \ac{ki}-Nutzung. Beide Erhebungen zeigen
 Mit dem zunehmenden und immer umfangreicherem Einsatz von \acp{llm} in Unternehmen wird diesen vermehrt Zugriff auf Dokumente gewährt oder si werden für weiterführende 
 Aktionen wie Internetrecherchen eingesetzt, was immer größere Gefahren mit sich bringt.
 Dies spiegelt sich auch im Bericht der Organisation OWASP aus dem Jahr 2026 wider, in dem die zehn größten Risiken für \acp{llm} definiert werden. Darin wird
-das Risiko \enquote{Excessive Agency} auf Platz~3 eingeordnet, während es 2025 noch auf Platz~6 lag~\cite{pi24}. Dieses Risiko beschreibt die Gefahr, die 
+das Risiko der übermäßigen Handlungsfreiheit (eng.: Excessive Agency) auf Platz~3 eingeordnet, während es 2025 noch auf Platz~6 lag~\cite{pi24}. Dieses Risiko beschreibt die Gefahr, die 
 entsteht, wenn ein \ac{llm} auf zu viele Funktionalitäten zugreifen kann und über zu viele Berechtigungen verfügt. \\
 Es zeigt sich somit, dass \acp{llm} zunehmend Zugriff auf große Datenmengen erhalten, auf deren Grundlage sie Aktionen ausführen können. Diese Aktionen werden als
 Tool Calls bezeichnet. Durch \glqq Tool Calls\grqq wird es \acp{llm} ermöglicht, beliebige Funktionen auszuführen, beispielsweise auf externe Daten und Webseiten zuzugreifen 
@@ -40,23 +40,17 @@ besteht darin, dass sich Prompt Injection gegen Anwendungen richtet, die auf ein
 vertrauenswürdigen Prompt verkettet werden. Bei einem Jailbreak wird hingegen versucht, die Sicherheitsfilter des Modells selbst zu umgehen. Das Merkmal, welches 
 ausschlaggebend für Prompt Injection ist, ist somit die Verkettung eines vertrauenswürdigen mit einem nicht vertrauenswürdigen Inhalt kombiniert in einem Prompt~\cite{e05}. \\
 Die Literatur zeigt, dass bei den bestehenden Schutzmaßnahmen noch erhebliches Verbesserungspotenzial besteht. An diesem Punkt setzt die vorliegende Arbeit an. Der 
-Fokus liegt auf indirekten Prompt-Injection-Angriffen, bei denen der Angriff über externe Quellen erfolgt, auf die das \ac{llm} zugreift, beispielsweise eine Webseite~\cite[2\psq]{pi6}.
-Ziel ist die Entwicklung einer Schutzmaßnahme, die genau diese Angriffe abwehrt und zugleich eine praxisnahe Anwendung ermöglicht und damit eine Anwendung bei verschiedenen
-Chatbots. \\
-Die Schutzmaßnahme wird zunächst anhand eines selbst erstellten Datensatzes entwickelt. Die darin enthaltenen Angriffe wurden aus indirekten Angriffsszenarien abgeleitet, zur
-Vereinfachung jedoch als Nutzerprompt angegeben. Anschließend wird die Schutzmaßnahme mit den öffentlichen Datensätzen BIPIA und NotInject überprüft. In dem Datensatz
-BIPIA sind die Angriffe in externen Inhalten wie E-Mails, Tabellen oder Code positioniert. \\
+Fokus liegt auf indirekten Prompt-Injection-Angriffen, bei denen der Angriff über externe Quellen erfolgt, auf die das \ac{llm} zugreift, beispielsweise eine Webseite~\cite[2\psq]{pi6}. \\
 Als Anwendungsfall dient der Chatbot ChatBot4U der Energy4U GmbH, der zudem als Unternehmenslösung für die Kommunikation mit Kunden vorgesehen ist und damit ein 
 praxisnahes Anwendungsbeispiel darstellt. Im Folgenden werden die Zielsetzung, die Forschungsfragen sowie der Aufbau der Arbeit erläutert.
 
 \section{Zielsetzung}
 
-Ziel dieser Arbeit ist es, zu untersuchen, inwieweit ein Chatbot, konkret der unternehmensinterne Chatbot der Energy4U GmbH, durch eine selbst entwickelte 
+Ziel dieser Arbeit ist es, zu untersuchen, inwieweit der unternehmensinterne Chatbot der Energy4U GmbH, durch eine selbst entwickelte 
 Schutzmaßnahme vor indirekten Prompt-Injection-Angriffen abgesichert werden kann. \\
-Als Vorstufe wird eine Schwachstellenanalyse durchgeführt, um die Angriffsfläche 
-zu identifizieren. Hierfür wird eine lokale Testumgebung aufgebaut. \\
-Auf Grundlage der identifizierten Schwachstellen wird eine geeignete Schutzmaßnahme entwickelt und implementiert. Diese wird anhand mehrerer Datensätze getestet und 
-ihre Leistungsfähigkeit mithilfe geeigneter Metriken festgehalten. \\
+Als Vorstufe wird eine Schwachstellenanalyse durchgeführt, um die Angriffsfläche zu identifizieren. Hierfür wird eine lokale Testumgebung aufgebaut. \\
+Auf Grundlage der identifizierten Schwachstellen wird eine Schutzmaßnahme entwickelt und implementiert. Die Entwicklung erfolgt anhand eines selbst erstellten 
+Datensatzes und wird anhand von zwei öffentlichen Datensätzen BIPIA und NotInject überprüft. Die Leistungsfähigkeit wir mithilfe geeigneter Metriken festgehalten. \\
 Die Ergebnisse sollen einen direkten Vergleich zwischen einem einfachen vorgeschalteten \ac{llm}-Klassifikator, der jede Eingabe lediglich mit einer einzelnen Anfrage 
 bewertet, und einer weiterentwickelten Schutzmaßnahme ermöglichen. Die Schutzmaßnahme soll sowohl für den unternehmensinternen Chatbot der Energy4U GmbH einsetzbar als 
 auch auf andere praxisrelevante Chatbots übertragbar sein.
@@ -64,40 +58,38 @@ auch auf andere praxisrelevante Chatbots übertragbar sein.
 \section{Forschungsfragen}
 
 \begin{enumerate}
-    \item[HF:] Inwieweit kann ein unternehmensinterner Chatbot mit implementiertem Tool Calling gegen indirekte Prompt-Injection-Angriffe abgesichert werden?
-    \item[TF1:] Welche Schwachstellen weist der Chatbot in Bezug auf indirekte Prompt-Injection-Angriffe auf?
-    \item[TF2:] Wie zuverlässig ist ein vorgeschaltetes \ac{llm} bei der Abwehr von Prompt-Injection-Angriffen?
-    \item[TF3:] Verbessert sich die Erkennung von Prompt-Injection-Angriffen, wenn die Schutzmaßnahme um Segmentierung und Rekonstruktion erweitert wird?
-    \item[TF4:] Inwieweit lassen sich die Ergebnisse auf öffentliche Datensätze übertragen?
+    \item[Hauptforschungsfrage:] Inwieweit kann ein unternehmensinterner Chatbot mit implementiertem Tool Calling gegen indirekte Prompt-Injection-Angriffe abgesichert werden?
+    \item[Teilforschungsfrage 1:] Welche Schwachstellen weist der Chatbot in Bezug auf indirekte Prompt-Injection-Angriffe auf?
+    \item[Teilforschungsfrage 2:] Wie zuverlässig ist ein vorgeschaltetes \ac{llm} bei der Abwehr von Prompt-Injection-Angriffen?
+    \item[Teilforschungsfrage 3:] Verbessert sich die Erkennung von Prompt-Injection-Angriffen, wenn die Schutzmaßnahme um Segmentierung und Rekonstruktion erweitert wird?
+    \item[Teilforschungsfrage 4:] Inwieweit lassen sich die Ergebnisse auf öffentliche Datensätze übertragen?
 \end{enumerate}
 
-Für diese Arbeit wurde eine Hauptforschungsfrage definiert, die in mehrere Teilfragen untergliedert ist. Die Hauptfrage lautet, inwieweit ein unternehmensinterner 
-Chatbot mit implementiertem Tool Calling gegen indirekte Prompt-Injection-Angriffe abgesichert werden kann. Der unternehmensinterne Chatbot ist dabei das Testsystem.
-Die Beantwortung der Frage soll allgemein erfolgen. Zur Beantwortung der Hauptfrage wurden mehrere Teilfragen formuliert. Zunächst soll geklärt werden, welche 
-Schwachstellen der Chatbot in Bezug auf indirekte Prompt-Injection-Angriffe aufweist. Während der Implementierung der Schutzmaßnahme wird untersucht, wie zuverlässig
-ein vorgeschaltetes \ac{llm} Prompt-Injection-Angriffe abwehrt. Auf diesen Ergebnissen aufbauend soll geprüft werden, ob sich die Erkennung verbessert, wenn die 
-Schutzmaßnahme in Kombination mit dem vorgeschalteten Modell um Rekonstruktionsmaßnahmen und eine Segmentierung der Daten erweitert wird. Abschließend wird untersucht,
-inwieweit sich die Ergebnisse und der Ansatz auf öffentliche Datensätze übertragen lassen und wie praxisnah der Ansatz somit ist.
+Aus der Zielsetzung ergibt sich eine Hauptforschungsfragen, welche in vier Teilfragen untergliedert werden kann. Diese vier Untergliederungen können Teilen der
+Arbeit zugeordnet werden. Die erste Teilforschungsfrage wird im Rahmen der Schwachstellenanalyse in Kapitel~\ref{ch:methodik} beantwortet. Die Teilforschungsfragen
+2 und 3 in Kapitel~\ref{ch:schutzmassnahmen} während den Entwicklungsschritten einer der Schutzmaßnahme. Die Teilforschungsfrage 4 wird ebenfalls in dem 
+Kapitel~\ref{ch:schutzmassnahmen} beantwortet, indem die Wirksamkeit der Schutzmaßnahme mit öffentlichen Datensätzen überprüft wird. \\
+Die Beantwortung der Hauptforschungsfrage soll allgemein erfolgen, obwohl der unternehmsinterne Chatbot als Testsystem verwendet wird.
 
 \section{Aufbau der Arbeit}
 
-Die Arbeit gliedert sich in sieben Kapitel. Im Anschluss an die Einleitung werden im Grundlagenkapitel die fachlichen Grundlagen erarbeitet, um dem Leser einen 
-Überblick über die Thematik zu verschaffen. Dazu werden \acp{llm} und ihre Funktionsweise, ihre Entwicklungsgeschichte, ihre technischen Bestandteile und 
-ihr Aufbau behandelt. Darauf aufbauend wird Tool Calling bei \acp{llm} erläutert, also die Nutzung und der Ablauf eines Aufrufs von externen Ressourcen. Das Verständnis
-dieser Funktion bildet eine wesentliche Grundlage für die Arbeit. Zusätzlich werden Sicherheitsbedrohungen vorgestellt, welche durch den Einsatz von Tool Calling 
-entstehen. Anschließend werden Chatbots definiert und von \acp{llm} abgegrenzt. Es wird ihre Architektur erläutert und anhand dieser die Angriffsfläche beschrieben.
-Abschließend werden unternehmensinterne Chatbots mit ihren Einsatzbereichen und Risiken betrachtet. \\
-Im darauffolgenden Kapitel wird das zentrale Thema der Arbeit behandelt. Prompt-Injection-Angriffe werden definiert und in direkte und indirekte Angriffe kategorisiert.
-Für beide Kategorien werden aktuelle Angriffe vorgestellt und erläutert. Zusätzlich wird die Bedeutung dieser Angriffe für Unternehmen behandelt und anhand eines
+Die Arbeit gliedert sich in sieben Kapitel. Im Kapitel~\ref{ch:grundlagen} werden die fachlichen Grundlagn vermittelt. Dazu werden \acp{llm} und ihre Funktionsweise, 
+ihre Entwicklungsgeschichte, ihre technischen Bestandteile und ihr Aufbau behandelt. 
+
+
+Darauf aufbauend wird Tool Calling bei \acp{llm} erläutert, also die Nutzung und der Ablauf eines Aufrufs von externen Ressourcen.  Zusätzlich werden 
+Sicherheitsbedrohungen vorgestellt, welche durch den Einsatz von Tool Calling 
+entstehen. Im weiteren Verlauf werden Chatbots definiert und von \acp{llm} abgegrenzt. Es wird ihre Architektur erläutert und anhand dieser die Angriffsfläche beschrieben.
+Den Abschluss des Kapitels bildet die Betrachtung unternehmensinterner Chatbots mit ihren Einsatzbereichen und Risiken. \\
+
+Kapitel~\ref{ch:promptinjection} bahndelt das zentrale Thema der Arbeit. Prompt-Injection-Angriffe werden definiert und in direkte und indirekte Angriffe kategorisiert.
+Für beide Kategorien werden aktuelle Angriffe vorgestellt und erläutert. Ergänzend wird die Bedeutung dieser Angriffe für Unternehmen behandelt und anhand eines
 praxisnahen Beispiels veranschaulicht. \\
-Auf Grundlage dieser Kapitel wird der praktische Teil der Arbeit vorbereitet, in dem der unternehmensinterne Chatbot auf Angriffe getestet wird. Hierfür wird eine 
-Testumgebung aufgebaut. Es werden der Aufbau des Chatbots und seine Komponenten sowie die weiteren Bestandteile der Testumgebung beschrieben. Anschließend werden 
-die Durchführung der einzelnen Angriffe beschrieben und die Ergebnisse dokumentiert, welcher Angriff in welchem Umfang erfolgreich war. Abschließend werden die aus
-den Ergebnissen ableitbaren Schwachstellen dargestellt. \\
-Im Anschluss an diese Vorarbeiten folgt der Hauptbestandteil der Arbeit: die Konzeption und Implementierung einer eigenen Schutzmaßnahme, mit der die zuvor dokumentierten
-Angriffe abgewehrt werden sollen. Dazu werden zunächst mögliche Schutzmaßnahmen aus der Theorie aufbereitet und auf Basis ausgewählter Maßnahmen ein Konzept
-entwickelt. Für die Schutzmaßnahme wird ein Datensatz erstellt sowie öffentliche Datensätze übertragen und geeignete Metriken ausgewählt. Anschließend wird die
-Maßnahme implementiert und die Ergebnisse für die Auswertung aufbereitet. \\
-In der Evaluation wird zunächst überprüft, ob die Forschungsfragen beantwortet wurden. Anschließend werden die Ergebnisse bewertet und analysiert, ob die Schutzmaßnahme
-erfolgreich war und aus welchen Gründen. Zudem werden die Grenzen der Arbeit aufgezeigt und Verbesserungsmöglichkeiten definiert. \\
-Abschließend werden die wesentlichen Ergebnisse der Arbeit zusammengetragen und ein Ausblick gegeben, wie zukünftige Forschung bestehende Lücken schließen kann.
+Kapitel~\ref{ch:methodik} behandelt die Grundlage des praktischen Teil. Es wird das Testsystem, der Chatbot, und die Testumgebung beschrieben und die durchgeführten Angriffe 
+sowie die Ergebnisse dokumentiert. Aus diesen werden Schwachstellen des Chatbots angeleitet. \\
+In Kapitel~\ref{ch:schutzmassnahmen} wird der Hauptteil der Arbeit behandelt. Anhand einer zuvor dokumentierten Übersicht aktueller Schutzmaßnahmen wird ein 
+eigenes Konzept entwickelt. Diese Schutzmaßnahme wird implementiert und mit den in der Zielsetzung genannten Datensätzen getestet. \\
+Kapitel~\ref{ch:evaluation} beantwortet die Forschungsfragen, bewertet die Ergebnisse und anaysiert, aus welchen Gründen die Schutzmaßnahme erfolgreich oder nicht
+erfolgreich war. Zudem werden die Grenzen der Arbeit aufgezeigt und Verbesserungsmöglichkeiten definiert. \\
+In Kapitel~\ref{ch:fazit} werden abschließend die wesentlichen Ergebnisse zusammengetragen und ein Ausblick darauf gegeben, wie zukünftige Forschung bestehende 
+Lücken schließen kann.
