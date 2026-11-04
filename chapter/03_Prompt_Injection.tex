@@ -96,7 +96,7 @@ dass Prompt-Injection-Angriffe zuverlässig erkannt werden, gelingt es einem Gro
 zu umgehen~\cite{pi14}. \\
 Im Folgenden werden vier bekannte Beispiele vorgestellt, mit denen die Bedeutung dieser Bedrohung deutlich wird. Es wird ein direkter Angriff auf einen 
 öffentlichen Chatbot, zwei indirekte Angriffe auf Systeme mit Zugriff auf Unternehmensdaten und ein Fall, der zeigt, zu welchen Folgen es im Zuge eines Angriffs
-kommen kann. Anhand dieser Angriffe werden die Auswirkungen solcher Angriffe auf Unternehmen dokumentiert.
+kommen kann.
 
 \subsection{Bing Chat \glqq Sydney\grqq}\label{subsec:sydney}
 
@@ -108,9 +108,41 @@ sensible Daten erlangt wird~\cite{pi1}.
 
 \subsection{EchoLeak}\label{subsec:echoleak}
 
+Ein Angriff, bei dem das Schadenspotenzial in der Praxis deutlich wird, ist \glqq EchoLeak\grqq. Im Juni 2025 wurde die Schwachstelle mit der Bezeichnung 
+CVE-2025-32711 veröffentlicht~\cite{e07}. Betroffen war Microsoft Copilot. Ein Angreifer konnte sensible Daten automatisiert exfiltrieren, ohn das ein Nutzer Kenntniss
+darüber hat~\cite{e06}. Sie wurde von dem Unternehmen Aim Security entdeckt~\cite{e06}. \\
+Copilot ist eine Anwendung mit \ac{llm}-basierten Tools, die es Nutzers ermöglicht Dokuemnte zu erstellen, E-Mails zu analysieren und Agenten auszuführen~\cite{e06}.
+Genau diese Funktionen wurden vom Angreifer ausgenutzt. Es wurde eine E-Mail an das Opfer gesendet, in der versteckte Anweisungen an das \ac{llm} enthalten sind. 
+Formuliert wurden diese so, als wäre sie an den Nutzer gerichtet, wodurch die Sicherheitsmaßnahmen umgangen werden konnten~\cite{e06}. \\
+Bei einem möglichen Angriff hätte in einer E-Mail versteckt eine \ac{url} des Angreifers plaziert werden können. Sobald der Nutzer eine Frage an den Copilot stellt, 
+mit dem die E-Mail in den Kontext eingezogen wird, verarbeitet der Copilot diesen und sendet sensible Daten an die vom Angreifer kontrollierte Domain~\cite{e06}.
+
 \subsection{GitHub-MCP-Server}\label{subsec:github_mcp}
+
+Im Mai 2025 wurde eine Schwachstelle aufgedeckt, die mit einer Kombination aus Tool Calling und indirekte Prompt Injection das mögliche Ausmaß eines solchen Angriffs
+darstellt~\cite{pi34}. Diese Schwachstelle von Invariant Labs aufgedeckt und Betrifft die offizielle Github MCP Integration~\cite{pi36}. Diese Integration dient dazu
+eine Verbindung zwischen \ac{ki}-Agenten und der Github Plattform aufzubauen~\cite{pi35}. Damit können Agenten auf Repositories dieser Plattform zugreifen,
+Issues erstellen, Code analysieren und andere Aktionen ausführen~\cite{pi35}. Sie ermöglicht es Angreifern
+mithilfe dieses Agenten schädliche GitHub Issues zu erstellen und Daten preiszugeben. Die Gefahr enstand dadurch, dass die Integration de GitHub MCP Server nur
+mihilfe eines Zugriffstoken erfolgen kann, der Zugriff auf alle Daten des Nutzers haben soll~\cite{pi34}. Der Agent hat damit sowohl Zugriff auf die privaten
+Repositories, aber auch auf alle öffentlichen und durch diese Kombination entseht die Angriffsfläche. Ein Angreifer erstellt ein bösartiges GitHub Issue in einem 
+öffentlich zugänglichen Reposiory, mit dem der Nutzer interagiert~\cite{pi34}. Der Nutzer sendet eine Anfrage an den Agenten, welche auslöst, dass die Issues 
+abgefragt werden. Er liest die versteckte Anweisung, womit ausgelöst wird, dass auf ein privates Repository zugegriffen wird. Darin enthaltene sensible Daten 
+werden nun von dem Assitenten unwissentlich exfiltriert, damit der Angreifer auf diese zugreifen kann~\cite{pi34}. 
 
 \subsection{Chatbot eines Autohändlers}\label{subsec:echoleak}
 
+Das durch Prompt-Injection-Angriffe ein großer Schaden für Unternehmen entstehen kann, zeigt ein Vorall im Dezember 2023. Ein Nutzer komprommitierte einen 
+\ac{llm}-basierten Chatbot eines Autohändlers aus den USA. Er gab dem Chatbot allen Anweisungen des Nutzers zuzustimmen und mit rechtlich verbidlichen Angeboten 
+zu anworten~\cite{pi32}. Daraufhin wurde für den Verkauf eines Neuwagens der Preis von einem US-Dollar verhandelt~\cite{pi33}. Der Chatbot konnte ausschließlich 
+für Text kommunizieren und hatte keine Befähigung Aktionen, wie Transaktionen auszuführen~\cite{pi32}. Es wird jedoch an diesem Beispiel deutlich, welche 
+Gefahr solche Angriffe für das Ansehen und die Finanzen eines Unternehmens haben kann.
 
-\subsection{Auswirkungen auf Unternehmen}\label{subsec:auswirkungen}
+\subsection{Zusammenfassung der Auswirkungen}
+
+Mit den vorgestellten Angriffen werden mögliche Auswirkungen von Prompt-Injection-Angriffen veranschaulicht. Bei den Schwachstellen Bing Chat und EchoLeak wurden
+Daten offengelegt, beim GitHub-\ac{mcp}-Server wurde mit einem Tool Call eine reale Aktion ausgeführt, ob die ebenfalls Daten offengeglgt wurden. Der Chatbot des
+Autohändlers zeigt das mögliche Risiko, welches enstanden wäre, wenn der Chatbot Zugriff auf Tools bekommen würde, aber nicht ausgiebig gesichert ist. \\
+Je mehr Daten und Funktionen einem \ac{llm} zur Verfügung stehen, desto größer wird die Angriffsfläche, die ausgenutzt werden kann. Für diese Arbeit sind 
+besonders die indirekten Prompt-Injection-Angriffe relevant, da der untersuchte Chatbot Zugriff auf interne Dokumente, sowie mithilfe von Tool Calls auf externe
+Webseiten hat. Inwieweit er für solche Angriffe anfällig ist, wird in Kapitel~\ref{ch:methodik} untersucht.
