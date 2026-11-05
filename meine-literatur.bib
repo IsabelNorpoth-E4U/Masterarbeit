@@ -63,6 +63,223 @@
 
 % 2. Grundlagen
 
+% 2. RAG
+
+% rag01 == pi24
+
+@inproceedings{rag02,
+    title = "Dense Passage Retrieval for Open-Domain Question Answering",
+    author = "Karpukhin, Vladimir  and
+      Oguz, Barlas  and
+      Min, Sewon  and
+      Lewis, Patrick  and
+      Wu, Ledell  and
+      Edunov, Sergey  and
+      Chen, Danqi  and
+      Yih, Wen-tau",
+    editor = "Webber, Bonnie  and
+      Cohn, Trevor  and
+      He, Yulan  and
+      Liu, Yang",
+    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing ({EMNLP})",
+    month = nov,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2020.emnlp-main.550/",
+    doi = "10.18653/v1/2020.emnlp-main.550",
+    pages = "6769--6781",
+    urldate      = {2026-10-30}
+}
+
+@article{rag03,
+author = {Huang, Lei and Yu, Weijiang and Ma, Weitao and Zhong, Weihong and Feng, Zhangyin and Wang, Haotian and Chen, Qianglong and Peng, Weihua and Feng, Xiaocheng and Qin, Bing and Liu, Ting},
+title = {A Survey on Hallucination in Large Language Models: Principles, Taxonomy, Challenges, and Open Questions},
+year = {2025},
+issue_date = {March 2025},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {43},
+number = {2},
+issn = {1046-8188},
+url = {https://doi.org/10.1145/3703155},
+doi = {10.1145/3703155},
+abstract = {The emergence of large language models (LLMs) has marked a significant breakthrough in natural language processing (NLP), fueling a paradigm shift in information acquisition. Nevertheless, LLMs are prone to hallucination, generating plausible yet nonfactual content. This phenomenon raises significant concerns over the reliability of LLMs in real-world information retrieval (IR) systems and has attracted intensive research to detect and mitigate such hallucinations. Given the open-ended general-purpose attributes inherent to LLMs, LLM hallucinations present distinct challenges that diverge from prior task-specific models. This divergence highlights the urgency for a nuanced understanding and comprehensive overview of recent advances in LLM hallucinations. In this survey, we begin with an innovative taxonomy of hallucination in the era of LLM and then delve into the factors contributing to hallucinations. Subsequently, we present a thorough overview of hallucination detection methods and benchmarks. Our discussion then transfers to representative methodologies for mitigating LLM hallucinations. Additionally, we delve into the current limitations faced by retrieval-augmented LLMs in combating hallucinations, offering insights for developing more robust IR systems. Finally, we highlight the promising research directions on LLM hallucinations, including hallucination in large vision-language models and understanding of knowledge boundaries in LLM hallucinations.},
+journal = {ACM Trans. Inf. Syst.},
+month = jan,
+articleno = {42},
+numpages = {55},
+keywords = {Large Language Models, Hallucination, Factuality, Faithfulness},
+urldate      = {2026-10-30}
+}
+
+@misc{rag04,
+      title={Retrieval-Augmented Generation for Large Language Models: A Survey}, 
+      author={Yunfan Gao and Yun Xiong and Xinyu Gao and Kangxiang Jia and Jinliu Pan and Yuxi Bi and Yi Dai and Jiawei Sun and Meng Wang and Haofen Wang},
+      year={2024},
+      eprint={2312.10997},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2312.10997}, 
+      urldate      = {2026-10-30}
+}
+
+@inproceedings{rag05,
+author = {Lewis, Patrick and Perez, Ethan and Piktus, Aleksandra and Petroni, Fabio and Karpukhin, Vladimir and Goyal, Naman and K{\"u}ttler, Heinrich and Lewis, Mike and Yih, Wen-tau and Rockt{\"a}schel, Tim and Riedel, Sebastian and Kiela, Douwe},
+title = {Retrieval-augmented generation for knowledge-intensive NLP tasks},
+year = {2020},
+isbn = {9781713829546},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+abstract = {Large pre-trained language models have been shown to store factual knowledge in their parameters, and achieve state-of-the-art results when fine-tuned on downstream NLP tasks. However, their ability to access and precisely manipulate knowledge is still limited, and hence on knowledge-intensive tasks, their performance lags behind task-specific architectures. Additionally, providing provenance for their decisions and updating their world knowledge remain open research problems. Pre-trained models with a differentiable access mechanism to explicit non-parametric memory can overcome this issue, but have so far been only investigated for extractive downstream tasks. We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) — models which combine pre-trained parametric and non-parametric memory for language generation. We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever. We compare two RAG formulations, one which conditions on the same retrieved passages across the whole generated sequence, and another which can use different passages per token. We fine-tune and evaluate our models on a wide range of knowledge-intensive NLP tasks and set the state of the art on three open domain QA tasks, outperforming parametric seq2seq models and task-specific retrieve-and-extract architectures. For language generation tasks, we find that RAG models generate more specific, diverse and factual language than a state-of-the-art parametric-only seq2seq baseline.},
+booktitle = {Proceedings of the 34th International Conference on Neural Information Processing Systems},
+articleno = {793},
+numpages = {16},
+location = {Vancouver, BC, Canada},
+series = {NIPS '20},
+urldate      = {2026-10-30}
+}
+
+
+% 2. Chatbot
+
+
+@article{cb01,
+  author  = {Annepaka, Yadagiri and Pakray, Partha},
+  title   = {Large language models: a survey of their development, capabilities, and applications},
+  journal = {Knowledge and Information Systems},
+  volume  = {67},
+  pages   = {2967--3022},
+  year    = {2024},
+  month   = dec,
+  doi     = {10.1007/s10115-024-02310-4},
+  url     = {https://link.springer.com/article/10.1007/s10115-024-02310-4},
+  urldate = {2026-10-30}
+}
+
+@InProceedings{cb02,
+author="Brandtzaeg, Petter Bae
+and F{\o}lstad, Asbj{\o}rn",
+editor="Kompatsiaris, Ioannis
+and Cave, Jonathan
+and Satsiou, Anna
+and Carle, Georg
+and Passani, Antonella
+and Kontopoulos, Efstratios
+and Diplaris, Sotiris
+and McMillan, Donald",
+title="Why People Use Chatbots",
+booktitle="Internet Science",
+year="2017",
+publisher="Springer International Publishing",
+address="Cham",
+pages="377--392",
+isbn="978-3-319-70284-1",
+urldate = {2026-10-30}
+}
+
+@article{cb03,
+author = {Huang, Weijiao and Hew, Khe Foon and Fryer, Luke K.},
+title = {Chatbots for language learning—Are they really useful? A systematic review of chatbot-supported language learning},
+journal = {Journal of Computer Assisted Learning},
+volume = {38},
+number = {1},
+pages = {237-257},
+keywords = {affordances, chatbot usefulness, chatbots, language learning},
+doi = {https://doi.org/10.1111/jcal.12610},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1111/jcal.12610},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1111/jcal.12610},
+abstract = {Abstract Background The use of chatbots as learning assistants is receiving increasing attention in language learning due to their ability to converse with students using natural language. Previous reviews mainly focused on only one or two narrow aspects of chatbot use in language learning. This review goes beyond merely reporting the specific types of chatbot employed in past empirical studies and examines the usefulness of chatbots in language learning, including first language learning, second language learning, and foreign language learning. Aims The primary purpose of this review is to discover the possible technological, pedagogical, and social affordances enabled by chatbots in language learning. Materials \& Methods We conducted a systematic search and identifies 25 empirical studies that examined the use of chatbots in language learning. We used the inductive grounded approach to identify the technological and pedagogical affordances, and the challenges of using chatbots for students’ language learning. We used Garrison's social presence framework to analyze the social affordances of using chatbots in language learning Results Our findings revealed three technological affordances: timeliness, ease of use, and personalization; and five pedagogical uses: as interlocutors, as simulations, for transmission, as helplines, and for recommendations. Chatbots appeared to encourage students’ social presence by affective, open, and coherent communication. Several challenges in using chatbots were identified: technological limitations, the novelty effect, and cognitive load. Discussion and Conclusion A set of rudimentary design principles for chatbots are proposed for meaningfully implementing educational chatbots in language learning, and detailed suggestions for future research are presented.},
+year = {2022},
+urldate = {2026-10-30}
+}
+
+@article{cb04,
+  author  = {Hsu, Pei-Fang and Nguyen, Tuan and Wang, Chen-Ya and Huang, Pei-Ju},
+  title   = {Chatbot commerce---How contextual factors affect Chatbot effectiveness},
+  journal = {Electronic Markets},
+  volume  = {33},
+  number  = {14},
+  year    = {2023},
+  month   = may,
+  doi     = {10.1007/s12525-023-00629-4},
+  urldate = {2026-10-30}
+}
+
+@Inbook{cb05,
+author="Kurpicz-Briki, Mascha",
+title="Haben Chatbots Gef{\"u}hle?",
+bookTitle="Mehr als ein Chatbot: Die Entmystifizierung der Sprachmodelle",
+year="2024",
+publisher="Springer Nature Switzerland",
+address="Cham",
+pages="59--89",
+abstract="Die Menschheit ist schon lange Zeit davon fasziniert, intelligente Maschinen zu erschaffen, was auch zu einer ganzen Reihe von B{\"u}chern und Filmen gef{\"u}hrt hat. Mit den neusten Sprachmodellen kommt wieder die Frage auf, was es eigentlich bedeutet, wenn wir von intelligent sprechen. In diesem Kapitel werden wir dieses Thema diskutieren und auch sehen, wie dies durch die menschliche Wahrnehmung beeinflusst wird. Im zweiten Teil des Kapitels werden wir unsere technischen Kenntnisse vertiefen und erfahren, wie Sprachmodelle funktionieren. Am Schluss schauen wir uns noch den typischen Aufbau eines Chatbots an.",
+isbn="978-3-031-58545-6",
+doi="10.1007/978-3-031-58545-6_4",
+url="https://doi.org/10.1007/978-3-031-58545-6_4",
+urldate = {2026-10-30}
+}
+
+% cb06 == pi18
+
+% cb07 == pi24
+
+% cb08 == sm08
+
+@inproceedings{cb09,
+author = {Greshake, Kai and Abdelnabi, Sahar and Mishra, Shailesh and Endres, Christoph and Holz, Thorsten and Fritz, Mario},
+title = {Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection},
+year = {2023},
+isbn = {9798400702600},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3605764.3623985},
+doi = {10.1145/3605764.3623985},
+abstract = {Large Language Models (LLMs) are increasingly being integrated into applications, with versatile functionalities that can be easily modulated via natural language prompts. So far, it was assumed that the user is directly prompting the LLM. But, what if it is not the user prompting? We show that LLM-Integrated Applications blur the line between data and instructions and reveal several new attack vectors, using Indirect Prompt Injection, that enable adversaries to remotely (i.e., without a direct interface) exploit LLM-integrated applications by strategically injecting prompts into data likely to be retrieved at inference time. We derive a comprehensive taxonomy from a computer security perspective to broadly investigate impacts and vulnerabilities, including data theft, worming, information ecosystem contamination, and other novel security risks. We then demonstrate the practical viability of our attacks against both real-world systems, such as Bing Chat and code-completion engines, and GPT-4 synthetic applications. We show how processing retrieved prompts can act as arbitrary code execution, manipulate the application's functionality, and control how and if other APIs are called. Despite the increasing reliance on LLMs, effective mitigations of these emerging threats are lacking. By raising awareness of these vulnerabilities, we aim to promote the safe and responsible deployment of these powerful models and the development of robust defenses that protect users from potential attacks.},
+booktitle = {Proceedings of the 16th ACM Workshop on Artificial Intelligence and Security},
+pages = {79–90},
+numpages = {12},
+keywords = {indirect prompt injection, large language models},
+location = {Copenhagen, Denmark},
+series = {AISec '23},
+urldate = {2026-10-30}
+}
+
+@article{cb10,
+author = {Weizenbaum, Joseph},
+title = {ELIZA—A Computer Program For the Study of Natural Language Communication Between Man and Machine},
+year = {1966},
+issue_date = {Jan. 1966},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {9},
+number = {1},
+issn = {0001-0782},
+url = {https://doi.org/10.1145/365153.365168},
+doi = {10.1145/365153.365168},
+abstract = {ELIZA is a program operating within the MAC time-sharing system at MIT which makes certain kinds of natural language conversation between man and computer possible. Input sentences are analyzed on the basis of decomposition rules which are triggered by key words appearing in the input text. Responses are generated by reassembly rules associated with selected decomposition rules. The fundamental technical problems with which ELIZA is concerned are: (1) the identification of key words, (2) the discovery of minimal context, (3) the choice of appropriate transformations, (4) generation of responses in the absence of key words, and (5) the provision of an editing capability for ELIZA “scripts”. A discussion of some psychological issues relevant to the ELIZA approach as well as of future developments concludes the paper.},
+journal = {Commun. ACM},
+month = jan,
+pages = {36–45},
+numpages = {10},
+urldate = {2026-10-30}
+}
+
+@article{cb11,
+title = {Chatbots: History, technology, and applications},
+journal = {Machine Learning with Applications},
+volume = {2},
+pages = {100006},
+year = {2020},
+issn = {2666-8270},
+doi = {https://doi.org/10.1016/j.mlwa.2020.100006},
+url = {https://www.sciencedirect.com/science/article/pii/S2666827020300062},
+author = {Eleni Adamopoulou and Lefteris Moussiades},
+keywords = {Chatbot, Pattern matching, Machine learning, Natural dialog interfaces, Natural language processing, Human–computer interaction},
+urldate = {2026-10-30}
+}
+
 
 
 

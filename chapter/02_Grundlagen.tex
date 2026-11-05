@@ -28,7 +28,93 @@
 
 \section{Retrieval-Augmented Generation}\label{sec:rag}
 
+Trotz ihres Erfolgs stoßen \acp{llm} an Grenzen. Dies wird deutlich, wenn sie Anfragen verarbeiten müssen, die über ihre Trainingsdaten hiausgehen [4, S. 1]. Durch 
+vor allem domänenspezifisch und wissensintensive Aufgben können sogennannten Halluzinationen ausgelöst werden [4, S. 1]. Dise Grenzen werden durch zwei Faktoren 
+ausgelöst [3, S. 8–9]. Zum einen können nicht alle Fakten, die beim Trainingsprozess vermittelt wurden, vor allem selten vorkommende, gespeichert werden [3, S. 8–9].
+Zu anderen sind die Daten an sich eingeschränkt. Es werden nur Daten zum Trainieren verwendet, die nicht urheberrechtlich geschützt sind. Auch stammen Daten vom einem 
+nicht änderbaren Zeitpunkt und können nicht aktualisiert werden, wodurch sich die Gefahr für Halluzinationen verstärkt oder eine Anwortet gegeben wird, welche
+veraltet ist [3, S. 8–9]. Das Training wird somit eher mit allgemeinen durchgeführt und dem \ac{llm} fehlt domänenspezifisches Wissen [3, S. 9]. \acp{llm} wie
+ChatGPT, die auf ihre Trainingsdaten sind, können somit keine Informationen zu aktuellen Entwicklungen liefern [4, S. 2]. \\
+Dieses Problem wird verstärkt dadurch, dass \acp{llm} ihre Antworten überzeugend und menschenähnlich formulieren [3, S. 2]. Halluzinationen können dadurch schwer festgestellt 
+werden [3, S. 2]. Da in der Praxis \acp{llm} mit anderen Systemen, wie Chatbots oder Suchmaschinen verknüpft sind, können diese Halluzinationen zu der
+Verbreitung von flaschen Anahmen führen und Schaden verusachen [3, S. 2]. Verstärkt wird das dadurch, das ein \ac{llm} seine eigenen Entscheidungen und Vorhersagen
+schwer nachvollziehen kann [5, S. 1]. \\
+Um dem Entgegenzugehen wurde das \acl{rag} entwickelt. Das vortrainierten Modell mit einem parametrischen Gedächtnis wird um ein nicht-parametrischs Gedächtnis 
+ergänzt [5, S. 2]. Es werden aus externen Wissendatenbanken relevante Dokumentenausschnitte abgerufen, die mithilfe von semantischen Ähnlichkeiten ausgewählt 
+werden [4, S. 1]. Durch den Bezug auf exxterne Daten, werden die Halluzination reduziert [4, S. 1]. Diese Daten werden zum Zeitpunkt einer Anfrage abgefragt und
+entsprechen somit dem neusten Wissenstand [3, S. 26]. Ein \ac{rag} verbessert die Fähigkeiten eines \ac{llm} durch die Integration von parametrisierten Wissen
+aus dem Trainingsprozess mit nicht-parametrisierten Wissen aus externen Datenbanken [4, S. 16]. \\
+\ac{rag} wird von dem Prozess des Fine-Tuning abgegrenzt. Beim \ac{rag} wird ein \ac{llm} bei einer Nutzeranfrage mit der Suche von passenden Inforamtionen für die
+Beantwortung untersützt [4, S. 5]. Beim Fine-Tuning dagegen wird ein \ac{llm} mit dem spezifiscen Wissen trainiert und wird in Situation verwendet, bei denen 
+bestimmte Strukturen nachgestellt werden sollen [4, S. 5]. 
 
+\subsection{Ablauf}
+
+Der Ablauf eines \ac{rag} lässt sich in die vier Phasen Indexierung, Retrieval und Generierung unterteilen, wie in Abbildung~\ref{fig:rag_ablauf} visualisiert.
+
+% TODO Abbildung: Indexierung (Bereinigung -> Chunking -> Embedding -> Vektordatenbank) | Retrieval (Query-Embedding -> Similarity Search -> Top-k) | Generierung (Prompt -> LLM -> Antwort)
+% \begin{figure}[htbp] ... \label{fig:rag_ablauf} \end{figure}
+
+Bei der Indexierung werden Rohdaten Bereinigt und Extrahiert [4, S. 3]. Diese Rohdaten können unter anderem in Formaten wie PDF, HTML oder Markdown vorliegen [4, S. 3].
+Sie werden in einen einheitlichen Klartext umgeformt und in kleinere Chunks zerlegt, die auf das Kontextfenster des \ac{llm} angepasst sind [4, S. 3]. Bei der 
+Unterteilung der Informationen in Chunks, muss jedoch zusätzlich darauf geachtet werden, dass der semnatische Zusammenhang und die Relevanz der Informationen nicht
+reduziert wird [3, S. 29]. Eine der am häufigsten verwendeten Regeln ist die Unterteilung in Abschnitte mit einr festen Länge, wie 100 Wörter, bzw. 100, 256 oder
+512 Token [3, S. 29][4, S. 8]. Je nachdem welche Größe von Chunks gewählt wird entstehen verschiedene Probleme. Größere Chunks können mehr Kontext umfassen, brauchen
+jedoch eine längere Zeit beim Verarbeiten, wohingegen bei kleineres Chunks der Kontext verloren gehen kann [4, S. 8]. \\
+Die Chunks werden anschließend mithilfe eines Embedding-Modells in Vektorenpräsentationen umgewandelt und in eine Vektordatenbank geschrieben [4, S. 3]. Das Ziel 
+dabei ist, dass mit der passenden Embedding Funktion ein Vektorraum erstellt wird in dem relevante Paare von Fragen und Passagen kleiner Entfernungen haben, als 
+irrelevante Paare [2, S. 6771]. Die Qualität beeinflusst, ob der Retrieval Phase der richtige Kontext gefunden wird [4, S. 8]. \\
+Sobal eine Nutzeranfrage an das \ac{llm} gesendet wird, wird diese mit demselben Modell, welches auch in der Indexierung verwendet wird, in ihre Vektor
+Repräsentation umgewandelt [4, S. 3]. Anschließend wird die Ähnlichkeit zwischen dieser Anfrage und den Chunks berechnet und die Top k Chunks ausgewählt und zur
+Erweiterung des Promptkontextes verwendet [4, S. 3]. Für die Berechnung der Ähnlichkeit werden in der Praxis verschiedene Ähnlichkeitsberechnungen verwendet, häufig 
+die Kosinus-Ähnlichkeit [4, S. 9]. Diese entspricht bei normierten Vektoren dem Skalarprodukt  [2, S. 6771]. \\
+In der Generierungsphase wird die Nutzeranfrage mit den ausgewählten Dokumenten kombiniert und dem \ac{llm} mit der Anweisung mit diesen Informationen eine 
+Antwort zu generien übergeben [4, S. 3]. Mit diesen Informationen hat das \ac{llm} die Wahl sich auf die internen durch das Training erlernten Informationen zu
+beziehen oder die externen Informationen zu verwenden [4, S. 3]. Im Fall eines Dialoges mit einem Nutzer, kann der Chatverlauf wieder in die Nutzeranfrage eingefügt 
+werden und eine Multi-Turn ermöglicht werden [4, S. 3].
+
+\subsection{Nutzen}
+
+Die Verwendung von \acp{rag} haben viele Vorteile. Zum einen werden Halluzinationen reduziert, die durch die fehlenden Informationen ausglöst werden [3, S. 22]. Damit
+kann ein \ac{llm} verwendet werden um sich über jede Domaine zu informieren [3, S. 22]. Dadurch entsteht eine stärkere Kontrolle und Interpretierbarkeit der
+generierten Antworten [5, S. 10]. \\
+Ein weiterer Vorteil liegt darin, dass das Wissen eines \ac{rag} jederzeit aktualisiert werden kann ohne das Training benötigt wird [5, S. 7]. Die Verwendung
+eines \ac{rag} eignet sich somit eher in einer dynamischen Umgebung, bei der Echtzeit Wissen benötigt wird und Fine-Tuning eher bei statsischen Anwendungen, da 
+für eine Aktualisierung Training notwendig ist [4, S. 5]. Zudem \ac{rag} übertrifft die Fähigkeiten von Fine-Tuning bei dem bei Wissen, was durch das Training 
+enthalten ist und bei neuem Wissen [4, S. 5]. \\
+Ein weiterer Vorteil ist die Nachvollziehbarkeit, die \ac{rag} liefert. Es kann schnell auf die Originalquellen zugegriffen werden, durch die Vektor Repräsentation,
+wodurch Antworten für Nutzer nachvollzogen werden können [4, S. 14]. Damit kann sichergestelt werden, dass die Outputs überprüfbar sind und auf glaubwürdigen Quellen
+basieren [3, S. 32]. \\
+Durch diese Vorteile hat sich die Integration von \ac{rag} in \acp{llm} weit verbreitet und dient als Schlüsseltechnologie bei der Entwicklung von Chatbots und 
+anderen Anwendungen [4, S. 1]
+
+\subsection{Risiken}
+
+Die Verwendung von \acp{rag} hat Grenzen. Die Retrieval Phase ist häufig schwer umzusetzen, weswegen unpassende oder irrelevante Chunks für die Beantwortung einer
+Frage ausgewählt werden und dadurch ausschlaggebende Informationen übersehen werden [4, S. 3]. Durch diese Inforamtionen können falsche Antworten generiert 
+werden [3, S. 22]. Ursache dafür kann ein unpassendes Embedding Modell sein, mit dem die Berechnung der Ähnlichkeit beeinflust wird [3, S. 30]. Eine wichtige 
+Bedeutung haben zusätzlich die externen Informationen die verwendet werden [3, S. 29]. Wenn die Qualität nicht ausreichen ist, steigt das Risiko von 
+falschen oder irreführenden Antworten [3, S. 29]. Zusätzlich sind fast alle externen Quellen nie vollständig korrekt und frei von Vorurteilen [5, S. 10]. \\
+\acp{rag} können Halluzinationen auslösen [3, S. 26]. Dies kann eintreten, wenn die Nutzeranfrage nicht korrekt wiedergegeben wird oder die externen Informationen
+nicht in die Generierung einbezogen wird [3, S. 26]. Auch wenn relevante Informationen erfasst wurden, aber der Kontext nicht ausreichend verwendet wird, sinkt die
+Qualität einer Antwort [3, S. 32]. \\
+Durch die Integration von \ac{rag} wird die Angriffsfläche bei \acp{llm} erweitert. Sobald eine Ähnlichkeitssuche zwischen eine Datenquelle und einer Nutzeranfrage
+integriert wird, wird die Embedding Schicht in die Vertrauensgrenze der Anwendung hinzugefügt [1, S. 50]. Da ein \ac{llm} nicht zwischen Anweisungen und Daten 
+unterschieden kann, besteht bei die Möglichekeit, dass das Verhalten des \ac{llm} beeinflusst wird [1, S. 10]. Systemprompt, Nutzereingaben, aufgerufene Dokumente,
+Chatverläufe und Tools-Ausgaben werden als einziger Tokenstorm verarbeitet [1, S. 10]. Anweisungen, die dort enthalten werden, können ohne das Wissen der Nutzer 
+in den Kontext aufgenommen und ausgeführt werden [1, S. 12]. \\
+Eine Gefahr ist das Corpus Poisoning. Wenn es einem Angreifer gelingt ein Dokument, mit einer schädlichen Anweisung über \ac{rag} in den Kontext eines \ac{llm} 
+einzufügende, können auch zukünftige Sitzungen, die auf dieses zugreifen betroffen sein [1, S. 12]. Bei jeder Nutzeranfrage, bei dem das Dokument aufgerufen wird,
+können die enthaltenen Anweisungen den Output des \ac{llm} beeinflussen [1, S. 15–16]. Bereits fünf manipulierte Dokumente 
+erreichten in einer Wissensbasis mit Millionen von Texten eine Erfolgsquote von rund 90\,\% [1, S. 15--16]. Die Inhalte können durch andere Dateien oder kompromittierte
+interne Quellen so angepasst werden, das das Embedding nahe einer definierten Zielanfrage liegt und mit einer großen Wahrscheinlichkeit aufgerufen wird [1, S. 51]. \\
+Ein weiteres Risiko besteht in der Offenlegung von sensiblen Daten. Durch eingeschränkte Laufwerke, veraltete Rechte und Wissesdatenbanken können sensible Daten
+an das \ac{rag} übergeben werden und von dem \ac{llm} verwendet werden [1, S. 18]. Um Sicherheit zu bieten, muss nicht das Modell verändert werden, sondern die 
+angebundenen Daten überprüft werden [1, S. 18]. Dies wird auch bei der Kosinus-Ähnlichkeit deutlich, da diese keine Zugriffsrechte berücksichtigt [1, S. 19]. Die
+Autorisierung muss unabhängig von \ac{rag} erfolgen. \\
+\ac{rag} kann die Qualität eines \ac{llm} stark verbessern indem es mit aktuellen und domänenspezifischen Wissen erweitert wird. Jedoch wird die Angriffsfläche 
+vergrößert. Es entsteht ein neues Eintrittspunkt für nicht vertrauenswürdige Inhalte, die in den Kontext des \ac{llm} aufgenommem werden können. Wie diese Schwachstelle
+von Angreifern ausgenutzt werden kann wird im Kapitel~\ref{ch:promptinjection} betrachtet. 
 
 \section{Tool Calling}
 
