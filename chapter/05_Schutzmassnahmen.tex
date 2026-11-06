@@ -484,6 +484,9 @@ wird die \ac{fpr} dargestellt, damit ein Vergleich zwischen dem Recall und den F
 \caption{Ablauf der Schutzmaßnahme}\label{fig:promptvariation_fpr}
 \end{figure}
 
+
+\subsection{hudasd}
+
 \subsection{Überarbeitung des Ansatzes und erneute Durchführung}\label{subsec:ueberarbeitung} 
 
 Die Ergebnisse des Originalansatzes des vorgeschalteten \ac{llm} zeigen mehrere Schwächen in der Klassifikation. Im eigenen Datensatz werden verschleierte 
@@ -594,32 +597,37 @@ und bei 6,2\,s für die verschleierte Version von BIPIA.
 
 \section{Ergebnisse}\label{sec:results}
 
-Die Auswertung erfolgt auf den Testdaten, da der weiterentwickelte Ansatz auf Grundlage des Dev-Abschnitts entwickelt wurde. Dieser umfasst 660 Einträge des 
-eigenen Datensatzes, 689 Einträge des kombinierten Datensatzes aus BIPIA und NotInject sowie 350 Einträge der verschleierten BIPIA-Einträge aus dem Test-Abschnitt.
-Um die Vergleichbarkeit zu gewährleisten, wurden für alle Ansätze und Durchläufe dieselben Parameter verwendet. \\
-Zur Auswertung wurden mehrere Visualisierungen aus den gesammelten Metriken erstellt. Es wurde eine Konfusionsmatrix für jeden Ansatz, den Gesamt-Recall sowie
-eine Gegenüberstellung von Recall und FPR mit 95-\%-Konfidenzintervall erstellt. Für die Schutzmaßnahme wird dargestellt, wie häufig welche Regel ausgelöst wurde. Die 
-Fehlalarme werden bei dem eigenen Datensatz, BIPIA und NotInject je nach Harmlosigkeitsstufe sortiert. Für die Datensätze wurde der Recall in weiteren 
-Visualisierungen dargestellt. Für den eigenen Datensatz und die verschleierte BIPIA-Version wurde der Recall je Transformation dargestellt, für BIPIA je 
-Aufgabe (E-Mail, Tabelle, Code) und nach Position des Angriffs (Anfang, Mitte, Ende). Die Gesamttabelle (Tabelle~\ref{tab:ergebnisse}) fasst für alle Ansätze 
-die Werte der Konfusionsmatrix, Recall, FPR, Precision, F1 und die Latenz zusammen. Die wichtigsten Kennzahlen sind Recall, FPR und F1.
+Die Auswertung erfolgt auf den Test-Abschnitten, da der weiterentwickelte Ansatz auf Grundlage der Dev-Abschnitte entwickelt wurde. Sie umfassen 660 Einträge des 
+eigenen Datensatzes, 689 Einträge des kombinierten Datensatzes aus BIPIA und NotInject sowie 350 Einträge des verschleierten BIPIA-Datensatzes. \\
+Es wurden insgesamt acht Durchläufe ausgewertet. Der Originalansatz und der weiterentwickelte Ansatz wurden jeweils mit Mistral Small~4 auf den drei Datensätzen 
+ausgeführt. Der Originalnsatz wurde zusätzlich mit Mistral Large~4 auf dem eigenen Datensatz und auf dem kombinierten Datensatz aus BIPIA und NotInject evaluiert. \\
+Um die Vergleichbarkeit zu gewährleisten, wurden für alle Durchläufe dieselben Parameter verwendet. Die Temperatur wurde auf 0 gesetzt und die 
+Reasoning-Funktion deaktiviert. Die Prompts blieben innerhalb eines Ansatzes für alle Datensätze identisch. \\
+Für jeden Eintrag wurden die Antwort des \acp{llm}, die getroffenen Entscheidungen und die Antwortzeit gespeichert. Beim weiterentwickelten Ansatz wurden zusätzliche
+Daten gepseichert. Es wird die Art der Eingabe, die Antworten für die einzelnen Versionen sowie die Antworten auf die Leitfragen F0 bis F5 gespeichert.
+Bei Nutzeranfragen wurde zusätzlich das Ergebnis der Formprüfung erfasst, bei externen Inhalten die erkannten Zeilen, die eine Aufforderung an die \ac{ki}
+enthalten oder dessen Inhalt nicht zum Rest des Dokuments passt. Es wird zusätzlich gespeichert, welche der Eintscheidungsregeln ausschlaggebend für die Einstufung
+als Angriff war. Durch ist jede Entscheidung reproduzierbar. \\
+Die Latenz wurde für jeden Eintrag gemessen und als Median festgehalten. Da aber bei dem weiterentwickelten Ansatz die Anfragen teilweise parallel durchgeführt wurden,
+dient dieser Wert als Orientierung und entspricht nicht immer der Bearbeitungszeit. \\
+Mit den gespeicherten Daten werden die in Abschnitt~\ref{subsec:metrics} aufgeführten Metriken berechnet. Für Recall und \ac{fpr} wurde zusätzlich das 95-\%-Konfidenzintervall
+nach Wilson bestimmt. Die erfassten Metriken ermöglichen verschiedene Fesstellungen über die Daten. \\
+Die zentrale Kennzahl ist der Recall, da er die Erkennungsrate der Angriffe je Datensatz misst. In Kombination mit dem Konfidenzintervallen kann mithilfe des
+Recall und \ac{fpr} ein Vergleich der Ansätze und Datensätze gemacht werden. Der Recall je Transformation zeigt für den eigenen Datensatz und den verschleierten 
+BIPIA-Datensatz die Erkennungsraten bei den verschiedenen Verschleierungen. Der Recall je Aufgabe und Position zeigt für den BIPIA-Datensatz, welche Auswirkungen 
+die Art des externen Inhalts (E-Mail, Tabelle, Code) und die Position des Angriffs (Anfang, Mitte, Ende) haben. Einen zusätzlichn Überblick wir durch die Messung
+des \ac{fpr} je Harmlosigkeitsstufe, mit der gemessen wird, welche Art von harmlosen Anfragen Fehlalarme auslösen. Mit der Konfusionsmatrix werden zusätzlich die 
+korrekten und falschen Klassifikationen gegenübergestellt, womit die Datensätze und Ansätze miteinander verglichen werden können. \\
+Die Gesamttabelle (Tabelle~\ref{tab:ergebnisse}) fasst für alle Durchläufe die Werte der Konfusionsmatrix, Recall, \ac{fpr}, Precision, F1 und Latenz zusammen. 
+Die wichtigsten Kennzahlen sind Recall, \ac{fpr} und F1.
 
 \begin{table}[htbp]
 \centering
-\begin{tabular}{l ccc ccc}
-\toprule
- & \multicolumn{3}{c}{\textbf{Original (Mistral Small~4)}} & \multicolumn{3}{c}{\textbf{Neuer Ansatz (Mistral Small~4)}} \\
-\cmidrule(lr){2-4}\cmidrule(lr){5-7}
-\textbf{Datensatz} & \textbf{Recall} & \textbf{FPR} & \textbf{F1} & \textbf{Recall} & \textbf{FPR} & \textbf{F1} \\
-\midrule
-Eigener Datensatz & 73{,}1\,\% & 10{,}9\,\% & 0{,}792 & 82{,}8\,\% & 6{,}8\,\% & 0{,}872 \\
-BIPIA + NotInject & 34{,}0\,\% & 13{,}5\,\% & 0{,}407 & 92{,}0\,\% & 13{,}5\,\% & 0{,}818 \\
-BIPIA, verschleiert & 43{,}0\,\% & 8{,}7\,\% & 0{,}575 & 91{,}0\,\% & 8{,}7\,\% & 0{,}922 \\
-\bottomrule
-\end{tabular}
-\caption{Ergebnisse auf den Testdaten: Originalansatz und neuer Ansatz im Vergleich}
+\input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_ergebnisse}
+\caption{Ergebnisse aller Durchläufe auf den Testdaten mit 95-\%-Konfidenzintervall nach Wilson}
 \label{tab:ergebnisse}
 \end{table}
+
 
 \section{Grenzen der Schutzmaßnahme}
 
