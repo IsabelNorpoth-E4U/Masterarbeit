@@ -400,8 +400,11 @@ Formulierung der Anweisung zurückzuführen, die dem Modell kaum Interpretations
 
 \paragraph{Multiturn Injection}
 
-Im ersten Versuch wurde der Chatverlauf direkt übermittelt. Da die Aufforderung hier jedoch nicht getarnt war, entspricht dieser Versuch eher einer direkten Prompt
-Injection. Im zweiten Versuch war der Chatbot zur Übermittlung bereit, die POST-Anfrage wurde jedoch nicht korrekt ausgeführt. Der Misserfolg der drei abgewandelten 
+Beide Versuche weichen von der in Kapitel~\ref{ch:promptinjection} beschriebenen Multitun Injection ab. Der Chatverlauf wurde direkt als Nutzereingabe übergeben und
+das Chat-Template nicht manipuliert. Daher müssen diese Versuche als direkte Prompt Injection gewertet werden und können nicht für die Beantwortung der Forschungsfrage
+verwendet werden. \\
+Im ersten Versuch wurde der Chatverlauf direkt übermittelt. Im zweiten Versuch war der Chatbot zur Übermittlung bereit, die POST-Anfrage wurde jedoch nicht korrekt 
+ausgeführt. Der Misserfolg der drei abgewandelten 
 Folgefragen ist somit auf einen technischen Fehler und nicht auf eine Weigerung des Modells zurückzuführen. Das Modell hat die Anweisung nicht als schädlich erkannt, der 
 Versuch gilt nach Abschnitt~\ref{sec:bewertungskriterien} aber nicht als erfolgreich.
 
