@@ -485,7 +485,47 @@ wird die \ac{fpr} dargestellt, damit ein Vergleich zwischen dem Recall und den F
 \end{figure}
 
 
-\subsection{hudasd}
+\subsection{Entwicklung des Ansatzes}
+
+Auf Grundlage der in Abschnitt~\ref{sec:original} erfassten Baseline wurde der Ansatz in mehreren Schritten überarbeitet. Im Folgenden werden diese Schritte und 
+die erlangten Erkenntnisse beschrieben. Dabei werden Änderungen beibehalten oder verworfen. Für alle Schritte wurden, wie bei der endgültigen Lösung
+aus Abschnitt~\ref{subsec:ueberarbeitung}, dieselben Parameter und das \ac{llm} Mistral Small~4 verwendet. Ausgangspunkt sind die Ergebnisse 
+des Dev-Abschnitts des Originalansatzes, der einen Recall von 80,6\,\% und eine \ac{fpr} von 8,8\,\% erreichte. \\
+
+\begin{enumerate}
+    \item Rekonstruktion und Leitfragen
+    \item Strukturprüfung
+    \item Entfernung der Mehrheitsentscheidung für externe Inhalte
+    \item Vereinheitlichung des Ansatzes
+\end{enumerate}
+
+Im ersten Schritt, \textbf{Rekonstruktion und Leitfragen}, wurde anhand der bei dem Originalansatz erkannten Schwächen bei der Erkennung von Verschleierungen ein 
+Ansatz implementiert, der den Prompt rekonstruieren soll. Dieser wurde um eine Mehrheitsentscheidung über die rekonstruierten Prompts und um Leitfragen erweitert. 
+Es wurde nur der eigene Datensatz verwendet. Auf dem Dev-Abschnitt wurde ein Recall von 90,6\,\% und eine \ac{fpr} von 5,9\,\% erreicht. \\
+Dieser Ansatz wurde anschließend auf die öffentlichen Datensätze angewendet. Auf dem Dev-Abschnitt erreichte er lediglich einen Recall von 43,5\,\% und eine \ac{fpr} 
+von 16,5\,\%. Dadurch konnte die Schwäche des Ansatzes festgestellt werden. Angriffe werden nur erkannt, wenn sie schädlich formuliert sind, jedoch ist dies im 
+BIPIA-Datensatz nicht der Fall, denn die Gefahr besteht darin, dass sich die Anweisungen in externen Inhalten befinden. \\
+Anhand der öffentlichen Datensätze wurde daher für externe Inhalte die \textbf{Strukturprüfung} entwickelt. Das \ac{llm} listete dabei alle Aufforderungen, 
+welche in den externen Inhalten gefunden wurden, auf und gab an, an wen sich diese richten. Der Recall stieg dadurch auf 51,5\,\% bei einer \ac{fpr} von
+7,9\,\%. Ursache für diesen niedrigen Recall war unter anderem die Positionierung des Angriffs. Aus diesem Grund wurden die Anfragen in Segmente von 1.000 Zeichen 
+geteilt. Durch diese Änderung stieg der Recall jedoch nur auf 53\,\% und die Latenz erhöhte sich gleichzeitig um 75\,\%. Als Alternative zur Einteilung in Segmente
+wurden die Zeilen nummeriert, damit das \ac{llm} eine bessere Orientierung bei der Suche hat und die Daten gleichzeitig unterteilt werden. Mit dieser Lösung 
+stieg der Recall auf 76\,\% und die \ac{fpr} sank auf 4,3\,\%. \\
+Durch die Kombination der Strukturprüfung mit dem Ansatz aus Mehrheitsentscheidung und Leitfragen für externe Inhalte wurde deutlich, dass der Recall durch die 
+Leitfragen stieg, während durch die Mehrheitsentscheidung Fehlalarme ausgelöst wurden. Der Recall stieg auf 84,0\,\% und die \ac{fpr} im gleichen
+Zuge auf 17,3\,\%. Durch die \textbf{Entfernung der Mehrheitsentscheidung für externe Inhalte} veränderten sich die Werte auf 79,0\,\% Recall und 4,3\,\% \ac{fpr}. 
+Eine weitere Änderung bestand darin, die Leitfragen für jede Zeile einzeln abzufragen. Sie wurde verworfen, da sich die Werte auf 74,0\,\% Recall und 6,5\,\% \ac{fpr} 
+verschlechterten. \\
+Nach diesem Schritt wurde festgestellt, dass der Ansatz noch nicht auf verschleierten externen Daten getestet wurde. Aus diesem Grund wurde ein Teil des 
+BIPIA-Datensatzes mit ausgewählten Transformationen verschleiert. Diese Verschleierung wird in Abschnitt~\ref{subsec:externerdatensatz} genauer erläutert. 
+Der Test mit diesem Datensatz ergab, dass der Recall auf 75,0\,\% sank. Interpretiert wurde dieses Ergebnis als Überanpassung des Ansatzes an die
+vorliegenden Datensätze. Als Reaktion darauf wurde eine \textbf{Vereinheitlichung des Ansatzes} entwickelt. Dabei wurde die Rekonstruktion 
+wieder aufgenommen, um auch verschleierte Inhalte in externen Daten erfassen zu können. Auch die Leitfragen wurden auf diese rekonstruierten Versionen angewendet. 
+Der Recall stieg bei den externen Inhalten auf 88,5\,\% und in der verschleierten Version auf 87,5\,\%. Es stieg zwar zusätzlich die \ac{fpr} auf 15,1\,\% 
+beziehungsweise 13,7\,\%, dieser Anstieg wurde jedoch in Kauf genommen, da auf diese Weise ein einheitlicher Ansatz entstand. \\
+Dieser Ansatz enthielt keine allgemeine Frage nach einem Prompt-Injection-Angriff. Sie wurde bei der Mehrheitsentscheidung wieder eingeführt, womit
+die Werte auf 87,5\,\% Recall bei 3,5\,\% \ac{fpr} auf dem Dev-Abschnitt des eigenen Datensatzes stiegen. Dieser Ansatz wurde als Endversion festgelegt.
+
 
 \subsection{Überarbeitung des Ansatzes und erneute Durchführung}\label{subsec:ueberarbeitung} 
 
