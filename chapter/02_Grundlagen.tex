@@ -40,8 +40,12 @@ bestimmte Strukturen nachgestellt werden sollen~\cite[5]{rag04}.
 
 Der Ablauf eines \ac{rag} lässt sich in die drei Phasen Indexierung, Retrieval und Generierung unterteilen, wie in Abbildung~\ref{fig:rag_ablauf} visualisiert.
 
-% TODO Abbildung: Indexierung (Bereinigung -> Chunking -> Embedding -> Vektordatenbank) | Retrieval (Query-Embedding -> Similarity Search -> Top-k) | Generierung (Prompt -> LLM -> Antwort)
-% \begin{figure}[htbp] ... \label{fig:rag_ablauf} \end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.6\textwidth]{figs/02/rag_ablauf}
+\caption{Ablauf eines \ac{rag}}
+\label{fig:rag_ablauf}
+\end{figure}
 
 Bei der Indexierung werden Rohdaten bereinigt und extrahiert~\cite[3]{rag04}. Diese Rohdaten können unter anderem in Formaten wie PDF, HTML oder Markdown 
 vorliegen~\cite[3]{rag04}. Sie werden in einheitlichen Klartext umgewandelt und in kleinere Chunks zerlegt, die auf das Kontextfenster des \ac{llm} angepasst 
@@ -223,25 +227,8 @@ die Logik aus und gibt das Ergebnis an das \ac{llm} zurück~\cite{tc03}. \\
 Das Ergebnis eines Tools wird im Normalfall in den aktuellen Kontext des \ac{llm} integriert~\cite[3]{tc09}. Bei den meisten Ansätzen wird der Tool Output als 
 Input an das \ac{llm} übergeben, womit dieses auf Basis der Informationen eine bessere Antwort generieren kann~\cite[17]{tc10}. Diese Antwort des 
 \ac{llm} wird anschließend an den Nutzer als Antwort übergebe~\cite{tc05}. \\
-Tool Calling ist nicht auf einen einzelnen Aufruf beschränkt sondern es gibt verschiedene Ablaufmöglichkeiten~\cite{tc01}. In der folgenden Tabelle sind die 
-möglichen Abläufe dargestellt: 
-
-\begin{table}[htbp]
-\centering
-\caption{Nachrichtenabfolgen beim Tool Calling (in Anlehnung an~\cite{tc1})}
-\label{tab:tool_calling_abfolgen}
-\begin{tabularx}{\textwidth}{l X}
-\toprule
-\textbf{Variante} & \textbf{Abfolge der Nachrichten} \\
-\midrule
-Ohne Tool Call &  \texttt{user} $\rightarrow$ \texttt{assistant} $\rightarrow$ \texttt{user} $\rightarrow$ \dots \\
-Einfacher Tool Call &  \texttt{user} $\rightarrow$ \texttt{assistant} (Call 1) $\rightarrow$ \texttt{tool} (Ergebnis 1) $\rightarrow$ \texttt{assistant} $\rightarrow$ \dots \\
-Sequenzielle Tool Calls &  \texttt{user} $\rightarrow$ \texttt{assistant} (Call 1) $\rightarrow$ \texttt{tool} (Ergebnis 1) $\rightarrow$ \texttt{assistant} (Call 2) $\rightarrow$ \texttt{tool} (Ergebnis 2) $\rightarrow$ \texttt{assistant} $\rightarrow$ \dots \\
-Parallele Tool Calls & \texttt{user} $\rightarrow$ \texttt{assistant} (Call 1, Call 2) $\rightarrow$ \texttt{tool} (Ergebnis 1) $\rightarrow$ \texttt{tool} (Ergebnis 2) $\rightarrow$ \texttt{assistant} $\rightarrow$ \dots \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
+Tool Calling ist nicht auf einen einzelnen Aufruf beschränkt sondern es gibt verschiedene Ablaufmöglichkeiten~\cite{tc01}. Auf eine Nutzeranfrage kann das \ac{llm}
+direkt ohne Tool Call diese beantworten oder mehrere Tool Calls ausführen, bis eine Antwort für den Nutzer generiert werden kann~\cite{tc01}. \\
 Sind mehrere Tool Calls notwendig, können diese gleichzeitig oder sequentiell ausgeführt werden~\cite[7]{tc14}. Dabei wird zwischen 
 Turns und Steps unterschieden~~\cite[4]{tc14}. Eine Konversation beinhaltet mehrere Turns, die durch eine Nutzernachricht ausgelöst werden. Jeder dieser Turns umfasst
 mehrere Steps, sogenannte Interaktionsschritte~\cite[4]{tc14}. Im Allgemeinen wird der Ablauf von Tool Calls durch verschiedenen Abhängigkeiten bestimmt~\cite{tc03}. 
@@ -410,10 +397,14 @@ Komponenten: Frontend, Anwendungslogik, \ac{llm}, Daten und Tools. In diesem Abs
 Analyse
 der Angriffsfläche notwendig ist. Das zeigt auch der Angriff auf Bing Chat, der erfolgreich durchgeführt werden konnte, weil nur die 
 Input- und Output-Kanäle gesichert, externe Eingaben jedoch nicht berücksichtigt wurden~\cite[12]{cb09}. 
-% Abbildung~\ref{fig:chatbot_komponenten} fasst die Komponenten und ihre Eintrittspunkte zusammen. 
+Abbildung~\ref{fig:chatbot_schichten} fasst die Komponenten und ihre Eintrittspunkte zusammen.
 
-% TODO Abbildung: fünf Schichten mit markierten Eintrittspunkten (Vorlage: [8, S. 3] und [11, S. 8, Fig. 8])
-% \begin{figure}[htbp] ... \label{fig:chatbot_schichten} \end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figs/02/chatbot_schichten}
+\caption{Komponenten eines \ac{llm}-basierten Chatbots}
+\label{fig:chatbot_schichten}
+\end{figure}
 
 \paragraph{Frontend}
 

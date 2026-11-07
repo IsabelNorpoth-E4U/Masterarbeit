@@ -175,15 +175,7 @@ wird überprüft, ob eine Zeile der externen Daten nicht zum Rest passt oder an 
 als Angriff gewertet.\\
 Durch die Verknüpfung von zwei Regeln soll das \ac{llm} eine höhere Erkennungsrate erreichen. Die Anwendung der Leitfrage F0 verfolgt das Ziel, dass Nutzeranfragen, die
 sich über Themen informieren möchten, nicht direkt als Angriff gewertet werden. Welche Regel ausgelöst wurde, wird gespeichert, damit bei 
-der Auswertung in Kapitel~\ref{ch:evaluation} die Begründungen nachvollziehbar sind.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.7\textwidth]{figs/05/ansatz_idee}
-\caption{Konzept der Schutzmaßnahme}
-\end{figure}
-
-Die konkreten Schritte der Maßnahme werden in Abschnitt~\ref{subsec:ueberarbeitung} erläutert.
+der Auswertung in Kapitel~\ref{ch:evaluation} die Begründungen nachvollziehbar sind. Die konkreten Schritte der Maßnahme werden in Abschnitt~\ref{subsec:ueberarbeitung} erläutert.
 
 \section{Aufbau der Umgebung}
 
@@ -342,7 +334,7 @@ In dieser Matrix werden vier verschiedene Kennzahlen dargestellt: \\
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\textwidth]{figs/05/confusion_matrix}
+\includegraphics[width=0.7\textwidth]{figs/05/confusion_matrix}
 \caption{Konfusionsmatrix}
 \end{figure}
 
@@ -411,9 +403,10 @@ den vollständigen Ablauf.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.85\textwidth]{figs/05/ablauf_original}
+\includegraphics[page=2, trim=262 229 185 18, clip, width=0.6\textwidth]{notes/Grafiken_05.pdf}
 \caption{Ablauf des Originalansatzes}\label{fig:ablauf_original}
 \end{figure}
+
 
 Als Eingabe werden die Einträge wie in den Abschnitten~\ref{subsec:datensatz} und~\ref{subsec:externerdatensatz} beschrieben verwendet. Es wird bei jeder Anfrage
 die Anweisung als Systemprompt und der Datensatzeintrag als Nutzerprompt übergeben. Dadurch werden der zu prüfende Text und die Anweisung voneinander getrennt, 
@@ -502,8 +495,8 @@ des Dev-Abschnitts des Originalansatzes, der einen Recall von 80,6\,\% und eine 
 Im ersten Schritt, \textbf{Rekonstruktion und Leitfragen}, wurde anhand der bei dem Originalansatz erkannten Schwächen bei der Erkennung von Verschleierungen ein 
 Ansatz implementiert, der den Prompt rekonstruieren soll. Dieser wurde um eine Mehrheitsentscheidung über die rekonstruierten Prompts und um Leitfragen erweitert. 
 Es wurde nur der eigene Datensatz verwendet. Auf dem Dev-Abschnitt wurde ein Recall von 90,6\,\% und eine \ac{fpr} von 5,9\,\% erreicht. \\
-Dieser Ansatz wurde anschließend auf die öffentlichen Datensätze angewendet. Auf dem Dev-Abschnitt erreichte er lediglich einen Recall von 43,5\,\% und eine \ac{fpr} 
-von 16,5\,\%. Dadurch konnte die Schwäche des Ansatzes festgestellt werden. Angriffe werden nur erkannt, wenn sie schädlich formuliert sind, jedoch ist dies im 
+Dieser Ansatz wurde anschließend auf die öffentlichen Datensätze angewendet. Auf dem Dev-Abschnitt erreichte er lediglich einen Recall von 43,5\,\%. 
+Dadurch konnte die Schwäche des Ansatzes festgestellt werden. Angriffe werden nur erkannt, wenn sie schädlich formuliert sind, jedoch ist dies im 
 BIPIA-Datensatz nicht der Fall, denn die Gefahr besteht darin, dass sich die Anweisungen in externen Inhalten befinden. \\
 Anhand der öffentlichen Datensätze wurde daher für externe Inhalte die \textbf{Strukturprüfung} entwickelt. Das \ac{llm} listete dabei alle Aufforderungen, 
 welche in den externen Inhalten gefunden wurden, auf und gab an, an wen sich diese richten. Der Recall stieg dadurch auf 51,5\,\% bei einer \ac{fpr} von
@@ -514,7 +507,7 @@ stieg der Recall auf 76\,\% und die \ac{fpr} sank auf 4,3\,\%. \\
 Durch die Kombination der Strukturprüfung mit dem Ansatz aus Mehrheitsentscheidung und Leitfragen für externe Inhalte wurde deutlich, dass der Recall durch die 
 Leitfragen stieg, während durch die Mehrheitsentscheidung Fehlalarme ausgelöst wurden. Der Recall stieg auf 84,0\,\% und die \ac{fpr} im gleichen
 Zuge auf 17,3\,\%. Durch die \textbf{Entfernung der Mehrheitsentscheidung für externe Inhalte} veränderten sich die Werte auf 79,0\,\% Recall und 4,3\,\% \ac{fpr}. 
-Eine weitere Änderung bestand darin, die Leitfragen für jede Zeile einzeln abzufragen. Sie wurde verworfen, da sich die Werte auf 74,0\,\% Recall und 6,5\,\% \ac{fpr} 
+Eine weitere Änderung bestand darin, die Leitfragen für jede Zeile einzeln abzufragen. Sie wurde verworfen, da sich sowohl der Recall als auch die \ac{fpr} 
 verschlechterten. \\
 Nach diesem Schritt wurde festgestellt, dass der Ansatz noch nicht auf verschleierten externen Daten getestet wurde. Aus diesem Grund wurde ein Teil des 
 BIPIA-Datensatzes mit ausgewählten Transformationen verschleiert. Diese Verschleierung wird in Abschnitt~\ref{subsec:externerdatensatz} genauer erläutert. 
@@ -524,7 +517,7 @@ wieder aufgenommen, um auch verschleierte Inhalte in externen Daten erfassen zu 
 Der Recall stieg bei den externen Inhalten auf 88,5\,\% und in der verschleierten Version auf 87,5\,\%. Es stieg zwar zusätzlich die \ac{fpr} auf 15,1\,\% 
 beziehungsweise 13,7\,\%, dieser Anstieg wurde jedoch in Kauf genommen, da auf diese Weise ein einheitlicher Ansatz entstand. \\
 Dieser Ansatz enthielt keine allgemeine Frage nach einem Prompt-Injection-Angriff. Sie wurde bei der Mehrheitsentscheidung wieder eingeführt, womit
-die Werte auf 87,5\,\% Recall bei 3,5\,\% \ac{fpr} auf dem Dev-Abschnitt des eigenen Datensatzes stiegen. Dieser Ansatz wurde als Endversion festgelegt.
+die Werte 87,5\,\% Recall bei 3,5\,\% \ac{fpr} auf dem Dev-Abschnitt des eigenen Datensatzes erreicht wurden. Dieser Ansatz wurde als Endversion festgelegt.
 
 
 \subsection{Überarbeitung des Ansatzes und erneute Durchführung}\label{subsec:ueberarbeitung} 
@@ -543,7 +536,7 @@ Funktionen. Der vollständige Code befindet sich im Anhang.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.85\textwidth]{figs/05/ablauf_weiterentwicklung}
+\includegraphics[page=3, trim=250 0 271 0, clip, width=0.6\textwidth]{notes/Grafiken_05.pdf}
 \caption{Ablauf der Schutzmaßnahme}\label{fig:ablauf_massnahme}
 \end{figure}
 
@@ -658,13 +651,12 @@ BIPIA-Datensatz die Erkennungsraten bei den verschiedenen Verschleierungen. Der 
 die Art des externen Inhalts (E-Mail, Tabelle, Code) und die Position des Angriffs (Anfang, Mitte, Ende) haben. Einen zusätzlichn Überblick wir durch die Messung
 des \ac{fpr} je Harmlosigkeitsstufe, mit der gemessen wird, welche Art von harmlosen Anfragen Fehlalarme auslösen. Mit der Konfusionsmatrix werden zusätzlich die 
 korrekten und falschen Klassifikationen gegenübergestellt, womit die Datensätze und Ansätze miteinander verglichen werden können. \\
-Die Gesamttabelle (Tabelle~\ref{tab:ergebnisse}) fasst für alle Durchläufe die Werte der Konfusionsmatrix, Recall, \ac{fpr}, Precision, F1 und Latenz zusammen. 
+Die Gesamttabelle (Tabelle~\ref{tab:ergebnisse}) visualisiert die Ergebnise der Dürchläufe auf den Testdaten mit 95-\%-Konfidenzintervall nach Wilson.
 Die wichtigsten Kennzahlen sind Recall, \ac{fpr} und F1.
 
 \begin{table}[htbp]
 \centering
 \input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_ergebnisse}
-\caption{Ergebnisse aller Durchläufe auf den Testdaten mit 95-\%-Konfidenzintervall nach Wilson}
 \label{tab:ergebnisse}
 \end{table}
 

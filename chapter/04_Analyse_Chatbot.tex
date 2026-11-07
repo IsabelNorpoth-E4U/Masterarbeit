@@ -9,7 +9,7 @@ Ergebnissen werden Schwachstellen abgeleitet, die die Grundlage für die Schutzm
 Bei dem untersuchten System handelt es sich um den firmeninternen Chatbot \enquote{ChatBot4U} des Unternehmens ENERGY4U GmbH~\cite{an17}.
 Der Chatbot beantwortet Fragen aus dem Umfeld der Energiewirtschaft. Die Komponenten werden auf der Google Cloud Platform (GCP) betrieben. Es 
 sind mehrere Sprachmodelle angebunden, die über externe Anbieter bereitgestellt werden. \\
-Die Architektur setzt sich aus sieben Komponenten zusammen: \\
+Die Architektur setzt sich aus sieben Komponenten zusammen:
 
 \begin{enumerate}
     \item \textbf{\gls{frontend}:} Stellt die Chat-Oberfläche bereit und nimmt die Nutzereingaben entgegen. Die Authentifizierung der Nutzer erfolgt über Firebase Authentication. Im Energy-Bot-Modus leitet das Frontend Anfragen an das Backend weiter, im Normal-Modus kommuniziert der Frontend-Server direkt mit dem LLM-Provider.
@@ -51,6 +51,13 @@ Die Unterteilung in zwei Projekte erfüllt den Nutzen, Kunden für eine beschrä
 die internen Dokumente haben. Den Kunden soll dadurch ein erster Eindruck ermöglicht werden, wie mit den Dokumenten gearbeitet wird. 
 Somit liegt der wesentliche Unterschied zwischen den beiden Instanzen im Datenbestand. Die interne \gls{qdrant}-Instanz enthält sowohl die interne als auch
 die öffentliche Sammlung, wogegen die externe Instanz nur die öffentliche Sammlung beinhaltet. \\
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth]{figs/04/architektur}
+\caption{Chatbotkomponenten}
+\label{fig:chatbot_overview}
+\end{figure}
 
 \section{Untersuchungsziel und Vorgehensweise}\label{sec:untersuchungsziel}
 
