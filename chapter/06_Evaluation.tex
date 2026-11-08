@@ -65,7 +65,7 @@ Die Konfusionsmatrizen in den Abbildungen~\ref{fig:konfusion_eigen} bis~\ref{fig
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\textwidth]{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_bipia_obfuscated_konfusionsmatrix}
+\includegraphics[width=0.65\textwidth]{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_bipia_obfuscated_konfusionsmatrix}
 \caption{Konfusionsmatrizen auf dem verschleierten BIPIA-Datensatz}\label{fig:konfusion_obf}
 \end{figure}
 
@@ -160,13 +160,13 @@ Angriffe einbezogen.
 \small
 \caption{Ausgelöste Entscheidungsregeln bei erkannten Angriffen}
 \label{tab:regeln}
-\begin{tabularx}{\textwidth}{X c c c}
+\begin{tabularx}{\textwidth}{X c c c c}
 \toprule
-\textbf{Datensatz} & \textbf{Nur Form- bzw. Strukturprüfung} & \textbf{Beide Regeln} & \textbf{Nur Leitfragen} \\
+\textbf{Datensatz} & \textbf{Nur Form- bzw. Strukturprüfung} & \textbf{Nur Leitfragen} & \textbf{Beide Regeln} & Gesamt \\
 \midrule
-Eigener Datensatz (265) & 110 & 103 & 52 \\
-BIPIA (184) & 106 & 67 & 11 \\
-BIPIA, verschleiert (182) & 74 & 96 & 12 \\
+Eigener Datensatz & 110 & 52 & 103 & 265 \\
+BIPIA & 106 & 11 & 67 & 184 \\
+BIPIA, verschleiert & 74 & 12 & 96 & 182 \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -192,9 +192,10 @@ und überienpassender sie mit dem restlichen Inhalt sind, desto so ejer werde si
 
 \section{Latenz und Kosten}\label{sec:latenz_kosten}
 
-In der Tabelle~\ref{tab:token_kosten} werden für die acht Durchläufe die Anzahl der Anfragen an das \ac{llm}, die dafür benötigten Input- und Output-Token,
-die daraus entstehenden Kosten und die Latenz gegenübergestellt. Die Token wurden nachträglich mit dem Tokenizer des jeweiligen \ac{llm} aus den gespeicherten
-Anfragen und Antworten berechnet. Wiederholte Anfragen nach einem Fehler der \ac{api} sind nicht enthalten.
+Eine der Kriterien, welche als Anforderung für die Maßnahme gestellt wurde besagte, dass Maßnahme mit einem kleinen Modell umgesetzt werde nsollte und demnentsprechen
+kostengünstig und schnell sein soll. In diesem Zuge wurden die Latenz sowie die Kosten berechnet und in Tabelle~\ref{tab:token_kosten} gegenübergestellt. Die Kosten 
+wurden berechnet, indem für die acht Durchläufe die Anzahl der Anfragen und die daraus entstehenden Input- und Output-Token berechnet wurden. Die Token wurden 
+nachträglich mit dem Tokenizer des jeweiligen \ac{llm} berechnet. Die Kosten wurde mit den in Abschnitt~\ref{sec:aufbau_umgebung} definierten Preisen berechnet.
 
 \begin{table}[htbp]
 \centering
@@ -203,6 +204,32 @@ Anfragen und Antworten berechnet. Wiederholte Anfragen nach einem Fehler der \ac
 \input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_token_kosten}
 \end{table}
 
+Die Ansätze unterscheiden sich bereits stark in der unterschiedlichen Anzahl von Anfragen. Bei dem Originalansatz wurde nur eine Anfrage benötigt. Für den 
+weiterentwickelten Ansatz dagegen wurden für den eigenen Ansatz und bei dem Datensatz BIPIA und NotInject durchschnittlich 3,5 Anfragen gemacht. Bei dem 
+verschleierten BIPIA Datensatz wurden sogar durchschnittlich 4,7 Anfragen benötigt. Die Anzahl unterscheidet sich stark, wegen der unterschiedlichen
+Prüfung bei einfachen Nutzeranfragen und externen Inhalten. Maximal wurden bei Nutzeranfragen sechs Anfragen benötigt und bei den Nutzerfragen fünf gemacht. \\
+Die Anzahl der Token steigt sehr stark zwischen den beiden Ansätzen an. Bei dem Originalansatz werden nur 217 für eine Anfrage bei dem eigenen Datensatz
+benötigt. Bei dem weiterenwickelten dagegen 1.693 Token. Bei dem Daten BIPIA und NotInject wurden stieg die notwendigen Token von 215 auf 2.174 und bei dem 
+verschleierten Datensatz von 384 auf 3.683. Die Token steigen damit fast ums 10-Fache. Die Output Token bleiben dabei ähnlich wie beim Originalansatz gering, da
+es nur eine binäre Abfrage ist und meistens nur ein JA oder NEIN benötigt wird. Die Input Token steigen dagegen sehr stark, da bei jeder Anfrage der Nutzerprompt und
+der jeweilige Systemprompt mitgegeben werden muss. Bei den Leitfragen müssen diese ebenfalls mitgegenem werden. \\
+Die Kosten für die Prüfung steigt damit etwa um 9- bis 12-Fache. Es wurde mit 1.000 Einträgen gerechnet. Bei dem eigenen Datensatz erhöhen sich die Werte von
+0,034\,\$ auf 0,294\,\$. Bei dem BIPIA und NotInject von 0,033\,\$ auf 0,385\,\$ und bei dem verschleierten BIPIA Datensatz von 0,059\,\$ auf 0,641\,\$. 
+Die Prüfung aller 9.378 Anfragen, die in dieser Arbeit durchgeführt wurden, haben Kosten von 1,12\,\$ verursacht. \\
+Bei der Verwendung des \ac{llm} Mistral Large 4 liegen bei der Verwendung des Originalansatzes die Kosten bei 0,277\,\$ pro 1000 Einträge. Je nachdem welche 
+Anfrage also geprüft werden muss können die Kosten 1,4-mal so groß sein, wie eine Anfrage an das Haupt-\ac{llm}. Es werden aber dafür beim eigenen Datensatz 
+82,8\,\% statt 41,6\,\%  der Angriffe und bei dem Datensatz BIPIA und NotINject 92,0\,\% statt 24,5\,\% erkannt. \\
+Ausschlaggebener als die Kosten sind die steigenden Latenzen. Die Latenzen werden in dieser Arbeit immer im Median betrachet. Bei dem Originalansatz es können bis 
+zu 1,6\,s benötigt werden. Der verschleierte BIPIA Datensatz ist damit die zeitaufwendigst. Bei dem eigenen Datnsatz benötigt eine Anfrage 0,3 bis 0,5\,s. Dagegen
+werden steigen die Latenzen beim weiterentwickelten Ansatz stark an. Die Latenzen werden hier Unterschieden je nachdem ob es sich um eine Nutzeranfrage oder externen
+Inhalt handelt. Die einfachen Nutzeranfragen schwanken zwischen 3,4\,s bei dem eiegnen Datensatz bis 2,7\,s bei dem DAtensatz NotInject. Bei externen Inhalt 
+sind es 5,1\,s bei dem BIPIA Datensatz und 6,2\,s bei dem verschleierten Datensatz. Im Vergleich kann die Zeit, die benötigt wird um eine Anfrage zu überprüfen, aösp
+um 5 bis 6\,s ansteigen. \\
+Da die Anfragen nicht wie bei einem richtigen Chatbot unabhängig voneinander sind können se auch parallellisiert, wodurch die Latenz sinken würden. Die Kosten bleiben
+jedoch gleich. \\
+Trotz der stark ansteigenden Kosten, ist der Ansatz dennoch kostengünstig, da für die Prüfung von mehr als 9.000 Anfragen kosten von ein bisschen mehr als ein US-Dollar
+entstanden sind. Damit ist das Kriterium der kostengünstigketi erfüllt. Jedoch ist damit nicht definiert, ob der Ansatz Kostengüsntiger ist als die Verwendung des
+Haupt-\ac{llm}. 
 
 \section{Praktische Einschätzung}
 
@@ -270,34 +297,16 @@ erkannt werden in der Anweisung.
 
 Abschließend müssen die Grenzen dieser Arbeit noch einmal definiert werden. Sie wurden bereits in Kapitel~\ref{ch:methodik} und~\ref{ch:schutzmassnahmen} genannt, 
 werden jedoch abschließen hier noch einmal aufgezählt. \\
-TOKEN -> Kosten -> VERGLEICH MIT MISRTRAL LARGE 
-
-
-
-
-
-
-
-
-
-
-\subsection{Allgemeine Grenzen vorgeschalteter Modelle}
-
-Ein vorgeschaltetes Prüfmodell ist nur sinnvoll, wenn es schneller und günstiger ist als das Hauptmodell, da es sonst einen
-unnötigen Zwischenschritt darstellt~\cite[1]{sm36}. Daraus ergibt sich zugleich eine Angriffsmöglichkeit: Ein Angriff kann so
-gestaltet werden, dass er die Fähigkeiten des Prüfmodells übersteigt, vom Hauptmodell aber noch verstanden und
-ausgeführt wird~\cite[2]{sm36}. \\
-Zudem neigen solche Modelle zu Over-Defense und stufen harmlose Eingaben als Angriff ein, sobald bestimmte Triggerwörter
-vorkommen~\cite[1\psq]{sm37}. Ursache ist ein Shortcut Learning, bei dem das Modell auf diese Wörter statt auf die verlangte
-Aktion reagiert. Schließlich verarbeiten Sprachmodelle Text bedingt durch die Vorhersage des nächsten Tokens von links nach rechts.
-Werden Zeichen oder Wörter vertauscht, kann das Modell die Bedeutung einer Anweisung schlechter erkennen~\cite[4]{sm38}.
-
-
-
-
-
-
-
+Im Kriterium für die Maßnahme wurde definiert, dass ein \ac{llm} verwendet werden soll, welchem dem Haupt-\ac{llm} gegenüber schneller und kostengünstiger ist.
+Es wurde Mistral Small 4 in Kombination mit dem Haupt-\ac{llm} Mistral Large 4 ausgewählt. \\
+Durch die vernwednung des Prüfmodells entshet jedoch eine Angriffs,öglichkeit, da ein diese \acp{llm} nicht so robust isnd und einen Angriff nicht gut genug 
+abwehren und richtig klassifizieren kann. \\
+Zusätzlich steigt mit der Verwendung eines vorgeschalteten \acp{llm} das Risiko von sogenannter Over-Defense, bei dem harmlose Nutzereingaben fälschlicherweise 
+als Angriffe klassifiziert werden, weil das \ac{llm} durch verschiedene Begriffe und FOrmulierungen vorschnell einen Angriff erkennt. Dies wurde auch in 
+Abschnitt~\ref{sec:wirksamkeit} festegestellt. \\
+Zusätzlich wurde das Problem erkannt, welches entsteht, wenn durch einen Angreifer die Riehenfogle der Worte in einer Nutzernafragen verändert wurde. \acp{llm}
+weisen bei solchen verschleierungn schwächen auf, welche auc beo der auswertung festegstellt werden konnten. Diese rühren daher dass ein \ac{llm} Text von links
+nach rechts bearbeiten, was mit der Token Generierung zusammenhängt~\cite[4]{sm38}. \\
 Bei den Daten sind die Grenzen bereits bekannt. Der Datensatz wurde eigens auf Grundlage von verschiedenen Arbeiten erstellt, kann aber inhaltliche Fehler 
 beinhalten. Er ist zu klein, da für jede Transformation nur 20 Testfällt enthalten sind. Die öffentlichen Datensätze sind auf Englisch. Der Ansatz wurde aber auf 
 die Sprache Deutsch formuliert und der eigene Datensatz ist auch auf deutsch formuliert. Mit den öffentlichen Datensätzen werden zudem nicht alle in 
