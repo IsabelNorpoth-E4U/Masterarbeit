@@ -192,7 +192,16 @@ und überienpassender sie mit dem restlichen Inhalt sind, desto so ejer werde si
 
 \section{Latenz und Kosten}\label{sec:latenz_kosten}
 
--> Notwendige Token berechnen
+In der Tabelle~\ref{tab:token_kosten} werden für die acht Durchläufe die Anzahl der Anfragen an das \ac{llm}, die dafür benötigten Input- und Output-Token,
+die daraus entstehenden Kosten und die Latenz gegenübergestellt. Die Token wurden nachträglich mit dem Tokenizer des jeweiligen \ac{llm} aus den gespeicherten
+Anfragen und Antworten berechnet. Wiederholte Anfragen nach einem Fehler der \ac{api} sind nicht enthalten.
+
+\begin{table}[htbp]
+\centering
+\caption{Anfragen, Token, Kosten und Latenz der Durchläufe}
+\label{tab:token_kosten}
+\input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_token_kosten}
+\end{table}
 
 
 \section{Praktische Einschätzung}
