@@ -100,7 +100,7 @@ harmosle Anfrgane. Die Anzahl der Fehlalarme wurde am stärksten bei der Transfo
 verschlüsselt und somit schneller vom \ac{llm} als Angriff gewertet. Bei dem weiterentwickleten Ansatz wird in Stufe 1 jedoch genau diese Transformation behandelt und
 rückgängig gmacht und der Text dadurch in Klartext vom \ac{llm} analysiert. 
 
-\section{Ergebnisse - BIPIA und NotInject}
+\subsection{Ergebnisse - BIPIA und NotInject}
 
 In den Grafiken~\ref{fig:recall_position} und~\ref{fig:recall_aufgabe} wird der Recall je Position und Art der Nutzeranfrage differenziert.
 
@@ -262,6 +262,31 @@ erkannt werden in der Anweisung.
 Abschließend müssen die Grenzen dieser Arbeit noch einmal definiert werden. Sie wurden bereits in Kapitel~\ref{ch:methodik} und~\ref{ch:schutzmassnahmen} genannt, 
 werden jedoch abschließen hier noch einmal aufgezählt. \\
 TOKEN -> Kosten -> VERGLEICH MIT MISRTRAL LARGE 
+
+
+
+
+
+
+
+
+
+
+\subsection{Allgemeine Grenzen vorgeschalteter Modelle}
+
+Ein vorgeschaltetes Prüfmodell ist nur sinnvoll, wenn es schneller und günstiger ist als das Hauptmodell, da es sonst einen
+unnötigen Zwischenschritt darstellt~\cite[1]{sm36}. Daraus ergibt sich zugleich eine Angriffsmöglichkeit: Ein Angriff kann so
+gestaltet werden, dass er die Fähigkeiten des Prüfmodells übersteigt, vom Hauptmodell aber noch verstanden und
+ausgeführt wird~\cite[2]{sm36}. \\
+Zudem neigen solche Modelle zu Over-Defense und stufen harmlose Eingaben als Angriff ein, sobald bestimmte Triggerwörter
+vorkommen~\cite[1\psq]{sm37}. Ursache ist ein Shortcut Learning, bei dem das Modell auf diese Wörter statt auf die verlangte
+Aktion reagiert. Schließlich verarbeiten Sprachmodelle Text bedingt durch die Vorhersage des nächsten Tokens von links nach rechts.
+Werden Zeichen oder Wörter vertauscht, kann das Modell die Bedeutung einer Anweisung schlechter erkennen~\cite[4]{sm38}.
+
+
+
+
+
 
 
 Bei den Daten sind die Grenzen bereits bekannt. Der Datensatz wurde eigens auf Grundlage von verschiedenen Arbeiten erstellt, kann aber inhaltliche Fehler 
