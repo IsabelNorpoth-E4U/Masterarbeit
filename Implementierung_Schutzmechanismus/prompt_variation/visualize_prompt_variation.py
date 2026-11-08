@@ -1,5 +1,6 @@
 # Line diagrams of the guard prompt variation: recall and FPR per guard prompt
 # (GP0 = original prompt, GP1 to GP5 = changed prompts), one line per data set.
+# Also a LaTeX table with recall and FPR (with Wilson confidence interval) per guard prompt.
 # Same colors and style as ../visualize_results.py.
 #
 # Run: python3 visualize_prompt_variation.py
@@ -102,19 +103,66 @@ def draw_lines(values, metric_name, y_label, y_max, name):
     save_diagram(figure, name)
 
 
+# 0.731 -> '73{,}1' (German decimal comma)
+def percent_tex(rate):
+    return f"{100 * rate:.1f}".replace(".", "{,}")
+
+
+# rate with confidence interval, the interval small and gray (as in ../visualize_results.py)
+def share_tex(share):
+    return (percent_tex(share["rate"]) + r"\,\% {\scriptsize\color{gray}["
+            + percent_tex(share["ci_low"]) + "; " + percent_tex(share["ci_high"]) + "]}")
+
+
+# one row per guard prompt, recall and FPR for every data set
+def write_table(shares, name):
+    lines = [
+        r"\resizebox{\textwidth}{!}{%",
+        r"\begin{tabular}{l rr rr rr}",
+        r"\toprule",
+    ]
+    header = [""]
+    rules = []
+    for i, (data_set, label, color, marker) in enumerate(DATA_SETS):
+        header.append(r"\multicolumn{2}{c}{\textbf{" + label + "}}")
+        rules.append(r"\cmidrule(lr){" + str(2 + 2 * i) + "-" + str(3 + 2 * i) + "}")
+    lines.append(" & ".join(header) + r" \\")
+    lines.append("".join(rules))
+    lines.append(r"\textbf{Guard-Prompt}" + r" & \textbf{Recall} & \textbf{FPR}" * len(DATA_SETS)
+                 + r" \\")
+    lines.append(r"\midrule")
+    for i, prompt_id in enumerate(PROMPTS):
+        cells = [PROMPT_NAMES[i].replace("-\n", "").replace("\n", " ")]
+        for data_set, label, color, marker in DATA_SETS:
+            cells.append(share_tex(shares[data_set]["recall"][i]))
+            cells.append(share_tex(shares[data_set]["fpr"][i]))
+        lines.append(" & ".join(cells) + r" \\")
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}}")
+    path = os.path.join(DIAGRAM_DIR, name + ".tex")
+    with open(path, "w", encoding="utf-8") as file:
+        file.write("\n".join(lines) + "\n")
+    print("Saved as", path)
+
+
 thesis_style()
 os.makedirs(DIAGRAM_DIR, exist_ok=True)
 
 values = {}
+shares = {}
 for data_set, label, color, marker in DATA_SETS:
     values[data_set] = {"recall": [], "fpr": []}
+    shares[data_set] = {"recall": [], "fpr": []}
     for prompt_id in PROMPTS:
         result = metrics.compute(load_jsonl(results_file(prompt_id, data_set)), "test")
         values[data_set]["recall"].append(result["recall"]["rate"] * 100)
         values[data_set]["fpr"].append(result["fpr"]["rate"] * 100)
+        shares[data_set]["recall"].append(result["recall"])
+        shares[data_set]["fpr"].append(result["fpr"])
         print(prompt_id, data_set, "n =", result["n"],
               "recall", value_label(result["recall"]["rate"] * 100),
               "fpr", value_label(result["fpr"]["rate"] * 100))
 
 draw_lines(values, "recall", "Recall in %", 100, "mistral_small4_test_promptvariation_recall")
 draw_lines(values, "fpr", "FPR in %", 20, "mistral_small4_test_promptvariation_fpr")
+write_table(shares, "mistral_small4_test_promptvariation_tabelle")

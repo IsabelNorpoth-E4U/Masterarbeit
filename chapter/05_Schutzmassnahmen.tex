@@ -391,7 +391,7 @@ besonders geeignet bei binären Ergebnissen wie JA/NEIN
 
 \section{Durchführung und Weiterentwicklung}
 
-\subsection{Originalansatz}\label{sec:original}
+\subsection{Originalansatz}\label{subsec:original}
 
 Wie in Abschnitt~\ref{konzept} beschrieben, wird als Schutzmaßnahme ein vorgeschaltetes \ac{llm} eingesetzt, das als Klassifikator einschätzt, ob ein Nutzerprompt
 einen Angriff enthält. Im ersten Schritt wird dieser Klassifikator in einer einfachen Form umgesetzt, um eine Baseline zu erhalten. Dabei wird jeder Eintrag der
@@ -651,15 +651,6 @@ BIPIA-Datensatz die Erkennungsraten bei den verschiedenen Verschleierungen. Der 
 die Art des externen Inhalts (E-Mail, Tabelle, Code) und die Position des Angriffs (Anfang, Mitte, Ende) haben. Einen zusätzlichn Überblick wir durch die Messung
 des \ac{fpr} je Harmlosigkeitsstufe, mit der gemessen wird, welche Art von harmlosen Anfragen Fehlalarme auslösen. Mit der Konfusionsmatrix werden zusätzlich die 
 korrekten und falschen Klassifikationen gegenübergestellt, womit die Datensätze und Ansätze miteinander verglichen werden können. \\
-Die Gesamttabelle (Tabelle~\ref{tab:ergebnisse}) visualisiert die Ergebnise der Dürchläufe auf den Testdaten mit 95-\%-Konfidenzintervall nach Wilson.
-Die wichtigsten Kennzahlen sind Recall, \ac{fpr} und F1.
-
-\begin{table}[htbp]
-\centering
-\input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_ergebnisse}
-\label{tab:ergebnisse}
-\end{table}
-
 
 \section{Grenzen der Schutzmaßnahme}
 

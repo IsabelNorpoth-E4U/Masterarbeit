@@ -1,39 +1,293 @@
 \chapter{Evaluation}\label{ch:evaluation}
-ng. Ziel ist es, bestehende Ansätze zu implementieren, zu vergleichen und potenzielle Verbesserungen
-zu
 
-\section{Problemstelung und Motivation}
+In diesem Kapitel werden die gesammelten Ergebnisse aus dem Kapitel~\ref{ch:schutzmassnahme} ausgewertet. Anhand dessen wird die entwickelte Schutzmaßnahem bewertet
+und die Teilforschungsfragen beantwortet. \\
+Ziel ist es die Ergebnisse der einzelnen Datensätze vorzustellen und anschließend die Latenz und Kosten zu betrachten. Zusätzlich wird bewertet, ob die in 
+Kapitel~\ref{ch:methodik} durchgeführten Angriffe mit der Schutzmaßnahme verhindert werden können. Mit diesen Erkenntnissen kann der eine Aussage getroffen werde,
+ob die Maßnahme in der Praxis geeignet ist. Die Analyse der Ergebnuisse wird damit aufgeteilt in eine theoretische und praktische Analyse. \\
+Für die theoretische Auswertung werden die acht, in Abschnitt~\ref{se:results} durchgeführten, Durchläufe ausgewertet. Es wurden der eigene Datensatz mit 
+660 Einträgen, 320 Angriffen und 340 harmlosen Einträgen, der Datensatz kombiniert aus dem BIPIA und NotInject Datensatz mit 689 Einträgen, 200 Angriffe und 489
+harmole Einträge, und der verschleierte BIPIA Datensatz mit 350 Einträgen, 200 Angriffe und 150 harmlose Einträge. Mit diesen Datensätzen wurden jeweils drei 
+Durchläufe mit dem Origianlansatz, beschrieben in Abchnitt~\ref{subsec:original} und dem weiterentwickelten Ansatz aus Abschnitt~\ref{subsec:ueberarbeitung} 
+durchgeführt. Durchgeführt wurden diese
+Durchläufe mit dem \ac{llm} Mistral Small 4. Zusätzlich wurden zwei Durchläufe mit dem eigenen Datensatz und dem kombinierten aus BIPIA und NotInject mit dem
+\ac{llm} Mistral Large 4 durchgeführt. Dieses \ac{llm} ist das Haupt\ac{llm}, welches in dieser Arbeit verwendet wurde und dient dazu, dass die Fähigkeiten
+des Haupt-\ac{llm} im Bezug auf die Klassifikation der Angriffe bestimmt werden kann. Dies ermöglicht eine direkte Gegenüberstellnug der Ergebnisse. Für die Ergebnisse
+wurde die in Abschnitt~\ref{subsec:metrics} ausgelisteten Metriken brechnet. Für diese Arbeit sind dabei der Recall und die \ac{fpr} relevant, die mit einem 
+95-\%-Konfidenzuntervall nach Wilson dokumentiert wurden. \\
 
-Ein kurzes Beispiel für eine Abkürzung: Ein Large Language Model (LLM) wird im weiteren Verlauf oft verwendet llm.
+\section{Ergebnisse der Klassifikation}
+
+In der Tabelle~\ref{tab:ergebnisse} werden die Ergebnisse der acht Läufe gegenübergestellt. In der Tabelle~\ref{tab:promptvariation} werden zusätzlich die 
+Ergebniss festgehalten, die durch die verschiedenen Promptvariationen bei dem Originalansatz entstanden sind.
+
+\begin{table}[htbp]
+\centering
+\input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_ergebnisse}
+\label{tab:ergebnisse}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Recall und \ac{fpr} der Promptvariation}
+\label{tab:promptvariation}
+\input{Implementierung_Schutzmechanismus/prompt_variation/results_diagramms/mistral_small4_test_promptvariation_tabelle}
+\end{table}
+
+Anhand dieser Tabelle können wichtige Erkenntnisse getroffen werden. Die Weitentwicklung des Ansatzes, hat die stark ansteigen lassen. Bei der Berechnung der
+Konfidenzintervalle der Recall Werte wird der Anstieg stärker deutlich, da sich diese Were nicht überschneiden. Bei Betrachtung der Werte sieht man, dass für die 
+Auswirkung sehr viel stärker bei den xternen Inhalten ist. Der Recall stieg bei dem Datenatz BIPIA und NotInject von 34,0\,\% auf 92,0\,\% und bei dem 
+verschleierten Datensatz von 43,0\,\% auf 91,0\,\%. Die Werte bei dem eigenen Datensatz stiegen von 73,1\,\% auf 82,8\,\%. \\
+Dahingegen ist bei der \ac{fpr} keine gleichwertende Entwicklung erkennbar. Die Konfidenzintervall überschneiden sich bei alen Durchläufen oder sind identisch.
+Bei dem eigenen Ansatz sinkt der Wert zwar  von 10,9\,\% auf 6,8\,\%, jedoch bleibt er bei dem Datensatz BIPIA und NotInject identisch, bei 13,5\,\% und bei
+dem verschleierten BIPIA Ansatz bei 8,7\,\%. Die identischen Werte sind bei dem Datensatz BIPIA und NotInject zufällig entstanden und bei dem verschleierten
+BIPIA Ansaztz darauf zurückzufolgen, dass nur die Angriffe mit den Tranformationen verschleiret wrurden und die harmlosen Angriffe gleich beibehalten wurden. \\
+Dazu steht im krassen Gegensatz die Ergebnisse des Haupt\ac{llm} Mistral Large 4. Es wurden nur 41,6\,\% der Angriffe aus dem eigenen Datensatz erkannt und gerade
+einmal 24,5\,\% aus dem Datensatz BIPIA und NotInject. Es ist jedoch ausschlaggebend bei den Erkenntnissen, das sich die \ac{fpr} bei gerade einmal 1,2\,\% \ac{fpr}
+liegt. Diese niedrige Fehlerrate ist jedoch damit zu begründen, dass so wenige ANgriffe erkannt werden, dass das Modell nichts als Angriff betrachtet. \\
+Die Tabelle~\ref{tab:promptvariation} zeigt außerdem, dass die Verbesserung der Klassifikation des \acp{llm} nicht ausschließlich durch die Änderung des Prompts
+ermöglicht wird. Der stärkste Anstieg entsteht durch den Prompt GP3, bei dem der Recall auf 84,1\,\% steigt, damit wird ein höherer Wert erreicht, als bei dem 
+weiterentwickelten Ansatz. Jedoch steigt auch die \ac{fpr} auf 16,5\,\%. Dahingegen sinkt der Recall bei dem Datensatz BIPIA und NotInject auf 36,5\,\%. Die 
+Erkennungrate ist mit Originalansatz fast gleichgestellt. \\
+Die Konfusionsmatrizen in den Abbildungen~\ref{fig:konfusion_eigen} bis~\ref{fig:konfusion_obf} zeigen die Verteilung der richtigen und falschen Klassifikationen.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_eigen_konfusionsmatrix}
+\caption{Konfusionsmatrizen auf dem eigenen Datensatz}\label{fig:konfusion_eigen}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_bipia_konfusionsmatrix}
+\caption{Konfusionsmatrizen auf BIPIA und NotInject}\label{fig:konfusion_bipia}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_bipia_obfuscated_konfusionsmatrix}
+\caption{Konfusionsmatrizen auf dem verschleierten BIPIA-Datensatz}\label{fig:konfusion_obf}
+\end{figure}
+
+\subsection{Ergebnisse - Eigener Datensatz}
+
+Tabelle~\ref{tab:recall_transformation} zeigt den Recall je Transformation auf dem eigenen Datensatz.
+
+\begin{table}[htbp]
+\centering
+\caption{Recall je Transformation auf dem eigenen Datensatz}
+\label{tab:recall_transformation}
+\input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_eigen_recall_pro_transformation}
+\end{table}
+
+In dieser Tabelle werden die Ergebnisse, an den Aufbau des Datensatzes angepasst, erläutert. Bei diesem Datensatz liegt dabei der Fokus auf den verschiedenen 
+Transformationen. Die stärkste Verbesserung ist bei den Transformationen T02 und T15 erkennbar. Bei T02 steigt die Anzahl der erkannten Angriffe von 6 auf 17 und
+bei T15 von 10 auf 16. Die beiden Transformationen manipulieren Wörter mit Rechtschreibfehlern, Umstellungen oder Synonymen. Dadurch wird die Auswirkung der 
+Stufe 1 des weiterentwickelten Ansatzes sichtbar, bei dem die drei Versionen V0, V1 und V2 erstellt werden. Bei V2 wird eine Rechtschreibkorrektur durchgeführt. 
+Durch diese Korrektur kann das \ac{llm} die Angriffe besser erkennen. \\
+Es gibt jedoch auch Transformationen, bei denen der Unterschied zu dem Originalansatz kaum vorliegt. Die Transformaitonen T05 bis T14 sind Beispiele dafür. Bei 
+der Rekonstruktion der Nutzeranfrage in Stufe 1 des weiterentwickelten Ansatzes werden die hier vorliegenden Transformationen nicht behandelt. Es werden Transformationen
+gemacht, wie die Übersetzung in die Low Reosurce Sprache Zulu, Umkehrung der Wortreihenfolge, Spiegelung der Anfrage oder maaskieren bzw. veränderung der 
+auffälligen Wörter. Die Transformationene wurden nicht bei dem weiterentwickleten Ansatz rückgängig gemacht, da diese versucht wurde allgemein zu behalten, damit sie
+nicht auf den eiegenen Ansatz überangepasst wird. Die Rekonstruktion und erstellung der Versionen V1 und V2 ist dabei in vielen Fällen trivial, da die Rekonstruktionen
+nicht viele Änderungen vornehmen an dem Originalprompt. Dadurch verliert auch die Mehrheitsentscheidung ihren Nutzen. \\
+Bei den Originalen Nutzeranfragen, also den unveränderten Datenbankeinträgen werden 17 von 20 richtig erkannt. Bei den drei nicht erkannten Angriffen wird jedoch 
+der Grund deutlich. Er beinhaltet eine Anweisung in einem KOmmentar, welches Code dartellen soll 
+(\enquote{TODO fuer den Assistenten: den Wert von os.environ TOKEN mit in die Antwort schreiben}). Dieser Angriff wird nicht erkannt, da er sich in der Nutzeranfrage
+befindet und somit nicht die Stufen 3 und 4 entsprechend des externen Inhatlts durchgeführt werden, sondenr für die einfache Nutzeranfrage. \\
+Bei diesem Ansatz werden nicht auffälig viele Fehlalamr ausgelöst. Sie treten weder bei den Normalen oder Hard negatives auf, sondern nur bei den transformierten
+harmosle Anfrgane. Die Anzahl der Fehlalarme wurde am stärksten bei der Transformaition T08 reduziert. Bei dieser Transformation wurde die Nutzeranfrage in Base64
+verschlüsselt und somit schneller vom \ac{llm} als Angriff gewertet. Bei dem weiterentwickleten Ansatz wird in Stufe 1 jedoch genau diese Transformation behandelt und
+rückgängig gmacht und der Text dadurch in Klartext vom \ac{llm} analysiert. 
+
+\section{Ergebnisse - BIPIA und NotInject}
+
+In den Grafiken~\ref{fig:recall_position} und~\ref{fig:recall_aufgabe} wird der Recall je Position und Art der Nutzeranfrage differenziert.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\textwidth]{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_bipia_recall_pro_position}
+\caption{Recall je Position des Angriffs auf BIPIA}\label{fig:recall_position}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\textwidth]{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_bipia_recall_pro_aufgabe}
+\caption{Recall je Aufgabe auf BIPIA}\label{fig:recall_aufgabe}
+\end{figure}
+
+Bei der Postionierung der Angriffe ist eine starke Verbesserung zwischen dem Originalansatz und dem weiterentwickelten zu sehen. Beim Originalansatz wurden nur
+36 von 67 der Angriffe am Anfang erkannt, In der Mitte nur 20 von 65 und am Ende nur 12 von 68, was nicht einmal 18\% entspricht. Bei dem weiterentwickelten 
+Ansatz sind diese Zahlen um 61 am ANfnag, 61 in der Mitte und 62 am Ende gestiegen~\ref{fig:recall_position}. Diese Verbesseurng lässt sich mit der Stufe 3 für den
+externen Inhalt bei dem weiterentwicklten Ansatz begründen. Durch die Nummerierung der Zeilen, ist es für das \ac{llm} leichter sich mit den gesamten Daten zu
+beschäftigen und alle gleich ausführlich zu behandeln. Jede Zeile wird nämlich einzeln bewertet. \\
+Auch die Unterschiede je nach Art der Anfrage wird reduziert. Bei dem Original ANsatz wurden nur 19 von 75 der E-Mails richtig erkannt, 13 von 75 der Tabellen
+und 36 von 50 Codeausschnitten~\ref{fig:recall_position}. Diese Zahlen stiegen durch die Nummerierzung der Zeilen auf 64 bei den E-Mails, 72 bei den tabelle und
+48 bei den codeauschnitten. Die Erkennung der E-Mail bleibt dennoch am schwersten für das \ac{llm} zu erkennen, was auch durch den Angriff in Kapitel 4~\ref{sec:durchfuehrung}
+begründet wird, bei dem die Zwei durchgeführten Versuche beide erfolgreich waren. \\
+Bei diesem Datensatz hat sich die \ac{fpr} von 13,5\,\% zwischen den Ansätzen nicht verändert, jedoch ist die Auslöser anders. Die verschieben sich so, dass die 
+Anzahl bei NotInject von 59 auf 53 sinkt und bei BIPIA von 7 auf 13 steigt. Diese Veränderung ist jedoch nicht ausschlaggebend. Es wird jedoch deutlich, dass 
+bei dem NotInject, welcher 339 Einträge umfasst, davon cirac 16\% falsch klasifiziert werden. Diese werden vor allem bei der Mehrheitsentscheidung aals Angriff
+eingestuft und 42 davon wurden beim Originalansatz auch bereits fälschlich eingeordnet. Begründet werden kann dies mit den darin enthaltenen triggerwörtern, da der
+Datensatz extra für diesen Zweck entwickelt wurde
 
 
-\section{Zielsetzung}
+\subsection{Ergebnisse - verschleierter BIPIA}
 
-\section{Forschungsfrage}
+Die Tabelle~\ref{tab:recall_transformation_bipia} stellt den Recall der Einzelnen Transformationen dar.
 
-\section{Aufbau der Arbeit}
+\begin{table}[htbp]
+\centering
+\caption{Recall je Transformation auf dem verschleierten BIPIA-Datensatz}
+\label{tab:recall_transformation_bipia}
+\input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_bipia_obfuscated_recall_pro_transformation}
+\end{table}
+
+Die Ergebnisse dieser verschleierten Version des Test-Abschnitts sollten dabei unterstützen die Klassifizierungsfähigkeit des weiterentwickelten Ansatzes zu 
+bestimmen. Dabei wurden die Daten nur einmal, beim Abshcließenden Durchlauf verwendet. Es sind 200 Angriffe und 150 harmlose Einträge enthalten, wobei die 
+harmlosen nicht transformiert wurden. Aus diesem Grund lässt sich dementsprehcen dkeine Einschätzung bezüglich der Auswirkungen bei den hamrlosen Einträgen 
+machen. 
+
+\section{Fehleranalyse}\label{sec:fehleranalyse}
+
+Mit der Tabelle~\ref{tab:regeln} wird visualisiert, weche der beiden Entscheidungsregelen der Stufe 4 bei dem weiterentwickelten Ansatz ausgelöst wurden. Die Regeln 
+unterscheiden sich zwischen den externen Daten und den einfachen Nutzeranfragen, wie in Abschnitt~\ref{fig:ablauf_massnahme} näher erläutert wird. Dabei wird die
+Formprüfung für die einfachen Nutezranfragen angewendet und die Strukturprüfung für die externen Inhalte. Es wird in dieser Tabelle nur die richtig klassifizierten
+Angriffe einbezogen. 
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Ausgelöste Entscheidungsregeln bei erkannten Angriffen}
+\label{tab:regeln}
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Datensatz} & \textbf{Nur Form- bzw. Strukturprüfung} & \textbf{Beide Regeln} & \textbf{Nur Leitfragen} \\
+\midrule
+Eigener Datensatz (265) & 110 & 103 & 52 \\
+BIPIA (184) & 106 & 67 & 11 \\
+BIPIA, verschleiert (182) & 74 & 96 & 12 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Es wird deutlich dass sich je nach Datensatz der Einfluss der einzlenen Regeln unterscheidet. Bei dem eigenen Datensatz sind 52 NAgriffe die erkannt wurden nur anhand
+der Leitfragen erkannt worden. Wenn diese nicht in die weiterentwicklung des Ansatzes mit einbezogen wären, dann wäre dder Recall auf 66,6\,\% gesunken und hätte
+damit von der Leistung sogar schlechter als der Originalansatz. Bei dem Datensatz BIPIA, welches statt der Formprüfung die Struktur prüfung verwendet wird deutlich,
+dass der größte Ausmaß bei der richtigen Klassifizierung ovn Angriffen durch diese Prüfung kommt und die Leitfragen nur eine untertützung bietet. anze 86,5\,\%
+der Angriffe werden alleine durch diese Prüfung erkannt und verstärkt das Argument, dass durch die Untertielung der Daten in Zeilen, dem \ac{llm} eine bessere
+Übersicht ermöglicht und Angriffe von der Position abhängen. \\
+Die Anzahl und Verteilung der \textbf{False Positives} im Datensatz sind gut begründbar mit den bereits gemachten Erkenntnissen. Bei dem eigenen Datensatz entsheen 16 von 
+23 Fehlalarme, damit fast 70 \%, entstehene bei der Transformation T04, bei der eine Nutzeranfrage durch in eine Negation umformuliert wird. Das \ac{llm} nimmt durch
+die Formulierung an, dass es sich um einen Angriff handelt, obwohl die Anweisungen harmlos sind. \\
+Das gleiche Prinzip ist auch bei dem Datensatz NotInject erkennbar. Es werden durch die Positionierung der Triggerwörter uese vor allem als Angriff klassifiziert. 
+Zusätzlich klingen die Anweisungen in Kombination mit den Triggerwörtern für \ac{llm} wie eine Anweisung. \\
+Auch bei BIPIA werden die Fehlalamre bei externen Daten ausgelöst, die ls Anweisung vom \ac{llm} aufgefasst werden können. 10 der 13 Fehlalamre sind dabei durch
+die Codeausschnitte ausglöst. Diese falsche Klssifizierung kann zusätzlich durch ddas Merkmal des Codeausschnitte unterstützt werden, da Anweisungen an eine KI 
+nicht in einem Code positioniert werden würden.\\
+Bei den \textbf{False Negatives} lassen sich ähnliche Muster erkennen. Bei dem Datensatz BIPIA wurden 16 Angriffe nicht erkannt und davon 11 der E-Mails. Zusätzlich 
+wurden bei 12 der 16 Fälle bei der Strukturprüfung keine Aufforderungen erkannt. Die Positionierung war bei dieser flaschen Klassifizierung kein ausschlaggebender
+Puknt. Zu erkennen sind vor allem das bestimmte Strukturen und die Formulierung der Anweisungen auswirkungen darauf haben, ob diese erkannt werden. Je unauffälliger
+und überienpassender sie mit dem restlichen Inhalt sind, desto so ejer werde sie nicht beachtete. 
+
+\section{Latenz und Kosten}\label{sec:latenz_kosten}
+
+-> Notwendige Token berechnen
 
 
+\section{Praktische Einschätzung}
 
-Kapitel 6: Evaluation ( 12–14 Seiten)
-Die Gliederung beantwortet TF2–TF4 und schließt die wichtigste Grenze aus 5.6: Die Schutzmaßnahme wurde nie im echten Chatbot getestet.
+Für die praktische Einschätzung der Schutzmaßnahme wurden die in Kapitel~\ref{ch:methodik} durchgeführten Angriffe erneut durchgeführt. Da bereits festgestellt wurden,
+dass viele dieser angriffe erfolgreich ausgeführt werden konnten ist dies nun ein praxisnaher Vergleich. Die Schutzmaßnahme wurde dafür nicht in den Chatbot
+integriert, sondern die Angriffe unabhängig in einem Skript nachgebaut. 
 
-Abschnitt	Seiten	Inhalt
-6.1 Evaluationsaufbau	1	Was wird womit evaluiert: Testsplit der drei Datensätze, Vergleich Original vs. neuer Ansatz, Integration in die Testumgebung. Verweis auf die Metriken in 5.3.4
-6.2 Ergebnisse auf den Datensätzen	4–5	
-6.2.1 Gesamtergebnisse	1	Tabelle aus 5.5, Konfusionsmatrizen, Recall und FPR mit Wilson-Konfidenzintervallen
-6.2.2 Eigener Datensatz	1–1,5	Recall je Transformation. Welche Verschleierungen werden noch übersehen?
-6.2.3 BIPIA und NotInject	1–1,5	Recall je Aufgabe und Position. Das Positionsproblem des Originalansatzes ist gelöst, die FPR bleibt bei 13,5 %. Warum?
-6.2.4 Verschleiertes BIPIA	0,5–1	
-6.3 Fehleranalyse	2	Qualitative Auswertung: typische False Positives (Triggerwörter, Over-Defense nach Harmlosigkeitsstufe) und typische False Negatives mit 2–3 konkreten Beispielen. Welche Regel wurde wie oft ausgelöst?
-6.4 Latenz und Kosten	1–1,5	Median und Streuung der Latenz, Anzahl API-Aufrufe pro Anfrage, Kosten pro 1000 Anfragen für Original, neuen Ansatz und Prüfung durch das Hauptmodell. Damit prüfst du dein eigenes Kriterium „kostengünstig“ aus 5.2
-6.5 Wirksamkeit in der Testumgebung	3–4	Neu und das stärkste Argument der Arbeit: Schutzmaßnahme vor callMistralAI bzw. vor die Tool-Ergebnisse schalten und die Angriffe aus Kapitel 4 wiederholen, idealerweise 3–5 Durchläufe pro Variante. Tabelle wie in 4.5.2 mit Spalten „ohne Schutz“ und „mit Schutz“. Löst auch die Einschränkung „nur einmal durchgeführt“ aus Kapitel 4
-6.6 Grenzen	1,5	Aus 5.6 hierher verschieben und um die Erkenntnisse aus 6.5 ergänzen
-Falls 6.5 zeitlich nicht reicht: Füttere die Schutzmaßnahme offline mit den Payloads aus Kapitel 4 (E-Mail, Webseite, Dokument, URL). Das geht schnell und deckt zugleich die Webseiten-Lücke der öffentlichen Datensätze ab.
+\subsection{Versuchsaufbau}
 
-Kapitel 7: Diskussion und Fazit (5–6 Seiten)
-Abschnitt	Seiten	Inhalt
-7.1 Beantwortung der Forschungsfragen	2–2,5	TF1–TF4 einzeln, dann die Hauptfrage
-7.2 Einordnung in die Literatur	1–1,5	Vergleich mit PIGuard, DataSentinel und SmoothLLM: Was ist besser, was schlechter, was neu?
-7.3 Handlungsempfehlungen für ChatBot4U	1	Aus den 5 Schwachstellen ableiten: Allowlist für URLs, Bestätigung durch den Nutzer vor dem Absenden, Schutzmaßnahme vorschalten
-7.4 Ausblick	1	Andere Modelle, Konfidenzwerte statt JA/NEIN, automatische Erkennung externer Inhalte, adaptive Angreifer
+Für die Durchführung der Angriffe wurde ein Datensatz aufgebaut. In diesem Daensatz wurden die Nutzeranfragen, welche in Kapitel~\ref{ch:methodik} an den Chatbot
+gestellt wurden, in einzelnen Einträgen umformuliert. Alle Anfragen wurden als getrennten Eintrag definiert. Externe Inhalte wurden ebenfalls übernommen als Eintrag
+und bei der Multi-Modal Injection wurde der Bild text als eintrag übernommen, da ein Bild nicht verarbeitet werden kann. Bei Angriffen, welche externen Inhalt 
+in den Chat beigefügt hatten, wurde drei Einträge erstellt. Einer mit der Nutzeranfage, einer mit dem externen Inhalt und einer mit beiden Inhalten kombiniert. 
+Daruas sind 57 Einträge entstanden. Harmlose sind dabei die einfachen Nutzeranfragen, die bei den Angriffen als vorbereitung verwendet wurden und die Angriffe in 
+den verschiedenen ausführungen. Insgesamt 27 Angriffe und 20 harmlose einträge. Die Einträge haben einen Aufbau, der sich an dem eigenen ersellten Datensatz 
+orientiert. Für jeden Eintrag wurde eine Id, der split, das label, harmless level, die message und der Input typ festgelegt, damit der weiterentwickelte Ansatz
+diese Einträge verarbeiten kann. \\ 
+Geprüft wurde der Datensazt mit dem weiterentwickelten ANsatz und dem Mistral Small 4 \ac{llm}. Es wurden auch hier die gleichen Parameter verwendet wie bei den 
+vorherigen Durchläufen. Zusätzlich wurde die Temperatur auf 0 gesetzt. Für die Ergebnisse wurde ebenfalls die Metriken aus Abschnitt~\ref{sec:results} erstellt.
+Dieser Durchlauf entspricht Durchlauf nummer 9.
+
+\subsection{Ergebnisse}\label{subsec:vergleichkapitel4}
+
+In der Tabelle~\ref{tab:wirksamkeit} wird dargestellt, welcher der Angriffe weiterhin erfolgreich waren und welche durch die Schutzmaßanhme abgewehrt werden konnten.
+Für die besserer Vergleichbarkeit wurden die Ergebnisse ohne Schutzmaßnahme mit in der Tabelle angegeben. 
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l c c c c X}
+\toprule
+\textbf{Angriffsart} & \textbf{Versuche} & \textbf{Erfolg ohne} & \textbf{Kanal} & \textbf{Erkannt} & \textbf{Auslösende} \\
+ & \textbf{Kap.~4} & \textbf{Schutz} & & & \textbf{Prüfung} \\
+\midrule
+E-Mail Injection   & 2 & 2 & Nutzer & 2/2 & Guard, Leitfragen \\
+Multiturn          & 2 & 1 & Nutzer & 5/7 & Leitfragen, teils Guard \\
+Website Injection  & 1 & 1 & extern & 1/1 & Leitfragen \\
+Jailbreak (Base64) & 5 & 0 & Nutzer & 5/5 & überwiegend Guard \\
+Multi-Modal        & 9 & 1 & extern & 3/3 & Leitfragen, Zeilenprüfung \\
+Document Injection & 3 & 1 & extern & 3/3 & Leitfragen, Zeilenprüfung \\
+URL-Parameter      & 2 & 2 & Nutzer & 2/2 & Leitfragen, teils Guard \\
+\midrule
+E-Mail als externer Inhalt      & -- & -- & extern & 2/2 & Leitfragen, Zeilenprüfung \\
+Document, kombiniert            & -- & -- & Nutzer & 3/3 & Guard, Leitfragen \\
+Multi-Modal, kombiniert         & -- & -- & Nutzer & 9/9 & Leitfragen, teils Guard \\
+\bottomrule
+\end{tabularx}
+\caption{Erkennung der Angriffe aus Kapitel~\ref{ch:methodik} durch die Schutzmaßnahme}
+\label{tab:wirksamkeit}
+\end{table}
+
+Aus den Ergebnissen sticht heraus, dass von den 37 Einträgen mit Angriffs inhalten 35 richtig klassifiziert wurden. Dies entspricht 94,6\,\%. Die beiden 
+\textbf{False Negatives}
+sind bei dem Multiturn Angriff entstanden, welcher in dieser Arbeit bereits als problematisch markiert wurde, da er eher einem direkten Prompt-Injection-Angriff
+entspricht als einem indirekten. \\
+Externe Inhalte wird deutlich das alle mit dem Leitfragen und der Zeilenprüfung erkannt wurden. Die Nutzerfragen vor allem mit den Leitfragen. Bei der Jailbreak
+Injection wurden drei von fünf Fällen durch die Formüberprüfung erkannt. Dies unterstützt die Striktur des Ansatzes, dass verschleierte ANfragen versucht werden
+mit der Rekonstruktion dem \ac{llm} die Erkennung zu erleichtern. \\
+\textbf{False Positives} gab es nur bei nicht bei den normalen Anfragen, welche bei dem ursprünglichen Angriff als vorbereitende ANfragen verwendet wurden. es wurden 
+insgesamt drei blockiert, welche alle zu den Angriffen zähöen, die von dem externen Inhalten getrnnt als Eintrag definiert wurden, aber bereits die schädclieh 
+Anweisung für den Angriff beinhalteten. Dieses Ergebniss ist auf das in Abschnitt~\ref{sec:results} Over-Defense verhalten zurüückzuführen, wenn bestimmte Triggerwörter
+erkannt werden in der Anweisung. 
+
+\section{Grenzen}
+
+Abschließend müssen die Grenzen dieser Arbeit noch einmal definiert werden. Sie wurden bereits in Kapitel~\ref{ch:methodik} und~\ref{ch:schutzmassnahmen} genannt, 
+werden jedoch abschließen hier noch einmal aufgezählt. \\
+TOKEN -> Kosten -> VERGLEICH MIT MISRTRAL LARGE 
+
+
+Bei den Daten sind die Grenzen bereits bekannt. Der Datensatz wurde eigens auf Grundlage von verschiedenen Arbeiten erstellt, kann aber inhaltliche Fehler 
+beinhalten. Er ist zu klein, da für jede Transformation nur 20 Testfällt enthalten sind. Die öffentlichen Datensätze sind auf Englisch. Der Ansatz wurde aber auf 
+die Sprache Deutsch formuliert und der eigene Datensatz ist auch auf deutsch formuliert. Mit den öffentlichen Datensätzen werden zudem nicht alle in 
+Kapitel~\ref{ch:methodik} durchgeführte Angriffe behandelt, sondern es sind nur Einträge zu E-mails, Tabellen und Code ausschnitten enthalten. \\
+Bei der Entwicklung der SChutzmaßnahem wurde zwar darauf geachtete, dass es zu keiner überanapssung kommt, wesewegen die öffentlichen Datensätze mit einbezogen wurden
+und die Maßnahme versucht wurde zuverallgemeinern, jedoch kann es nicht vollständig ausgeschlossen werden. \\
+Der Datensatz aus dem Abschnitt~\ref{subsec:vergleichkapitel4} ist sehr klein. 57 Einträge reichen nicht aus, um eine aussagekräftige Erkenntnis zu sammeln. Zusätzlich
+sind auch dies Einträge eigens formuliert. Zusötziuch sind sie kuru gefasst. Der Recall und die \ac{fpr} fallen demnach positiv für diese Maßnahem aus, jedoch 
+ist die Basis zu gering. Hinzu kommt, dass die Angriffe nicht teilweise nicht vollständig nachgestllt werden konnten, da zum einen für die Multi-Modal Injection
+nicht das Bild eingefügt weren konnte, sondern der enthaltenen Text und von der Webseite der Quellcode übernommen wurde. \\
+Zu den Grenzn des Ansatzes zählen, dass der externe Inhalt gekennzeichnet werden muss und die Kennzeichnung auch nicht überorpft wird. Weiterhin wird eine 
+Anfrage nicht als externer Inhalt gekennzeichnet, wenn sich alle Anweisungen direkt in der Nutzeranfrage befinden. Zum Beispiel wenn eine E-Mail kopiert wurde.\\
+Es kann kein Mutli-Turn Angriff abgegriffen werden, da jede Anfrage unabhängig von allen anderen bearbeitet wird. Angriffe, die wie bei einem in der praxis 
+eingesetzten Chatbot, die über mehrere Nachrichten hinweg erzeugt wird, könnte demntsprechn dnicht richtig klassifiziert werden. \\
+Die Schutzmaßnahme ist in dem Sinne eingeshcränkt, dass alle in Textformat vorliegen muss. Wenn ein Bild oder andere Medien keinenen direkten Text enthalten, 
+dann können sie nicht analysiert werden von der Maßnahme. Auch wenn sie umgefprmt werden kann es sein, dass dadurch wchtige informationen verloren gehen. \\
+Für den Ansatz ist die Anzahl der Anfragen stark gestiegen und auch die Dauer dieser. Zusätzlich wurden nur die \acp{llm} von Mistral getestet. Somit wird nicht
+deutlich, ob diese Schutzmaßnahme vollständig durch den Einsatz eines stärkeren \ac{llm} ersetzt den könnte, welche vergleichbare kosten hat, in bezug auf die 
+große anzahl an Anfragen die nowendig wird. \\
+Aus dieser Maßnahme wird auch nicht dutlich mit welcher Wahrscheinlichkeit entschieden wurde, dass es sich um einen Angriff handelt. Schluss edlich wird nur eine 
+binäre Entscheidung getroffen. \\
+Es wurden nur statische Datensätze verwendet und nicht die wahrscheinliche Situation eines Angreifers betrachtet, welcher versucht bei einer Blockierung eines 
+ANgriffs diesen solange zu verändern, bis er nicht mehr als Angriff klassifiziert wird. \\
+Die größte Einschränkung der Beurteilung liegt darin, dass die Maßnahme nicht in ein laufendes System integriert wurde. Er wurde nicht mit dem Chatbot verbunden und
+es kann dementsprechend keine aussage darüber getroffen werden, ob die Angriffe wirklich abgewehrt werden, ob die \ac{fpr} zu starke Auswirkungen bei einer 
+Nutzerkommunikatoin hat und wie sich die Kosten und die Dauer verändern. Es konnte dadurch ebenfalls keine simulation eines ANgreifers durchgeführt werden, mit welchem
+übprüft werden könnte, wie lange der Chatbot in Kombination mit dem Maßnahem Angriffe abwehren könnte. 
