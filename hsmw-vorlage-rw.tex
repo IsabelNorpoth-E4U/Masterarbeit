@@ -233,6 +233,9 @@ Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und
 % Erlaubt lockerere Zeilen statt Text über den Seitenrand (v. a. bei \texttt-Code im Fließtext)
 \setlength{\emergencystretch}{3em}
 
+% \paragraph-Überschriften in eigener Zeile statt Run-in
+\RedeclareSectionCommand[runin=false, afterskip=0.5\baselineskip]{paragraph}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
