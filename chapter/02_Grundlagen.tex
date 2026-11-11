@@ -1,18 +1,123 @@
-% Abschnitt	Seiten	Inhalt	Literatur-Ideen
-% 2.1 Large Language Models	4–5		
-% 2.1.1 Entwicklung	1	Vom N-Gramm über RNN zum Transformer, GPT-Reihe, heutige Modellfamilien (Mistral kurz einordnen)	Vaswani et al. 2017; Überblicksartikel zu LLMs (z. B. Zhao et al., A Survey of LLMs)
-% 2.1.2 Aufbau und Funktionsweise	2	Tokenisierung, Embeddings, Self-Attention, Next-Token-Prediction, Kontextfenster	Vaswani et al. 2017
-% 2.1.3 Steuerung von LLMs	1–1,5	Rollen (System, User, Assistant, Tool), Systemprompt, Temperatur, top_p. Wichtig für die Arbeit: Alle Rollen landen im selben Kontext, das Modell hat keine harte Trennung zwischen Anweisung und Daten. Diese Grundlage brauchst du für Schwachstelle 1 in Kapitel 4	API-Doku Mistral
-
 \chapter{Grundlagen}\label{ch:grundlagen}
+
+In diesem Kapitel werden die fachlichen Grundlagen erläutert, die für diese Arbeit relevant sind. Sie schaffen ein grundlegendes Verständnis, das die
+Nachvollziehbarkeit des praktischen Teils der Arbeit erleichtert. Dazu werden die Themengebiete \acp{llm}, \ac{rag}, Tool Calling und Chatbots beleuchtet und 
+voneinander abgegrenzt.
 
 \section{Large Language Models}
 
+\acp{llm} kommen im Bereich des \ac{nlp} zum Einsatz. Dabei handelt es sich um ein Teilgebiet der \ac{ki}, das sich damit beschäftigt, menschliche Sprache 
+mithilfe linguistischer Methoden und maschinellen Lernens so aufzubereiten, dass sie von Computern verarbeitet werden kann~\cite[2967]{cb01}. \acp{llm}
+sind Modelle, die natürliche Sprache verarbeiten können~\cite[378]{llm01} und Aufgaben wie Textgenerierung und Klassifikation ausführen~\cite[2968]{cb01}\cite[95]{llm02}.
+Dazu nimmt ein \ac{llm} eine Eingabe entgegen und erzeugt auf dieser Grundlage eine Ausgabe~\cite[378]{llm01}. \\
+Die Grundlage eines \ac{llm} bildet ein Sprachmodell, welches die Wahrscheinlichkeitsverteilung natürlicher Sprache abbildet und so die Wahrscheinlichkeit zukünftiger 
+oder fehlender Token vorhersagen kann~\cite[1]{llm09}. Als \acp{llm} werden in der Regel Transformer-Sprachmodelle mit Hunderten Milliarden Parametern bezeichnet, 
+die auf sehr großen Textmengen trainiert werden~\cite[4]{llm09}. Ein bekanntes Beispiel ist GPT-3~\cite[4]{llm09}. \acp{llm} müssen vier Kriterien 
+erfüllen~\cite[1]{pi2}:
+
+\begin{itemize}
+  \item ein gutes Verständnis des Kontexts natürlicher Sprache,
+  \item die Fähigkeit, menschenähnlichen Text zu generieren,
+  \item eine kontextuelle Wahrnehmung, insbesondere bei wissensintensiven Themen und
+  \item eine starke Orientierung an Anweisungen.
+\end{itemize}
+
+Mit der Einführung von \acp{llm} hat sich die Nutzung von \ac{ki} im Vergleich zu früheren, kleineren Sprachmodellen verändert~\cite[3]{llm09}. Der Zugriff erfolgt 
+nun vor allem über Prompt-Schnittstellen, beispielsweise über eine \ac{api}~\cite[3]{llm09}. 
+
 \subsection{Entwicklung}
+
+Die Entwicklung von Sprachmodellen lässt sich in vier Phasen unterteilen~\cite[1955]{llm05}: 
+
+\begin{enumerate}
+  \item statistische Sprachmodelle,
+  \item neuronale Sprachmodelle,
+  \item vortrainierte Sprachmodelle und
+  \item \acp{llm}
+\end{enumerate}
+
+Die Phasen werden im Folgenden näher beschrieben. \\
+
+Die ersten bekannten statistischen Sprachmodelle wurden in den 1980er- und 1990er-Jahren entwickelt~\cite[2968]{cb01}. Hierzu zählt das n-Gramm-Modell, welches 
+Wahrscheinlichkeiten anhand der Häufigkeit von Wortfolgen berechnet~\cite[2968]{cb01}. Diese Modelle basieren auf der Markov-Annahme, nach der die Vorhersage
+eines Wortes in einer Sequenz vom vorherigen Kontext abhängt~\cite[2976]{cb01}. Sie stießen jedoch an ihre Grenze, wenn linguistische Kontexte erfasst und 
+semantische Zusammenhänge vorhergesagt werden mussten~\cite[2976]{cb01}. \\
+Ab 2012 kamen zunehmend neuronale Sprachmodelle zum Einsatz~\cite[2970]{cb01}. Sie verwenden verschiedene Architekturen mit dem Ziel, die Wahrscheinlichkeit einer 
+Sequenz zu bestimmen~\cite[2977]{cb01}. Durchgesetzt haben sich vor allem \acp{rnn} und \ac{lstm}~\cite[2]{llm06}. Sie wurden vor allem für die
+Sprachmodellierung und maschinelle Übersetzung eingesetzt~\cite[2]{llm06}. Ihr Einsatz war jedoch dadurch begrenzt, dass sie Daten sequenziell verarbeiten mussten.
+Eine Parallelisierung im Trainingsprozess war daher nicht möglich, was insbesondere bei langen Sequenzen zu Problemen führte~\cite[2]{llm06}. \\
+Die nächste Entwicklungsphase bilden die vortrainierten Sprachmodelle, die auf einer Vielzahl ungelabelter Texte trainiert wurden~\cite[2977]{cb01}. Um sie an eine
+spezifische Aufgabe anzupassen, ist ein anschließendes Fine-Tuning erforderlich~\cite[2977]{cb01}. Später wurden diese Sprachmodelle auf Basis der 
+Transformer-Architektur aufgebaut, die eine Parallelisierung ermöglicht und Attention-Mechanismen beinhaltet~\cite[2]{llm09}. Mithilfe dieser 
+Attention-Mechanismen können Abhängigkeiten zwischen Eingaben und Ausgaben abgebildet werden~\cite[2]{llm06}. Die Transformer-Architektur wurde 2017 entwickelt 
+und ermöglicht es Modellen, große Textmengen zu verarbeiten und zu generieren~\cite[378]{llm01}. Sie bildet die Grundlage heutiger \acp{llm}~\cite[95]{llm02}. \\
+Die Entwicklung der \acp{llm} wurde durch die Erkenntnis vorangetrieben, dass eine größere Datenmenge und Modellgröße die Fähigkeiten der Modelle verbessern~\cite[2\psq]{llm09}.
+Große Modelle wie GPT-3 mit 175 Milliarden Parametern zeigen dabei deutlich bessere Fähigkeiten als kleinere Modelle wie GPT-2 mit 1,5 Milliarden
+Parametern~\cite[2\psq]{llm09}.
+Besonders sichtbar wurde die Entwicklung bei der GPT-Reihe von OpenAI, deren Name für Generative Pre-Training steht~\cite[7]{llm09}. GPT-1 erschien 2018 und 
+kombinierte unüberwachtes Pre-Training mit überwachtem Fine-Tuning~\cite[7]{llm09}. Bei GPT-2 wurde die Anzahl der Parameter erhöht, was durch das Training mit einem
+Datensatz aus Webseiten ermöglicht wurde. Ziel war es, Aufgaben ohne explizites Fine-Tuning ausführen zu können~\cite[7]{llm09}. Mit dem 2020 veröffentlichten GPT-3
+wurde das Konzept von In-Context Learning eingeführt, bei dem ein Modell eine Aufgabe anhand von Anweisungen und Beispielen im Prompt lösen soll~\cite[9]{llm09}. 
+GPT-4 erweiterte 2023 die Eingabe um multimodale Signale~\cite[10]{llm09}. \\
+Auch wenn die Entwicklung zeigt, dass das Ziel vor allem darin bestand, Modelle zu vergrößern, führte dies nicht unbedingt zu besseren Modellen. 
+\acp{llm} können Ausgaben erzeugen mit unwahren, toxischen oder nicht hilfreichen Inhalten~\cite[1]{llm08}. Nutzer erwarten hingegen, dass ein Sprachmodell 
+hilfreich, harmlos und ehrlich ist~\cite[2]{llm08}. Aus diesem Grund werden Modelle mithilfe von Datensätzen in natürlicher Sprache feinabgestimmt~\cite[30]{llm09}.
+Dabei kommt vor allem \ac{rlhf} zum Einsatz, bei dem ein Modell anhand menschlicher Rückmeldungen feinabgestimmt wird~\cite[2]{llm08}. Die menschliche
+Bewertung dient dabei als Belohnungssignal für das Modell~\cite[2]{llm08}. \ac{rlhf} verbessert die Fähigkeiten eines Sprachmodells effizienter als eine
+Vergrößerung des Modells um das Hundertfache~\cite[9]{llm08}. Auf diesem Verfahren basiert auch das 2022 veröffentlichte ChatGPT. Es wurde mit von Menschen 
+erstellten Gesprächen trainiert, in denen beide Rollen, die des Nutzers und die der \ac{ki}, eingenommen wurden~\cite[10]{llm09}.
+Trotz Fine-Tuning ist ein Modell jedoch nicht sicher und kann schädliche Inhalte erzeugen~\cite[10]{llm08}. So befolgt es Anweisungen der Nutzer auch dann, wenn
+ein realer Schaden entstehen kann~\cite[10]{llm08}. \\
+Seit 2022 haben sich zudem zunehmend Open-Source-Modelle etabliert, deren Fähigkeiten denen der GPT-Modelle entsprechen sollen, darunter LLaMA~\cite[2970]{cb01}. 
+Auch 2024 basierten die meisten Modelle auf der Transformer-Architektur~\cite[2970]{cb01}. Die Modellfamilie LLaMA wurde dabei kontinuierlich weiterentwickelt. 
+Das neuste Modell LLaMA 4 hat bereits 400 Milliarden Parameter QUELLLE!!!!. Eine weitere bekannte Modellfamilie ist Mistral~\cite[11]{llm09}. 
 
 \subsection{Aufbau und Funktionsweise}
 
+\acp{llm} erhalten einen Text als Eingabe und geben einen zum Kontext passenden Text aus~\cite[2978]{cb01}. Dazu nutzen sie statistische Muster und die Struktur
+der Sprache, die sie durch das Training auf großen Datensätzen erlernt haben~\cite[2978]{cb01}. \\
+Da Modelle darauf ausgelegt sind, numerische Daten zu verarbeiten, muss die Eingabe zunächst umgewandelt werden~\cite[2991]{cb01}. Dazu wird der Text in kleinere 
+Einheiten, sogenannte Token, zerlegt~\cite[2991]{cb01}. Diese Token werden anschließend als numerische Repräsentationen, sogenannte Input Embeddings, in einem
+Vektorraum dargestellt~\cite[2991]{cb01}. Embeddings ermöglichen es einem Modell, Wörter mit ähnlicher Bedeutung miteinander zu assoziieren, indem ihnen
+ähnliche Vektoren zugeordnet werden~\cite[2991]{cb01}. \\
+Das zentrale Element der Transformer-Architektur ist der Attention-Mechanismus. Er ermöglicht es den Token einer Sequenz, miteinander zu interagieren, und dient der
+Berechnung der Repräsentationen von Eingabe- und Ausgabesequenz~\cite[25]{llm09}. Eine Attention-Funktion bildet eine Anfrage und eine Menge von Schlüssel-Wert-Paaren 
+auf eine Ausgabe ab, wobei alle Werte als Vektoren vorliegen~\cite[3\psq]{llm06}. Die Ausgabe ergibt sich als gewichtete Summe der Werte, wobei das Gewicht eines 
+Wertes davon abhängt, wie gut die Anfrage zum jeweiligen Schlüssel passt~\cite[3\psq]{llm06}. \\
+Hinsichtlich der Architektur wird zwischen Encoder-Decoder-, Causal-Decoder- und Prefix-Decoder-Modellen unterschieden~\cite[22]{llm09}. Die ursprüngliche 
+Transformer-Architektur basiert auf einem Encoder-Decoder~\cite[22]{llm09}. Der Encoder wandelt die Eingabesequenz in eine Repräsentation um, die 
+weiterverarbeitet werden kann. Der Decoder greift auf diese Repräsentation zu und generiert unter Verwendung des Attention-Mechanismus autoregressiv die
+Ausgabesequenz~\cite[22]{llm09}. Die GPT-Modelle basieren dagegen auf der Causal-Decoder-Architektur~\cite[22]{llm09}. Diese verwendet eine Attention-Maske, die
+sicherstellt, dass jedes Eingabetoken nur auf die vorangegangenen Token und sich selbst zugreifen kann~\cite[22]{llm09}. Eingabe- und Ausgabetoken werden dabei auf
+dieselbe Weise vom Decoder verarbeitet~\cite[22]{llm09}. \\
+Die am weitesten verbreitete Aufgabe eines \ac{llm} ist die Sprachmodellierung~\cite[26]{llm09}. Dabei werden auf Grundlage einer Tokensequenz neue Token anhand der 
+jeweils vorangegangenen Token vorhergesagt~\cite[26]{llm09}. Das Modell arbeitet autoregressiv, wodurch bereits vorhergesagte Token als zusätzliche Eingabe für
+die Vorhersage der folgenden Token dienen~\cite[26]{llm09}. Hierzu werden die Ausgaben des Decoders in Wahrscheinlichkeiten für das nächste Token 
+umgewandelt~\cite[2995]{cb01}. Ein häufig verwendetes Verfahren ist die Greedy Search, bei der jeweils das wahrscheinlichste Token ausgewählt wird~\cite[26]{llm09}.
+Für Aufgaben ohne definiertes Ende, beispielsweise Dialoge, ist diese Methode nicht geeignet, da sich Sätze wiederholen können und Ausgaben unbeholfen 
+klingen~\cite[26]{llm09}. Die Vorhersage des nächsten Tokens ist zwar die grundlegende Fähigkeit eines Modells, stellt jedoch lediglich einen Stellvertreter für
+die eigentliche Aufgabe dar, die es erfüllen soll~\cite[10]{llm08}.
+
 \subsection{Steuerung von LLMs}
+
+Nach dem Training werden \acp{llm} mithilfe von Prompting-Strategien für die Ausführung vielfältiger Aufgaben verwendet~\cite[44]{llm09}. Der Prozess, einen geeigneten 
+Prompt zu erstellen, wird als Prompt Engineering bezeichnet~\cite[44]{llm09}. Von der Qualität des Prompts hängt ab, wie gut eine Aufgabe ausgeführt wird~\cite[44]{llm09}.
+Ein Prompt besteht aus vier Bestandteilen: der Aufgabenbeschreibung, den Eingabedaten, den Kontextinformationen und dem Prompt-Stil~\cite[44]{llm09}. Bereits einfache
+Formulierungen können das Verhalten eines Sprachmodells beeinflussen. So kann beispielsweise eine Rollenzuweisung die Leistung bei einer bestimmten Aufgabe
+verbessern~\cite[45]{llm09}. \\
+Seit GPT-3 wird Prompt Engineering vermehrt als Alternative zum Fine-Tuning eingesetzt~\cite[2968]{cb01}. Dazu wird unter anderem die Methode In-Context Learning
+verwendet~\cite[4]{llm07}. Bei dieser Methode wird der Eingabetext als Spezifikation für die Aufgabe verwendet. Das Modell erhält eine Anweisung in natürlicher
+Sprache und soll die Aufgabe lösen, indem es vorhersagt, was als Nächstes folgt~\cite[4]{llm07}. Dabei findet kein Fine-Tuning statt und die Gewichte des Modells
+werden nicht verändert~\cite[5]{llm07}. Je nachdem, wie viele Beispiele ein Sprachmodell zur Demonstration der Aufgabe erhält, wird zwischen Few-Shot, One-Shot und
+Zero-Shot unterschieden. Beim Few-Shot werden dem Modell typischerweise 10 bis 100 Beispiele übergeben, abhängig von der Größe des Kontextfensters~\cite[6]{llm07}.
+Beim One-Shot erhält das Modell ein einzelnes Beispiel zusammen mit einer Beschreibung der Aufgabe in natürlicher Sprache, beim Zero-Shot ausschließlich die
+Beschreibung~\cite[6\psq]{llm07}. Zero-Shot ist am einfachsten umzusetzen, stellt zugleich jedoch die anspruchsvollste Variante dar~\cite[7]{llm07}. \\
+Neben dem Prompt beeinflussen Sampling-Parameter die Generierung~\cite[26]{llm09}. Im Gegensatz zur Greedy Search wird beim Sampling das nächste Token auf Grundlage
+der Wahrscheinlichkeitsverteilung zufällig ausgewählt~\cite[26]{llm09}. Die dadurch entstehende Zufälligkeit fördert die Vielfalt der Ausgabe~\cite[26]{llm09}, da
+auch weniger wahrscheinliche, aber potenzielle Sequenzen erzeugt werden~\cite[2996]{cb01}. Über die Temperatur wird gesteuert, wie zufällig die Ausgabe ausfällt. 
+Niedrige Werte erzeugen deterministischere, hohe Werte vielfältigere Ausgaben~\cite{llm10}. Der Parameter top\_p begrenzt die Auswahl auf die kleinste Menge 
+an Token, deren kumulierte Wahrscheinlichkeitsmasse den Wert $p$ erreicht~\cite{llm10}.
+
 
 \section{Retrieval-Augmented Generation}\label{sec:rag}
 

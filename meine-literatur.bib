@@ -63,6 +63,121 @@
 
 % 2. Grundlagen
 
+% 1. LLMs
+
+@article{llm01,
+title = {AI-enabled language models (LMs) to large language models (LLMs) and multimodal large language models (MLLMs) in drug discovery and development},
+journal = {Journal of Advanced Research},
+volume = {78},
+pages = {377-389},
+year = {2025},
+issn = {2090-1232},
+doi = {https://doi.org/10.1016/j.jare.2025.02.011},
+url = {https://www.sciencedirect.com/science/article/pii/S2090123225001092},
+author = {Chiranjib Chakraborty and Manojit Bhattacharya and Soumen Pal and Srijan Chatterjee and Arpita Das and Sang-Soo Lee},
+keywords = {Large language models, Drug discovery, Target identification, ADMET},
+urldate = {2026-10-30}
+}
+
+@article{llm02,
+  author    = {Teubner, Timm and Flath, Christoph M. and Weinhardt, Christof and van der Aalst, Wil and Hinz, Oliver},
+  title     = {Welcome to the Era of {ChatGPT} et al.},
+  journal   = {Business \& Information Systems Engineering},
+  year      = {2023},
+  month     = mar,
+  volume    = {65},
+  pages     = {95--101},
+  doi       = {10.1007/s12599-023-00795-x},
+  url       = {https://doi.org/10.1007/s12599-023-00795-x},
+  urldate = {2026-10-30}
+}
+
+% llm03 == pi2
+
+% llm04 == cb01
+
+@article{llm05,
+  author    = {Wang, Zichong and Chu, Zhibo and Doan, Thang Viet and Ni, Shiwen and Yang, Min and Zhang, Wenbin},
+  title     = {History, development, and principles of large language models: an introductory survey},
+  journal   = {AI and Ethics},
+  year      = {2025},
+  month     = jun,
+  volume    = {5},
+  pages     = {1955--1971},
+  doi       = {10.1007/s43681-024-00583-7},
+  url       = {https://doi.org/10.1007/s43681-024-00583-7},
+  urldate = {2026-10-30}
+}
+
+@inproceedings{llm06,
+author = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, {\L}ukasz and Polosukhin, Illia},
+title = {Attention is all you need},
+year = {2017},
+isbn = {9781510860964},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+abstract = {The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles, by over 2 BLEU. On the WMT 2014 English-to-French translation task, our model establishes a new single-model state-of-the-art BLEU score of 41.0 after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature.},
+booktitle = {Proceedings of the 31st International Conference on Neural Information Processing Systems},
+pages = {6000–6010},
+numpages = {11},
+location = {Long Beach, California, USA},
+series = {NIPS'17},
+urldate = {2026-10-30}
+}
+
+@inproceedings{llm07,
+author = {Brown, Tom B. and Mann, Benjamin and Ryder, Nick and Subbiah, Melanie and Kaplan, Jared and Dhariwal, Prafulla and Neelakantan, Arvind and Shyam, Pranav and Sastry, Girish and Askell, Amanda and Agarwal, Sandhini and Herbert-Voss, Ariel and Krueger, Gretchen and Henighan, Tom and Child, Rewon and Ramesh, Aditya and Ziegler, Daniel M. and Wu, Jeffrey and Winter, Clemens and Hesse, Christopher and Chen, Mark and Sigler, Eric and Litwin, Mateusz and Gray, Scott and Chess, Benjamin and Clark, Jack and Berner, Christopher and McCandlish, Sam and Radford, Alec and Sutskever, Ilya and Amodei, Dario},
+title = {Language models are few-shot learners},
+year = {2020},
+isbn = {9781713829546},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+abstract = {We demonstrate that scaling up language models greatly improves task-agnostic, few-shot performance, sometimes even becoming competitive with prior state-of-the-art fine-tuning approaches. Specifically, we train GPT-3, an autoregressive language model with 175 billion parameters, 10x more than any previous non-sparse language model, and test its performance in the few-shot setting. For all tasks, GPT-3 is applied without any gradient updates or fine-tuning, with tasks and few-shot demonstrations specified purely via text interaction with the model. GPT-3 achieves strong performance on many NLP datasets, including translation, question-answering, and cloze tasks. We also identify some datasets where GPT-3's few-shot learning still struggles, as well as some datasets where GPT-3 faces methodological issues related to training on large web corpora.},
+booktitle = {Proceedings of the 34th International Conference on Neural Information Processing Systems},
+articleno = {159},
+numpages = {25},
+location = {Vancouver, BC, Canada},
+series = {NIPS '20},
+urldate = {2026-10-30}
+}
+
+@inproceedings{llm08,
+ author = {Ouyang, Long and Wu, Jeffrey and Jiang, Xu and Almeida, Diogo and Wainwright, Carroll and Mishkin, Pamela and Zhang, Chong and Agarwal, Sandhini and Slama, Katarina and Ray, Alex and Schulman, John and Hilton, Jacob and Kelton, Fraser and Miller, Luke and Simens, Maddie and Askell, Amanda and Welinder, Peter and Christiano, Paul F and Leike, Jan and Lowe, Ryan},
+ booktitle = {Advances in Neural Information Processing Systems},
+ doi = {10.52202/068431-2011},
+ editor = {S. Koyejo and S. Mohamed and A. Agarwal and D. Belgrave and K. Cho and A. Oh},
+ pages = {27730--27744},
+ publisher = {Curran Associates, Inc.},
+ title = {Training language models to follow instructions with human feedback},
+ url = {https://proceedings.neurips.cc/paper_files/paper/2022/file/b1efde53be364a73914f58805a001731-Paper-Conference.pdf},
+ volume = {35},
+ year = {2022},
+ urldate = {2026-10-30}
+}
+
+@article{llm09,
+  author    = {Zhao, Wayne Xin and Zhou, Kun and Li, Junyi and Tang, Tianyi and Dong, Zican and Hou, Yupeng and Zhang, Beichen and Min, Yingqian and Zhang, Junjie and Liu, Peiyu and Wang, Xiaolei and Du, Yifan and Yang, Chen and Chen, Yushuo and Chen, Zhipeng and Jiang, Jinhao and Ren, Ruiyang and Li, Yifan and Tang, Xinyu and Liu, Zikang and Hu, Yiwen and Nie, Jian-Yun and Wen, Ji-Rong},
+  title     = {A Survey of Large Language Models},
+  journal   = {Frontiers of Computer Science},
+  year      = {2026},
+  month     = may,
+  volume    = {20},
+  pages     = {2012627},
+  doi       = {10.1007/s11704-026-60308-3},
+  url       = {https://doi.org/10.1007/s11704-026-60308-3},
+  urldate = {2026-10-30}
+}
+
+@online{llm10,
+    author       = {{Mistral AI}},
+    title        = {Chat Endpoints – Create Chat Completions},
+    organization = {Mistral AI Documentation},
+    year         = {2026},
+    url          = {https://docs.mistral.ai/api/endpoint/chat},
+    urldate      = {2026-10-30}
+}
+
+
 % 2. RAG
 
 % rag01 == pi24
