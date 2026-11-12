@@ -94,6 +94,14 @@ glossaryfront,
 		{§}{{\S}}1 {°}{{\textdegree}}1 {ø}{{\o}}1 {„}{{\glqq}}1 {“}{{\grqq}}1 {→}{{$\rightarrow$}}1
 }
 
+% einheitliche Schriftgröße für alle Tabellen (statt \resizebox)
+% (setspace setzt Gleitumgebungen auf \normalsize zurück, daher über den caption-Hook;
+%  Captions behalten ihre eigene Größe, Abbildungen sind nicht betroffen)
+\makeatletter
+\def\thesis@tabletype{table}
+\AtBeginDocument{\g@addto@macro\caption@xfloat@hook{\ifx\@captype\thesis@tabletype\footnotesize\fi}}
+\makeatother
+
 % für das Literaturverzeichnis
 \usepackage[
 hyperref=true, % Links zu Referenzen

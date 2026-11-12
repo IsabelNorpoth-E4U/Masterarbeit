@@ -125,8 +125,11 @@ Die gesammelten Ergebnisse liefern einen umfassenden Eindruck davon, welche Ans�
 Der wichtigste Schritt ist die Implementierung des Ansatzes in die Produktivumgebung. Dadurch kann die Leistung in einer praxisnahen Anwendung erfasst werden
 und die Einsatzmöglichkeiten besser beurteilt werden. \\
 Die Schutzmaßnahme sollte außerdem mit weiteren \acp{llm} getestet werden. Bislang bleibt ungeklärt, ob andere Modelle bereits mit dem Originalansatz bessere
-Ergebnisse erzielen und die weiterentwickelte Schutzmaßnahme überflüssig wäre. Dies ist auch in Bezug auf die Kosten relevant, da die Prüfung einer Anfrage
-ungefähr so viel kostet wie eine Anfrage mit Mistral Large 4. \\
+Ergebnisse erzielen und die weiterentwickelte Schutzmaßnahme überflüssig wäre. Dies ist auch in Bezug auf die Kosten relevant, da die Prüfung einer Anfrage 
+ungefähr so viel kostet wie eine Anfrage mit Mistral Large 4. Inzwischen gibt es zudem Modelle, die speziell auf die Klassifikation ausgelegt sind. Ein Beispiel
+ist Microsoft-Decision-1, das bei einer festen Anzahl von Antwortmöglichkeiten für jede eine Wahrscheinlichkeit ausgibt. Das Modell zeichnet sich vor allem durch 
+eine gerige Latenz aus. In einem Test dauerte eine Entscheidung im Median 125\,ms~\cite{f01}. Durch die Ausgabe der Wahrscheinlichkeiten ließe sich die 
+in dem weiterentwickelten Ansatz beschriebene Mehrheitsentscheidung ersetzen. \\
 Für eine bessere Übertragbarkeit sollte der Ansatz zusätzlich auf weiteren Datensätzen geprüft werden, auch auf deutschsprachigen. Zusätzlich sollte das Verhalten eines
 möglichen Angreifers simuliert werden, statt ausschließlich statische Datensätze zu verwenden. Dadurch wird die Bewertung praxisnäher und kann sich besser an die
 aktuelle Entwicklung anpassen. \\

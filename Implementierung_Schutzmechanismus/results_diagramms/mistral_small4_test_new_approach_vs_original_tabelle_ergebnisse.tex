@@ -1,20 +1,21 @@
-\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}
+\providecommand{\zweizeilig}[1]{\begin{tabular}[b]{@{}r@{}}#1\end{tabular}}
 \begin{tabular}{l rrrr rr rr r}
 \toprule
-\textbf{Ansatz} & \textbf{TP} & \textbf{FN} & \textbf{FP} & \textbf{TN} & \textbf{Recall} & \textbf{FPR} & \textbf{Precision} & \textbf{F1} & \textbf{Latenz (Median)} \\
+\textbf{Ansatz} & \textbf{TP} & \textbf{FN} & \textbf{FP} & \textbf{TN} & \textbf{Recall} & \textbf{FPR} & \textbf{Precision} & \textbf{F1} & \zweizeilig{\textbf{Latenz}\\\textbf{(Median)}} \\
 \midrule
 \multicolumn{10}{l}{\textit{Eigener Datensatz}} \\
 Original (Mistral Small~4) & 234 & 86 & 37 & 303 & 73{,}1\,\% & 10{,}9\,\% & 0{,}863 & 0{,}792 & 314\,ms \\
 Original (Mistral Large~4) & 133 & 187 & 0 & 340 & 41{,}6\,\% & 0{,}0\,\% & 1{,}000 & 0{,}587 & 639\,ms \\
-\textbf{Weiterentwickelter Ansatz (Mistral Small~4)} & 265 & 55 & 23 & 317 & 82{,}8\,\% & 6{,}8\,\% & 0{,}920 & 0{,}872 & 3421\,ms \\
+\begin{tabular}[t]{@{}l@{}}\textbf{Weiterentwickelter Ansatz}\\\textbf{(Mistral Small~4)}\end{tabular} & 265 & 55 & 23 & 317 & 82{,}8\,\% & 6{,}8\,\% & 0{,}920 & 0{,}872 & 3421\,ms \\
 \midrule
 \multicolumn{10}{l}{\textit{BIPIA + NotInject}} \\
 Original (Mistral Small~4) & 68 & 132 & 66 & 423 & 34{,}0\,\% & 13{,}5\,\% & 0{,}507 & 0{,}407 & 354\,ms \\
 Original (Mistral Large~4) & 49 & 151 & 6 & 483 & 24{,}5\,\% & 1{,}2\,\% & 0{,}891 & 0{,}384 & 1622\,ms \\
-\textbf{Weiterentwickelter Ansatz (Mistral Small~4)} & 184 & 16 & 66 & 423 & 92{,}0\,\% & 13{,}5\,\% & 0{,}736 & 0{,}818 & 3848\,ms \\
+\begin{tabular}[t]{@{}l@{}}\textbf{Weiterentwickelter Ansatz}\\\textbf{(Mistral Small~4)}\end{tabular} & 184 & 16 & 66 & 423 & 92{,}0\,\% & 13{,}5\,\% & 0{,}736 & 0{,}818 & 3848\,ms \\
 \midrule
 \multicolumn{10}{l}{\textit{BIPIA, verschleiert}} \\
 Original (Mistral Small~4) & 86 & 114 & 13 & 137 & 43{,}0\,\% & 8{,}7\,\% & 0{,}869 & 0{,}575 & 477\,ms \\
-\textbf{Weiterentwickelter Ansatz (Mistral Small~4)} & 182 & 18 & 13 & 137 & 91{,}0\,\% & 8{,}7\,\% & 0{,}933 & 0{,}922 & 6230\,ms \\
+\begin{tabular}[t]{@{}l@{}}\textbf{Weiterentwickelter Ansatz}\\\textbf{(Mistral Small~4)}\end{tabular} & 182 & 18 & 13 & 137 & 91{,}0\,\% & 8{,}7\,\% & 0{,}933 & 0{,}922 & 6230\,ms \\
 \bottomrule
-\end{tabular}}
+\end{tabular}

@@ -217,7 +217,6 @@ def count_run(model, file_name):
 
 
 lines = [
-    r"\resizebox{\textwidth}{!}{%",
     r"\begin{tabular}{l r r r r r r r r}",
     r"\toprule",
     r"\textbf{Ansatz} & \textbf{Einträge} & \textbf{Anfragen} & \textbf{Input-Token}"
@@ -257,7 +256,7 @@ lines.append(r"\textbf{Gesamt} & & " + number_de(total["requests"])
              + " & " + number_de(total["tokens_out"])
              + " & & " + number_de(total["cost"], 3) + r"\,\$ & & \\")
 lines.append(r"\bottomrule")
-lines.append(r"\end{tabular}}")
+lines.append(r"\end{tabular}")
 
 with open(TABLE_FILE, "w", encoding="utf-8") as file:
     file.write("\n".join(lines) + "\n")

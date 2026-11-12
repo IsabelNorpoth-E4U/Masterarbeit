@@ -151,7 +151,6 @@ def label_tex(run):
 # one big table with every run of both data sets
 def write_results_table(runs):
     lines = [
-        r"\resizebox{\textwidth}{!}{%",
         r"\begin{tabular}{l rrrr rr rr r}",
         r"\toprule",
         r"\textbf{Ansatz} & \textbf{TP} & \textbf{FN} & \textbf{FP} & \textbf{TN} & "
@@ -178,7 +177,7 @@ def write_results_table(runs):
                          + " & " + number_tex(m["precision"]) + " & " + number_tex(m["f1"])
                          + " & " + f"{m['latency_ms']['median']:.0f}" + r"\,ms \\")
     lines.append(r"\bottomrule")
-    lines.append(r"\end{tabular}}")
+    lines.append(r"\end{tabular}")
     save_text("\n".join(lines) + "\n", PREFIX + "tabelle_ergebnisse.tex")
 
 
@@ -228,7 +227,6 @@ def write_transformation_table(runs):
         for run in selected:
             header = header + " & " + label_tex(run)
         lines = [
-            r"\resizebox{\textwidth}{!}{%",
             r"\begin{tabular}{l" + " r" * len(selected) + "}",
             r"\toprule",
             header + r" \\",
@@ -251,7 +249,7 @@ def write_transformation_table(runs):
             cells.append(f"{run['metrics']['latency_ms']['median']:.0f}" + r"\,ms")
         lines.append(r"\textbf{Latenz (Median)} & " + " & ".join(cells) + r" \\")
         lines.append(r"\bottomrule")
-        lines.append(r"\end{tabular}}")
+        lines.append(r"\end{tabular}")
         save_text("\n".join(lines) + "\n",
                   PREFIX + "tabelle_" + data_set + "_recall_pro_transformation.tex")
 

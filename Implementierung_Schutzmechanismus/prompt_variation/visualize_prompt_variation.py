@@ -125,7 +125,6 @@ def share_tex(share):
 # one row per guard prompt, recall and FPR for every data set
 def write_table(shares, name):
     lines = [
-        r"\resizebox{\textwidth}{!}{%",
         r"\begin{tabular}{l rr rr rr}",
         r"\toprule",
     ]
@@ -146,7 +145,7 @@ def write_table(shares, name):
             cells.append(share_tex(shares[data_set]["fpr"][i]))
         lines.append(" & ".join(cells) + r" \\")
     lines.append(r"\bottomrule")
-    lines.append(r"\end{tabular}}")
+    lines.append(r"\end{tabular}")
     path = os.path.join(DIAGRAM_DIR, name + ".tex")
     with open(path, "w", encoding="utf-8") as file:
         file.write("\n".join(lines) + "\n")
