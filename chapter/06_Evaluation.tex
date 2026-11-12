@@ -181,8 +181,10 @@ wird sie übersehen.
 \section{Latenz und Kosten}\label{sec:latenz_kosten}
 
 Eine der Anforderungen, die an die Maßnahme gestellt wurden, war, dass sie mit einem kleinen Modell umgesetzt wird und somit kostengünstig und schnell ist. Für die 
-Evaluation wurden daher die Latenz~\eqref{eq:latency} und Kosten berechnet und in Tabelle~\ref{tab:token_kosten} gegenübergestellt. Für die Kostenberechnung wurden für alle
-acht Durchläufe die Anzahl der Anfragen und die daraus entstehenden Input- und Output-Token berechnet. Die Token wurden 
+Evaluation wurden daher die Latenz~\eqref{eq:latency} und Kosten berechnet und in Tabelle~\ref{tab:token_kosten} gegenübergestellt. Für die Kostenberechnung wurden
+für alle
+acht Durchläufe die Anzahl der Anfragen und die daraus entstehenden Input- und Output-Token berechnet~\footnote{Da die Token-Nutzung während der Durchläufe nicht erfasst wurde, wurden die Anfragen nachträglich rekonstruiert und mit dem Tokenizer des jeweiligen Modells gezählt. Das hierfür verwendete Skript wurde mit Unterstützung von Claude (Anthropic) erstellt. Wiederholte Anfragen nach \acs{api}-Fehlern sind nicht berücksichtigt.}. 
+Die Token wurden 
 nachträglich mit dem Tokenizer des jeweiligen \ac{llm} gezählt und die Kosten mit den in Abschnitt~\ref{sec:aufbau_umgebung} definierten Preisen berechnet.
 
 \begin{table}[htbp]
