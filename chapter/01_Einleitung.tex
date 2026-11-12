@@ -3,7 +3,7 @@
 
 \section{Problemstellung und Motivation}
 
-\acf{llm} finden in der Praxis und insbesondere in Unternehmen zunehmend Anwendung. Diese Entwicklung lässt sich in zahlreichen Statistiken der vergangenen 
+\acfp{llm} finden in der Praxis und insbesondere in Unternehmen zunehmend Anwendung. Diese Entwicklung lässt sich in zahlreichen Statistiken der vergangenen 
 Jahre verfolgen. So stellt das Statistische Bundesamt fest, dass der Anteil der Unternehmen, die \ac{ki} einsetzen, im Zeitraum von 2021 bis 2025 von 
 11\,\% auf 26\,\% gestiegen ist. Dabei ist zu beachten, dass Unternehmen aller Größenklassen in diese Statistik einbezogen wurden, auch solche mit 10 bis 
 49 Beschäftigten. Bei Unternehmen mit 250 und mehr Beschäftigten stieg der Anteil im selben Zeitraum von 31\,\% auf 57\,\%~\cite{e01}. \\
@@ -17,7 +17,7 @@ Dies spiegelt sich auch im Bericht der Organisation OWASP aus dem Jahr 2026 wide
 das Risiko der übermäßigen Handlungsfreiheit (eng.: Excessive Agency) auf Platz~3 eingeordnet, während es 2025 noch auf Platz~6 lag~\cite{pi24}. Dieses Risiko beschreibt die Gefahr, die 
 entsteht, wenn ein \ac{llm} auf zu viele Funktionalitäten zugreifen kann und über zu viele Berechtigungen verfügt. \\
 Es zeigt sich somit, dass \acp{llm} zunehmend Zugriff auf große Datenmengen erhalten, auf deren Grundlage sie Aktionen ausführen können. Diese Aktionen werden als
-Tool Calls bezeichnet. Durch \glqq Tool Calls\grqq wird es \acp{llm} ermöglicht, beliebige Funktionen auszuführen, beispielsweise auf externe Daten und Webseiten zuzugreifen 
+Tool Calls bezeichnet. Durch \glqq Tool Calls\grqq{} wird es \acp{llm} ermöglicht, beliebige Funktionen auszuführen, beispielsweise auf externe Daten und Webseiten zuzugreifen 
 oder Formulare auszufüllen. Es können unbegrenzt viele dieser Funktionen hinzugefügt werden. \\
 Mit dieser Erweiterung entstehen jedoch auch Gefahren, da durch den Aufruf 
 externer Quellen und die Verarbeitung großer Datenmengen neue Angriffsflächen entstehen. \acp{llm} können nicht zuverlässig zwischen Anweisungen 
@@ -73,15 +73,12 @@ Die Beantwortung der Hauptforschungsfrage soll allgemein erfolgen, obwohl der un
 
 \section{Aufbau der Arbeit}
 
-Die Arbeit gliedert sich in sieben Kapitel. Im Kapitel~\ref{ch:grundlagen} werden die fachlichen Grundlagn vermittelt. Dazu werden \acp{llm} und ihre Funktionsweise, 
+Die Arbeit gliedert sich in sieben Kapitel. Im Kapitel~\ref{ch:grundlagen} werden die fachlichen Grundlagen vermittelt. Dazu werden \acp{llm} und ihre Funktionsweise, 
 ihre Entwicklungsgeschichte, ihre technischen Bestandteile und ihr Aufbau behandelt. 
-
-
-Darauf aufbauend wird Tool Calling bei \acp{llm} erläutert, also die Nutzung und der Ablauf eines Aufrufs von externen Ressourcen.  Zusätzlich werden 
+Darauf aufbauend wird das Tool Calling bei \acp{llm} erläutert, wobei die Nutzung sowie der Ablauf des Aufrufs externer Ressourcen beschrieben werden. Zusätzlich werden 
 Sicherheitsbedrohungen vorgestellt, welche durch den Einsatz von Tool Calling 
 entstehen. Im weiteren Verlauf werden Chatbots definiert und von \acp{llm} abgegrenzt. Es wird ihre Architektur erläutert und anhand dieser die Angriffsfläche beschrieben.
 Den Abschluss des Kapitels bildet die Betrachtung unternehmensinterner Chatbots mit ihren Einsatzbereichen und Risiken. \\
-
 Kapitel~\ref{ch:promptinjection} bahndelt das zentrale Thema der Arbeit. Prompt-Injection-Angriffe werden definiert und in direkte und indirekte Angriffe kategorisiert.
 Für beide Kategorien werden aktuelle Angriffe vorgestellt und erläutert. Ergänzend wird die Bedeutung dieser Angriffe für Unternehmen behandelt und anhand eines
 praxisnahen Beispiels veranschaulicht. \\

@@ -506,7 +506,8 @@ wird die \ac{fpr}~\eqref{eq:fpr} dargestellt, damit ein Vergleich zwischen dem R
 Auf Grundlage der in Abschnitt~\ref{sec:original} erfassten Baseline wurde der Ansatz in mehreren Schritten überarbeitet. Im Folgenden werden diese Schritte und 
 die erlangten Erkenntnisse beschrieben. Dabei werden Änderungen beibehalten oder verworfen. Für alle Schritte wurden, wie bei der endgültigen Lösung
 aus Abschnitt~\ref{subsec:ueberarbeitung}, dieselben Parameter und das \ac{llm} Mistral Small~4 verwendet. Ausgangspunkt sind die Ergebnisse 
-des Dev-Abschnitts des Originalansatzes, der einen Recall~\eqref{eq:recall} von 80,6\,\% und eine \ac{fpr}~\eqref{eq:fpr} von 8,8\,\% erreichte. \\
+des Dev-Abschnitts des Originalansatzes, der einen Recall~\eqref{eq:recall} von 80,6\,\% und eine \ac{fpr}~\eqref{eq:fpr} von 8,8\,\% erreichte. 
+Die einzelnen Schritte nud die erreichten Werte werden in der Abbildung~\ref{fig:entwicklung_ansatz} visualisiert.\\
 
 \begin{enumerate}
     \item Rekonstruktion und Leitfragen
@@ -514,6 +515,56 @@ des Dev-Abschnitts des Originalansatzes, der einen Recall~\eqref{eq:recall} von 
     \item Entfernung der Mehrheitsentscheidung für externe Inhalte
     \item Vereinheitlichung des Ansatzes
 \end{enumerate}
+
+\begin{figure}[htbp]
+\centering
+\footnotesize
+\begin{tikzpicture}[
+    node distance=4.5mm and 7mm,
+    schritt/.style={rectangle, draw, rounded corners=2pt, align=center, text width=7.6cm, inner sep=3.5pt,
+        execute at begin node={\hyphenpenalty=10000}},
+    haupt/.style={schritt, very thick},
+    test/.style={schritt, fill=gray!15},
+    verworfen/.style={schritt, dashed, draw=gray, text=gray!80!black, text width=3.8cm},
+    pfeil/.style={-{Stealth[length=2mm]}, semithick}
+]
+\node[schritt] (s0) {\textbf{Originalansatz}\\[1pt]
+    {\scriptsize Eigen: Recall 80,6\,\% \,|\, FPR 8,8\,\%}};
+\node[haupt, below=of s0] (s1) {\textbf{(1) Rekonstruktion, Mehrheitsentscheidung und Leitfragen}\\[1pt]
+    {\scriptsize Eigen: Recall 90,6\,\% \,|\, FPR 5,9\,\%}};
+\node[test, below=of s1] (t1) {Test auf den öffentlichen Datensätzen\\[1pt]
+    {\scriptsize Öffentlich: Recall 43,5\,\% $\rightarrow$ Anweisungen in externen Inhalten übersehen}};
+\node[haupt, below=of t1] (s2) {\textbf{(2) Strukturprüfung für externe Inhalte}\\[1pt]
+    {\scriptsize Öffentlich: Recall 51,5\,\% \,|\, FPR 7,9\,\%}};
+\node[schritt, below=of s2] (s3) {Nummerierung der Zeilen\\[1pt]
+    {\scriptsize Öffentlich: Recall 76,0\,\% \,|\, FPR 4,3\,\%}};
+\node[schritt, below=of s3] (s4) {Kombination mit Mehrheitsentscheidung und Leitfragen\\[1pt]
+    {\scriptsize Öffentlich: Recall 84,0\,\% \,|\, FPR 17,3\,\%}};
+\node[haupt, below=of s4] (s5) {\textbf{(3) Entfernung der Mehrheitsentscheidung für externe Inhalte}\\[1pt]
+    {\scriptsize Öffentlich: Recall 79,0\,\% \,|\, FPR 4,3\,\%}};
+\node[test, below=of s5] (t2) {Test auf dem verschleierten BIPIA-Datensatz\\[1pt]
+    {\scriptsize Verschleiert: Recall 75,0\,\% $\rightarrow$ Überanpassung}};
+\node[haupt, below=of t2] (s6) {\textbf{(4) Vereinheitlichung des Ansatzes}\\[1pt]
+    {\scriptsize Öffentlich: Recall 88,5\,\% \,|\, FPR 15,1\,\%}\\
+    {\scriptsize Verschleiert: Recall 87,5\,\% \,|\, FPR 13,7\,\%}};
+\node[schritt, below=of s6, double, double distance=1pt] (s7) {\textbf{Endversion:} Wiedereinführung der allgemeinen Frage\\[1pt]
+    {\scriptsize Eigen: Recall 87,5\,\% \,|\, FPR 3,5\,\%}};
+
+% verworfene Varianten
+\node[verworfen, anchor=west, xshift=7mm] at ($(s2.east)!0.5!(s3.east)$) (v1) {Segmente à 1.000 Zeichen\\[1pt]
+    {\scriptsize Recall 53,0\,\%, Latenz +75\,\% \\ \textit{verworfen}}};
+\node[verworfen, right=of s5] (v2) {Leitfragen je Zeile\\[1pt]
+    {\scriptsize Recall und FPR schlechter\\ \textit{verworfen}}};
+
+\foreach \a/\b in {s0/s1, s1/t1, t1/s2, s2/s3, s3/s4, s4/s5, s5/t2, t2/s6, s6/s7}
+    \draw[pfeil] (\a) -- (\b);
+\draw[pfeil, gray, dashed] (s2.east) -| (v1.north);
+\draw[pfeil, gray, dashed] (s5.east) -- (v2.west);
+\end{tikzpicture}
+\caption{Entwicklungsschritte des Ansatzes (Werte jeweils auf dem Dev-Abschnitt)}
+\label{fig:entwicklung_ansatz}
+\end{figure}
+
 
 Im ersten Schritt, \textbf{Rekonstruktion und Leitfragen}, wurde anhand der bei dem Originalansatz erkannten Schwächen bei der Erkennung von Verschleierungen ein 
 Ansatz implementiert, der den Prompt rekonstruieren soll. Dieser wurde um eine Mehrheitsentscheidung über die rekonstruierten Prompts und um Leitfragen erweitert. 
@@ -697,7 +748,8 @@ Eine Grenze des Ansatzes ist, dass externe Inhalte vor dem Durchlauf gekennzeich
 ist im Datensatz als zusätzliches Feld angegeben. Somit findet eine aktive Überprüfung, ob es sich um externen Inhalt handelt, nicht statt. Eine weitere 
 Grenze ist die Latenz. Im Gegensatz zu einer Überprüfung mit dem Hauptmodell müssen bei der Schutzmaßnahme zahlreiche Anfragen gemacht werden, wodurch der Median
 der Antwortzeit deutlich steigt. Zudem liefert jede Anfrage an das vorgeschaltete \ac{llm} nur eine binäre Antwort (JA oder NEIN). Dadurch kann nicht 
-festgestellt werden, wie sicher diese Entscheidung ist. Auch eine 50-zu-50-Entscheidung ist möglich. Außerdem wurden ausschließlich Modelle von Mistral 
+festgestellt werden, wie sicher diese Entscheidung ist. Auch eine Entscheidung, bei der beide Antworten gleich wahrscheinlich sind, ist möglich. Außerdem wurden 
+ausschließlich Modelle von Mistral 
 verwendet. Es lässt sich daher nicht sagen, ob andere Modelle eine andere Erkennungsleistung liefern, sodass die Schutzmaßnahme nicht notwendig wäre oder die
 Entscheidung durch die Integration verschlechtert werden könnte. \\
 Weiterhin sind alle Datensätze fest vorgegeben. Ein realer Angreifer, der seine Angriffe so lange variiert, bis er eine Schwachstelle findet, wird somit nicht 

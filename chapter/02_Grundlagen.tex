@@ -128,7 +128,7 @@ Insbesondere domänenspezifische und wissensintensive Aufgaben können sogenannt
 ausgelöst~\cite[8\psq]{rag03}. Zum einen können nicht alle im Trainingsprozess vermittelten Fakten gespeichert werden, insbesondere selten 
 vorkommende~\cite[8\psq]{rag03}. Zum anderen sind die Daten selbst eingeschränkt. Zum Training werden nur Daten verwendet, die nicht urheberrechtlich geschützt sind.
 Zudem stammen die Daten aus einem festen Zeitpunkt und können nicht aktualisiert werden, wodurch die Gefahr von Halluzinationen und die Generierung von veralteten 
-Antworten steigt~\cite[8\psq]{rag03}. Das Training erfolgt somit eher mit allgemeinen Daten, sodass dem \ac{llm} domänenspezifisches Wissen fehlt~\cite[9]{rag03}. 
+Antworten steigt~\cite[8\psq]{rag03}. Das Training erfolgt somit überwiegend mit allgemeinen Daten, sodass dem \ac{llm} domänenspezifisches Wissen fehlt~\cite[9]{rag03}. 
 \acp{llm} wie ChatGPT, die auf ihre Trainingsdaten beschränkt sind, können somit keine Informationen zu aktuellen Entwicklungen liefern~\cite[2]{rag04} [4, S. 2]. \\
 Dieses Problem wird dadurch verstärkt, dass \acp{llm} ihre Antworten überzeugend und menschenähnlich formulieren~\cite[2]{rag03}. Halluzinationen sind dadurch schwer 
 festzustellen~\cite[2]{rag03}. Da \acp{llm} in der Praxis mit anderen Systemen wie Chatbots oder Suchmaschinen verknüpft sind, können diese Halluzinationen zu der
@@ -205,7 +205,7 @@ in den Kontext aufgenommen und ausgeführt werden~\cite[12]{pi24}. \\
 Eine Gefahr stellt das Corpus Poisoning dar. Wenn es einem Angreifer gelingt, ein Dokument mit einer schädlichen Anweisung über \ac{rag} in den Kontext eines \ac{llm} 
 einzufügen, können auch zukünftige Sitzungen betroffen sein, die auf dieses Dokument zugreifen~\cite[12]{pi24}. Bei jeder Nutzeranfrage, bei der das Dokument 
 abgerufen wird, können die enthaltenen Anweisungen die Ausgabe des \ac{llm} beeinflussen~\cite[15\psq]{pi24}. Bereits fünf manipulierte Dokumente 
-erreichten in einer Wissensbasis mit Millionen von Texten eine Erfolgsquote von rund 90\,\% [1, S. 15--16]. Die Inhalte können durch andere Dateien oder 
+erreichten in einer Wissensbasis mit Millionen von Texten eine Erfolgsquote von rund 90\,\%~\cite[15\psq]{pi24}. Die Inhalte können durch andere Dateien oder 
 kompromittierte interne Quellen so angepasst werden, dass ihr Embedding nahe an einer definierten Zielanfrage liegt und mit einer großen Wahrscheinlichkeit 
 abgerufen wird~\cite[51]{pi24}. \\ 
 Ein weiteres Risiko besteht in der Offenlegung von sensiblen Daten. Durch veraltete Rechte und überholte Wissensdatenbanken können sensible Daten
@@ -219,7 +219,7 @@ diese Schwachstelle von Angreifern ausgenutzt werden kann, wird im Kapitel~\ref{
 \section{Tool Calling}
 
 Die Grundidee von Tool Calling besteht darin, einem \ac{llm} den Aufruf externen Funktionen und \acp{api} zu ermöglichen~\cite{tc05}. Es wird in diesem Zusammenhang
-auch häufig der Begriff Function Calling verwendet, jedoch wird in dieser Arbeit ausschließlich der Begriff Tool Calling verwendet~\cite{tc04}. Tool Calling 
+auch häufig der Begriff Function Calling verwendet, jedoch wird in dieser Arbeit ausschließlich der Begriff Tool Calling genutzt~\cite{tc04}. Tool Calling 
 ermöglicht es einem \ac{llm}, nicht nur Text zu erzeugen, sondern auch mit anderen System zu interagieren~\cite{tc04}. Dadurch wird die Sprachverarbeitung mit 
 Aktionen in der realen Welt verbunden~\cite{tc03}\cite{tc05}. \\
 In wissenschaftlichen Arbeiten wird ein von einem \ac{llm} verwendetes Tool als Funktionsschnittstelle zu einem Programm definiert. Es wird extern des \ac{llm}
@@ -237,9 +237,9 @@ verstärkt
 zu Halluzinationen und Fehlerpropagation kommen~\cite[2]{tc15}. Tools ergänzen ein Modell innerhalb dieser Grenzen, indem sie seinen Kontext erweitern, sodass fehlende
 Informationen, die sich nicht in den Gewichten des Modells befinden, ergänzt werden~\cite[3]{tc09}.
 Aufgaben wie Berechnungen oder Informationssammlung können somit an externe Module wie Suchmaschinen oder Python-Interpreter ausgelagert werden~\cite[9]{tc09}.
-Damit lassen sich auch Aktionen ausgeführen, die Daten in Echtzeit oder externe Berechnungen erfordern~\cite[2]{tc14}. Bereits Modelle
-wie GPT-4 hatten die Fähigkeit, JSON zu erzeugen, womit Funktionsaufrufe durchgeführt werden konnten. Neuere Modelle haben diese Fähigkeit bereits direkt 
-integriert~\cite[2]{tc14}. \\
+Damit lassen sich auch Aktionen ausgeführen, die Daten in Echtzeit oder externe Berechnungen erfordern~\cite[2]{tc14}. Bereits Modelle wie GPT-4 aus dem Jahr 2023~\cite[10]{llm09} 
+waren in der Lage, strukturierte Ausgaben im JSON-Format zu erzeugen, mit dem Funktionsaufrufe ausgeführt werden konnten. Neuere Modelle verfügen über eine direkt 
+integrierte Unterstützung für Tool Calling~\cite[2]{tc14}. \\
 Die Einsatzmöglichkeiten erstrecken sich vom Aufruf von \acp{api}, über die Suchen im Internet und Ausführen von Code bis zum Zugriff auf Dokumente~\cite{tc03}. 
 \acp{llm} sind jedoch grundsätzlich Sprachverarbeiter, weswegen sie Aufgaben wie das Buchen von Flügen oder Konferenzräumen unabhängig durchführen können~\cite[6]{tc10}.
 Daher werden in diese Tools die notwendigen externen Partner integriert, damit diese Schnittstellen geschaffen werden~\cite[6]{tc10}. Grundsätzlich lassen sich 
@@ -575,8 +575,11 @@ für solche Angriffe verwendet werden können, wird in Kapitel~\ref{ch:promptinj
 
 Chatbots dienen heutzutage der direkten Interaktion mit Nutzern und Kunden, vor allem im Kundenservice und im Marketing~\cite[377]{cb02}. Aber auch für Information,
 Unterhaltung sowie soziale und emotionale Unterstützung werden Chatbots eingesetzt~\cite[379]{cb02}. In vielen Unternehmen dienen sie der sofortigen Unterstützung, wodurch
-die Nutzerkommunikation verbessert wird und große Mengen an Anfragen bewältigt werden können, die jederzeit beantwortet werden können~\cite[3004]{cb01}. Chatbots vereinen 
-Textgenerierung, mehrstufige Interaktionen und Informationsbeschaffung~\cite[3004]{cb01}. \\
+die Nutzerkommunikation verbessert wird und große Mengen an Anfragen bewältigt werden können, die jederzeit beantwortet werden können~\cite[3004]{cb01}. 
+Neben dem Einsatz im Kundenkontakt werden Chatbots auch unternehmensintern genutzt. Dort unterstützen sie Mitarbeitende als
+Assistenten bei ihren Aufgaben~\cite[6]{cb16}. Durch den Zugriff auf interne Dokumente ermöglichen sie es, spezifische Informationen
+zu erschließen, ohne dass die Informationsstruktur innerhalb der Dokumente bekannt sein muss~\cite[4]{cb16}.
+Ein solcher unternehmensinterner Chatbot ist auch Gegenstand dieser Arbeit und wird in Kapitel~\ref{ch:analyse} näher beschrieben. \\
 Der ausschlaggebendste Grund, einen Chatbot zu verwenden, ist die damit verbundene Produktivität~\cite[1]{cb11}. Unternehmen setzen Chatbots immer häufiger ein, um die Kosten
 zu reduzieren und viele Nutzeranfragen gleichzeitig bearbeiten zu können~\cite[1]{cb11}. Chatbots sind zudem freundlicher gegenüber Nutzern und ermöglichen, dass die 
 Informationen
