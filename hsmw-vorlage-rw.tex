@@ -15,7 +15,7 @@ faculty=cb,
 % printmode,
 %
 % EINSEITIGER DRUCK: Seitenzahlen immer rechts usw.
-onesided,
+% onesided,
 %
 % ENGLISCHSPRACHIGE TITELSEITE entfernen
 % nosecondtitle,
@@ -163,31 +163,47 @@ uniquename=init, %
 %%% DIESER EINTRAG IST OPTIONAL UND KANN WEGGELASSEN WERDEN. MEHRERE BETREUER WERDEN DURCH KOMMATA GETRENNT
 % \betreuer{Das WWW, ChatGPT}
 
-\abstract[Englisch Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.]
-{
-	
-
-
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-Dieses Dokument soll als minimales Beispiel für eine Abschlussarbeit dienen und hat nur einen sehr begrenzten Nährwert.
-}% Abstract (optional english)
+\abstract[Large Language Models (LLMs) are increasingly used in chatbots, for example in automated customer service
+or in marketing. To adapt them to specific use cases, they are connected to internal company data and external
+services via tool calling. This enables them, for instance, to perform actions on websites. However, integrating
+tool calling creates an attack surface that can be exploited through indirect prompt injection attacks in order to
+exfiltrate data or trigger harmful actions. In cooperation with Energy4U GmbH, this thesis examines, using the
+chatbot ChatBot4U as an example, to what extent an internal company chatbot with tool calling can be protected
+against indirect prompt injection attacks. \\
+In a local test environment, selected attacks revealed five vulnerabilities of the chatbot. Based on these, a
+protective measure was developed: an upstream model (Mistral Small 4) checks each request using a combination of
+prompt filtering, input modification and prompt enhancement before it is passed on to the main model (Mistral
+Large 4). An original approach based on a binary query, which measures the basic detection capability of the
+models, serves as a comparison. Both approaches were applied to a custom dataset and to the public datasets BIPIA
+and NotInject. The evaluation was based on recall, false positive rate (FPR), latency and cost. \\
+The enhanced measure increases recall from 34.0--73.1\,\% to 82.8--92.0\,\%. The FPR remains largely unchanged and
+reaches up to 13.5\,\%. However, costs rise by up to a factor of twelve, and latency reaches up to 6\,s per check.
+The upstream model therefore significantly improves the detection of prompt injection attacks, but is not
+sufficient as a stand-alone measure. Further limitations are that the measure was tested independently of the
+chatbot, does not detect multi-turn attacks and, due to its high FPR, can only be used to a limited extent in
+customer service. It should therefore be combined with additional measures, such as human oversight of tool calls
+and a restriction of permitted target addresses.]
+{\acsp{llm} werden zunehmend in Chatbots eingesetzt, unter anderem im automatisierten Kundenservice oder im Marketing.
+Um sie an bestimmte Anwendungsfälle anzupassen, werden sie über Tool Calling mit internen Unternehmensdaten und externen 
+Diensten verbunden. Dadurch können beispielsweise Aktionen auf Webseiten ausgeführt werden. Mit der Integration von Tool 
+Calling entsteht jedoch eine Angriffsfläche, die über indirekte Prompt-Injection-Angriffe ausgenutzt werden kann, um Daten
+zu exfiltrieren oder schädliche Aktionen auszulösen. Diese Arbeit untersucht in Kooperation mit der Energy4U GmbH am
+Beispiel des Chatbots ChatBot4U, inwieweit ein unternehmensinterner Chatbot mit implementiertem Tool Calling gegen
+indirekte Prompt-Injection-Angriffe abgesichert werden kann. \\
+In einer lokalen Testumgebung wurden mit ausgewählten Angriffen fünf Schwachstellen des Chatbots festgestellt. Auf 
+dieser Grundlage wurde eine Schutzmaßnahme entwickelt. Ein vorgeschaltetes Modell (Mistral Small 4) überprüft eine 
+Anfrage mit einer Kombination aus Prompt-Filterung, Input-Modifizierung und Prompt-Enhancement, bevor sie an das 
+Hauptmodell (Mistral Large 4) weitergereicht wird. Als Vergleich dient ein Originalansatz mit einer binären Anfrage,
+der die grundlegende Erkennungsfähigkeit der Modelle misst. Angewendet wurden die Ansätze auf einen eigenen Datensatz
+und die öffentlichen Datensätze BIPIA und NotInject. Die Evaluation wurde anhand von Metriken, unter anderem
+Recall, \acs{fpr}, Latenz und Kosten, durchgeführt. \\
+Durch die weiterentwickelte Maßnahme steigt der Recall von 34,0 bis 73,1\,\% auf 82,8 bis 92,0\,\%. Die \acs{fpr} verändert
+sich kaum und erreicht bis zu 13,5\,\%. Die Kosten steigen jedoch auf bis zum Zwölffachen und die Latenz beträgt bis
+zu 6\,s pro Prüfung. Das vorgeschaltete Modell verbessert die Erkennung von Prompt-Injection-Angriffen deutlich, 
+reicht als alleinstehende Maßnahme jedoch nicht aus. Einschränkend kommt hinzu, dass die Maßnahme unabhängig vom
+Chatbot getestet wurde, keine Multi-Turn-Angriffe erkennt und aufgrund der hohen \acs{fpr} nur eingeschränkt im 
+Kundenservice integriert werden kann. Daher sollte sie in Kombination mit weiteren Maßnahmen implementiert werden, 
+wie einer menschlichen Kontrolle und einer erweiterten Kontrolle der Zieladressen.}
 
 %%% Optional Fields for Thesis
 %\defensedate{2022}% Defense Date (please specify year of defense, default will be the same year as submission date)
