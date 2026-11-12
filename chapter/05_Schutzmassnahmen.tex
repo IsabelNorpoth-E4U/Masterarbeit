@@ -332,12 +332,27 @@ In dieser Matrix werden vier verschiedene Kennzahlen dargestellt: \\
     \item False Negative (FN): Anzahl der als harmlos klassifizierten Einträge, die tatsächlich Angriffe sind
 \end{enumerate}
 
-\begin{figure}[h]
+\begin{table}[h]
 \centering
-\includegraphics[width=0.7\textwidth]{figs/05/confusion_matrix}
 \caption{Konfusionsmatrix}
-\end{figure}
-
+\label{tab:konfusionsmatrix}
+\newcommand\MyBox[2]{%
+  \fbox{\lower0.75cm
+    \vbox to 1.7cm{\vfil
+      \hbox to 1.7cm{\hfil\parbox{1.4cm}{#1\\#2}\hfil}
+      \vfil}%
+  }%
+}
+\renewcommand\arraystretch{1.5}
+\setlength\tabcolsep{0pt}
+\begin{tabular}{c >{\bfseries}r @{\hspace{0.7em}}c @{\hspace{0.4em}}c}
+  \multirow{10}{*}{\rotatebox[origin=c]{90}{\bfseries Tatsächlich}\hspace{0.7em}} &
+    & \multicolumn{2}{c}{\bfseries Klassifikation} \\
+  & & \bfseries Angriff & \bfseries Harmlos \\
+  & Angriff\hspace{0.7em} & \MyBox{True}{Positive} & \MyBox{False}{Negative} \\[2.4em]
+  & Harmlos\hspace{0.7em} & \MyBox{False}{Positive} & \MyBox{True}{Negative} \\
+\end{tabular}
+\end{table}
 
 \paragraph{Precision}~\cite[227]{sm29}
 
@@ -345,6 +360,7 @@ Mit der Precision wird der Anteil der als Angriff klassifizierten Einträge, die
 
 \begin{equation}
   P = \frac{TP}{TP + FP} .
+  \label{eq:precision}
 \end{equation}
 
 \paragraph{Recall/Sensitivity}~\cite[227]{sm29}
@@ -353,6 +369,7 @@ Der Recall (auch \textit{Sensitivity} oder \textit{True Positive Rate}) gibt an,
 
 \begin{equation}
   R = \frac{TP}{TP + FN} .
+  \label{eq:recall}
 \end{equation}
 
 \paragraph{F1~\cite[227]{sm29}}
@@ -361,6 +378,7 @@ Der F1-Wert ist das harmonische Mittel aus Precision und Recall
 
 \begin{equation}
   F_1 = \frac{2 \cdot P \cdot R}{P + R} .
+  \label{eq:f1}
 \end{equation}
 
 \paragraph{False Positive Rate~\cite[22]{sm27}}
@@ -369,6 +387,7 @@ Die False Positive Rate gibt den Anteil der harmlosen Prompts an, die fälschlic
 
 \begin{equation}
   \mathit{FPR} = \frac{FP}{FP + TN} .
+  \label{eq:fpr}
 \end{equation}
 
 \paragraph{Latenz~\cite[22]{sm27}}
@@ -377,6 +396,7 @@ Gemessen wird die gesamte Dauer der Prüfung pro Text, angegeben wird der Median
 
 \begin{equation}
   \mathit{Latency Overhead} = \mathit{Defense inference time} - \mathit{Baseline inference time} .
+  \label{eq:latency}
 \end{equation}
 
 \paragraph{Konfidenzintervalle nach Wilson~\cite{sm44}}
@@ -387,6 +407,7 @@ besonders geeignet bei binären Ergebnissen wie JA/NEIN
 
 \begin{equation}
   \mathit{Wilson Score} = \frac{\hat{p} + \frac{z^2}{2n} \pm z\sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac{z^2}{4n^2}}}{1+\frac{z^2}{n}} .
+  \label{eq:confidence}
 \end{equation}
 
 Für die Auswertung der Ergebnisse wird in dieser Arbeit ein Konfidenzniveau von 95\% festgelegt. 
@@ -464,8 +485,8 @@ festgehalten, wenn das \ac{llm} bei jedem Aufruf eine Definition des gesuchten A
 und GP5 werden die beobachteten Schwächen bei der Erkennung benannt. Damit wird der Einfluss dokumentiert, wenn aktiv darauf hingewiesen wird, dass eine Anweisung, 
 die sich an das \ac{llm} richtet, enthalten sein könnte oder die Angriffe verschleiert sind. \\
 Damit die Ergebnisse verglichen werden können, werden alle Versionen mit demselben Modell Mistral Small~4, denselben Parametern und denselben Datensätzen durchgeführt.
-Für den Vergleich wird der Recall betrachtet. Das Ergebnis ist in Abbildung~\ref{fig:promptvariation_recall} visualisiert und zeigt die drei Datensätze. Ergänzend 
-wird die \ac{fpr} dargestellt, damit ein Vergleich zwischen dem Recall und den Fehlalarmen gemacht wird (Abbildung~\ref{fig:promptvariation_fpr}).
+Für den Vergleich wird der Recall~\eqref{eq:recall} betrachtet. Das Ergebnis ist in Abbildung~\ref{fig:promptvariation_recall} visualisiert und zeigt die drei Datensätze. Ergänzend 
+wird die \ac{fpr}~\eqref{eq:fpr} dargestellt, damit ein Vergleich zwischen dem Recall~\eqref{eq:recall} und den Fehlalarmen gemacht wird (Abbildung~\ref{fig:promptvariation_fpr}).
 
 \begin{figure}[h]
 \centering
@@ -485,7 +506,7 @@ wird die \ac{fpr} dargestellt, damit ein Vergleich zwischen dem Recall und den F
 Auf Grundlage der in Abschnitt~\ref{sec:original} erfassten Baseline wurde der Ansatz in mehreren Schritten überarbeitet. Im Folgenden werden diese Schritte und 
 die erlangten Erkenntnisse beschrieben. Dabei werden Änderungen beibehalten oder verworfen. Für alle Schritte wurden, wie bei der endgültigen Lösung
 aus Abschnitt~\ref{subsec:ueberarbeitung}, dieselben Parameter und das \ac{llm} Mistral Small~4 verwendet. Ausgangspunkt sind die Ergebnisse 
-des Dev-Abschnitts des Originalansatzes, der einen Recall von 80,6\,\% und eine \ac{fpr} von 8,8\,\% erreichte. \\
+des Dev-Abschnitts des Originalansatzes, der einen Recall~\eqref{eq:recall} von 80,6\,\% und eine \ac{fpr}~\eqref{eq:fpr} von 8,8\,\% erreichte. \\
 
 \begin{enumerate}
     \item Rekonstruktion und Leitfragen
@@ -496,30 +517,30 @@ des Dev-Abschnitts des Originalansatzes, der einen Recall von 80,6\,\% und eine 
 
 Im ersten Schritt, \textbf{Rekonstruktion und Leitfragen}, wurde anhand der bei dem Originalansatz erkannten Schwächen bei der Erkennung von Verschleierungen ein 
 Ansatz implementiert, der den Prompt rekonstruieren soll. Dieser wurde um eine Mehrheitsentscheidung über die rekonstruierten Prompts und um Leitfragen erweitert. 
-Es wurde nur der eigene Datensatz verwendet. Auf dem Dev-Abschnitt wurde ein Recall von 90,6\,\% und eine \ac{fpr} von 5,9\,\% erreicht. \\
-Dieser Ansatz wurde anschließend auf die öffentlichen Datensätze angewendet. Auf dem Dev-Abschnitt erreichte er lediglich einen Recall von 43,5\,\%. 
+Es wurde nur der eigene Datensatz verwendet. Auf dem Dev-Abschnitt wurde ein Recall~\eqref{eq:recall} von 90,6\,\% und eine \ac{fpr}~\eqref{eq:fpr} von 5,9\,\% erreicht. \\
+Dieser Ansatz wurde anschließend auf die öffentlichen Datensätze angewendet. Auf dem Dev-Abschnitt erreichte er lediglich einen Recall~\eqref{eq:recall} von 43,5\,\%. 
 Dadurch konnte die Schwäche des Ansatzes festgestellt werden. Angriffe werden nur erkannt, wenn sie schädlich formuliert sind, jedoch ist dies im 
 BIPIA-Datensatz nicht der Fall, denn die Gefahr besteht darin, dass sich die Anweisungen in externen Inhalten befinden. \\
 Anhand der öffentlichen Datensätze wurde daher für externe Inhalte die \textbf{Strukturprüfung} entwickelt. Das \ac{llm} listete dabei alle Aufforderungen, 
-welche in den externen Inhalten gefunden wurden, auf und gab an, an wen sich diese richten. Der Recall stieg dadurch auf 51,5\,\% bei einer \ac{fpr} von
-7,9\,\%. Ursache für diesen niedrigen Recall war unter anderem die Positionierung des Angriffs. Aus diesem Grund wurden die Anfragen in Segmente von 1.000 Zeichen 
-geteilt. Durch diese Änderung stieg der Recall jedoch nur auf 53\,\% und die Latenz erhöhte sich gleichzeitig um 75\,\%. Als Alternative zur Einteilung in Segmente
+welche in den externen Inhalten gefunden wurden, auf und gab an, an wen sich diese richten. Der Recall~\eqref{eq:recall} stieg dadurch auf 51,5\,\% bei einer \ac{fpr}~\eqref{eq:fpr} von
+7,9\,\%. Ursache für diesen niedrigen Recall~\eqref{eq:recall} war unter anderem die Positionierung des Angriffs. Aus diesem Grund wurden die Anfragen in Segmente von 1.000 Zeichen 
+geteilt. Durch diese Änderung stieg der Recall~\eqref{eq:recall} jedoch nur auf 53\,\% und die Latenz erhöhte sich gleichzeitig um 75\,\%. Als Alternative zur Einteilung in Segmente
 wurden die Zeilen nummeriert, damit das \ac{llm} eine bessere Orientierung bei der Suche hat und die Daten gleichzeitig unterteilt werden. Mit dieser Lösung 
-stieg der Recall auf 76\,\% und die \ac{fpr} sank auf 4,3\,\%. \\
-Durch die Kombination der Strukturprüfung mit dem Ansatz aus Mehrheitsentscheidung und Leitfragen für externe Inhalte wurde deutlich, dass der Recall durch die 
-Leitfragen stieg, während durch die Mehrheitsentscheidung Fehlalarme ausgelöst wurden. Der Recall stieg auf 84,0\,\% und die \ac{fpr} im gleichen
-Zuge auf 17,3\,\%. Durch die \textbf{Entfernung der Mehrheitsentscheidung für externe Inhalte} veränderten sich die Werte auf 79,0\,\% Recall und 4,3\,\% \ac{fpr}. 
-Eine weitere Änderung bestand darin, die Leitfragen für jede Zeile einzeln abzufragen. Sie wurde verworfen, da sich sowohl der Recall als auch die \ac{fpr} 
+stieg der Recall~\eqref{eq:recall} auf 76\,\% und die \ac{fpr}~\eqref{eq:fpr} sank auf 4,3\,\%. \\
+Durch die Kombination der Strukturprüfung mit dem Ansatz aus Mehrheitsentscheidung und Leitfragen für externe Inhalte wurde deutlich, dass der Recall~\eqref{eq:recall} durch die 
+Leitfragen stieg, während durch die Mehrheitsentscheidung Fehlalarme ausgelöst wurden. Der Recall~\eqref{eq:recall} stieg auf 84,0\,\% und die \ac{fpr}~\eqref{eq:fpr} im gleichen
+Zuge auf 17,3\,\%. Durch die \textbf{Entfernung der Mehrheitsentscheidung für externe Inhalte} veränderten sich die Werte auf 79,0\,\% Recall~\eqref{eq:recall} und 4,3\,\% \ac{fpr}~\eqref{eq:fpr}. 
+Eine weitere Änderung bestand darin, die Leitfragen für jede Zeile einzeln abzufragen. Sie wurde verworfen, da sich sowohl der Recall~\eqref{eq:recall} als auch die \ac{fpr}~\eqref{eq:fpr} 
 verschlechterten. \\
 Nach diesem Schritt wurde festgestellt, dass der Ansatz noch nicht auf verschleierten externen Daten getestet wurde. Aus diesem Grund wurde ein Teil des 
 BIPIA-Datensatzes mit ausgewählten Transformationen verschleiert. Diese Verschleierung wird in Abschnitt~\ref{subsec:externerdatensatz} genauer erläutert. 
-Der Test mit diesem Datensatz ergab, dass der Recall auf 75,0\,\% sank. Interpretiert wurde dieses Ergebnis als Überanpassung des Ansatzes an die
+Der Test mit diesem Datensatz ergab, dass der Recall~\eqref{eq:recall} auf 75,0\,\% sank. Interpretiert wurde dieses Ergebnis als Überanpassung des Ansatzes an die
 vorliegenden Datensätze. Als Reaktion darauf wurde eine \textbf{Vereinheitlichung des Ansatzes} entwickelt. Dabei wurde die Rekonstruktion 
 wieder aufgenommen, um auch verschleierte Inhalte in externen Daten erfassen zu können. Auch die Leitfragen wurden auf diese rekonstruierten Versionen angewendet. 
-Der Recall stieg bei den externen Inhalten auf 88,5\,\% und in der verschleierten Version auf 87,5\,\%. Es stieg zwar zusätzlich die \ac{fpr} auf 15,1\,\% 
+Der Recall~\eqref{eq:recall} stieg bei den externen Inhalten auf 88,5\,\% und in der verschleierten Version auf 87,5\,\%. Es stieg zwar zusätzlich die \ac{fpr}~\eqref{eq:fpr} auf 15,1\,\% 
 beziehungsweise 13,7\,\%, dieser Anstieg wurde jedoch in Kauf genommen, da auf diese Weise ein einheitlicher Ansatz entstand. \\
 Dieser Ansatz enthielt keine allgemeine Frage nach einem Prompt-Injection-Angriff. Sie wurde bei der Mehrheitsentscheidung wieder eingeführt, womit
-die Werte 87,5\,\% Recall bei 3,5\,\% \ac{fpr} auf dem Dev-Abschnitt des eigenen Datensatzes erreicht wurden. Dieser Ansatz wurde als Endversion festgelegt.
+die Werte 87,5\,\% Recall~\eqref{eq:recall} bei 3,5\,\% \ac{fpr}~\eqref{eq:fpr} auf dem Dev-Abschnitt des eigenen Datensatzes erreicht wurden. Dieser Ansatz wurde als Endversion festgelegt.
 
 
 \subsection{Überarbeitung des Ansatzes und erneute Durchführung}\label{subsec:ueberarbeitung} 
@@ -527,7 +548,7 @@ die Werte 87,5\,\% Recall bei 3,5\,\% \ac{fpr} auf dem Dev-Abschnitt des eigenen
 Die Ergebnisse des Originalansatzes des vorgeschalteten \ac{llm} zeigen mehrere Schwächen in der Klassifikation. Im eigenen Datensatz werden verschleierte 
 Angriffe häufig falsch eingeschätzt. Beispielsweise wurden von dem Test-Abschnitt bei T02 nur 6 von 20 und bei T14 nur 7 von 20 Angriffen erkannt. Insgesamt wurden
 von den Angriffen 73\,\% (T00-T15) und 89\,\% der harmlosen Prompts richtig klassifiziert. Bei den öffentlichen Datensätzen ist eine generelle Schwäche bei der
-Erkennung von Angriffen zu erkennen. Mit dem Modell Mistral Small~4 wurde nur ein Recall von 34\,\% erkannt. Übersehen werden vor allem Angriffe, die am Ende des 
+Erkennung von Angriffen zu erkennen. Mit dem Modell Mistral Small~4 wurde nur ein Recall~\eqref{eq:recall} von 34\,\% erkannt. Übersehen werden vor allem Angriffe, die am Ende des 
 Textes stehen oder in Tabellen eingebettet sind. \\
 Daher wird der Ansatz so überarbeitet, dass die Erkennungsrate steigt, verschleierte Prompts berücksichtigt werden und die Position eines Angriffs keine Rolle
 für die Erkennung spielt. Dabei werden weiterhin die in Abschnitt~\ref{konzept} definierten Kriterien berücksichtigt. Weder am Hauptmodell noch an der Systemarchitektur sollen
@@ -645,13 +666,13 @@ enthalten oder dessen Inhalt nicht zum Rest des Dokuments passt. Es wird zusätz
 als Angriff war. Durch ist jede Entscheidung reproduzierbar. \\
 Die Latenz wurde für jeden Eintrag gemessen und als Median festgehalten. Da aber bei dem weiterentwickelten Ansatz die Anfragen teilweise parallel durchgeführt wurden,
 dient dieser Wert als Orientierung und entspricht nicht immer der Bearbeitungszeit. \\
-Mit den gespeicherten Daten werden die in Abschnitt~\ref{subsec:metrics} aufgeführten Metriken berechnet. Für Recall und \ac{fpr} wurde zusätzlich das 95-\%-Konfidenzintervall
+Mit den gespeicherten Daten werden die in Abschnitt~\ref{subsec:metrics} aufgeführten Metriken berechnet. Für Recall~\eqref{eq:recall} und \ac{fpr}~\eqref{eq:fpr} wurde zusätzlich das 95-\%-Konfidenzintervall~\eqref{eq:confidence}
 nach Wilson bestimmt. Die erfassten Metriken ermöglichen verschiedene Fesstellungen über die Daten. \\
-Die zentrale Kennzahl ist der Recall, da er die Erkennungsrate der Angriffe je Datensatz misst. In Kombination mit dem Konfidenzintervallen kann mithilfe des
-Recall und \ac{fpr} ein Vergleich der Ansätze und Datensätze gemacht werden. Der Recall je Transformation zeigt für den eigenen Datensatz und den verschleierten 
-BIPIA-Datensatz die Erkennungsraten bei den verschiedenen Verschleierungen. Der Recall je Aufgabe und Position zeigt für den BIPIA-Datensatz, welche Auswirkungen 
+Die zentrale Kennzahl ist der Recall~\eqref{eq:recall}, da er die Erkennungsrate der Angriffe je Datensatz misst. In Kombination mit dem Konfidenzintervallen~\eqref{eq:confidence} kann mithilfe des
+Recall~\eqref{eq:recall} und \ac{fpr}~\eqref{eq:fpr} ein Vergleich der Ansätze und Datensätze gemacht werden. Der Recall~\eqref{eq:recall} je Transformation zeigt für den eigenen Datensatz und den verschleierten 
+BIPIA-Datensatz die Erkennungsraten bei den verschiedenen Verschleierungen. Der Recall~\eqref{eq:recall} je Aufgabe und Position zeigt für den BIPIA-Datensatz, welche Auswirkungen 
 die Art des externen Inhalts (E-Mail, Tabelle, Code) und die Position des Angriffs (Anfang, Mitte, Ende) haben. Einen zusätzlichn Überblick wir durch die Messung
-des \ac{fpr} je Harmlosigkeitsstufe, mit der gemessen wird, welche Art von harmlosen Anfragen Fehlalarme auslösen. Mit der Konfusionsmatrix werden zusätzlich die 
+des \ac{fpr}~\eqref{eq:fpr} je Harmlosigkeitsstufe, mit der gemessen wird, welche Art von harmlosen Anfragen Fehlalarme auslösen. Mit der Konfusionsmatrix werden zusätzlich die 
 korrekten und falschen Klassifikationen gegenübergestellt, womit die Datensätze und Ansätze miteinander verglichen werden können. \\
 
 \section{Grenzen der Schutzmaßnahme}

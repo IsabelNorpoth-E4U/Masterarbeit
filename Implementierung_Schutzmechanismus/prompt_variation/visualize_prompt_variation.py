@@ -1,5 +1,5 @@
-# Line diagrams of the guard prompt variation: recall and FPR per guard prompt
-# (GP0 = original prompt, GP1 to GP5 = changed prompts), one line per data set.
+# Bar diagrams of the guard prompt variation: recall and FPR per guard prompt
+# (GP0 = original prompt, GP1 to GP5 = changed prompts), one bar per data set.
 # Also a LaTeX table with recall and FPR (with Wilson confidence interval) per guard prompt.
 # Same colors and style as ../visualize_results.py.
 #
@@ -86,19 +86,27 @@ def value_label(value):
     return text
 
 
-# one line per data set, the rate (recall or fpr) in percent for every guard prompt
-def draw_lines(values, metric_name, y_label, y_max, name):
+# grouped bars: one group per guard prompt, one bar per data set, the rate (recall or fpr)
+# in percent. Bars instead of lines, because the guard prompts are independent variants
+# and not a sequence. Same style as draw_grouped_bars in ../visualize_results.py.
+def draw_bars(values, metric_name, y_label, y_max, name):
     figure, ax = plt.subplots(figsize=(16 / 2.54, 7.5 / 2.54))
-    x = list(range(len(PROMPTS)))
-    for data_set, label, color, marker in DATA_SETS:
-        y = values[data_set][metric_name]
-        ax.plot(x, y, marker=marker, color=color, markeredgecolor=EDGE, markeredgewidth=0.6,
-                linewidth=1.6, markersize=6, label=label)
-    # no value labels, the lines lie too close together (the values are printed by the script)
-    ax.set_xticks(x)
+    bar_width = 0.8 / len(DATA_SETS)
+    for d, (data_set, label, color, marker) in enumerate(DATA_SETS):
+        positions = [g - 0.4 + bar_width / 2 + d * bar_width for g in range(len(PROMPTS))]
+        heights = values[data_set][metric_name]
+        # a small gap between the bars (width * 0.9)
+        bars = ax.bar(positions, heights, bar_width * 0.9, label=label,
+                      color=color, edgecolor=EDGE, linewidth=0.6)
+        # value above the bar, a bar with 0 % cannot be seen but still gets its "0"
+        for bar, height in zip(bars, heights):
+            ax.text(bar.get_x() + bar.get_width() / 2, height + y_max * 0.015,
+                    value_label(height), ha="center", va="bottom", fontsize=6, color=EDGE)
+    ax.set_xticks(range(len(PROMPTS)))
     ax.set_xticklabels(PROMPT_NAMES, fontsize=8)
     ax.set_ylabel(y_label)
-    ax.set_ylim(0, y_max)
+    ax.set_ylim(0, y_max * 1.1)
+    ax.set_yticks(range(0, y_max + 1, y_max // 5))
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.32), ncol=3, fontsize=8)
     save_diagram(figure, name)
 
@@ -163,6 +171,6 @@ for data_set, label, color, marker in DATA_SETS:
               "recall", value_label(result["recall"]["rate"] * 100),
               "fpr", value_label(result["fpr"]["rate"] * 100))
 
-draw_lines(values, "recall", "Recall in %", 100, "mistral_small4_test_promptvariation_recall")
-draw_lines(values, "fpr", "FPR in %", 20, "mistral_small4_test_promptvariation_fpr")
+draw_bars(values, "recall", "Recall in %", 100, "mistral_small4_test_promptvariation_recall")
+draw_bars(values, "fpr", "FPR in %", 20, "mistral_small4_test_promptvariation_fpr")
 write_table(shares, "mistral_small4_test_promptvariation_tabelle")

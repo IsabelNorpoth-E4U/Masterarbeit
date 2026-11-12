@@ -3,7 +3,7 @@
 In diesem Kapitel werden die in Kapitel~\ref{ch:schutzmassnahme} gesammelten Ergebnisse ausgewertet. Auf dieser Grundlage wird die entwickelte Schutzmaßnahme bewertet
 und die Teilforschungsfragen werden beantwortet. \\
 Die Evaluation der Ergebnisse unterteilt sich in eine theoretische und praktische Analyse. Zuerst werden die Ergebnisse der einzelnen Datensätze vorgestellt und 
-anschließend Latenz und Kosten betrachtet. Zusätzlich wird bewertet, ob die in Kapitel~\ref{ch:methodik} durchgeführten Angriffe durch die Schutzmaßnahme verhindert 
+anschließend Latenz~\eqref{eq:latency} und Kosten betrachtet. Zusätzlich wird bewertet, ob die in Kapitel~\ref{ch:methodik} durchgeführten Angriffe durch die Schutzmaßnahme verhindert 
 werden können. Mit diesen Erkenntnissen kann abgeleitet werden, ob die Maßnahme für den praktischen Einsatz geeignet ist.  \\
 Für die theoretische Auswertung werden die acht in Abschnitt~\ref{se:results} durchgeführten Durchläufe ausgewertet. Es wurden der eigene Datensatz mit 
 660 Einträgen (320 Angriffe, 340 harmlose Einträge), der aus BIPIA und NotInject kombinierte Datensatz mit 689 Einträgen (200 Angriffe, 489 harmlose Einträge)
@@ -11,7 +11,7 @@ und der verschleierte BIPIA-Datensatz mit 350 Einträgen (200 Angriffe, 150 harm
 und der weiterentwickelte Ansatz~\ref{subsec:ueberarbeitung} mit Mistral Small 4 durchgeführt. Zusätzlich wurden der eigene Datensatz und der Datensatz aus BIPIA
 und NotInject mit Mistral Large 4 klassifiziert. Es ist das Haupt-\ac{llm} dieser Arbeit und ermöglicht eine Gegenüberstellung der Ergebnisse. \\
 Für die in den Durchläufen entstandenen Ergebnisse wurden die in Abschnitt~\ref{subsec:metrics} aufgelisteten Metriken berechnet. Relevant für die Auswertung sind
-der Recall und die \ac{fpr}, die jeweils mit einem 95-\%-Konfidenzintervall nach Wilson angegeben wurden. \\
+der Recall~\eqref{eq:recall} und die \ac{fpr}~\eqref{eq:fpr}, die jeweils mit einem 95-\%-Konfidenzintervall~\eqref{eq:confidence} nach Wilson angegeben wurden. \\
 
 \section{Ergebnisse der Klassifikation}
 
@@ -26,25 +26,25 @@ verschiedenen Promptvariationen des Originalansatzes ergänzt.
 
 \begin{table}[htbp]
 \centering
-\caption{Recall und \ac{fpr} der Promptvariation}
+\caption{Recall~\eqref{eq:recall} und \ac{fpr}~\eqref{eq:fpr} der Promptvariation}
 \label{tab:promptvariation}
 \input{Implementierung_Schutzmechanismus/prompt_variation/results_diagramms/mistral_small4_test_promptvariation_tabelle}
 \end{table}
 
-Die Weiterentwicklung des Ansatzes hat den Recall deutlich gesteigert. Die Konfidenzintervalle der Recall-Werte überschneiden sich nicht, wodurch der Anstieg deutlich
-wird. Diese Auswirkung tritt vor allem bei den externen Inhalten auf. Der Recall auf dem Datensatz aus BIPIA und NotInject stieg von 34,0\,\% auf 92,0\,\% und auf 
-dem verschleierten BIPIA-Datensatz von 43,0\,\% auf 91,0\,\%. Auf dem eigenen Datensatz stieg der Recall von 73,1\,\% auf 82,8\,\%. \\
-Bei der \ac{fpr} ist keine vergleichbare Entwicklung erkennbar. Die Konfidenzintervalle überschneiden sich in allen Durchläufen oder sind identisch.
-Auf dem eigenen Datensatz sinkt die \ac{fpr} von 10,9\,\% auf 6,8\,\%, auf dem Datensatz aus BIPIA und NotInject bleibt sie unverändert bei 13,5\,\% und auf
-dem verschleierten BIPIA-Datensatz bei 8,7\,\%. Dass sich die \ac{fpr} bei den Ansätzen nicht verändert, ist bei dem Datensatz aus BIPIA und NotInject 
+Die Weiterentwicklung des Ansatzes hat den Recall~\eqref{eq:recall} deutlich gesteigert. Die Konfidenzintervall~\eqref{eq:confidence}e der Recall~\eqref{eq:recall}-Werte überschneiden sich nicht, wodurch der Anstieg deutlich
+wird. Diese Auswirkung tritt vor allem bei den externen Inhalten auf. Der Recall~\eqref{eq:recall} auf dem Datensatz aus BIPIA und NotInject stieg von 34,0\,\% auf 92,0\,\% und auf 
+dem verschleierten BIPIA-Datensatz von 43,0\,\% auf 91,0\,\%. Auf dem eigenen Datensatz stieg der Recall~\eqref{eq:recall} von 73,1\,\% auf 82,8\,\%. \\
+Bei der \ac{fpr}~\eqref{eq:fpr} ist keine vergleichbare Entwicklung erkennbar. Die Konfidenzintervall~\eqref{eq:confidence}e überschneiden sich in allen Durchläufen oder sind identisch.
+Auf dem eigenen Datensatz sinkt die \ac{fpr}~\eqref{eq:fpr} von 10,9\,\% auf 6,8\,\%, auf dem Datensatz aus BIPIA und NotInject bleibt sie unverändert bei 13,5\,\% und auf
+dem verschleierten BIPIA-Datensatz bei 8,7\,\%. Dass sich die \ac{fpr}~\eqref{eq:fpr} bei den Ansätzen nicht verändert, ist bei dem Datensatz aus BIPIA und NotInject 
 zufällig. Bei dem verschleierten BIPIA-Datensatz kann es darauf zurückgeführt werden, dass nur die Angriffe transformiert wurden und die harmlosen Einträge 
 unverändert in den Datensatz aufgenommen wurden. \\
 Im Gegensatz dazu stehen die Ergebnisse des Haupt-\ac{llm} Mistral Large 4. Es wurden nur 41,6\,\% der Angriffe aus dem eigenen Datensatz erkannt und lediglich
-24,5\,\% im Datensatz aus BIPIA und NotInject. Die \ac{fpr} liegt dabei mit 1,2\,\% sehr niedrig, ist jedoch damit zu begründen, dass das Modell insgesamt wenige
+24,5\,\% im Datensatz aus BIPIA und NotInject. Die \ac{fpr}~\eqref{eq:fpr} liegt dabei mit 1,2\,\% sehr niedrig, ist jedoch damit zu begründen, dass das Modell insgesamt wenige
 der Angriffe richtig klassifiziert hat. \\
 Tabelle~\ref{tab:promptvariation} zeigt außerdem, dass sich die Klassifikation des \ac{llm} nicht ausschließlich durch eine Änderung des Prompts verbessern lässt.
-Der stärkste Anstieg entsteht durch den Prompt GP3, mit dem der Recall auf dem eigenen Datensatz auf 84,1\,\% steigt und damit über dem Wert des 
-weiterentwickelten Ansatzes liegt. Jedoch steigt gleichzeitig die \ac{fpr} auf 16,5\,\%. Auf dem Datensatz aus BIPIA und NotInject wird mit GP3 nur ein Recall von
+Der stärkste Anstieg entsteht durch den Prompt GP3, mit dem der Recall~\eqref{eq:recall} auf dem eigenen Datensatz auf 84,1\,\% steigt und damit über dem Wert des 
+weiterentwickelten Ansatzes liegt. Jedoch steigt gleichzeitig die \ac{fpr}~\eqref{eq:fpr} auf 16,5\,\%. Auf dem Datensatz aus BIPIA und NotInject wird mit GP3 nur ein Recall~\eqref{eq:recall} von
 36,5\,\% erreicht, ähnlich zu dem Wert des Originalansatzes. \\
 Die Konfusionsmatrizen in den Abbildungen~\ref{fig:konfusion_eigen} bis~\ref{fig:konfusion_obf} zeigen die Verteilung der richtigen und falschen Klassifikationen.
 
@@ -68,12 +68,12 @@ Die Konfusionsmatrizen in den Abbildungen~\ref{fig:konfusion_eigen} bis~\ref{fig
 
 \subsection{Ergebnisse -- eigener Datensatz}
 
-Tabelle~\ref{tab:recall_transformation} zeigt den Recall je Transformation auf dem eigenen Datensatz. Entsprechend dem Aufbau des eigenen Datensatzes liegt der 
+Tabelle~\ref{tab:recall_transformation} zeigt den Recall~\eqref{eq:recall} je Transformation auf dem eigenen Datensatz. Entsprechend dem Aufbau des eigenen Datensatzes liegt der 
 Fokus hier auf den einzelnen Transformationen.
 
 \begin{table}[htbp]
 \centering
-\caption{Recall je Transformation -- eigener Datensatz}
+\caption{Recall~\eqref{eq:recall} je Transformation -- eigener Datensatz}
 \label{tab:recall_transformation}
 \input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_eigen_recall_pro_transformation}
 \end{table}
@@ -97,18 +97,18 @@ Transformation rückgängig, sodass das \ac{llm} den Klartext analysiert.
 
 \subsection{Ergebnisse -- BIPIA und NotInject}
 
-In den Abbildungen~\ref{fig:recall_position} und~\ref{fig:recall_aufgabe} wird der Recall differenziert nach Position des Angriffs und Art der Aufgabe.
+In den Abbildungen~\ref{fig:recall_position} und~\ref{fig:recall_aufgabe} wird der Recall~\eqref{eq:recall} differenziert nach Position des Angriffs und Art der Aufgabe.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.75\textwidth]{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_bipia_recall_pro_position}
-\caption{Recall je Position des Angriffs -- BIPIA}\label{fig:recall_position}
+\caption{Recall~\eqref{eq:recall} je Position des Angriffs -- BIPIA}\label{fig:recall_position}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.75\textwidth]{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_bipia_recall_pro_aufgabe}
-\caption{Recall je Aufgabe -- BIPIA}\label{fig:recall_aufgabe}
+\caption{Recall~\eqref{eq:recall} je Aufgabe -- BIPIA}\label{fig:recall_aufgabe}
 \end{figure}
 
 Bei der Positionierung der Angriffe ist eine deutliche Verbesserung zwischen den Ansätzen erkennbar. Beim Originalansatz wurden nur 36 von 67 der Angriffe am Anfang, 
@@ -119,7 +119,7 @@ Auch die Unterschiede zwischen den Aufgabentypen reduzieren sich. Beim Originala
 richtig erkannt. Durch die Nummerierung der Zeilen stiegen diese Werte auf 64 bei E-Mails, 72 bei Tabellen und 48 bei Codeausschnitten. Es wird deutlich, dass die Erkennung
 von Angriffen in E-Mails dem \ac{llm} die größten Schwierigkeiten bereitet. Dies begründet die Ergebnisse aus Kapitel~\ref{sec:durchfuehrung}, bei dem beide 
 durchgeführten Versuche erfolgreich waren. \\
-Die \ac{fpr} von 13,5\,\% hat sich auf diesem Datensatz zwischen den Ansätzen nicht verändert, jedoch unterscheidet sich die Verteilung dieser. Bei dem Datensatz 
+Die \ac{fpr}~\eqref{eq:fpr} von 13,5\,\% hat sich auf diesem Datensatz zwischen den Ansätzen nicht verändert, jedoch unterscheidet sich die Verteilung dieser. Bei dem Datensatz 
 NotInject sinkt die Anzahl von 59 auf 53, bei BIPIA steigt sie dagegen von 7 auf 13. Deutlich wird, dass von den 339 Einträgen des NotInject-Datensatzes 
 rund 16\,\% falsch als Angriff klassifiziert werden. Diese Einträge werden vor allem durch die Mehrheitsentscheidung als Angriff eingestuft, 42 davon wurden beim 
 Originalansatz bereits fälschlich eingeordnet. Begründet werden kann dies mit den enthaltenen Triggerwörtern, da der Datensatz darauf abzielt, einem \ac{llm} 
@@ -127,11 +127,11 @@ mit den Triggerwörtern die Klassifikation zu erschweren.
 
 \subsection{Ergebnisse -- verschleierter BIPIA}
 
-Die Tabelle~\ref{tab:recall_transformation_bipia} zeigt den Recall der einzelnen Transformationen.
+Die Tabelle~\ref{tab:recall_transformation_bipia} zeigt den Recall~\eqref{eq:recall} der einzelnen Transformationen.
 
 \begin{table}[htbp]
 \centering
-\caption{Recall je Transformation -- verschleierter BIPIA-Datensatz}
+\caption{Recall~\eqref{eq:recall} je Transformation -- verschleierter BIPIA-Datensatz}
 \label{tab:recall_transformation_bipia}
 \input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_bipia_obfuscated_recall_pro_transformation}
 \end{table}
@@ -163,7 +163,7 @@ BIPIA, verschleiert & 74 & 12 & 96 & 182 \\
 \end{table}
 
 Der Einfluss der einzelnen Regeln unterscheidet sich je nach Datensatz. Im eigenen Datensatz wurden 52 Angriffe ausschließlich durch die Leitfragen erkannt. Ohne diese
-Prüfung wäre der Recall auf 66,6\,\% gesunken und hätte damit eine schlechtere Leistung als der Originalansatz erzeugt. Bei BIPIA, bei dem anstelle der Formprüfung 
+Prüfung wäre der Recall~\eqref{eq:recall} auf 66,6\,\% gesunken und hätte damit eine schlechtere Leistung als der Originalansatz erzeugt. Bei BIPIA, bei dem anstelle der Formprüfung 
 die Strukturprüfung verwendet wird, werden dadurch die meisten Angriffe erkannt und die Leitfragen wirken nur unterstützend. 86,5\,\% der Angriffe werden durch die 
 Strukturprüfung erkannt. Dies bestätigt die Auswirkung der Aufteilung der Daten in Zeilen. Das \ac{llm} behält dadurch eine bessere Übersicht und die Erkennung eines
 Angriffs ist nicht mehr von der Position des Angriffs abhängig. \\
@@ -181,13 +181,13 @@ wird sie übersehen.
 \section{Latenz und Kosten}\label{sec:latenz_kosten}
 
 Eine der Anforderungen, die an die Maßnahme gestellt wurden, war, dass sie mit einem kleinen Modell umgesetzt wird und somit kostengünstig und schnell ist. Für die 
-Evaluation wurden daher die Latenz und Kosten berechnet und in Tabelle~\ref{tab:token_kosten} gegenübergestellt. Für die Kostenberechnung wurden für alle
+Evaluation wurden daher die Latenz~\eqref{eq:latency} und Kosten berechnet und in Tabelle~\ref{tab:token_kosten} gegenübergestellt. Für die Kostenberechnung wurden für alle
 acht Durchläufe die Anzahl der Anfragen und die daraus entstehenden Input- und Output-Token berechnet. Die Token wurden 
 nachträglich mit dem Tokenizer des jeweiligen \ac{llm} gezählt und die Kosten mit den in Abschnitt~\ref{sec:aufbau_umgebung} definierten Preisen berechnet.
 
 \begin{table}[htbp]
 \centering
-\caption{Anfragen, Token, Kosten und Latenz der Durchläufe}
+\caption{Anfragen, Token, Kosten und Latenz~\eqref{eq:latency} der Durchläufe}
 \label{tab:token_kosten}
 \input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_token_kosten}
 \end{table}
@@ -209,11 +209,11 @@ weiterentwickelten Ansatz Kosten entstehen, die 1,4-mal so hoch sind wie eine An
 Trotz der deutlich ansteigenden Kosten ist der Ansatz dennoch kostengünstig, da für die Prüfung von mehr als 9.000 Anfragen Kosten von etwas mehr als einem US-Dollar
 entstanden sind. Das Kriterium der Kosteneffizienz ist damit erfüllt. Ob der Ansatz jedoch günstiger ist als der Einsatz des Haupt-\ac{llm}, ist damit nicht 
 beantwortet. \\
-Ausschlaggebender als die Kosten ist die Latenz. Latenzen werden in dieser Arbeit als Median angegeben. Beim Originalansatz benötigt eine Prüfung auf dem eigenen 
-Datensatz 0,3 bis 0,5\,s und auf dem verschleierten BIPIA-Datensatz bis zu 1,6\,s. Beim weiterentwickelten Ansatz steigt die Latenz deutlich an und unterscheidet sich
-danach, ob es sich um eine einfache Nutzeranfrage oder externen Inhalt handelt. Bei einfachen Nutzeranfragen liegt die Latenz zwischen 2,7\,s (NotInject) und 3,4\,s 
+Ausschlaggebender als die Kosten ist die Latenz~\eqref{eq:latency}. Latenz~\eqref{eq:latency}en werden in dieser Arbeit als Median angegeben. Beim Originalansatz benötigt eine Prüfung auf dem eigenen 
+Datensatz 0,3 bis 0,5\,s und auf dem verschleierten BIPIA-Datensatz bis zu 1,6\,s. Beim weiterentwickelten Ansatz steigt die Latenz~\eqref{eq:latency} deutlich an und unterscheidet sich
+danach, ob es sich um eine einfache Nutzeranfrage oder externen Inhalt handelt. Bei einfachen Nutzeranfragen liegt die Latenz~\eqref{eq:latency} zwischen 2,7\,s (NotInject) und 3,4\,s 
 (eigener Datensatz). Bei externen Inhalten liegt sie zwischen 5,1\,s (BIPIA) und 6,2\,s (BIPIA, verschleiert). Die Dauer steigt bei dem weiterentwickelten Ansatz
-somit um 5 bis 6\,s an. Da die Anfragen unabhängig voneinander sind, können diese parallelisiert werden, wodurch die Latenz sinkt. Die Kosten bleiben jedoch gleich. \\
+somit um 5 bis 6\,s an. Da die Anfragen unabhängig voneinander sind, können diese parallelisiert werden, wodurch die Latenz~\eqref{eq:latency} sinkt. Die Kosten bleiben jedoch gleich. \\
 
 \section{Praktische Einschätzung}
 
@@ -292,7 +292,7 @@ formuliert. Es werden zudem nicht alle in Kapitel~\ref{ch:methodik} durchgeführ
 enthalten. Bei der Entwicklung der Schutzmaßnahme wurde zwar darauf geachtet, eine Überanpassung zu vermeiden, weshalb die öffentlichen Datensätze einbezogen
 und die Maßnahme allgemein gehalten wurde, jedoch lässt sich dies nicht vollständig ausschließen. \\
 Der Datensatz aus Abschnitt~\ref{subsec:vergleichkapitel4} ist mit 57 Einträgen zu klein, um eine aussagekräftige Erkenntnis zu sammeln. Zusätzlich
-sind auch diese Einträge selbst formuliert und kurz gehalten. Recall und \ac{fpr} fallen zwar positiv aus, jedoch ist die Datengrundlage zu gering. 
+sind auch diese Einträge selbst formuliert und kurz gehalten. Recall~\eqref{eq:recall} und \ac{fpr}~\eqref{eq:fpr} fallen zwar positiv aus, jedoch ist die Datengrundlage zu gering. 
 Hinzu kommt, dass die Angriffe teilweise nicht vollständig nachgestellt werden konnten, da für die Multi-Modal Injection statt des Bildes der 
 enthaltene Text und bei der Website Injection der Quellcode der Webseite verwendet wurde. \\
 Der Ansatz weist ebenfalls Grenzen auf. Externe Inhalte müssen gekennzeichnet werden und diese Kennzeichnung wird nicht überprüft. Befinden sich externe Inhalte in
@@ -306,6 +306,6 @@ kann nicht ausgeschlossen werden, dass der Einsatz der Maßnahme durch ein stär
 Bei der Evaluation wurden ausschließlich statische Datensätze verwendet. Es wurde nicht das Szenario eines Angreifers betrachtet, welcher bei einem blockierten Angriff
 diesen so lange verändert, bis er nicht mehr als Angriff klassifiziert wird. \\
 Die größte Einschränkung besteht darin, dass die Maßnahme nicht in ein laufendes System integriert wurde. Sie wurde nicht mit dem Chatbot verbunden, wodurch
-keine Aussage darüber getroffen werden kann, ob die Angriffe tatsächlich abgewehrt werden, wie stark sich die \ac{fpr} auf die Kommunikation mit Nutzern auswirkt und
+keine Aussage darüber getroffen werden kann, ob die Angriffe tatsächlich abgewehrt werden, wie stark sich die \ac{fpr}~\eqref{eq:fpr} auf die Kommunikation mit Nutzern auswirkt und
 wie sich Kosten und Dauer im Betrieb verändern. Es konnte dadurch kein Angriff simuliert werden, um zu prüfen, wie lange der Chatbot in Kombination mit der Maßnahme 
 Angriffe abwehrt. 

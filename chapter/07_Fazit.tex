@@ -33,7 +33,7 @@ sensible Daten, verarbeitete nicht vertrauenswürdige Inhalte und konnte extern 
 Bei der Verhinderung von Prompt-Injection-Angriffen ist ein vorgeschaltetes \ac{llm} je nach Ausgestaltung nur eingeschränkt hilfreich. Bei einer einfachen binären
 Abfrage mit Mistral Small 4 wurden auf dem eigenen Datensatz 73,1\,\% der Angriffe abgewehrt. Auf dem kombinierten Datensatz aus BIPIA und NotInject lag
 dieser Wert bei 34,0\,\% und auf dem verschleierten BIPIA-Datensatz bei 43,0\,\%. Bei der Verwendung von Mistral Large 4 wurden hingegen nur 41,6\,\% der Angriffe im
-eigenen Datensatz und 24,5\,\% im Datensatz aus BIPIA und NotInject erkannt. Diese Werte wurden in Kombination mit einer \ac{fpr} von 1,2\,\% erreicht. \\
+eigenen Datensatz und 24,5\,\% im Datensatz aus BIPIA und NotInject erkannt. Diese Werte wurden in Kombination mit einer \ac{fpr}~\eqref{eq:fpr} von 1,2\,\% erreicht. \\
 Diese Ergebnisse sind abhängig von dem Prompt, der dem \ac{llm} zusammen mit der Nutzeranfrage übergeben wird, der Art der schädlichen Anweisungen, die
 erkannt werden müssen, und der Art des Inhalts. Ausschlaggebend sind zusätzlich enthaltene Triggerwörter, welche von dem \ac{llm} vorschnell als Angriff gewertet werden. \\
 Es lässt sich feststellen, dass ein vorgeschaltetes \ac{llm} bei der Erkennung von indirekten Prompt-Injection-Angriffen nur bedingt
@@ -42,10 +42,10 @@ Ansatz und für \acp{llm} von Mistral beantwortet wurde. Daher ist die Aussage a
 
 \paragraph{Teilforschungsfrage 3: Verbessert sich die Erkennung von Prompt-Injection-Angriffen, wenn die Schutzmaßnahme um Segmentierung und Rekonstruktion erweitert wird?}
 
-Durch die Erweiterung der Schutzmaßnahme konnten deutliche Verbesserungen festgestellt werden. Der Recall stieg auf dem eigenen Datensatz von 73,1\,\% auf 82,8\,\%.
+Durch die Erweiterung der Schutzmaßnahme konnten deutliche Verbesserungen festgestellt werden. Der Recall~\eqref{eq:recall} stieg auf dem eigenen Datensatz von 73,1\,\% auf 82,8\,\%.
 Auf dem Datensatz BIPIA und NotInject stieg er von 34,0\,\% auf 92,0\,\% und auf dem verschleierten BIPIA-Datensatz von 43,0\,\% auf 91,0\,\%. Die Veränderungen
-der \ac{fpr} fielen weniger stark aus. Auf den öffentlichen Datensätzen blieb sie unverändert, auf dem eigenen Datensatz sank sie von 10,9\,\% auf 6,8\,\%. \\
-Die Verbesserungen des Recalls werden durch unterschiedliche Stufen des erweiterten Ansatzes ausgelöst. Die Rekonstruktion ist vor allem bei verschleierten
+der \ac{fpr}~\eqref{eq:fpr} fielen weniger stark aus. Auf den öffentlichen Datensätzen blieb sie unverändert, auf dem eigenen Datensatz sank sie von 10,9\,\% auf 6,8\,\%. \\
+Die Verbesserungen des Recall~\eqref{eq:recall}s werden durch unterschiedliche Stufen des erweiterten Ansatzes ausgelöst. Die Rekonstruktion ist vor allem bei verschleierten
 Angriffen im eigenen Datensatz und im verschleierten BIPIA-Datensatz hilfreich. Durch die Dekodierung Base64-kodierter Anfragen, eine Rechtschreibkorrektur und
 weitere Rekonstruktionsschritte lassen sich die Angriffe vom \ac{llm} besser klassifizieren, da sie mehr einem Klartext entsprechen. \\
 Durch die Verwendung der Leitfragen in der zweiten Stufe, welche die Absichten einer Anfrage ermitteln, werden die Angriffe insbesondere im eigenen Datensatz richtig
@@ -60,7 +60,7 @@ auf das Zwölffache steigen und die Latenz einer Anfrage kann bis zu 6\,s in Ans
 \paragraph{Teilforschungsfrage 4: Inwieweit lassen sich die Ergebnisse auf öffentliche Datensätze übertragen?}
 
 Aus den Ergebnissen wird deutlich, dass die Erkennungsleistung gegenüber dem Originalansatz vor allem auf den öffentlichen Datensätzen am stärksten gestiegen ist.
-Der Recall stieg von 34,0\,\% auf 92,0\,\% beim Datensatz aus BIPIA und NotInject und von 43,0\,\% auf 91,0\,\% beim verschleierten BIPIA-Datensatz. Eine damit
+Der Recall~\eqref{eq:recall} stieg von 34,0\,\% auf 92,0\,\% beim Datensatz aus BIPIA und NotInject und von 43,0\,\% auf 91,0\,\% beim verschleierten BIPIA-Datensatz. Eine damit
 festgestellte Schwäche ist jedoch, dass die Fehlalarme stark von der Art der Daten abhängen. Besonders viele Fehlalarme entstanden bei Codeausschnitten oder E-Mails.
 Zudem konnten viele der Fehlalarme, welche bereits beim Originalansatz auftraten, durch die Weiterentwicklung nicht behoben werden. \\
 Die Ergebnisse sind daher nur eingeschränkt übertragbar. Zum einen lagen die öffentlichen Datensätze auf Englisch vor, sodass externe Inhalte ausschließlich
@@ -72,7 +72,7 @@ Codeausschnitten und E-Mails getestet, was die Übertragbarkeit ebenfalls einsch
 Auf Grundlage der gesammelten Ergebnisse lässt sich festhalten, dass ein vorgeschaltetes \ac{llm} einen unternehmensinternen Chatbot zum Teil gegen indirekte
 Prompt-Injection-Angriffe absichern kann. Mit dem erweiterten Ansatz werden 83\,\% bis 92\,\% der Angriffe richtig klassifiziert, gegenüber 34,0\,\% bis 73,1\,\%
 beim Originalansatz. Von den in Kapitel~\ref{ch:methodik} durchgeführten Angriffsvarianten wurden 35 von 37 richtig erkannt. \\
-Die Aussagekraft ist jedoch eingeschränkt. Der Ansatz wurde nicht in den Chatbot integriert, sondern unabhängig davon getestet. Die \ac{fpr} erreichte bis zu
+Die Aussagekraft ist jedoch eingeschränkt. Der Ansatz wurde nicht in den Chatbot integriert, sondern unabhängig davon getestet. Die \ac{fpr}~\eqref{eq:fpr} erreichte bis zu
 14\,\% und beeinträchtigt somit einen realitätsnahen Einsatz im Kundenservice. Zudem werden keine Multi-Turn-Angriffe erkannt, da die Prüfung bei jeder Anfrage
 unabhängig durchgeführt wird. Auch die Erkennung, ob eine Anfrage externe Inhalte enthält, kann nicht von der Schutzmaßnahme durchgeführt werden. Es muss somit im
 Datensatz bereits festgelegt sein, wodurch eine praktische Anwendung erschwert wird. \\
@@ -113,7 +113,7 @@ beeinflusst werden.
 \paragraph{Implementierung der Schutzmaßnahme}
 
 Die in dieser Arbeit entwickelte Schutzmaßnahme kann in Chatbots integriert werden, um deren Schutz zu verstärken. Sie sollte jedoch weder als alleinige
-Schutzmaßnahme noch für den gesamten Datenverkehr eingesetzt werden. Durch die Ergebnisse wird deutlich, dass eine \ac{fpr} von bis zu 13,5\,\% und eine Latenz
+Schutzmaßnahme noch für den gesamten Datenverkehr eingesetzt werden. Durch die Ergebnisse wird deutlich, dass eine \ac{fpr}~\eqref{eq:fpr} von bis zu 13,5\,\% und eine Latenz
 von bis zu 6\,s im Kundenservice zu Problemen führen können, da sie die Benutzerfreundlichkeit reduzieren. Auch dass eine Anfrage, in der ein Angriff erkannt wird,
 ohne Begründung abgelehnt wird, kann zu Unzufriedenheit der Kunden führen. Es empfiehlt sich daher, die Schutzmaßnahme für die Überprüfung externer Inhalte zu
 integrieren. Anstatt eine Anfrage ohne Begründung abzulehnen, sollte diese zusammen mit dem Verdacht dem Haupt-\ac{llm} übergeben werden, welches die endgültige
@@ -132,7 +132,7 @@ möglichen Angreifers simuliert werden, statt ausschließlich statische Datensä
 aktuelle Entwicklung anpassen. \\
 Es können zudem direkte Änderungen an dem Ansatz durchgeführt werden. Bislang wird eine binäre Entscheidung getroffen. Es kann nicht nachvollzogen werden, mit
 welcher Wahrscheinlichkeit eine Anfrage als Angriff klassifiziert wird. Durch die Berechnung der Wahrscheinlichkeit und die Verwendung eines Schwellwerts für die
-Klassifizierung könnte sich der Ansatz besser in den Kundenservice integrieren lassen. Durch die Anpassung des Schwellwerts könnte die \ac{fpr} gesteuert werden und
+Klassifizierung könnte sich der Ansatz besser in den Kundenservice integrieren lassen. Durch die Anpassung des Schwellwerts könnte die \ac{fpr}~\eqref{eq:fpr} gesteuert werden und
 dazu führen, dass weniger Anfragen abgelehnt werden. Zusätzlich sollte die Prüfung der Anfragen erweitert werden, sodass ein gesamter Chatverlauf geprüft wird
 und nicht jede Anfrage unabhängig voneinander. Zusätzlich sollte eine Erkennung externer Inhalte implementiert werden, damit beispielsweise eine in das Textfeld
 kopierte E-Mail erkannt wird und als externer Inhalt geprüft wird, statt wie aktuell als einfache Nutzeranfrage. \\
