@@ -178,7 +178,7 @@ Durch die Verknüpfung von zwei Regeln soll das \ac{llm} eine höhere Erkennungs
 sich über Themen informieren möchten, nicht direkt als Angriff gewertet werden. Welche Regel ausgelöst wurde, wird gespeichert, damit bei 
 der Auswertung in Kapitel~\ref{ch:evaluation} die Begründungen nachvollziehbar sind. Die konkreten Schritte der Maßnahme werden in Abschnitt~\ref{subsec:ueberarbeitung} erläutert.
 
-\section{Aufbau der Umgebung}
+\section{Aufbau der Umgebung}\label{sec:aufbau_umgebung}
 
 Als vorgeschaltetes \ac{llm} wurde Mistral Small~4 ausgewählt~\cite{sm15}. Diese Wahl wurde getroffen, damit ein direkter Vergleich mit dem Hauptmodell Mistral Large~4
 möglich ist. Die genauen Modellbezeichnungen lauten \texttt{mistral-small-2603} und \texttt{mistral-large-4-0}. \\
@@ -422,7 +422,8 @@ einen Angriff enthält. Im ersten Schritt wird dieser Klassifikator in einer ein
 Datensätze unverändert an das Modell übergeben, zusammen mit der Anweisung, ausschließlich mit JA oder NEIN zu antworten. Mit diesen Ergebnissen soll ermöglicht 
 werden, einen direkten Vergleich zwischen dem Klassifikator alleine und einer Schutzmaßnahme zu schaffen und zusätzlich die Erkennungsleistung des Modells 
 zu messen.  \\
-Die Implementierung erfolgte in Python mit dem Modell Mistral Small~4. Der vollständige Quellcode befindet sich im Anhang. Abbildung~\ref{fig:ablauf_original} zeigt
+Die Implementierung erfolgte in Python mit dem Modell Mistral Small~4. Der vollständige Quellcode befindet sich im Anhang~\ref{sec:code_original}. 
+Abbildung~\ref{fig:ablauf_original} zeigt
 den vollständigen Ablauf. 
 
 \begin{figure}[h]
@@ -507,7 +508,7 @@ um die Erkennungsrate den Fehlalarmen gegenüberzustellen.
 
 \subsection{Entwicklung des Ansatzes}
 
-Auf Grundlage der in Abschnitt~\ref{sec:original} erfassten Baseline wurde der Ansatz in mehreren Schritten überarbeitet. Im Folgenden werden diese Schritte und 
+Auf Grundlage der in Abschnitt~\ref{subsec:original} erfassten Baseline wurde der Ansatz in mehreren Schritten überarbeitet. Im Folgenden werden diese Schritte und 
 die erlangten Erkenntnisse beschrieben. Dabei werden Änderungen beibehalten oder verworfen. Für alle Schritte wurden, wie bei der endgültigen Lösung
 aus Abschnitt~\ref{subsec:ueberarbeitung}, dieselben Parameter und das \ac{llm} Mistral Small~4 verwendet. Ausgangspunkt sind die Ergebnisse 
 des Dev-Abschnitts des Originalansatzes, der einen Recall~\eqref{eq:recall} von 80,6\,\% und eine \ac{fpr}~\eqref{eq:fpr} von 8,8\,\% erreichte. 
@@ -598,7 +599,7 @@ für die Erkennung spielt. Dabei werden weiterhin die in Abschnitt~\ref{konzept}
 Änderungen notwendig sein. Zusätzlich soll der Ansatz mit einem kleinen, kostengünstigen Modell umsetzbar sein. Um den Vorgang zu erleichtern, wird der bereits
 implementierte Ansatz erweitert. Als Modell wird weiterhin Mistral Small~4 mit denselben Parametern verwendet. Auch die Metriken werden weiterhin verwendet, damit
 die Ergebnisse nach der Implementierung direkt vergleichbar sind. Die Abbildung~\ref{fig:ablauf_massnahme} zeigt den Ablauf und das Zusammenspiel der einzelnen 
-Funktionen. Der vollständige Code befindet sich im Anhang.
+Funktionen. Der vollständige Code befindet sich im Anhang~\ref{sec:code_new_approach}.
 
 \begin{figure}[h]
 \centering
@@ -689,7 +690,7 @@ Aspekte hinzu:
 Die überarbeitete Maßnahme wird auf denselben Datensätzen sowie mit denselben Parametern und Metriken durchgeführt wie der Originalansatz. Für jeden Eintrag wird
 zusätzlich gespeichert, welche Regel zur Einstufung als Angriff geführt hat. So lässt sich einschätzen, welchen Beitrag die beiden Prüfungen jeweils zur 
 Erkennung leisten. \\
-Im Gegensatz zu dem Originalansatz~\ref{sec:original} sind bei einer Nutzeranfrage bis zu sechs und bei externen Inhalten bis zu fünf Anfragen an das \ac{llm} notwendig. Dabei werden
+Im Gegensatz zum Originalansatz (Abschnitt~\ref{subsec:original}) sind bei einer Nutzeranfrage bis zu sechs und bei externen Inhalten bis zu fünf Anfragen an das \ac{llm} notwendig. Dabei werden
 drei in der zweiten Stufe und drei beziehungsweise zwei in der dritten Stufe durchgeführt. Dadurch steigen die Kosten und die Antwortzeit deutlich. Der Originalansatz
 benötigte im Median 0,3 bis 0,5\,s. Der Median bei dem überarbeiteten Ansatz liegt dagegen bei 3,4\,s für den eigenen Datensatz, bei 3,8\,s für den BIPIA-Datensatz
 und bei 6,2\,s für die verschleierte Version von BIPIA.

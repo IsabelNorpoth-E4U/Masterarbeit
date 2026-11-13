@@ -5,7 +5,7 @@ und die Teilforschungsfragen werden beantwortet. \\
 Die Evaluation der Ergebnisse unterteilt sich in eine theoretische und praktische Analyse. Zuerst werden die Ergebnisse der einzelnen Datensätze vorgestellt und 
 anschließend Latenz~\eqref{eq:latency} und Kosten betrachtet. Zusätzlich wird bewertet, ob die in Kapitel~\ref{ch:methodik} durchgeführten Angriffe durch die Schutzmaßnahme verhindert 
 werden können. Mit diesen Erkenntnissen kann abgeleitet werden, ob die Maßnahme für den praktischen Einsatz geeignet ist.  \\
-Für die theoretische Auswertung werden die acht in Abschnitt~\ref{se:results} durchgeführten Durchläufe ausgewertet. Es wurden der eigene Datensatz mit 
+Für die theoretische Auswertung werden die acht in Abschnitt~\ref{sec:results} durchgeführten Durchläufe ausgewertet. Es wurden der eigene Datensatz mit 
 660 Einträgen (320 Angriffe, 340 harmlose Einträge), der aus BIPIA und NotInject kombinierte Datensatz mit 689 Einträgen (200 Angriffe, 489 harmlose Einträge)
 und der verschleierte BIPIA-Datensatz mit 350 Einträgen (200 Angriffe, 150 harmlose Einträge) verwendet. Auf allen Datensätzen wurden der Originalansatz~\ref{subsec:original}
 und der weiterentwickelte Ansatz~\ref{subsec:ueberarbeitung} mit Mistral Small 4 durchgeführt. Zusätzlich wurden der eigene Datensatz und der Datensatz aus BIPIA
@@ -96,7 +96,7 @@ harmlosen Anfragen. Am stärksten wurde die Anzahl der Fehlalarme bei Transforma
 was bei dem Originalansatz schneller als Angriff gewertet wird. Die Rekonstruktion aus der ersten Stufe des weiterentwickelten Ansatzes macht diese 
 Transformation rückgängig, sodass das \ac{llm} den Klartext analysiert. 
 
-\subsection{Ergebnisse -- BIPIA und NotInject}
+\subsection{Ergebnisse -- BIPIA und NotInject}\label{subsec:ergebnisse_bipia}
 
 In den Abbildungen~\ref{fig:recall_position} und~\ref{fig:recall_aufgabe} wird der Recall~\eqref{eq:recall} differenziert nach Position des Angriffs und Art der Aufgabe.
 
@@ -286,7 +286,7 @@ Als Kriterium für die Maßnahme wurde definiert, dass ein \ac{llm} verwendet we
 Gewählt wurde Mistral Small 4 in Kombination mit dem Haupt-\ac{llm} Mistral Large 4. Durch den Einsatz dieses vorgeschalteten \ac{llm} entsteht jedoch eine 
 neue Angriffsfläche, da kleinere Modelle weniger robust sind und Angriffe nicht zuverlässig korrekt als solche klassifizieren können. Zudem erhöht sich das Risiko 
 von Over-Defense, bei der harmlose Anfragen fälschlicherweise als Angriff klassifiziert werden, weil das \ac{llm} aufgrund bestimmter Begriffe und Formulierungen
-vorschnell einen Angriff annimmt. Dies wurde auch in Abschnitt~\ref{sec:wirksamkeit} festgestellt. Zudem wird einem \ac{llm} die Klassifizierung eines
+vorschnell einen Angriff annimmt. Dies wurde auch in Abschnitt~\ref{subsec:ergebnisse_bipia} festgestellt. Zudem wird einem \ac{llm} die Klassifizierung eines
 Angriffs erschwert, wenn die Reihenfolge der Wörter verändert wird. Bei solchen Verschleierungen treten Probleme auf, da ein \ac{llm} einen Text von links nach 
 rechts verarbeitet, was mit der Token-Generierung zusammenhängt~\cite[4]{sm38}. \\
 Auch bei den Daten treten Einschränkungen auf. Der eigene Datensatz wurde auf Grundlage verschiedener Arbeiten erstellt, kann jedoch inhaltliche Fehler enthalten.

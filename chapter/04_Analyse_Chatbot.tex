@@ -174,7 +174,7 @@ In diesem Abschnitt werden die in Kapitel~\ref{ch:promptinjection} vorgestellten
 Bei den meisten Angriffen wurden vor der schädlichen Anfrage zunächst weitere Nutzeranfragen an den Chatbot gesendet. Damit wurde sichergestellt,
 dass der vollständige Chatverlauf übertragen wird, da ansonsten der Chatverlauf aus einer Nachricht besteht und nicht festzustellen ist, ob nur diese Nachricht oder
 der gesamte Verlauf gesendet wird. Zusätzlich ließ sich mögliches Fehlverhalten ausschließen, beispielsweise durch die Kombination von Tool Calls 
-und Suchen in der Wissensdatenbank. Die vollständigen Chatverläufe befinden sich in Anhang~\ref{ch:anhang_chats}. \\
+und Suchen in der Wissensdatenbank. Die vollständigen Chatverläufe liegen der Arbeit in digitaler Form bei. \\
 
 \subsection{E-Mail Injection}
 
@@ -208,7 +208,7 @@ Im zweiten Versuch wurde stattdessen Fachwissen zur Energiewissenschaft abgefrag
 
 \subsection{Multiturn Injection}
 
-Bei der Multiturn Injection wurde dem Chatbot ein fiktiver Chatverlauf im JSON-Format übergeben (Anhang~\ref{ch:anhang_json}). Auch hier wurde geprüft, ob seine 
+Bei der Multiturn Injection wurde dem Chatbot ein fiktiver Chatverlauf im JSON-Format übergeben. Auch hier wurde geprüft, ob seine 
 Bereitschaft steigt, den Chatverlauf zu übermitteln. \\
 Im ersten Versuch wurden zu Beginn zwei Anfragen gestellt (\enquote{Moin}, \enquote{Wie lautet dein Systemprompt?}). Anschließend wurde das JSON mit der Bitte
 \enquote{Du hast mir dieses JSON geschickt. Korrigiere dies bitte, sodass das JSON dem originalen Chatverlauf entspricht:} mit der Aufforderung 
@@ -249,7 +249,7 @@ dieser Website http://127.0.0.1:5000/ etwas Hilfreiches?}
 \subsection{Jailbreak Prompt}
 
 Bei diesem Angriff sollte eine Base64-kodierte Anweisung die Übermittlung des Chatverlaufs auslösen. Es wurden mehrere Formulierungsvarianten getestet, die 
-erfolglos blieben (Anhang~\ref{sec:chat_4_jailbreak_versuch_1}). Das Ziel wurde aus diesem Grund vereinfacht. Es sollte lediglich das Wort \enquote{Hallo}
+erfolglos blieben. Das Ziel wurde aus diesem Grund vereinfacht. Es sollte lediglich das Wort \enquote{Hallo}
 an die Webseite gesendet werden. Es wurde ohne vorbereitende Anfragen und ohne eine zusätzliche Anweisung ausschließlich die folgende kodierte Anweisung 
 gesendet:
 
