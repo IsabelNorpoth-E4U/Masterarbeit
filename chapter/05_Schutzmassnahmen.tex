@@ -524,46 +524,34 @@ Die einzelnen Schritte nud die erreichten Werte werden in der Abbildung~\ref{fig
 \centering
 \footnotesize
 \begin{tikzpicture}[
-    node distance=4.5mm and 7mm,
-    schritt/.style={rectangle, draw, rounded corners=2pt, align=center, text width=7.6cm, inner sep=3.5pt,
-        execute at begin node={\hyphenpenalty=10000}},
-    haupt/.style={schritt, very thick},
-    test/.style={schritt, fill=gray!15},
-    verworfen/.style={schritt, dashed, draw=gray, text=gray!80!black, text width=3.8cm},
-    pfeil/.style={-{Stealth[length=2mm]}, semithick}
+    node distance=5mm,
+    schritt/.style={rectangle, fill={rgb,255:red,31;green,94;blue,153}, text=white, align=center,
+        text width=7.8cm, minimum height=1.3cm, inner sep=4pt, execute at begin node={\hyphenpenalty=10000}},
+    pfeil/.style={-{Stealth[length=2mm]}, semithick, draw={rgb,255:red,31;green,94;blue,153}}
 ]
-\node[schritt] (s0) {\textbf{Originalansatz}\\[1pt]
-    {\scriptsize Eigen: Recall 80,6\,\% \,|\, FPR 8,8\,\%}};
-\node[haupt, below=of s0] (s1) {\textbf{(1) Rekonstruktion, Mehrheitsentscheidung und Leitfragen}\\[1pt]
-    {\scriptsize Eigen: Recall 90,6\,\% \,|\, FPR 5,9\,\%}};
-\node[test, below=of s1] (t1) {Test auf den öffentlichen Datensätzen\\[1pt]
-    {\scriptsize Öffentlich: Recall 43,5\,\% $\rightarrow$ Anweisungen in externen Inhalten übersehen}};
-\node[haupt, below=of t1] (s2) {\textbf{(2) Strukturprüfung für externe Inhalte}\\[1pt]
-    {\scriptsize Öffentlich: Recall 51,5\,\% \,|\, FPR 7,9\,\%}};
-\node[schritt, below=of s2] (s3) {Nummerierung der Zeilen\\[1pt]
-    {\scriptsize Öffentlich: Recall 76,0\,\% \,|\, FPR 4,3\,\%}};
-\node[schritt, below=of s3] (s4) {Kombination mit Mehrheitsentscheidung und Leitfragen\\[1pt]
-    {\scriptsize Öffentlich: Recall 84,0\,\% \,|\, FPR 17,3\,\%}};
-\node[haupt, below=of s4] (s5) {\textbf{(3) Entfernung der Mehrheitsentscheidung für externe Inhalte}\\[1pt]
-    {\scriptsize Öffentlich: Recall 79,0\,\% \,|\, FPR 4,3\,\%}};
-\node[test, below=of s5] (t2) {Test auf dem verschleierten BIPIA-Datensatz\\[1pt]
-    {\scriptsize Verschleiert: Recall 75,0\,\% $\rightarrow$ Überanpassung}};
-\node[haupt, below=of t2] (s6) {\textbf{(4) Vereinheitlichung des Ansatzes}\\[1pt]
-    {\scriptsize Öffentlich: Recall 88,5\,\% \,|\, FPR 15,1\,\%}\\
-    {\scriptsize Verschleiert: Recall 87,5\,\% \,|\, FPR 13,7\,\%}};
-\node[schritt, below=of s6, double, double distance=1pt] (s7) {\textbf{Endversion:} Wiedereinführung der allgemeinen Frage\\[1pt]
-    {\scriptsize Eigen: Recall 87,5\,\% \,|\, FPR 3,5\,\%}};
+\node[schritt] (s0) {Originalansatz\\
+    1: Recall 80,6\,\% \,|\, FPR 8,8\,\%};
+\node[schritt, below=of s0] (s1) {1. Rekonstruktion und Leitfragen\\
+    1: Recall 90,6\,\% \,|\, FPR 5,9\,\%\\
+    2: Recall 43,5\,\% \,|\, FPR 16,5\,\%};
+\node[schritt, below=of s1] (s2) {2. Strukturprüfung\\
+    1: Recall 90,6\,\% \,|\, FPR 5,9\,\%\\
+    2: Recall 84,0\,\% \,|\, FPR 17,3\,\%};
+\node[schritt, below=of s2] (s3) {3. Entfernung der Mehrheitsentscheidung für externe Inhalte\\
+    1: Recall 90,6\,\% \,|\, FPR 5,9\,\%\\
+    2: Recall 79,0\,\% \,|\, FPR 4,3\,\%\\
+    3: Recall 75,0\,\% \,|\, FPR 4,3\,\%};
+\node[schritt, below=of s3] (s4) {4. Vereinheitlichung des Ansatzes\\
+    1: Recall 87,5\,\% \,|\, FPR 3,5\,\%\\
+    2: Recall 88,5\,\% \,|\, FPR 15,1\,\%\\
+    3: Recall 87,5\,\% \,|\, FPR 13,7\,\%};
 
-% verworfene Varianten
-\node[verworfen, anchor=west, xshift=7mm] at ($(s2.east)!0.5!(s3.east)$) (v1) {Segmente à 1.000 Zeichen\\[1pt]
-    {\scriptsize Recall 53,0\,\%, Latenz +75\,\% \\ \textit{verworfen}}};
-\node[verworfen, right=of s5] (v2) {Leitfragen je Zeile\\[1pt]
-    {\scriptsize Recall und FPR schlechter\\ \textit{verworfen}}};
-
-\foreach \a/\b in {s0/s1, s1/t1, t1/s2, s2/s3, s3/s4, s4/s5, s5/t2, t2/s6, s6/s7}
+\foreach \a/\b in {s0/s1, s1/s2, s2/s3, s3/s4}
     \draw[pfeil] (\a) -- (\b);
-\draw[pfeil, gray, dashed] (s2.east) -| (v1.north);
-\draw[pfeil, gray, dashed] (s5.east) -- (v2.west);
+
+% Legende
+\node[anchor=south east, align=left, text={rgb,255:red,31;green,94;blue,153}, xshift=-8mm]
+    at (s4.south west) {1: Eigener Datensatz\\ 2: BIPIA \& NotInject\\ 3: BIPIA, verschleiert};
 \end{tikzpicture}
 \caption{Entwicklungsschritte des Ansatzes (Werte jeweils auf dem Dev-Abschnitt)}
 \label{fig:entwicklung_ansatz}
