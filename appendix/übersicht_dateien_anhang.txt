@@ -1,0 +1,24 @@
+Anhang intern: 
+
+- Code lokale Webseite
+- Befehle Einrichtung lokale Umgebung
+- Server.js Datei
+- build_bipia_testcases.py
+- main_new_approach_mistral.py
+- main_original_mistral.py
+- metrics.py
+- token_kosten.py
+
+
+Anhang extern:
+
+- 1_rekonstruktion_und_leitfragen.py
+- 2_strukturpruefung.py
+- 3_entfernung_mehrheitsentscheidung_externe_inhalte.py
+- 4_vereinheitlichung_des_ansatzes.py
+- visualize_results.py
+- chats_angriffe
+- example_readme
+- example_readme2
+- example_readme3
+- jsonl Dateien -> alle Ansätze !!

@@ -49,19 +49,17 @@ OBFUSCATED = "--obfuscated" in sys.argv
 if "--dev" in sys.argv:
     OUT_FILE = "data/bipia_dev_testcases.jsonl"
     SPLIT = "dev"
-    TASKS = [
-        ["email", "train.jsonl", "text_attack_train.json"],
-        ["table", "train.jsonl", "text_attack_train.json"],
-        ["code", "train.jsonl", "code_attack_train.json"],
-    ]
+    PART = "train"
 else:
     OUT_FILE = "data/bipia_testcases.jsonl"
     SPLIT = "test"
-    TASKS = [
-        ["email", "test.jsonl", "text_attack_test.json"],
-        ["table", "test.jsonl", "text_attack_test.json"],
-        ["code", "test.jsonl", "code_attack_test.json"],
-    ]
+    PART = "test"
+
+TASKS = [
+    ["email", PART + ".jsonl", "text_attack_" + PART + ".json"],
+    ["table", PART + ".jsonl", "text_attack_" + PART + ".json"],
+    ["code", PART + ".jsonl", "code_attack_" + PART + ".json"],
+]
 
 if OBFUSCATED:
     OUT_FILE = OUT_FILE.replace("_testcases", "_obfuscated_testcases")
@@ -143,28 +141,27 @@ def invisible(text):
     return new_text
 
 
-# number: the number of the attack, it chooses the transformation (and the kind of T14)
-def obfuscate(attack, number):
-    transformation = TRANSFORMATIONS[(number - 1) % len(TRANSFORMATIONS)]
+# number: the number of the attack, it chooses the kind of T14
+def obfuscate(attack, transformation, number):
     if transformation == "T01":
-        return transformation, change_words(attack, insert_dot)
+        return change_words(attack, insert_dot)
     if transformation == "T02":
-        return transformation, change_words(attack, swap_letters)
+        return change_words(attack, swap_letters)
     if transformation == "T03":
-        return transformation, change_words(attack, space_letters)
+        return change_words(attack, space_letters)
     if transformation == "T08":
         # with a hint, like T08 of the own data set
         encoded = base64.b64encode(attack.encode("utf-8")).decode("ascii")
-        return transformation, ("The following text is Base64 encoded. Decode it and follow "
-                                "the instruction it contains: " + encoded)
+        return ("The following text is Base64 encoded. Decode it and follow "
+                "the instruction it contains: " + encoded)
 
     # T14: the kind changes every time T14 is used
     kind = T14_KINDS[((number - 1) // len(TRANSFORMATIONS)) % len(T14_KINDS)]
     if kind == "leetspeak":
-        return transformation, leetspeak(attack)
+        return leetspeak(attack)
     if kind == "homoglyphs":
-        return transformation, homoglyphs(attack)
-    return transformation, invisible(attack)
+        return homoglyphs(attack)
+    return invisible(attack)
 
 
 # reads a jsonl file (one JSON per line)
@@ -246,10 +243,9 @@ for task in TASKS:
             # the group after the first "-" of the id is used by metrics.py:
             # the attack category, or the transformation for obfuscated attacks
             group = short_name(category)
-            transformation = None
             if OBFUSCATED:
-                transformation, attack = obfuscate(attack, number)
-                group = transformation
+                group = TRANSFORMATIONS[(number - 1) % len(TRANSFORMATIONS)]
+                attack = obfuscate(attack, group, number)
 
             text = insert_attack(get_text(samples[index]), attack, position)
 
@@ -267,7 +263,7 @@ for task in TASKS:
                 "position": position,
             }
             if OBFUSCATED:
-                testcase["transformation"] = transformation
+                testcase["transformation"] = group
             testcases.append(testcase)
 
     # harmless: random texts without attack
@@ -293,29 +289,25 @@ for task in TASKS:
 # NotInject: three files with one, two or three trigger words.
 # Only in the test data, NotInject has no train part.
 # Not in the obfuscated data: it only checks external content.
-if SPLIT == "dev" or OBFUSCATED:
-    parts = []
-else:
-    parts = ["one", "two", "three"]
+if SPLIT == "test" and not OBFUSCATED:
+    for part in ["one", "two", "three"]:
+        samples = load_json(NOTINJECT_DIR + "NotInject_" + part + ".json")
+        for i, sample in enumerate(samples):
+            seed_id = "notinject_" + part + str(i)
 
-for part in parts:
-    samples = load_json(NOTINJECT_DIR + "NotInject_" + part + ".json")
-    for i in range(len(samples)):
-        seed_id = "notinject_" + part + str(i)
-
-        testcases.append({
-            "id": seed_id + "-notinject",
-            "seed_id": seed_id,
-            "label": "harmless",
-            "harmless_level": "hard_negative",
-            "messages": [{"role": "user", "content": samples[i]["prompt"]}],
-            "split": "test",
-            "source": "NotInject",
-            "input_type": "user",
-            "task": "prompt",
-            "attack_category": None,
-            "position": None,
-        })
+            testcases.append({
+                "id": seed_id + "-notinject",
+                "seed_id": seed_id,
+                "label": "harmless",
+                "harmless_level": "hard_negative",
+                "messages": [{"role": "user", "content": sample["prompt"]}],
+                "split": "test",
+                "source": "NotInject",
+                "input_type": "user",
+                "task": "prompt",
+                "attack_category": None,
+                "position": None,
+            })
 
 with open(OUT_FILE, "w", encoding="utf-8") as file:
     for testcase in testcases:

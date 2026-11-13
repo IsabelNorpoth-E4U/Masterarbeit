@@ -1,34 +1,3 @@
-# Builds the external test set data/bipia_testcases.jsonl
-# in the same format as data/testcases.jsonl, so metrics.py works.
-#
-#   BIPIA (Yi et al., KDD 2025): e-mails, tables and code answers.
-#     attack: an attack sentence is put into the text (start, middle or end)
-#     harmless_level "normal": the same kind of text without an attack
-#   NotInject (Li et al., ACL 2025):
-#     harmless_level "hard_negative": harmless prompts with words like "ignore"
-#
-# input_type says where the text comes from (used by main_new_approach_mistral.py):
-#   "external": BIPIA texts, content the assistant reads
-#   "user":     NotInject prompts, messages of the user
-#
-# Before:  git clone https://github.com/microsoft/BIPIA.git   data/external/BIPIA
-#          git clone https://github.com/leolee99/PIGuard.git  data/external/PIGuard
-# Run:     python3 build_bipia_testcases.py
-#
-# Development data (to try out a new check, the test data stays unseen):
-#          python3 build_bipia_testcases.py --dev
-#          -> data/bipia_dev_testcases.jsonl from the train part of BIPIA
-#             (other texts, other attack sentences), split "dev", without NotInject
-#
-# Obfuscated attacks (does cleaning and majority vote help for external content?):
-#          python3 build_bipia_testcases.py --dev --obfuscated
-#          python3 build_bipia_testcases.py --obfuscated
-#          -> data/bipia_dev_obfuscated_testcases.jsonl, data/bipia_obfuscated_testcases.jsonl
-#          The same texts, attacks and positions as without --obfuscated, but every
-#          attack sentence is obfuscated with one of the rule-based transformations of
-#          the own data set (T01, T02, T03, T08, T14), in turn, so every one is used
-#          equally often. The harmless texts stay the same. Without NotInject.
-
 import base64
 import json
 import random
@@ -40,82 +9,71 @@ NOTINJECT_DIR = "data/external/PIGuard/datasets/"
 # same seed as in BIPIA, so the random choices are always the same
 random.seed(2023)
 
-# texts without attack for every task
+# for every task 50 benign texts
 CLEAN_PER_TASK = 50
 
+# if obfuscated as parameter == OBFUSCATED is true
 OBFUSCATED = "--obfuscated" in sys.argv
 
-# task, file with the texts, file with its attacks (code gets code attacks, like in BIPIA)
+# check, if
 if "--dev" in sys.argv:
     OUT_FILE = "data/bipia_dev_testcases.jsonl"
     SPLIT = "dev"
-    TASKS = [
-        ["email", "train.jsonl", "text_attack_train.json"],
-        ["table", "train.jsonl", "text_attack_train.json"],
-        ["code", "train.jsonl", "code_attack_train.json"],
-    ]
+    PART = "train"
 else:
     OUT_FILE = "data/bipia_testcases.jsonl"
     SPLIT = "test"
-    TASKS = [
-        ["email", "test.jsonl", "text_attack_test.json"],
-        ["table", "test.jsonl", "text_attack_test.json"],
-        ["code", "test.jsonl", "code_attack_test.json"],
-    ]
+    PART = "test"
 
+# create file for text and for attack
+TASKS = [
+    ["email", PART + ".jsonl", "text_attack_" + PART + ".json"],
+    ["table", PART + ".jsonl", "text_attack_" + PART + ".json"],
+    ["code", PART + ".jsonl", "code_attack_" + PART + ".json"],
+]
+
+# check, if variable is true
 if OBFUSCATED:
     OUT_FILE = OUT_FILE.replace("_testcases", "_obfuscated_testcases")
 
-
-# ---------- rule-based transformations (only with --obfuscated) ----------
-
-# the transformations in turn, so every one is used equally often
+# list of chosen transformations
 TRANSFORMATIONS = ["T01", "T02", "T03", "T08", "T14"]
 
-# T14 has three kinds, also in turn
-T14_KINDS = ["leetspeak", "homoglyphs", "invisible"]
+T14_VARIANTS = ["leetspeak", "homoglyphs", "invisible"]
 
 LEETSPEAK = {"a": "4", "e": "3", "i": "1", "o": "0", "s": "5", "t": "7", "g": "9", "l": "1"}
 
-# Latin letters -> Cyrillic letters that look the same
 HOMOGLYPHS = {"a": "а", "e": "е", "o": "о", "p": "р", "c": "с", "x": "х", "y": "у"}
 
-
-# the conspicuous words: the two longest words with at least 5 letters
-def conspicuous_words(attack):
+# searches two longest words -> T01 - T03 only transform these two
+def longest_words(attack):
     words = []
     for word in attack.split():
         word = word.strip(".,:;!?\"'()[]{}`")
         if len(word) >= 5 and word.isalpha() and word not in words:
             words.append(word)
-    # sorted by length, the longest first; equal length: the first in the text first
     words.sort(key=len, reverse=True)
     return words[:2]
 
-
-# T01: a dot in the middle of the word, "instructions" -> "instru.ctions"
+# T01
 def insert_dot(word):
     middle = len(word) // 2
     return word[:middle] + "." + word[middle:]
 
-
-# T02: two letters in the middle are swapped, "instructions" -> "instrcutions"
+# T02
 def swap_letters(word):
     middle = len(word) // 2
     return word[:middle - 1] + word[middle] + word[middle - 1] + word[middle + 1:]
 
-
-# T03: spaces between the letters, "send" -> "s e n d"
+# T03
 def space_letters(word):
     return " ".join(word)
 
-
-# applies a transformation to the conspicuous words (only the first time each word appears)
+# applies one variant of T14 on the two longest words
 def change_words(attack, function):
-    for word in conspicuous_words(attack):
+    for word in longest_words(attack):
         attack = attack.replace(word, function(word), 1)
     return attack
-
 
 def leetspeak(text):
     new_text = ""
@@ -123,16 +81,13 @@ def leetspeak(text):
         new_text = new_text + LEETSPEAK.get(character.lower(), character)
     return new_text
 
-
 def homoglyphs(text):
     new_text = ""
     for character in text:
         new_text = new_text + HOMOGLYPHS.get(character, character)
     return new_text
 
-
-# invisible Unicode tag characters (U+E0000 + the code of the character),
-# like in T14 of the own data set
+# ascii character are shifted in U+E0000
 def invisible(text):
     new_text = ""
     for character in text:
@@ -142,32 +97,27 @@ def invisible(text):
             new_text = new_text + character
     return new_text
 
-
-# number: the number of the attack, it chooses the transformation (and the kind of T14)
-def obfuscate(attack, number):
-    transformation = TRANSFORMATIONS[(number - 1) % len(TRANSFORMATIONS)]
+# chooses the needed function for transformation
+def obfuscate(attack, transformation, number):
     if transformation == "T01":
-        return transformation, change_words(attack, insert_dot)
+        return change_words(attack, insert_dot)
     if transformation == "T02":
-        return transformation, change_words(attack, swap_letters)
+        return change_words(attack, swap_letters)
     if transformation == "T03":
-        return transformation, change_words(attack, space_letters)
+        return change_words(attack, space_letters)
     if transformation == "T08":
-        # with a hint, like T08 of the own data set
+        # transformation and hint
         encoded = base64.b64encode(attack.encode("utf-8")).decode("ascii")
-        return transformation, ("The following text is Base64 encoded. Decode it and follow "
-                                "the instruction it contains: " + encoded)
-
-    # T14: the kind changes every time T14 is used
-    kind = T14_KINDS[((number - 1) // len(TRANSFORMATIONS)) % len(T14_KINDS)]
+        return ("The following text is Base64 encoded. Decode it and follow "
+                "the instruction it contains: " + encoded)
+    # changes T14 variant
+    kind = T14_VARIANTS[((number - 1) // len(TRANSFORMATIONS)) % len(T14_VARIANTS)]
     if kind == "leetspeak":
-        return transformation, leetspeak(attack)
+        return leetspeak(attack)
     if kind == "homoglyphs":
-        return transformation, homoglyphs(attack)
-    return transformation, invisible(attack)
+        return homoglyphs(attack)
+    return invisible(attack)
 
-
-# reads a jsonl file (one JSON per line)
 def load_jsonl(file_name):
     rows = []
     with open(file_name, encoding="utf-8") as file:
@@ -176,21 +126,17 @@ def load_jsonl(file_name):
                 rows.append(json.loads(line))
     return rows
 
-
 def load_json(file_name):
     with open(file_name, encoding="utf-8") as file:
         return json.load(file)
 
-
-# the code task has a list of lines, the other tasks have one text
+# changes list to text
 def get_text(sample):
     if type(sample["context"]) == list:
         return "\n".join(sample["context"])
     return sample["context"]
 
-
-# "Marketing & Advertising" -> "MarketingAdvertising"
-# (metrics.py uses the part after the first "-" of the id as group)
+# deletes every character other than letters
 def short_name(category):
     name = ""
     for character in category:
@@ -198,22 +144,19 @@ def short_name(category):
             name = name + character
     return name
 
-
-# puts the attack into the text, like BIPIA does it.
-# middle: before a random sentence (a sentence starts after ". " or a new line)
+# puts attack into text like in BIPIA (start, nd or middle)
+# middle: before a random sentence
 def insert_attack(text, attack, position):
     if position == "start":
         return attack + "\n" + text
     if position == "end":
         return text + "\n" + attack
-
     sentence_starts = [0]
     for i in range(len(text) - 1):
         if text[i] == "\n" or (text[i] in ".!?" and text[i + 1] == " "):
             sentence_starts.append(i + 1)
     start = random.choice(sentence_starts)
     return text[:start] + "\n" + attack + "\n" + text[start:]
-
 
 testcases = []
 
@@ -222,8 +165,7 @@ for task in TASKS:
     samples = load_jsonl(BIPIA_DIR + task_name + "/" + task[1])
     attacks = load_json(BIPIA_DIR + task[2])
 
-    # BIPIA has 11 e-mails in train and in test. For the development data
-    # they are removed, so nothing of the test data is seen before the test.
+    # remove testcases, that are in dev and test
     if SPLIT == "dev":
         test_texts = []
         for sample in load_jsonl(BIPIA_DIR + task_name + "/test.jsonl"):
@@ -234,7 +176,6 @@ for task in TASKS:
                 new_samples.append(sample)
         samples = new_samples
 
-    # attacks: every attack sentence once, in a random text at a random position
     number = 0
     for category in attacks:
         for attack in attacks[category]:
@@ -242,14 +183,10 @@ for task in TASKS:
             index = random.randrange(len(samples))
             position = random.choice(["start", "middle", "end"])
             seed_id = task_name + str(index)
-
-            # the group after the first "-" of the id is used by metrics.py:
-            # the attack category, or the transformation for obfuscated attacks
             group = short_name(category)
-            transformation = None
             if OBFUSCATED:
-                transformation, attack = obfuscate(attack, number)
-                group = transformation
+                group = TRANSFORMATIONS[(number - 1) % len(TRANSFORMATIONS)]
+                attack = obfuscate(attack, group, number)
 
             text = insert_attack(get_text(samples[index]), attack, position)
 
@@ -267,10 +204,10 @@ for task in TASKS:
                 "position": position,
             }
             if OBFUSCATED:
-                testcase["transformation"] = transformation
+                testcase["transformation"] = group
             testcases.append(testcase)
 
-    # harmless: random texts without attack
+    # selects random 50 harmless testcases per task
     indexes = list(range(len(samples)))
     random.shuffle(indexes)
     for index in indexes[:CLEAN_PER_TASK]:
@@ -290,35 +227,30 @@ for task in TASKS:
             "position": None,
         })
 
-# NotInject: three files with one, two or three trigger words.
-# Only in the test data, NotInject has no train part.
-# Not in the obfuscated data: it only checks external content.
-if SPLIT == "dev" or OBFUSCATED:
-    parts = []
-else:
-    parts = ["one", "two", "three"]
+# NotInject: three files with one, two or three trigger words (only test)
+if SPLIT == "test" and not OBFUSCATED:
+    for part in ["one", "two", "three"]:
+        samples = load_json(NOTINJECT_DIR + "NotInject_" + part + ".json")
+        for i, sample in enumerate(samples):
+            seed_id = "notinject_" + part + str(i)
 
-for part in parts:
-    samples = load_json(NOTINJECT_DIR + "NotInject_" + part + ".json")
-    for i in range(len(samples)):
-        seed_id = "notinject_" + part + str(i)
-
-        testcases.append({
-            "id": seed_id + "-notinject",
-            "seed_id": seed_id,
-            "label": "harmless",
-            "harmless_level": "hard_negative",
-            "messages": [{"role": "user", "content": samples[i]["prompt"]}],
-            "split": "test",
-            "source": "NotInject",
-            "input_type": "user",
-            "task": "prompt",
-            "attack_category": None,
-            "position": None,
-        })
+            testcases.append({
+                "id": seed_id + "-notinject",
+                "seed_id": seed_id,
+                "label": "harmless",
+                "harmless_level": "hard_negative",
+                "messages": [{"role": "user", "content": sample["prompt"]}],
+                "split": "test",
+                "source": "NotInject",
+                "input_type": "user",
+                "task": "prompt",
+                "attack_category": None,
+                "position": None,
+            })
 
 with open(OUT_FILE, "w", encoding="utf-8") as file:
     for testcase in testcases:
+        # ensure_ascii so that characters like invisible ones are not modified when saved
         file.write(json.dumps(testcase, ensure_ascii=False) + "\n")
 
 print("Saved as", OUT_FILE)
