@@ -56,9 +56,10 @@ Um eine unabhängige Bewertung zu gewährleisten, kann hierfür ein separates Mo
 Aktionen und die verwendeten Tools mit der ursprünglichen Nutzeranweisung abgleichen~\cite[7]{sm09}. \\
 Die \textbf{regelbasierte Inhaltsüberprüfung} arbeitet hingegen mit vordefinierten Listen, in denen unzulässige Begriffe oder Quellen festgelegt sind~\cite[55]{pi1}. Diese
 Überprüfung kann skriptbasiert erfolgen, wodurch keine zusätzlichen Anfragen an ein \ac{llm} notwendig sind. \\
-Bei der \textbf{Perplexity-Erkennung} wird die Perplexity eines Textes berechnet~\cite[6]{sm11}. Sie gibt an, wie gut ein Sprachmodell eine gegebene Tokenfolge vorhersagt~\cite{sm13}.
+Bei der \textbf{Perplexity-Erkennung} wird die Perplexity als technische Größe für die Vorhersagbarkeit berechnt~\cite[6]{sm11}~\cite{sm46}. 
+Sie gibt an, wie gut ein Sprachmodell eine gegebene Tokenfolge vorhersagt~\cite{sm13}.
 Eine hohe Perplexity bedeutet, dass das Modell den beobachteten Tokens im Mittel geringe Wahrscheinlichkeiten zuordnet, der Text für das Modell also schlecht
-vorhersagbar ist. Dies kann auf eine geringe Textqualität oder auf ungewöhnliche, etwa durch einen Angriff manipulierte Inhalte hindeuten~\cite{sm13}.
+vorhersagbar ist. Dies kann auf eine geringe Textqualität oder auf ungewöhnliche, etwa durch einen Angriff manipulierte Inhalte hindeuten~\cite{sm13}. 
 
 \subsection{Systemseitige Maßnahmen}
 
@@ -107,8 +108,8 @@ Für die in dieser Arbeit ausgewählte Schutzmaßnahme wurden mehrere Kriterien 
 
 \begin{itemize}
     \item Sie soll sich leicht integrieren lassen, sodass weder die Struktur des Chatbots noch die Systemarchitektur verändert werden müssen. 
-    \item Um eine hohe Anzahl von Nutzeranfragen zu ermöglichen, soll die Maßnahme kostengünstig sein und ohne Training des Hauptmodells verwendet werden können.
-    Die Maßnahme soll zudem mit einem kleinen Modell ausgeführt werden können.
+    \item Um eine hohe Anzahl von Nutzeranfragen zu ermöglichen, soll die Maßnahme kostengünstig sein und mit einem kleinen Modell ausgeführt werden können
+    \item Sie soll ohne Modelltraining eingesetzt werden können, um regelmäßiges Nachtrainieren bei neuen Angriffstechniken zu vermeiden
     \item Die Entscheidungen sollen nachvollziehbar sein, sodass sie für die als Angriff klassifizierten Anfragen rekonstruiert werden können. Zusätzlich
     soll die Anzahl der fälschlich als Angriff eingestuften Anfragen minimiert werden.
 \end{itemize}
@@ -454,9 +455,10 @@ response = client.chat.complete(
 Das Modell gibt als Antwort JA oder NEIN zurück. Wird mit JA geantwortet, wird der Prompt als Angriff eingestuft. Die binäre Antwort wurde gewählt, weil sie
 eine eindeutige Einschätzung liefert. Bei einem Score von 0 bis 100 hätte dagegen eine Schwelle definiert werden müssen. Zusätzlich werden weniger Token 
 benötigt, wodurch Kosten und Antwortzeit gering bleiben. Es ist jedoch von Nachteil, dass sich aus den binären Antworten keine Wahrscheinlichkeiten ableiten lassen. 
-Somit könnte eine Entscheidung bei 50 zu 50 liegen, ohne dass dem eine Bedeutung beigemessen wird. \\
-Die Antwortlänge ist auf zehn Token begrenzt und die Reasoning-Funktion deaktiviert, die das \ac{llm} befähigt, Schlussfolgerungen zu ziehen. Die Temperatur wurde auf 0 gesetzt,
-damit die Wahrscheinlichkeit erhöht wird, dass in jedem Schritt das wahrscheinlichste nächste Token gewählt wird~\cite{sm45}. Dadurch sollen die Antworten
+Somit könnten die Antwortmöglichkeiten die gleiche Wahrscheinlichkeit haben oder die Entscheidung knapp ausfallen, ohne dass dem eine Bedeutung beigemessen wird. \\
+Die Antwortlänge ist auf zehn Token begrenzt und die Reasoning-Funktion deaktiviert, mit der das \ac{llm} vor der Antwort zunächst Zwischenschritte generiert.
+Die Temperatur wurde auf 0 gesetzt, damit in jedem Schritt das wahrscheinlichste nächste Token gewählt wird~\cite{sm45}. 
+Dadurch sollen die Antworten
 möglichst reproduzierbar sein, vollständig deterministisch ist das Modell jedoch nicht. \\
 Alle Einträge werden in einer Schleife durchlaufen und die Antwort des Modells, das erwartete Ergebnis und die Antwortzeit gespeichert. Wenn ein Durchlauf scheitert,
 wird dieser mehrfach wiederholt. Nach dem Durchlauf aller Einträge werden die in Abschnitt~\ref{subsec:metrics} beschriebenen Metriken erstellt und berechnet. Die
@@ -485,18 +487,20 @@ festgehalten, wenn das \ac{llm} bei jedem Aufruf eine Definition des gesuchten A
 und GP5 werden die beobachteten Schwächen bei der Erkennung benannt. Damit wird der Einfluss dokumentiert, wenn aktiv darauf hingewiesen wird, dass eine Anweisung, 
 die sich an das \ac{llm} richtet, enthalten sein könnte oder die Angriffe verschleiert sind. \\
 Damit die Ergebnisse verglichen werden können, werden alle Versionen mit demselben Modell Mistral Small~4, denselben Parametern und denselben Datensätzen durchgeführt.
-Für den Vergleich wird der Recall~\eqref{eq:recall} betrachtet. Das Ergebnis ist in Abbildung~\ref{fig:promptvariation_recall} visualisiert und zeigt die drei Datensätze. Ergänzend 
-wird die \ac{fpr}~\eqref{eq:fpr} dargestellt, damit ein Vergleich zwischen dem Recall~\eqref{eq:recall} und den Fehlalarmen gemacht wird (Abbildung~\ref{fig:promptvariation_fpr}).
+Für den Vergleich wird der Recall~\eqref{eq:recall} betrachtet. Das Ergebnis ist in Abbildung~\ref{fig:promptvariation_recall} visualisiert und zeigt den 
+Recall~\eqref{eq:recall} für die drei Datensätze. Ergänzend in in Abbildung Abbildung~\ref{fig:promptvariation_fpr} die \ac{fpr}~\eqref{eq:fpr} dargestellt, 
+um die Erkennungsrate den Fehlalarmen gegenüberzustellen.
+
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.85\textwidth]{Implementierung_Schutzmechanismus/prompt_variation/results_diagramms/mistral_small4_test_promptvariation_fpr}
+\includegraphics[width=0.85\textwidth]{Implementierung_Schutzmechanismus/prompt_variation/results_diagramms/mistral_small4_test_promptvariation_recall}
 \caption{Ablauf der Schutzmaßnahme}\label{fig:promptvariation_recall}
 \end{figure}
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.85\textwidth]{Implementierung_Schutzmechanismus/prompt_variation/results_diagramms/mistral_small4_test_promptvariation_recall}
+\includegraphics[width=0.85\textwidth]{Implementierung_Schutzmechanismus/prompt_variation/results_diagramms/mistral_small4_test_promptvariation_fpr}
 \caption{Ablauf der Schutzmaßnahme}\label{fig:promptvariation_fpr}
 \end{figure}
 

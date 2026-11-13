@@ -1,4 +1,4 @@
-\chapter{Analyse der Verwundbarkeit eines internen Chatbots}\label{ch:methodik}
+\chapter{Analyse der Verwundbarkeit eines unternehmensinternen Chatbots}\label{ch:methodik}
 
 Dieses Kapitel bildet die Grundlage für den praktischen Teil dieser Arbeit. Zunächst werden das untersuchte System beschrieben und das Untersuchungsziel festgelegt.
 Anschließend wird die Testumgebung erläutert. Auf dieser Grundlage werden ausgewählte indirekte Prompt-Injection-Angriffe durchgeführt und ausgewertet. Aus den
@@ -6,17 +6,17 @@ Ergebnissen werden Schwachstellen abgeleitet, die die Grundlage für die Schutzm
 
 \section{Beschreibung des untersuchten Systems}\label{system}
 
-Bei dem untersuchten System handelt es sich um den firmeninternen Chatbot \enquote{ChatBot4U} des Unternehmens ENERGY4U GmbH~\cite{an17}.
+Bei dem untersuchten System handelt es sich um den firmeninternen Chatbot \enquote{ChatBot4U} des Unternehmens Energy4U GmbH~\cite{an17}.
 Der Chatbot beantwortet Fragen aus dem Umfeld der Energiewirtschaft. Die Komponenten werden auf der Google Cloud Platform (GCP) betrieben. Es 
 sind mehrere Sprachmodelle angebunden, die über externe Anbieter bereitgestellt werden. \\
-Die Architektur setzt sich aus sieben Komponenten zusammen: \\
+Die Architektur setzt sich aus sieben Komponenten zusammen:
 
 \begin{enumerate}
     \item \textbf{\gls{frontend}:} Stellt die Chat-Oberfläche bereit und nimmt die Nutzereingaben entgegen. Die Authentifizierung der Nutzer erfolgt über Firebase Authentication. Im Energy-Bot-Modus leitet das Frontend Anfragen an das Backend weiter, im Normal-Modus kommuniziert der Frontend-Server direkt mit dem LLM-Provider.
     \item \textbf{\gls{backend}:} Verarbeitet die RAG-Anfragen und steuert den Datei-Upload sowie die Entgegennahme von Nutzer-Feedback.
-    \item \textbf{\gls{vektordatenbank}(Qdrant):} Speichert die Embeddings zusammen mit einem Payload (Chunk-Text und Metadaten) und führt die Similarity Search aus.
+    \item \textbf{\gls{vektordatenbank}{}(Qdrant):} Speichert die Embeddings zusammen mit einem Payload (Chunk-Text und Metadaten) und führt die Similarity Search aus.
     \item \textbf{\gls{objectstorage}:} Legt die Originaldokumente (z. B. PDFs und Markdown-Dateien) ab. Über Verlinkungen in den Quellenangaben können Nutzer das Dokument direkt aus dem Chat im Browser öffnen, und zwar an der passenden Seite.
-    \item \textbf{\gls{nutzerdatenbank}(Firestore):}  Speichert Nutzer-Metadaten und die Chatverläufe pro Nutzer verschlüsselt, erfasst Nutzungsstatistiken und speichert das Nutzer-Feedback.
+    \item \textbf{\gls{nutzerdatenbank}{}(Firestore):}  Speichert Nutzer-Metadaten und die Chatverläufe pro Nutzer verschlüsselt, erfasst Nutzungsstatistiken und speichert das Nutzer-Feedback.
     \item \textbf{\gls{embeddingpipeline}:} Wandelt die Dokumente je nach Dateityp in ein einheitliches Format um, zerlegt sie in Chunks, wandelt jeden Chunk mit dem Azure-Embedding-Modell in einen Vektor um und speichert diesen zusammen mit dem Payload in der Vektordatenbank.
     \item \textbf{\gls{cicd}:} Automatisiert Builds und Deployments der Anwendungen.
 \end{enumerate}
@@ -52,6 +52,13 @@ die internen Dokumente haben. Den Kunden soll dadurch ein erster Eindruck ermög
 Somit liegt der wesentliche Unterschied zwischen den beiden Instanzen im Datenbestand. Die interne \gls{qdrant}-Instanz enthält sowohl die interne als auch
 die öffentliche Sammlung, wogegen die externe Instanz nur die öffentliche Sammlung beinhaltet. \\
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth]{figs/04/architektur.pdf}
+\caption{Chatbotkomponenten}
+\label{fig:chatbot_overview}
+\end{figure}
+
 \section{Untersuchungsziel und Vorgehensweise}\label{sec:untersuchungsziel}
 
 Wie in Abschnitt~\ref{system} erläutert, greift der Chatbot auf externe Daten zu. Durch einen solchen Zugriff entsteht die in Kapitel~\ref{ch:promptinjection} 
@@ -65,7 +72,8 @@ die um die Funktionalität des  $\glqq$Tool Calling$\grqq$ erweitert wird. Dadur
 Aktionen auf Webseiten durchführen. Es wurden sieben Angriffsarten ausgewählt und ein Szenario entwickelt, in dem versucht werden soll, sensible Informationen,
 genauer den Chatverlauf des Nutzers, ohne dessen Wissen an ein externes Ziel zu übermitteln. Als externes Ziel dient eine Webseite,
 die ebenfalls lokal gehostet wird. \\
-Als Modell für die Testumgebung wurde das Modell Mistral Large 4 ausgewählt mit einer Temperatur von 0,7. \\
+Als Modell für die Testumgebung wurde das Modell Mistral Large 4 ausgewählt mit einer Temperatur von 0,7. Die Bedeutung der Temperatur wird in 
+Abschnitt~\ref{subsec:steuerungllm} näher erläutert. \\
 Es soll die Frage geklärt werden, welche Schwachstellen im System durch diese Angriffe festgestellt werden können. \\
 Die identifizierten Schwachstellen sollen anschließend als Grundlage für die Auswahl und Implementierung geeigneter Schutzmaßnahmen dienen.
 
@@ -73,7 +81,8 @@ Die identifizierten Schwachstellen sollen anschließend als Grundlage für die A
 
 \subsection{Lokale Inbetriebnahme}
 
-Für die Implementierung des Chatbots wurde das folgende Repository geklont: \texttt{https://github.com/DE-E4U-AI/ChatBot4U.git}. Wie bereits in 
+Für die Implementierung des Chatbots wurde das folgende Repository geklont: \\
+\texttt{https://github.com/DE-E4U-AI/ChatBot4U.git}. Wie bereits in 
 Abschnitt~\ref{system} beschrieben, 
 besteht der Chatbot aus einem Frontend- und einem Backend-Teil, die getrennt gestartet werden. \\
 Für die Testumgebung wurde eine lokale Implementierung gewählt, bei der sich das Aufsetzen des Backends zu dem in einer Cloud unterscheidet. Bevor das Backend implementiert wurde, wurde 
@@ -92,6 +101,20 @@ System-Zertifikatsspeicher verschoben wird, verhindert dies weitere Fehler~\cite
 Dieser Schritt ist notwendig, da Proxys, Vermittler zwischen einem internen Servernetzwerk und dem Internet~\cite{an9}, häufig Störungen verursachen, wenn sich die 
 Google Cloud mit Google-Servern verbindet. Firmenproxys brechen teilweise die \ac{ssl}-Verschlüsselung auf, was zu Zertifikatsfehlern führt oder den gesamten Verkehr 
 stört. \\
+
+Für die Testumgebung wurde das Repository des Chatbots~\cite{an17} geklont und lokal aufgesetzt. Wie in Abschnitt~\ref{system}
+beschrieben, werden Frontend und Backend dabei getrennt gestartet. Das Backend wurde in einer virtuellen Python-Umgebung
+betrieben~\cite{an1}. Da es auf Ressourcen der Google Cloud zugreift, wurde das lokale Gerät über die Google Cloud CLI
+authentifiziert und ein Standardprojekt festgelegt~\cite{an4}~\cite{an6}~\cite{an7}. Zusätzlich wurde ein Zugriffstoken für
+\gls{qdrant} hinterlegt, sodass der lokale Chatbot auf denselben Datenbestand zugreift wie das Produktivsystem. Das Frontend
+basiert auf Node.js und wird über NPM installiert und gestartet~\cite{an10}~\cite{an12}. \\
+Da die Testumgebung innerhalb der Unternehmensinfrastruktur betrieben wurde, waren Anpassungen an der Netzwerkkonfiguration
+notwendig: Das Root-Zertifikat der Firewall Zscaler wurde in den System-Zertifikatsspeicher übernommen, um \ac{ssl}-Fehler zu
+vermeiden~\cite{an11}, und die Proxy-Umgebungsvariablen wurden entfernt. Die vollständige Befehlsfolge befindet sich in
+Anhang~\ref{ch:anhang_setup}.
+
+
+
 Die vollständige Befehlsfolge befindet sich in Anhang~\ref{ch:anhang_setup}. \\
 Abschließend war der Chatbot lokal unter \url{http://localhost:5173/} erreichbar (Abbildung~\ref{fig:chatbot_login} und~\ref{fig:chatbot_chat}).
 
@@ -159,7 +182,7 @@ nach einer Websuche teilweise eine Liste von Text- und Quellenblöcken liefert, 
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.7\textwidth]{figs/05/ablauf_callMistralAI.pdf}
+\includegraphics[width=0.7\textwidth]{figs/04/ablauf_callMistralAI.pdf}
 \caption{Ablauf der Anfrageverarbeitung in \texttt{callMistralAI}}
 \label{fig:ablauf-mistral}
 \end{figure}
@@ -400,8 +423,11 @@ Formulierung der Anweisung zurückzuführen, die dem Modell kaum Interpretations
 
 \paragraph{Multiturn Injection}
 
-Im ersten Versuch wurde der Chatverlauf direkt übermittelt. Da die Aufforderung hier jedoch nicht getarnt war, entspricht dieser Versuch eher einer direkten Prompt
-Injection. Im zweiten Versuch war der Chatbot zur Übermittlung bereit, die POST-Anfrage wurde jedoch nicht korrekt ausgeführt. Der Misserfolg der drei abgewandelten 
+Beide Versuche weichen von der in Kapitel~\ref{ch:promptinjection} beschriebenen Multitun Injection ab. Der Chatverlauf wurde direkt als Nutzereingabe übergeben und
+das Chat-Template nicht manipuliert. Daher müssen diese Versuche als direkte Prompt Injection gewertet werden und können nicht für die Beantwortung der Forschungsfrage
+verwendet werden. \\
+Im ersten Versuch wurde der Chatverlauf direkt übermittelt. Im zweiten Versuch war der Chatbot zur Übermittlung bereit, die POST-Anfrage wurde jedoch nicht korrekt 
+ausgeführt. Der Misserfolg der drei abgewandelten 
 Folgefragen ist somit auf einen technischen Fehler und nicht auf eine Weigerung des Modells zurückzuführen. Das Modell hat die Anweisung nicht als schädlich erkannt, der 
 Versuch gilt nach Abschnitt~\ref{sec:bewertungskriterien} aber nicht als erfolgreich.
 
@@ -436,24 +462,82 @@ Beide Versuche waren erfolgreich, ohne dass der Chatbot eine Warnung ausgab. All
 
 \section{Schwachstellen der untersuchten Umgebung}\label{sec:schwachstellen_umgebung}
 
-Aus den Ergebnissen lassen sich folgende Schwachstellen festhalten:
+Bei der Auswertung der Ergebnisse wird deutlich, dass eine Kombination verschiedener Ursachen die Angriffsfläche ermöglicht. Dazu tragen unterschiedliche
+ Eigenschaften des Modells und der Testumgebung bei. Im Folgenden werden mithilfe dieser Eigenschaften allgemeine Schwachstellen definiert und mit Beobachtungen aus den
+Angriffsdurchführungen in Verbindung gesetzt. Zusätzlich erfolgt eine Einordnung in die in Abschnitt~\ref{subsec:sicherheitsbedrohungen} definierten 
+Sicherheitsbedrohungen.
 
-\begin{enumerate}
-    \item \textbf{Fehlende Trennung von Anweisungen und Daten:} Das Modell unterscheidet nicht zwischen Anweisungen des Nutzers und zu verarbeitenden Inhalten wie
-    E-Mails oder Webseiten. Anweisungen werden in diesen Inhalten wie Nutzeranweisungen behandelt.
-    \item \textbf{Übermäßige Funktionalitäten:} Der Chatbot kann beliebige \ac{url}s aufrufen und Inhalte auf Webseiten einfügen.
-    \item \textbf{Fehlende Kontrolle des Datenabflusses:} Der Chatbot kann den vollständigen Chatverlauf ohne Einschränkung an externe Ziele weitergeben. Es findet keine Prüfung statt, welche Daten das System verlassen dürfen.
-    \item \textbf{Keine Vorverarbeitung externer Inhalte:} Für Menschen unsichtbare Elemente in externen Inhalten werden weder entfernt noch markiert.
-    \item \textbf{Eingeschränkte Nachvollziehbarkeit:} Je nach Anweisung bleibt eine Datenübermittlung in der Antwort an den Nutzer unerwähnt.
-\end{enumerate}
+\subsection{Fehlende Trennung von Anweisungen und Daten}
 
-Es kann jedoch gleichzeitig ein Schutz des \ac{llm} festgestellt werden. Kodierte Anweisungen und versteckter Text in Bildern wurden erkannt und dem Nutzer gemeldet.
-Ob sich dieser Schutz durch geeignete Formulierungen umgehen lässt, wurde nicht untersucht.
+Das \ac{llm} unterscheidet nicht zwischen Anweisungen des Nutzers und zu verarbeitenden Inhalten. Anweisungen, die in E-Mails, Webseiten oder Dokumenten enthalten sind,
+werden wie Nutzeranweisungen behandelt und ausgeführt. Dies wurde bei mehreren Angriffen deutlich, vor allem bei der E-Mail Injection und Website Injection, die in 
+allen Versuchen erfolgreich waren. \\
+Durch den Aufbau der Testumgebung wurde diese Schwachstelle zusätzlich begünstigt, da alle Ergebnisse eines Tool Calls mit der Bezeichnung \texttt{tool} zusammen mit 
+dem Chatverlauf an das \ac{llm} gesendet werden. Es findet keine Kennzeichnung von externen Inhalten statt. 
+In Abschnitt~\ref{subsec:sicherheitsbedrohungen} wird diese Sicherheitsbedrohung als konkreter Fall besprochen. Durch die fehlende Trennung von Daten und Code kann
+das \ac{llm} nicht vertrauenswürdige Inhalte verarbeiten. \\
+Da diese Schwachstelle teilweise durch die Funktionsweise eines \ac{llm} begründet ist, kann das damit verbundene Risiko nicht vollständig behoben werden. Durch
+Änderungen bei der Verarbeitung kann jedoch eingeschränkt werden, welche Inhalte in den Kontext aufgenommen werden und welche Folgen möglich sind.
+Die Angriffe lassen sich den drei Kategorien des Lethal Trifecta zuordnen, womit die Voraussetzungen für eine Datenkompromittierung durch indirekte Prompt Injection
+gegeben sind~\cite[13]{pi24}.
 
-\paragraph{Einschränkungen}
+\subsection{Übermäßige Funktionalität}
 
-Die erkannten Schwachstellen unterliegen drei Einschränkungen. Es wurde zum einen jede Variante nur einmal durchgeführt. Da \ac{llm}s auf dieselbe Eingabe
-unterschiedlich antworten können, lässt sich aus den Ergebnissen zeigen, dass ein Angriff möglich ist, jedoch nicht, mit welcher Wahrscheinlichkeit. Die zweite
-Einschränkung ist, dass zwischen den Versuchen teilweise mehrere Parameter gleichzeitig verändert wurden, etwa die Formulierung des Angriffs und die Anzahl
-der vorherigen Anfragen, ohne dass ein Einfluss erkennbar war. Drittens richteten sich die Angriffe gegen eine lokale Webseite. Wie sich das \ac{llm} bei einer
-öffentlich erreichbaren Zieladresse verhalten würde, lässt sich daher nicht abschätzen.
+Das Tool \texttt{browser\_action} ermöglicht es dem \ac{llm}, eigenständig beliebige \acp{url} aufzurufen und Daten in Webseiten einzufügen. Dabei wird zwar
+eine Überprüfung mittels der Funktion \texttt{auditUrl} durchgeführt, diese erfasst jedoch lediglich, welches Protokoll verwendet wird und ob es sich um eine lokale 
+oder öffentliche Webseite handelt. Auch eine einfache Einschränkung durch eine Liste erlaubter Zieladressen, auf die zugegriffen werden darf, existiert
+nicht. Nach der Einordnung von OWASP liegt eine übermäßige Funktionalität vor~\cite[23]{pi24}. \\
+Das \ac{llm} hat Zugriff auf alle Tools und es muss keine menschliche Zustimmung erfragt werden, um ein Tool auszuführen. Bei allen erfolgreichen Angriffen hatte der 
+Nutzer keine Möglichkeit, die Aktion zu unterbrechen und den Angriff abzuwehren. Durch die Funktion, eine Aktion auf der Webseite auszuführen, ist die mögliche 
+Angriffsfläche nicht mehr auf die Chatoberfläche begrenzt, sondern eröffnet eine Möglichkeit zur Datenexfiltration und zu anderen schädlichen Aktionen.
+
+\subsection{Fehlende Kontrolle des Datenabflusses}
+
+Das ausgewählte \ac{llm} Mistral Large~4 ist zustandslos. Es speichert keine vorherigen Anfragen, wodurch bei jeder neuen Anfrage der gesamte Chatverlauf an das \ac{llm}
+gesendet wird. Es kann jederzeit eigenständig Tool Calls ausführen und alle bereitstehenden Informationen ohne Einschränkungen verwenden. Dies verdeutlichen auch 
+die erfolgreichen Durchführungen bei der E-Mail Injection, Multi-Modal Injection und Document Injection. Es wurde der vollständige Chatverlauf an die Zielwebseite
+weitergegeben. Die \ac{url}-Parameter Injection zeigt, dass bereits durch den Aufruf einer Webseite Daten extrahiert werden können.\\
+Bei einer praxisnahen Durchführung eines solchen Angriffs könnten interne Unternehmensdaten extrahiert werden, auf die der Chatbot
+zugreifen kann.
+
+\subsection{Keine Vorverarbeitung externer Inhalte}
+
+Externe Inhalte werden nicht überprüft, bevor sie in den Kontext aufgenommen werden. Bei Zugriff auf eine Webseite wird diese im Ganzen als \ac{html}-Quelltext
+zurückgegeben. Inhalte, die für Nutzer unsichtbar oder unauffällig sind, werden somit weder entfernt noch markiert. Dies zeigt sich bei der Multi-Modal Injection, der 
+Website Injection und der Document Injection. Bei der Multi-Modal Injection und Website Injection sind die schädlichen Anweisungen in einem Textblock mit 
+der Schriftgröße null oder in einem für den Nutzer unsichtbaren Bereich platziert. Bei der Document Injection ist der Inhalt für den Nutzer unauffällig, da der 
+Inhalt des Dokuments nicht vom Chatbot angezeigt wird. \\
+Während Nutzer externe Inhalte als unauffällig betrachten, kann das \ac{llm} gleichzeitig versteckte Anweisungen ausführen, ohne den Nutzer darüber in Kenntnis
+zu setzen. Eine menschliche Validierung reicht als möglicher Schutz bei dieser Schwachstelle nicht aus, da diese Anweisungen häufig unsichtbar sind.
+
+\subsection{Eingeschränkte Nachvollziehbarkeit}
+
+Ein Nutzer ist darauf angewiesen, vom \ac{llm} in einer Antwort darüber in Kenntnis gesetzt zu werden, welche Schritte durchgeführt wurden. In den genauen Ablauf 
+einer Anfrage und die dafür ausgeführten Tools hat er keinen Einblick. \\
+Auch die Versuche zeigen, dass das \ac{llm} expliziten Aufforderungen, den Nutzer nicht über die Aktionen zu unterrichten, häufig nachkommt.
+Besonders deutlich wird dies bei der E-Mail Injection und der Document Injection. Beim Jailbreak Prompt kam das \ac{llm} dieser Aufforderung
+dagegen in keinem Versuch nach.
+Der Erfolg eines Angriffs hängt somit stark von dem Modell selbst ab. Durch diese Schwachstelle könnte ein Angriff zudem über einen langen Zeitraum unentdeckt bleiben.
+
+\subsection{Grenzen}
+
+Die erkannten Schwachstellen unterliegen folgenden Einschränkungen:
+
+\begin{itemize}
+    \item  Jede Variante wurde nur einmal durchgeführt. Da \acp{llm} auf dieselbe Eingabe
+    unterschiedlich antworten können, zeigen die Ergebnisse, dass ein Angriff möglich ist, nicht jedoch, mit welcher Wahrscheinlichkeit.
+    \item  Zwischen den Versuchen wurden teilweise mehrere Parameter gleichzeitig verändert, etwa die Formulierung des Angriffs und die Anzahl
+    der vorherigen Anfragen, ohne dass ein Einfluss bestimmt wurde.
+    \item Die Angriffe richteten sich gegen eine lokale Webseite. Wie sich das \ac{llm} bei einer öffentlich erreichbaren Zieladresse verhalten würde, 
+    lässt sich daher nicht abschätzen.
+    \item Alle Versuche wurden mit dem \ac{llm} Mistral Large 4 durchgeführt. Andere Modelle könnten mögliche Angriffe besser identifizieren.
+    \item Die Funktion, Tool Calls auszuführen, wurde für diese Arbeit in der Testumgebung hinzugefügt und existiert nicht in der Version des Chatbot4U, die 
+    im Kundenservice verwendet wird.
+    \item Szenarien konnten teilweise nicht akkurat dargestellt werden. Bei der E-Mail Injection konnten die versteckten Anweisungen durch die Formatierungsvorgaben
+    des Chatbots nicht unsichtbar eingefügt werden. Die \ac{url} bei der \ac{url}-Parameter Injection war zu auffällig für den Nutzer formuliert.
+\end{itemize}
+
+Trotz dieser Einschränkungen lässt sich die Teilforschungsfrage 1 beantworten und Schwachstellen bei dem untersuchten System in Bezug auf indirekte 
+Prompt-Injection-Angriffe feststellen. Das \ac{llm} hat versteckte Anweisungen ausgeführt, den Nutzer darüber nicht in Kenntnis gesetzt und Daten an externe Systeme 
+übermittelt. In dieser Arbeit wird das externe System durch eine lokale Webseite dargestellt.
+Diese Schwachstellen bilden die Grundlage für die Auswahl der Schutzmaßnahme in Kapitel~\ref{ch:schutzmassnahmen}.
