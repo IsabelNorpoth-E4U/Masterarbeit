@@ -27,7 +27,7 @@ verschiedenen Promptvariationen des Originalansatzes ergänzt.
 
 \begin{table}[htbp]
 \centering
-\caption{Recall~\eqref{eq:recall} und \ac{fpr}~\eqref{eq:fpr} der Promptvariation}
+\caption{Recall und FPR der Promptvariation}
 \label{tab:promptvariation}
 \input{Implementierung_Schutzmechanismus/prompt_variation/results_diagramms/mistral_small4_test_promptvariation_tabelle}
 \end{table}
@@ -74,7 +74,7 @@ Fokus hier auf den einzelnen Transformationen.
 
 \begin{table}[htbp]
 \centering
-\caption{Recall~\eqref{eq:recall} je Transformation -- eigener Datensatz}
+\caption{Recall je Transformation -- eigener Datensatz}
 \label{tab:recall_transformation}
 \input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_eigen_recall_pro_transformation}
 \end{table}
@@ -103,13 +103,13 @@ In den Abbildungen~\ref{fig:recall_position} und~\ref{fig:recall_aufgabe} wird d
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.75\textwidth]{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_bipia_recall_pro_position}
-\caption{Recall~\eqref{eq:recall} je Position des Angriffs -- BIPIA}\label{fig:recall_position}
+\caption{Recall je Position des Angriffs -- BIPIA}\label{fig:recall_position}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.75\textwidth]{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_bipia_recall_pro_aufgabe}
-\caption{Recall~\eqref{eq:recall} je Aufgabe -- BIPIA}\label{fig:recall_aufgabe}
+\caption{Recall je Aufgabe -- BIPIA}\label{fig:recall_aufgabe}
 \end{figure}
 
 Bei der Positionierung der Angriffe ist eine deutliche Verbesserung zwischen den Ansätzen erkennbar. Beim Originalansatz wurden nur 36 von 67 der Angriffe am Anfang, 
@@ -132,7 +132,7 @@ Die Tabelle~\ref{tab:recall_transformation_bipia} zeigt den Recall~\eqref{eq:rec
 
 \begin{table}[htbp]
 \centering
-\caption{Recall~\eqref{eq:recall} je Transformation -- verschleierter BIPIA-Datensatz}
+\caption{Recall je Transformation -- BIPIA, verschleiert}
 \label{tab:recall_transformation_bipia}
 \input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_bipia_obfuscated_recall_pro_transformation}
 \end{table}
@@ -184,13 +184,13 @@ wird sie übersehen.
 Eine der Anforderungen, die an die Maßnahme gestellt wurden, war, dass sie mit einem kleinen Modell umgesetzt wird und somit kostengünstig und schnell ist. Für die 
 Evaluation wurden daher die Latenz~\eqref{eq:latency} und Kosten berechnet und in Tabelle~\ref{tab:token_kosten} gegenübergestellt. Für die Kostenberechnung wurden
 für alle
-acht Durchläufe die Anzahl der Anfragen und die daraus entstehenden Input- und Output-Token berechnet~\footnote{Da die Token-Nutzung während der Durchläufe nicht erfasst wurde, wurden die Anfragen nachträglich rekonstruiert und mit dem Tokenizer des jeweiligen Modells gezählt. Das hierfür verwendete Skript wurde mit Unterstützung von Claude (Anthropic) erstellt. Wiederholte Anfragen nach \acs{api}-Fehlern sind nicht berücksichtigt.}. 
+acht Durchläufe die Anzahl der Anfragen und die daraus entstehenden Input- und Output-Token berechnet~\footnote{Da die Token-Nutzung während der Durchläufe nicht erfasst wurde, wurden die Anfragen nachträglich rekonstruiert und mit dem Tokenizer des jeweiligen Modells gezählt. Wiederholte Anfragen nach \acs{api}-Fehlern sind nicht berücksichtigt.}. 
 Die Token wurden 
 nachträglich mit dem Tokenizer des jeweiligen \ac{llm} gezählt und die Kosten mit den in Abschnitt~\ref{sec:aufbau_umgebung} definierten Preisen berechnet.
 
 \begin{table}[htbp]
 \centering
-\caption{Anfragen, Token, Kosten und Latenz~\eqref{eq:latency} der Durchläufe}
+\caption{Anfragen, Token, Kosten und Latenz der Durchläufe}
 \label{tab:token_kosten}
 \input{Implementierung_Schutzmechanismus/results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_token_kosten}
 \end{table}
