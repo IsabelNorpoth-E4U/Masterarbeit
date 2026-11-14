@@ -1,12 +1,12 @@
 Anhang intern: 
 
-- Code lokale Webseite
-- Befehle Einrichtung lokale Umgebung
+- Code lokale Webseite ✓
+- Befehle Einrichtung lokale Umgebung ✓
 - Server.js Datei
-- build_bipia_testcases.py
-- main_new_approach_mistral.py
-- main_original_mistral.py
-- metrics.py
+- build_bipia_testcases.py ✓
+- main_new_approach_mistral.py ✓
+- main_original_mistral.py ✓
+- metrics.py 
 - token_kosten.py
 
 

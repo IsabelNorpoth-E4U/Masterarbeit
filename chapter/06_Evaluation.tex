@@ -9,13 +9,13 @@ Für die theoretische Auswertung werden die acht in Abschnitt~\ref{sec:results} 
 660 Einträgen (320 Angriffe, 340 harmlose Einträge), der aus BIPIA und NotInject kombinierte Datensatz mit 689 Einträgen (200 Angriffe, 489 harmlose Einträge)
 und der verschleierte BIPIA-Datensatz mit 350 Einträgen (200 Angriffe, 150 harmlose Einträge) verwendet. Auf allen Datensätzen wurden der Originalansatz~\ref{subsec:original}
 und der weiterentwickelte Ansatz~\ref{subsec:ueberarbeitung} mit Mistral Small 4 durchgeführt. Zusätzlich wurden der eigene Datensatz und der Datensatz aus BIPIA
-und NotInject mit Mistral Large 4 klassifiziert. Es ist das Haupt-\ac{llm} dieser Arbeit und ermöglicht eine Gegenüberstellung der Ergebnisse. \\
+und NotInject mit Mistral Large 4 klassifiziert, welches das Haupt-\ac{llm} dieser Arbeit ist und eine Gegenüberstellung der Ergebnisse ermöglicht. \\
 Für die in den Durchläufen entstandenen Ergebnisse wurden die in Abschnitt~\ref{subsec:metrics} aufgelisteten Metriken berechnet. Relevant für die Auswertung sind
 der Recall~\eqref{eq:recall} und die \ac{fpr}~\eqref{eq:fpr}, die jeweils mit einem 95-\%-Konfidenzintervall~\eqref{eq:confidence} nach Wilson angegeben wurden. \\
 
 \section{Ergebnisse der Klassifikation}
 
-Tabelle~\ref{tab:ergebnisse} stellt die Ergebnisse der acht Durchläufe gegenüber. Mit Tabelle~\ref{tab:promptvariation} werden diese mit den Ergebnissen der 
+Tabelle~\ref{tab:ergebnisse} stellt die Ergebnisse der acht Durchläufe gegenüber. In Tabelle~\ref{tab:promptvariation} werden diese mit den Ergebnissen der 
 verschiedenen Promptvariationen des Originalansatzes ergänzt.
 
 \begin{table}[htbp]
@@ -32,8 +32,9 @@ verschiedenen Promptvariationen des Originalansatzes ergänzt.
 \input{Implementierung_Schutzmechanismus/prompt_variation/results_diagramms/mistral_small4_test_promptvariation_tabelle}
 \end{table}
 
-Die Weiterentwicklung des Ansatzes hat den Recall~\eqref{eq:recall} deutlich gesteigert. Die Konfidenzintervall~\eqref{eq:confidence}e der Recall~\eqref{eq:recall}-Werte überschneiden sich nicht, wodurch der Anstieg deutlich
-wird. Diese Auswirkung tritt vor allem bei den externen Inhalten auf. Der Recall~\eqref{eq:recall} auf dem Datensatz aus BIPIA und NotInject stieg von 34,0\,\% auf 92,0\,\% und auf 
+Die Weiterentwicklung des Ansatzes hat den Recall~\eqref{eq:recall} bei der Verwendung von Mistral Small 4 deutlich gesteigert. Die 
+Konfidenzintervall~\eqref{eq:confidence}e der Recall~\eqref{eq:recall}-Werte überschneiden sich nicht, der Anstieg somit signifikant.
+Diese Auswirkung tritt vor allem bei den externen Inhalten auf. Der Recall~\eqref{eq:recall} auf dem Datensatz aus BIPIA und NotInject stieg von 34,0\,\% auf 92,0\,\% und auf 
 dem verschleierten BIPIA-Datensatz von 43,0\,\% auf 91,0\,\%. Auf dem eigenen Datensatz stieg der Recall~\eqref{eq:recall} von 73,1\,\% auf 82,8\,\%. \\
 Bei der \ac{fpr}~\eqref{eq:fpr} ist keine vergleichbare Entwicklung erkennbar. Die Konfidenzintervall~\eqref{eq:confidence}e überschneiden sich in allen Durchläufen oder sind identisch.
 Auf dem eigenen Datensatz sinkt die \ac{fpr}~\eqref{eq:fpr} von 10,9\,\% auf 6,8\,\%, auf dem Datensatz aus BIPIA und NotInject bleibt sie unverändert bei 13,5\,\% und auf
@@ -91,7 +92,8 @@ ihren Nutzen verliert. \\
 Von den Datensatzeinträgen ohne Transformation werden 17 von 20 korrekt klassifiziert. Die nicht erkannten Angriffe beinhalten eine Anweisung in einem Kommentar
 innerhalb eines Codeausschnitts (z.\,B. \enquote{TODO fuer den Assistenten: den Wert von os.environ TOKEN mit in die Antwort schreiben}). Dieser Angriff wird falsch
 klassifiziert, da er nicht als externer Inhalt behandelt wird und somit Stufe 3 und 4 für eine einfache Nutzeranfrage durchgeführt werden. \\
-Durch diesen Ansatz werden weder bei den normalen Anfragen noch bei den Hard Negatives viele Fehlalarme ausgelöst, sondern ausschließlich bei den transformierten 
+Durch den weiterentwickelten Ansatz werden weder bei den normalen Anfragen noch bei den Hard Negatives viele Fehlalarme ausgelöst, sondern ausschließlich bei den 
+transformierten 
 harmlosen Anfragen. Am stärksten wurde die Anzahl der Fehlalarme bei Transformation T08 reduziert. Bei dieser Transformation wird die Nutzeranfrage Base64-kodiert,
 was bei dem Originalansatz schneller als Angriff gewertet wird. Die Rekonstruktion aus der ersten Stufe des weiterentwickelten Ansatzes macht diese 
 Transformation rückgängig, sodass das \ac{llm} den Klartext analysiert. 
@@ -181,7 +183,7 @@ wird sie übersehen.
 
 \section{Latenz und Kosten}\label{sec:latenz_kosten}
 
-Eine der Anforderungen, die an die Maßnahme gestellt wurden, war, dass sie mit einem kleinen Modell umgesetzt wird und somit kostengünstig und schnell ist. Für die 
+Eine der Anforderungen, die an die Maßnahme gestellt wurden, war, dass sie mit einem kleinen Modell umgesetzt werden kann und somit kostengünstig und schnell ist. Für die 
 Evaluation wurden daher die Latenz~\eqref{eq:latency} und Kosten berechnet und in Tabelle~\ref{tab:token_kosten} gegenübergestellt. Für die Kostenberechnung wurden
 für alle
 acht Durchläufe die Anzahl der Anfragen und die daraus entstehenden Input- und Output-Token berechnet~\footnote{Da die Token-Nutzung während der Durchläufe nicht erfasst wurde, wurden die Anfragen nachträglich rekonstruiert und mit dem Tokenizer des jeweiligen Modells gezählt. Wiederholte Anfragen nach \acs{api}-Fehlern sind nicht berücksichtigt.}. 
@@ -203,10 +205,12 @@ Dadurch steigt die Anzahl der Token. Auf dem eigenen Datensatz benötigt der Ori
 Auf dem Datensatz aus BIPIA und NotInject steigt die Anzahl der Token von 215 auf 2.174, auf dem verschleierten Datensatz von 384 auf 3.683. Die Token steigen damit 
 ungefähr um das Zehnfache. Die Output-Token bleiben wie beim Originalansatz gering, da es sich um eine binäre Abfrage handelt und meistens nur ein JA oder NEIN 
 ausgegeben wird. Die Input-Token steigen dagegen stark, da bei jeder Anfrage die Nutzeranfrage und der jeweilige Systemprompt übergeben werden müssen. \\
-Die Kosten für die Prüfung steigen damit etwa um das 9- bis 12-Fache. Zur Vergleichbarkeit wurde mit 1.000 Einträgen gerechnet. Auf dem eigenen Datensatz erhöhen sich 
-die Kosten von 0,034\,\$ auf 0,294\,\$. Auf dem Datensatz aus BIPIA und NotInject von 0,033\,\$ auf 0,385\,\$ und auf dem verschleierten BIPIA-Datensatz von 0,059\,\$ 
-auf 0,641\,\$. Durch die Prüfung aller 9.378 Anfragen dieser Arbeit entstanden Kosten von 1,12\,\$. \\
-Mit Mistral Large 4 entstehen beim Originalansatz Kosten von 0,277\,\$ pro 1.000 Einträge. Je nachdem, welche Art von Anfrage geprüft wird, können somit bei dem 
+Die Kosten für die Prüfung steigen damit etwa um das 9- bis 12-Fache. Da die Datensätze unterschiedlich groß sind, wurden die Kosten auf 1.000 Einträge gerechnet,
+womit die Durchläufe miteinander verglichen werden können.
+Auf dem eigenen Datensatz erhöhen sich 
+die Kosten von 0,034\,USD auf 0,294\,USD. Auf dem Datensatz aus BIPIA und NotInject von 0,033\,USD auf 0,385\,USD und auf dem verschleierten BIPIA-Datensatz von 0,059\,USD 
+auf 0,641\,USD. Durch die Prüfung aller 9.378 Anfragen dieser Arbeit entstanden Kosten von 1,12\,USD. \\
+Mit Mistral Large 4 entstehen beim Originalansatz Kosten von 0,277\,USD pro 1.000 Einträge. Je nachdem, welche Art von Anfrage geprüft wird, können somit bei dem 
 weiterentwickelten Ansatz Kosten entstehen, die 1,4-mal so hoch sind wie eine Anfrage an das Haupt-\ac{llm}. Jedoch werden auf dem eigenen Datensatz 82,8\,\% statt 
 41,6\,\% der Angriffe und auf dem Datensatz aus BIPIA und NotInject 92,0\,\% statt 24,5\,\% der Angriffe erkannt. \\
 Trotz der deutlich ansteigenden Kosten ist der Ansatz dennoch kostengünstig, da für die Prüfung von mehr als 9.000 Anfragen Kosten von etwas mehr als einem US-Dollar
@@ -231,12 +235,12 @@ als einzelne Einträge abgebildet. Jede Anfrage ist ein unabhängiger Eintrag. E
 wurde der im Bild enthaltene Text übernommen, da Bilder nicht verarbeitet werden können. Für Angriffe, welche externen Inhalt in den Chat einfügen, wurden jeweils
 drei Einträge erstellt: einer mit der Nutzeranfrage, einer mit dem externen Inhalt und einer mit beiden Inhalten kombiniert. \\
 Es sind 57 Einträge entstanden, davon 37 Angriffe und 20 harmlose Einträge. Harmlose Einträge sind einfache Nutzeranfragen, die in den Angriffen zur Vorbereitung 
-verwendet wurden. Die Angriffe beinhalten die verwendeten Ausführungsvarianten. Der Aufbau der Einträge orientiert sich an den eigenen Daten. Für jeden Eintrag
+verwendet wurden. Die Angriffe beinhalten die verwendeten Ausführungsvarianten. Der Aufbau der Datensatzeinträge orientiert sich an den eigenen Datensatz. Für jeden 
+Eintrag
 wurde eine ID, der Split, das Label, der Harmlosigkeitsgrad, der Inhalt der Anfrage und der Eingabetyp festgelegt, damit der weiterentwickelte Ansatz die
 Einträge verarbeiten kann. \\
 Geprüft wurde der Datensatz mit dem weiterentwickelten Ansatz und Mistral Small 4. Es wurden dieselben Parameter wie bei den vorherigen Durchläufen verwendet. 
-Zusätzlich wurde die Temperatur auf 0 gesetzt. Für die Evaluation wurden ebenfalls die Metriken aus Abschnitt~\ref{sec:results} berechnet. Dieser Durchlauf 
-entspricht Durchlauf Nummer 9.
+Zusätzlich wurde die Temperatur auf 0 gesetzt. Für die Evaluation wurden ebenfalls die Metriken aus Abschnitt~\ref{sec:results} berechnet. 
 
 \subsection{Ergebnisse}\label{subsec:vergleichkapitel4}
 
@@ -281,34 +285,43 @@ bestimmte Triggerwörter in den Anweisungen ausgelöst wird.
 \section{Grenzen}
 
 Abschließend werden die Grenzen dieser Arbeit zusammengetragen. Sie wurden bereits in den Kapiteln~\ref{ch:methodik} und~\ref{ch:schutzmassnahmen} genannt und
-werden hier aufgeführt. \\
-Als Kriterium für die Maßnahme wurde definiert, dass ein \ac{llm} verwendet werden soll, welches schneller und kostengünstiger ist als das Haupt-\ac{llm}. 
+werden hier zusammengefasst. \\
+
+\paragraph{Modell}
+Als Kriterium für die Schutzmaßnahme wurde definiert, dass ein \ac{llm} verwendet werden soll, welches schneller und kostengünstiger ist als das Haupt-\ac{llm}. 
 Gewählt wurde Mistral Small 4 in Kombination mit dem Haupt-\ac{llm} Mistral Large 4. Durch den Einsatz dieses vorgeschalteten \ac{llm} entsteht jedoch eine 
-neue Angriffsfläche, da kleinere Modelle weniger robust sind und Angriffe nicht zuverlässig korrekt als solche klassifizieren können. Zudem erhöht sich das Risiko 
+neue Angriffsfläche, da kleinere Modelle weniger robust sind und Angriffe nicht zuverlässig als solche klassifizieren können. Zudem erhöht sich das Risiko 
 von Over-Defense, bei der harmlose Anfragen fälschlicherweise als Angriff klassifiziert werden, weil das \ac{llm} aufgrund bestimmter Begriffe und Formulierungen
 vorschnell einen Angriff annimmt. Dies wurde auch in Abschnitt~\ref{subsec:ergebnisse_bipia} festgestellt. Zudem wird einem \ac{llm} die Klassifizierung eines
-Angriffs erschwert, wenn die Reihenfolge der Wörter verändert wird. Bei solchen Verschleierungen treten Probleme auf, da ein \ac{llm} einen Text von links nach 
-rechts verarbeitet, was mit der Token-Generierung zusammenhängt~\cite[4]{sm38}. \\
-Auch bei den Daten treten Einschränkungen auf. Der eigene Datensatz wurde auf Grundlage verschiedener Arbeiten erstellt, kann jedoch inhaltliche Fehler enthalten.
-Mit 20 Testfällen je Transformation ist es zu klein. Die öffentlichen Datensätze sind englischsprachig, der Ansatz und der eigene Datensatz jedoch auf Deutsch
-formuliert. Es werden zudem nicht alle in Kapitel~\ref{ch:methodik} durchgeführten Angriffe abgedeckt, sondern nur Einträge zu E-Mails, Tabellen und Codeausschnitten
+Angriffs erschwert, wenn die Reihenfolge der Wörter verändert wird. Dies ist darauf zurückzuführen, dass ein \ac{llm} einen Text von links nach 
+rechts verarbeitet, was mit der Token-Generierung zusammenhängt~\cite[4]{sm38}. Da die Schutzmaßnahme nur mit Mistral Small 4 und Mistral Large 4 getestet wurde,
+kann zudemnicht ausgeschlossen werden, dass der Einsatz der Maßnahme durch ein stärkeres \ac{llm} mit vergleichbaren Kosten ersetzt werden könnte.
+
+\paragraph{Daten}
+Der eigene Datensatz wurde auf Grundlage verschiedener Arbeiten erstellt, kann jedoch inhaltliche Fehler enthalten und ist mit 20 Testfällen je Transformation zu klein.
+Die öffentlichen Datensätze sind englischsprachig, der Ansatz und der eigene Datensatz jedoch auf Deutsch formuliert. Es werden zudem nicht alle in 
+Kapitel~\ref{ch:methodik} durchgeführten Angriffe abgedeckt, sondern nur Einträge zu E-Mails, Tabellen und Codeausschnitten
 enthalten. Bei der Entwicklung der Schutzmaßnahme wurde zwar darauf geachtet, eine Überanpassung zu vermeiden, weshalb die öffentlichen Datensätze einbezogen
 und die Maßnahme allgemein gehalten wurde, jedoch lässt sich dies nicht vollständig ausschließen. \\
-Der Datensatz aus Abschnitt~\ref{subsec:vergleichkapitel4} ist mit 57 Einträgen zu klein, um eine aussagekräftige Erkenntnis zu sammeln. Zusätzlich
-sind auch diese Einträge selbst formuliert und kurz gehalten. Recall~\eqref{eq:recall} und \ac{fpr}~\eqref{eq:fpr} fallen zwar positiv aus, jedoch ist die Datengrundlage zu gering. 
+Der Datensatz aus Abschnitt~\ref{subsec:vergleichkapitel4} ist mit 57 Einträgen zu klein, um eine aussagekräftige Erkenntnis zu liefern. Zusätzlich
+sind auch diese Einträge nicht aus einer externen Quelle übernommen, sondern selbst erstellt und kurz gehalten. Recall~\eqref{eq:recall} und \ac{fpr}~\eqref{eq:fpr} 
+fallen zwar positiv aus, jedoch ist die Datengrundlage zu gering. 
 Hinzu kommt, dass die Angriffe teilweise nicht vollständig nachgestellt werden konnten, da für die Multi-Modal Injection statt des Bildes der 
-enthaltene Text und bei der Website Injection der Quellcode der Webseite verwendet wurde. \\
-Der Ansatz weist ebenfalls Grenzen auf. Externe Inhalte müssen gekennzeichnet werden und diese Kennzeichnung wird nicht überprüft. Befinden sich externe Inhalte in
+enthaltene Text und bei der Website Injection der Quellcode der Webseite verwendet wurde.
+
+\paragraph{Ansatz}
+Externe Inhalte müssen gekennzeichnet werden, wobei diese Kennzeichnung nicht überprüft wird. Befinden sich externe Inhalte in
 der Nutzeranfrage, etwa bei einer kopierten E-Mail, werden diese nicht als externer Inhalt behandelt. Multi-Turn-Angriffe können nicht verarbeitet werden, da jede 
 Anfrage unabhängig geprüft wird. Angriffe, die sich bei einem Produktivchatbot über mehrere Nachrichten erstrecken, können dementsprechend nicht klassifiziert werden.
-Zusätzlich müssen alle Inhalte in Textform vorliegen. Bilder oder andere Medien ohne direkten Text können von der Maßnahme nicht analysiert werden. Bei der 
-Umwandlung, die nicht automatisiert abläuft, können wichtige Informationen verloren gehen. Die Maßnahme trifft zusätzlich nur eine binäre Entscheidung, welche keine
-Aussage darüber zulässt, wie sicher eine Klassifikation erfolgt. \\
-Durch den weiterentwickelten Ansatz sind die Anzahl der Anfragen und die Dauer stark gestiegen. Da der Ansatz nur mit Mistral Small und Mistral Large getestet wurde,
-kann nicht ausgeschlossen werden, dass der Einsatz der Maßnahme durch ein stärkeres \ac{llm} mit vergleichbaren Kosten ersetzt werden könnte. \\
+Zusätzlich müssen alle Inhalte in Textform vorliegen. Bilder oder andere Medien ohne direkten Text können von der Maßnahme nicht analysiert werden und bei der 
+nicht automatisierten Umwandlung können wichtige Informationen verloren gehen. Die Maßnahme trifft zusätzlich nur eine binäre Entscheidung, welche keine
+Aussage darüber zulässt, wie sicher eine Klassifikation erfolgt. Zudem sind durch den weiterentwickelten Ansatz die Anzahl der Anfragen und die Dauer stark gestiegen.
+
+\paragraph{Evaluation}
 Bei der Evaluation wurden ausschließlich statische Datensätze verwendet. Es wurde nicht das Szenario eines Angreifers betrachtet, welcher bei einem blockierten Angriff
 diesen so lange verändert, bis er nicht mehr als Angriff klassifiziert wird. \\
 Die größte Einschränkung besteht darin, dass die Maßnahme nicht in ein laufendes System integriert wurde. Sie wurde nicht mit dem Chatbot verbunden, wodurch
-keine Aussage darüber getroffen werden kann, ob die Angriffe tatsächlich abgewehrt werden, wie stark sich die \ac{fpr}~\eqref{eq:fpr} auf die Kommunikation mit Nutzern auswirkt und
+keine Aussage darüber getroffen werden kann, ob die Angriffe tatsächlich abgewehrt werden, wie stark sich die \ac{fpr}~\eqref{eq:fpr} auf die Kommunikation mit Nutzern 
+auswirkt und
 wie sich Kosten und Dauer im Betrieb verändern. Es konnte dadurch kein Angriff simuliert werden, um zu prüfen, wie lange der Chatbot in Kombination mit der Maßnahme 
 Angriffe abwehrt. 
