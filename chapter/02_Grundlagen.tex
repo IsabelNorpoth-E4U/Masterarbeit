@@ -60,7 +60,7 @@ Datensatz aus Webseiten ermöglicht wurde. Ziel war es, Aufgaben ohne explizites
 wurde das Konzept von In-Context Learning eingeführt, bei dem ein Modell eine Aufgabe anhand von Anweisungen und Beispielen im Prompt lösen soll~\cite[9]{llm09}. 
 GPT-4 erweiterte 2023 die Eingabe um multimodale Signale~\cite[10]{llm09}. \\
 Auch wenn die Entwicklung zeigt, dass das Ziel vor allem darin bestand, Modelle zu vergrößern, führte dies nicht unbedingt zu besseren Modellen. 
-\acp{llm} können Ausgaben erzeugen mit unwahren, toxischen oder nicht hilfreichen Inhalten~\cite[1]{llm08}. Nutzer erwarten hingegen, dass ein Sprachmodell 
+\acp{llm} können Ausgaben mit unwahren, toxischen oder nicht hilfreichen Inhalten erzeugen~\cite[1]{llm08}. Nutzer erwarten hingegen, dass ein Sprachmodell 
 hilfreich, harmlos und ehrlich ist~\cite[2]{llm08}. Aus diesem Grund werden Modelle mithilfe von Datensätzen in natürlicher Sprache feinabgestimmt~\cite[30]{llm09}.
 Dabei kommt vor allem \ac{rlhf} zum Einsatz, bei dem ein Modell anhand menschlicher Rückmeldungen feinabgestimmt wird~\cite[2]{llm08}. Die menschliche
 Bewertung dient dabei als Belohnungssignal für das Modell~\cite[2]{llm08}. \ac{rlhf} verbessert die Fähigkeiten eines Sprachmodells effizienter als eine
@@ -70,8 +70,8 @@ Trotz Fine-Tuning ist ein Modell jedoch nicht sicher und kann schädliche Inhalt
 ein realer Schaden entstehen kann~\cite[10]{llm08}. \\
 Seit 2022 haben sich zudem zunehmend Open-Source-Modelle etabliert, deren Fähigkeiten denen der GPT-Modelle entsprechen sollen, darunter LLaMA~\cite[2970]{cb01}. 
 Auch 2024 basierten die meisten Modelle auf der Transformer-Architektur~\cite[2970]{cb01}. Die Modellfamilie LLaMA wurde dabei kontinuierlich weiterentwickelt. 
-Das neuste Modell LLaMA 4 hat bereits 400 Milliarden Parameter~\cite{llm11}. \\
-Eine weitere bekannte Modellfamilie ist Mistral~\cite[11]{llm09}. Deren aktuelles Modell Mistral Large 4 umfasst rund eine Billionen Parameter und wird in dieser 
+Das neueste Modell LLaMA 4 hat bereits 400 Milliarden Parameter~\cite{llm11}. \\
+Eine weitere bekannte Modellfamilie ist Mistral~\cite[11]{llm09}. Deren aktuelles Modell Mistral Large 4 umfasst rund eine Billion Parameter und wird in dieser 
 Arbeit für die Testumgebung eingesetzt~\cite{llm12}.
 
 \subsection{Aufbau und Funktionsweise}
@@ -218,12 +218,12 @@ an Token, deren kumulierte Wahrscheinlichkeitsmasse den Wert $p$ erreicht~\cite{
 
 \section{Tool Calling}
 
-Die Grundidee von Tool Calling besteht darin, einem \ac{llm} den Aufruf externen Funktionen und \acp{api} zu ermöglichen~\cite{tc05}. Es wird in diesem Zusammenhang
+Die Grundidee von Tool Calling besteht darin, einem \ac{llm} den Aufruf externer Funktionen und \acp{api} zu ermöglichen~\cite{tc05}. Es wird in diesem Zusammenhang
 auch häufig der Begriff Function Calling verwendet, jedoch wird in dieser Arbeit ausschließlich der Begriff Tool Calling genutzt~\cite{tc04}. Tool Calling 
-ermöglicht es einem \ac{llm}, nicht nur Text zu erzeugen, sondern auch mit anderen System zu interagieren~\cite{tc04}. Dadurch wird die Sprachverarbeitung mit 
+ermöglicht es einem \ac{llm}, nicht nur Text zu erzeugen, sondern auch mit anderen Systemen zu interagieren~\cite{tc04}. Dadurch wird die Sprachverarbeitung mit 
 Aktionen in der realen Welt verbunden~\cite{tc03}\cite{tc05}. \\
-In wissenschaftlichen Arbeiten wird ein von einem \ac{llm} verwendetes Tool als Funktionsschnittstelle zu einem Programm definiert. Es wird extern des \ac{llm}
-ausgeführt, währen das \ac{llm} den Funktionsaufruf und die Input-Argumente erzeugt~\cite[5]{tc10}. Die Ausgabe eines solchen Tools
+In wissenschaftlichen Arbeiten wird ein von einem \ac{llm} verwendetes Tool als Funktionsschnittstelle zu einem Programm definiert. Es wird außerhalb des \ac{llm}
+ausgeführt, während das \ac{llm} den Funktionsaufruf und die Input-Argumente erzeugt~\cite[5]{tc10}. Die Ausgabe eines solchen Tools
 wird in den Kontext des Modells übernommen~\cite[3]{tc09}. Ein Tool ist damit in der Lage, externe Informationen zu sammeln und einen Effekt auf die virtuelle oder 
 physische 
 Welt auszuüben~\cite[3]{tc09}. Für den Prozess wird das sogenannte Tool Learning verwendet. Es beschreibt den Prozess, in dem ein Modell lernt, mit verschiedenen 
@@ -231,16 +231,16 @@ Tools zu interagieren, um komplexe Aufgaben zu erfüllen~\cite[5]{tc10}. Der Sch
 Aktionen zu unterteilen, diese in natürliche Sprache zu übersetzen und in ausführbare Anweisungen umzuwandeln, die von den speziellen Tools verstanden werden können. 
 \acp{llm} dienen in diesem Prozess als Übersetzer~\cite[9]{tc11}. \\
 Die Integration von Tool Calling ist notwendig, da ein \ac{llm} darauf begrenzt ist, die in seinen Gewichten gespeicherten Informationen zu 
-verwenden und Generierungen innerhalb eines begrenzten Kontextfenster vorzunehmen~\cite[1]{tc16}. Wenn dieses Wissen erweitert werden soll, muss es durch Training
-aktualisiert werden~\cite[1]{tc16}. Kann ein Modell nur auf interne Repräsentationen zugreifen und ist nicht in der externen Welt integriert worden, kann es auch 
+verwenden und Generierungen innerhalb eines begrenzten Kontextfensters vorzunehmen~\cite[1]{tc16}. Wenn dieses Wissen erweitert werden soll, muss es durch Training
+aktualisiert werden~\cite[1]{tc16}. Kann ein Modell nur auf interne Repräsentationen zugreifen und ist nicht in die externe Welt integriert worden, kann es auch 
 verstärkt 
 zu Halluzinationen und Fehlerpropagation kommen~\cite[2]{tc15}. Tools ergänzen ein Modell innerhalb dieser Grenzen, indem sie seinen Kontext erweitern, sodass fehlende
 Informationen, die sich nicht in den Gewichten des Modells befinden, ergänzt werden~\cite[3]{tc09}.
 Aufgaben wie Berechnungen oder Informationssammlung können somit an externe Module wie Suchmaschinen oder Python-Interpreter ausgelagert werden~\cite[9]{tc09}.
 Damit lassen sich auch Aktionen ausführen, die Daten in Echtzeit oder externe Berechnungen erfordern~\cite[2]{tc14}. Bereits Modelle wie GPT-4 aus dem Jahr 2023~\cite[10]{llm09} 
-waren in der Lage, strukturierte Ausgaben im JSON-Format zu erzeugen, mit dem Funktionsaufrufe ausgeführt werden konnten. Neuere Modelle verfügen über eine direkt 
+waren in der Lage, strukturierte Ausgaben im JSON-Format zu erzeugen, mit denen Funktionsaufrufe ausgeführt werden konnten. Neuere Modelle verfügen über eine direkt 
 integrierte Unterstützung für Tool Calling~\cite[2]{tc14}. \\
-Die Einsatzmöglichkeiten erstrecken sich vom Aufruf von \acp{api}, über die Suchen im Internet und Ausführen von Code bis zum Zugriff auf Dokumente~\cite{tc03}. 
+Die Einsatzmöglichkeiten erstrecken sich vom Aufruf von \acp{api} über die Suche im Internet und das Ausführen von Code bis zum Zugriff auf Dokumente~\cite{tc03}. 
 \acp{llm} sind jedoch grundsätzlich Sprachverarbeiter, weswegen sie Aufgaben wie das Buchen von Flügen oder Konferenzräumen nicht unabhängig durchführen können~\cite[6]{tc10}.
 Daher werden in diese Tools die notwendigen externen Partner integriert, damit diese Schnittstellen geschaffen werden~\cite[6]{tc10}. Grundsätzlich lassen sich 
 Tools je nach Aufgabe in drei Kategorien einteilen: 
@@ -251,7 +251,7 @@ Tools je nach Aufgabe in drei Kategorien einteilen:
     verwendet, bei denen bekannt ist, wonach gesucht wird. Graphendatenbanken werden verwendet, wenn die Beziehungen der Daten ebenso viel bedeuten wie die Daten 
     selbst. \acp{api} werden verwendet, wenn Daten in Echtzeit verarbeitet werden müssen~\cite{tc05}.
     \item Berechnung: Diese Tools sind notwendig, da Daten häufig verändert werden müssen, damit sie verarbeitet werden können. Dazu zählen die Verarbeitung
-    von Daten mithilfe von Python oder Anwenden einer Logik, mathematische Operationen, Datentransformationen, die Verarbeitung von Bildern, Videos und Audio sowie
+    von Daten mithilfe von Python oder das Anwenden einer Logik, mathematische Operationen, Datentransformationen, die Verarbeitung von Bildern, Videos und Audio sowie
     die Kombination anderer Modelle, um z.\,B. Bilderkennung zu ermöglichen~\cite{tc05}.
     \item Aktion: Diese Tools dienen dazu, ein externes System zu verändern. Dazu zählen Kommunikations-Tools, die Benachrichtigungen versenden, z.\,B. E-Mails oder
     SMS, Workflow-Automation-Tools, mit denen Tickets erstellt oder Pipelines ausgelöst werden, sowie Datenmanipulations-Tools, die Datenbanken aktualisieren,
@@ -265,28 +265,28 @@ Daten über ein Aktions-Tool gesendet~\cite{tc05}.
 
 \subsection{Konzept und Ablauf}
 
-Ein Tool Call basiert auf verschiedenen Komponenten~\cite{tc06} [6]. Laut~\cite[10\psq]{tc11} handelt es sich dabei um vier. Das \textbf{Tool Set} beinhaltet die 
+Ein Tool Call basiert auf verschiedenen Komponenten~\cite{tc06}. Laut~\cite[10\psq]{tc11} handelt es sich dabei um vier. Das \textbf{Tool Set} beinhaltet die 
 Sammlung der Tools mit ihren jeweiligen 
 Funktionen. Die \textbf{Environment} stellt die Infrastruktur zur Ausführung eines Tools bereit und kann virtuell oder real sein. Der \textbf{Controller}
 bildet den Hauptsteuerungspunkt
 eines Tool-Learning-Frameworks und wird normalerweise durch ein \ac{llm} umgesetzt. Der \textbf{Perceiver} verarbeitet die Rückmeldungen des Nutzers und der Umgebung und 
 generiert daraus
-eine Zusammenfassung für den Controller. Die einfachste Form dieser Rückmeldungen besteht darin, dass ein vordefiniertes Formular ausgefüllt wird. Diese Zusammenarbeit 
+eine Zusammenfassung für den Controller. Die einfachste Form dieser Rückmeldungen besteht darin, dass ein vordefiniertes Formular ausgefüllt wird. Die Zusammenarbeit
 der 
-Komponenten und der allgemeine Ablauf wird dadurch beschrieben, dass zu einem Zeitpunkt $t$ ein LLM eine Observation $o_t$ der Umgebung erhält und eine Aktion
+Komponenten und der allgemeine Ablauf werden dadurch beschrieben, dass zu einem Zeitpunkt $t$ ein LLM eine Observation $o_t$ der Umgebung erhält und eine Aktion
 $a_t$ in Abhängigkeit vom Kontext $c_t = (o_1, a_1, \dots, o_{t-1}, a_{t-1}, o_t)$ wählt. Der Kontext umfasst die gesamte bisherige Abfolge aus Aktionen und 
 gelieferten Observationen~\cite[3]{tc15}. \\
 Bevor ein \ac{llm} Tools verwenden kann, müssen diese definiert werden. Dazu wird eine Liste mit Namen, Verwendung und Input-/Output-Formaten erstellt~\cite{tc03}. 
 Diese Liste
 ist meist ein strukturiertes JSON-Schema~\cite{tc07}. Anhand dieser Informationen kann ein Modell das richtige Tool identifizieren~\cite{tc06}. 
 Quelltext~\ref{lst:tool_definition}
-zeigt beispielhaft eine solche Definition. Die Möglichkeiten eines \ac{llm}, den Umgang mit Tools zu erlernen, reichen vom In-Context Learning zu dem expliziten 
+zeigt beispielhaft eine solche Definition. Die Möglichkeiten eines \ac{llm}, den Umgang mit Tools zu erlernen, reichen vom In-Context Learning bis zum expliziten
 Lernen mithilfe von speziellen Datensätzen~\cite[17777]{tc08}. \\
 Wie zuverlässig ein \ac{llm} ein Tool einsetzt, ist von der Qualität der Definition abhängig. Eine Definition sollte drei Punkte umfassen. Erstens sollte die Beschreibung des Zwecks 
 den genauen Umfang und die Bedingungen enthalten. Einbezogen werden sollte auch, wofür das Tool nicht angewendet werden sollte~\cite{tc03}. Zweitens sollten die 
 Parameter
 eingeschränkt sein. Dazu gehört eine ausführliche Beschreibung dessen, was nicht erwartet wird, z.\,B. bei dem Format. Beispiele können zur Unterstützung verwendet 
-werden. Drittens sollte das Format des Outputs klar definiert werden, also welche Form und welche Informationen er ausweist~\cite{tc03}.
+werden. Drittens sollte das Format des Outputs klar definiert werden, also welche Form und welche Informationen er aufweist~\cite{tc03}.
 
 \begin{lstlisting}[caption={Beispiel einer Tool-Definition als JSON-Schema~\cite{tc01}}, label={lst:tool_definition}]
 {
@@ -334,24 +334,24 @@ die Logik aus und gibt das Ergebnis an das \ac{llm} zurück~\cite{tc03}. \\
 Das Ergebnis eines Tools wird im Normalfall in den aktuellen Kontext des \ac{llm} integriert~\cite[3]{tc09}. Bei den meisten Ansätzen wird der Tool Output als 
 Input an das \ac{llm} übergeben, womit dieses auf Basis der Informationen eine bessere Antwort generieren kann~\cite[17]{tc10}. Diese Antwort des 
 \ac{llm} wird anschließend an den Nutzer als Antwort übergeben~\cite{tc05}. \\
-Tool Calling ist nicht auf einen einzelnen Aufruf beschränkt sondern es gibt verschiedene Ablaufmöglichkeiten~\cite{tc01}. Auf eine Nutzeranfrage kann das \ac{llm}
-direkt ohne Tool Call diese beantworten oder mehrere Tool Calls ausführen, bis eine Antwort für den Nutzer generiert werden kann~\cite{tc01}. \\
+Tool Calling ist nicht auf einen einzelnen Aufruf beschränkt, sondern es gibt verschiedene Ablaufmöglichkeiten~\cite{tc01}. Auf eine Nutzeranfrage kann das \ac{llm}
+diese direkt ohne Tool Call beantworten oder mehrere Tool Calls ausführen, bis eine Antwort für den Nutzer generiert werden kann~\cite{tc01}. \\
 Sind mehrere Tool Calls notwendig, können diese gleichzeitig oder sequentiell ausgeführt werden~\cite[7]{tc14}. Dabei wird zwischen 
-Turns und Steps unterschieden~~\cite[4]{tc14}. Eine Konversation beinhaltet mehrere Turns, die durch eine Nutzernachricht ausgelöst werden. Jeder dieser Turns umfasst
-mehrere Steps, sogenannte Interaktionsschritte~\cite[4]{tc14}. Im Allgemeinen wird der Ablauf von Tool Calls durch verschiedenen Abhängigkeiten bestimmt~\cite{tc03}. 
+Turns und Steps unterschieden~\cite[4]{tc14}. Eine Konversation beinhaltet mehrere Turns, die durch eine Nutzernachricht ausgelöst werden. Jeder dieser Turns umfasst
+mehrere Steps, sogenannte Interaktionsschritte~\cite[4]{tc14}. Im Allgemeinen wird der Ablauf von Tool Calls durch verschiedene Abhängigkeiten bestimmt~\cite{tc03}. 
 Wenn ein Tool den Output eines anderen Tools als Eingabe benötigt, müssen die Aufrufe nacheinander ablaufen. Liegen alle notwendigen Informationen vor, können sie 
 parallel ablaufen. Können Anfragen parallel ausgeführt werden, wird die Latenz stark reduziert~\cite[7]{tc14}. Es sinkt aber gleichzeitig die Qualität, wenn die 
 Aufrufe nicht sequentiell durchgeführt werden~\cite[7]{tc14}. Da es zudem eher der Praxis entspricht, dass die einzelnen Aufrufe von Informationen aus vorherigen 
 Aufrufen abhängen, ist es genauer und schneller, die Aufrufe nicht parallel auszuführen~\cite[7]{tc14}. Die Vorgehensweise bei der Ausführung von Tool 
-Calls kann in zwei Typen unterteilt werden, dem One-Step Task Solving und Iterative Task Solving~\cite[9]{tc10}. Beim One-Step Task Solving wird
-eine eingehende Nutzeranfrge auf ihre Absicht analysiert und anhand dessen die zur Lösung notwendigen Schritte geplant. 
+Calls kann in zwei Typen unterteilt werden: das One-Step Task Solving und das Iterative Task Solving~\cite[9]{tc10}. Beim One-Step Task Solving wird
+eine eingehende Nutzeranfrage auf ihre Absicht analysiert und anhand dessen die zur Lösung notwendigen Schritte geplant. 
 Diese Schritte werden durchgeführt und die Antwort generiert, ohne die Ergebnisse zu analysieren, auf Fehler zu kontrollieren oder auf Tool-Feedback einzugehen~\cite[9]{tc10}. 
-Beim iterative Task Solving werden die Teilaufgaben anhand der Interaktion mit den einzelnen Tools und des Feedbacks angepasst. Ein Problem wird
+Beim Iterative Task Solving werden die Teilaufgaben anhand der Interaktion mit den einzelnen Tools und des Feedbacks angepasst. Ein Problem wird
 somit ebenfalls in einzelnen Schritten gelöst, jedoch werden diese Schritte überarbeitet, um die Problemlösefähigkeit zu verbessern~\cite[9]{tc10}. \\
-Tool Calling ist von \acf{rag} abzugrenzen. Bei \ac{rag} wird das vortrainierte \ac{llm} und eine externe Wissensdatenbank ergänzt, aus der relevante Dokumentenausschnitte
-abgerufen werden~\cite[1]{rag04}. Dazu werden die Dokumente bei der Indexierung in Cunks zerlegt, mithilfe eines Embedding-Modelss in Vektorrepräsentationen
+Tool Calling ist von \acf{rag} abzugrenzen. Bei \ac{rag} wird das vortrainierte \ac{llm} um eine externe Wissensdatenbank ergänzt, aus der relevante Dokumentenausschnitte
+abgerufen werden~\cite[1]{rag04}. Dazu werden die Dokumente bei der Indexierung in Chunks zerlegt, mithilfe eines Embedding-Modells in Vektorrepräsentationen
 umgewandelt und in einer Vektordatenbank gespeichert~\cite[3]{rag04}. Bei einer Nutzeranfrage wird diese ebenfalls in eine Vektorrepräsentation umgewandelt
-und die passendesten Chunks berechnet~\cite[3]{rag04}. Die ausgewählten Chunks werden mit der Nutzeranfrage kombiniert und auf Basis dessen eine Antwort 
+und die passendsten Chunks werden ermittelt~\cite[3]{rag04}. Die ausgewählten Chunks werden mit der Nutzeranfrage kombiniert, und auf dieser Basis wird eine Antwort
 für den Nutzer generiert~\cite[3]{rag04}. Der Unterschied zwischen diesen beiden Ansätzen besteht darin, dass Tool Calling ein aktiver, vom Modell ausgelöster 
 Prozess ist, bei dem ein Modell selbst entscheidet, wann welche Funktionen aufgerufen werden~\cite{tc07}. Bei \ac{rag} werden die relevanten
 Dokumente dagegen vor der Modellantwort aus dem Speicher abgerufen und dem Prozess als Kontext übergeben. Dieser Prozess ist somit passiv~\cite{tc07}. \ac{rag} 
@@ -370,16 +370,16 @@ es nicht mehr zur Verfügung steht~\cite{tc03}. Diese Prinzipien werden auch in 
 
 Tool Calling erweitert die Funktionen von \acp{llm}. Neben der Texterzeugung ist es auch möglich, über Tools Aktionen auszuführen 
 und auf externe Systeme zuzugreifen. Dabei wird zwischen aktiven und passiven Tools unterschieden. Passive Tools dienen dazu, externe Informationen zu sammeln, 
-welche in den Kontext des \ac{llm}s eingefügt werden sollen. Mit aktiven Tools werden dagegen Aktionen ausgeführt~\cite[21]{tc09}. Tools wie Taschenrechnern oder 
+welche in den Kontext des \ac{llm}s eingefügt werden sollen. Mit aktiven Tools werden dagegen Aktionen ausgeführt~\cite[21]{tc09}. Tools wie Taschenrechner oder
 Übersetzer stellen dabei keine Gefahr dar. Mit dem Zugriff auf das Internet
 und der Funktionalität, eigenständige Entscheidungen zu treffen, wird jedoch eine Angriffsfläche erzeugt~\cite[26]{tc11}. Ein \ac{llm} wird dadurch befähigt, auf 
 private und 
 unangemessene Informationen zuzugreifen oder schädliche Aktionen auszuführen~\cite[10]{tc15}. Werden Tool Calls mithilfe des Outputs des \ac{llm}s durchgeführt, können 
-sich schädliche Auswirkungen über die Chatoberfläche hinaus auf alles ausweiten, worauf das \ac{llm} Zugriff hat und sich zu einer Kette von Auswirkungen entwickeln, da
+sich schädliche Auswirkungen über die Chatoberfläche hinaus auf alles ausweiten, worauf das \ac{llm} Zugriff hat, und sich zu einer Kette von Auswirkungen entwickeln, da
 die Tool-Ergebnisse in den Kontext gelangen~\cite[10]{pi24}. \\
 \ac{owasp} benennt eine Gefahr, die durch Tool Calling entstehen kann, als übermäßige Handlungsfreiheit. Damit Tools verschiedene Funktionen aufrufen können oder mit 
 externen Systemen kommunizieren können, muss ein Handlungsspielraum zugelassen werden. Zusätzlich werden die Tools dynamisch aufgerufen, je nachdem, welcher 
-Nutzerprompt an das \ac{llm} übergeben wird. Durch einen der drei Faktoren kann jedoch eine übermäßige Handlungsfreiheit enstehen~\cite[23]{pi24}:
+Nutzerprompt an das \ac{llm} übergeben wird. Durch einen der folgenden drei Faktoren kann jedoch eine übermäßige Handlungsfreiheit entstehen~\cite[23]{pi24}:
 
 \begin{itemize}
     \item \textbf{Übermäßige Funktionalitäten:} Das \ac{llm} erhält Zugriff auf Tools, die für Nutzeranfragen nicht benötigt werden.
@@ -389,7 +389,7 @@ Nutzerprompt an das \ac{llm} übergeben wird. Durch einen der drei Faktoren kann
 
 Eine bedeutende Ursache für die Angriffsfläche bei Tool Calls ist die fehlende Trennung von Daten und Code durch ein \ac{llm}. Werden nicht vertrauenswürdige
 Daten gesammelt, ist dies vergleichbar mit dem Ausführen von beliebigem Code, da es keine klare Unterscheidung zwischen Code und den Daten gibt~\cite[3]{cb09}.
-Auf diesem Weg kann ein \ac{llm} erfolgreich durch eingeschleuste Anweisungen gesteuert werden~\cite[6]{cb09}. Da ein \ac{llm} zusätzlich Tools selbstständige 
+Auf diesem Weg kann ein \ac{llm} erfolgreich durch eingeschleuste Anweisungen gesteuert werden~\cite[6]{cb09}. Da ein \ac{llm} zusätzlich Tools selbstständig
 aufrufen kann, sind von dieser Schwachstelle der Input und Output betroffen~\cite[5]{cb09}. Somit entsteht eine mögliche Angriffsfläche durch alle Tools, 
 mit denen externe Inhalte in den Kontext gelangen, etwa durch den Zugriff auf Webseiten oder das Abrufen von E-Mails~\cite[5\psq]{cb09}. Eine weitere Gefahr
 besteht darin, dass das Tool selbst oder die Dokumentation manipuliert wird, wodurch schädliche Outputs eines \ac{llm} entstehen können~\cite[26]{tc11}.
@@ -397,7 +397,7 @@ Ohne Validierung bilden Tool-Ergebnisse eine Angriffsfläche~\cite[10]{cb09}. Je
 zerstörerische Aktionen ausgelöst werden und Angreifer sich Zugriff auf Dateisysteme oder Cloud-\acp{api} verschaffen~\cite[11]{pi24}. Dieser Zugriff kann auch 
 über mehrere Sitzungen bestehen bleiben, wenn Anweisungen in den Speicher geladen werden~\cite[4]{cb09}. \\
 Eine weitere bedeutende Gefahr ist der Abfluss sensibler Daten. Wenn es einem Angreifer gelingt, Anweisungen in Inhalten zu platzieren, kann ein
-\ac{llm} diese durch eine Nutzeranfrage abrufen. Hat dieses \ac{llm} Zugriff auf \acp{api} und weitere Tools, können Angreifern dies nutzen, um 
+\ac{llm} diese durch eine Nutzeranfrage abrufen. Hat dieses \ac{llm} Zugriff auf \acp{api} und weitere Tools, können Angreifer dies nutzen, um 
 Informationen zu übermitteln oder schädliche Aktionen auszuführen~\cite[3]{cb09}. Dadurch können Zugangsdaten, persönliche Informationen oder ganze Chatverläufe 
 extrahiert werden~\cite[4]{cb09}. Eine solche Exfiltration kann bereits über eine Leseoperation ausgelöst werden. Eine Suchanfrage kann so gestaltet werden, dass Daten
 an einen vom Angreifer kontrollierten Server übertragen werden~\cite[6]{cb09}. Einfluss auf die Angriffsfläche nehmen somit auch die Tool-Call-Parameter, Logdaten und
@@ -405,25 +405,25 @@ abgerufene Inhalte~\cite[18]{pi24}. \\
 Durch die Verwendung von Tool Calls tritt das sogenannte Confused Deputy Problem auf~\cite[12]{pi24}. Der Angreifer kompromittiert das Backend nicht direkt, sondern 
 positioniert
 Anweisungen an einer Stelle, an der das \ac{llm} diese liest. Diese Anweisungen werden somit ausgeführt, ohne direkte Einwirkung des Angreifers~\cite[12]{pi24}. \\
-Wann ein \ac{llm} von diesen Gefahren besonders betroffen ist wird in~\cite[13]{pi24} durch das Lethal Trifecta beschrieben. Es werden drei strukturelle
+Wann ein \ac{llm} von diesen Gefahren besonders betroffen ist, wird in~\cite[13]{pi24} durch das Lethal Trifecta beschrieben. Es werden drei strukturelle
 Kategorien definiert, die bestimmen, wie anfällig ein \ac{llm} für solche Angriffe ist. Wenn das \ac{llm} auf private Daten zugreifen kann, nicht vertrauenswürdige 
 Inhalte verarbeitet und mit externen Systemen kommuniziert, sind die Voraussetzungen gegeben. Wird eine dieser Kategorien entfernt, entfällt die 
 Angriffsfläche~\cite[13]{pi24}. \\
-Beispiele, welche das Bestehen dieser Angriffsfläche verdeutlichen, sind in \ac{owasp} dokumentiert. In einem dieser Szenarien erhält ein \ac{llm}-basierter Assistent
+Beispiele, welche das Bestehen dieser Angriffsfläche verdeutlichen, sind im Bericht des \ac{owasp} dokumentiert. In einem dieser Szenarien erhält ein \ac{llm}-basierter Assistent
 durch einen Tool Call Zugriff auf das Postfach~\cite[26]{pi24}. Ziel ist es, den Inhalt der E-Mails zusammenzufassen. Um diese Funktion zu ermöglichen, 
 muss das \ac{llm} die Nachrichten lesen können. Das verwendete Tool kann jedoch zusätzlich auch Nachrichten versenden. Eine E-Mail mit einer 
 versteckten Anweisung kann dazu führen, dass über einen indirekten Prompt-Injection-Angriff sensible Informationen an den Angreifer geleitet werden~\cite[26]{pi24}.
 Dieses Beispiel stimmt mit den drei Kategorien des Lethal Trifecta überein und kombiniert übermäßige Funktionalitäten und den Abfluss von Daten über ein Tool.
-Dass solche Szenarien nicht nur theoretisch sind, zeigen dokumentierte Angriffe auf Systeme wie Microsoft 365 Copilot~\cite[16]{pi24}. Dazu wird in 
+Dass solche Szenarien nicht nur theoretisch sind, zeigen dokumentierte Angriffe auf Systeme wie Microsoft 365 Copilot~\cite[16]{pi24}. Dazu werden in
 Abschnitt~\ref{sec:beispiele_angriffe} Angriffe näher betrachtet. \\
 Zusammenfassend ist Prompt Injection die Kompromittierung der Eingabeseite. Erst die übermäßigen Funktionalitäten und Berechtigungen, die durch
-die Kombination mit Tool Calling vergeben werden, ermöglicht es, dass sich die Kompromittierung auf ein ganzes System ausbreitet~\cite[13]{pi24}. In diesem Abschnitt
+die Kombination mit Tool Calling vergeben werden, ermöglichen es, dass sich die Kompromittierung auf ein ganzes System ausbreitet~\cite[13]{pi24}. In diesem Abschnitt
 wurden somit die Möglichkeiten, die mit einem Angriff über Tools erreicht werden können, betrachtet. Wie das System manipuliert werden kann, wird in
 Kapitel~\ref{ch:promptinjection} betrachtet.
 
 \section{Chatbots}
 
-\ac{llm}s werden heutzutage in immer mehr Anwendungen integriert. Einsatzbereiche sind unter anderem die Unterstützung von Online-Recherchen, die
+\acp{llm} werden heutzutage in immer mehr Anwendungen integriert. Einsatzbereiche sind unter anderem die Unterstützung von Online-Recherchen, die
 Softwareentwicklung und der Kundenservice~\cite[3]{pi18}. Laut dem \ac{bsi} wird die Verwendung von \acp{llm} immer beliebter, um beispielsweise Textdokumente 
 automatisiert zu verarbeiten und Anwender mittels Chatbots zu unterstützen~\cite[1]{sm08}. Die Funktionalitäten dieser Chatbots werden dauerhaft erweitert. So ist es 
 mittlerweile möglich, mittels Plugins Internetseiten auszuwerten sowie auf Programmierumgebungen und E-Mail-Postfächer zuzugreifen. Dadurch 
@@ -439,7 +439,7 @@ zu führen~\cite[99]{cb05}. Findet diese Unterhaltung mündlich statt, spricht m
 Webseiten eingesetzt werden, um Kundenanfragen zu beantworten~\cite[99]{cb05}. Die allgemeine Definition, die sich häufig in der Literatur findet, besagt, dass es sich
 bei einem Chatbot um ein Softwareprogramm handelt, das mit Nutzern in natürlicher Sprache interagiert und Eingaben verarbeitet~\cite[237]{cb03}\cite[1]{cb04}. Chatbots 
 dienen damit
-als User Interface, das zwischen den Daten und Service Providern liegt~\cite[377]{cb02}. An ihnen wird der Unterschied zwischen traditionellen Anwendungen deutlich. Im 
+als User Interface, das zwischen den Daten und Service Providern liegt~\cite[377]{cb02}. An ihnen wird der Unterschied zu traditionellen Anwendungen deutlich. Im 
 Gegensatz zu Apps, die eine grafische Benutzeroberfläche (\ac{gui}) mit Listen und visuellen Hinweisen verwenden, nutzen Chatbots dialogorientierte
 Benutzeroberflächen (\ac{cui}), um Antworten und Empfehlungen durch Text oder Stimme zu übermitteln~\cite[1\psqq]{cb04}. \\
 Chatbots können in verschiedene Kategorien unterteilt werden. Mögliche Unterscheidungsmerkmale sind die Wissensdomäne, der angebotene Dienst, das Ziel, die Art der 
@@ -460,9 +460,9 @@ Antwort
 aus einer Menge von Antworten ausgewählt~\cite[4]{cb11}. Mit diesem Ansatz geht jedoch einher, dass Tausende von Regeln benötigt werden, damit ein Chatbot zuverlässig
 funktioniert~\cite[4\psq]{cb11}. Grammatikalische und syntaktische Fehler können dabei nur schwer berücksichtigt werden~\cite[4\psq]{cb11}. Vorteilhaft ist hingegen, 
 dass Chatbots
-dieser Art kein eigenes Wissen einbringen, somit ist es unwahrscheinlicher, dass falsche Informationen generiert werden und die Antworten erklärt und reproduziert 
+dieser Art kein eigenes Wissen einbringen. Somit ist es unwahrscheinlicher, dass falsche Informationen generiert werden, und die Antworten können erklärt und reproduziert
 werden
-können~\cite[101]{cb05}. Zudem sind die Antwortzeiten sehr kurz, da keine genaue Analyse der Nutzereingabe durchgeführt werden muss~\cite[5]{cb11}. Grenzen werden 
+~\cite[101]{cb05}. Zudem sind die Antwortzeiten sehr kurz, da keine genaue Analyse der Nutzereingabe durchgeführt werden muss~\cite[5]{cb11}. Grenzen werden 
 jedoch erreicht, wenn sich ein solches System mit Nutzern über beliebige Themen unterhalten soll, da mehr Regeln und Wortlisten erstellt werden
 müssten, als realistisch ist~\cite[102]{cb05}. Dementsprechend erzielten viele dieser Chatbots nicht die erhoffte Wirkung, da die Nutzer durch unsinnige Antworten und 
 mangelnde Benutzbarkeit nicht zufriedengestellt werden konnten~\cite[378]{cb02}. \\
@@ -484,9 +484,9 @@ Ein \ac{llm}-basierter Chatbot basiert häufig auf einem \ac{llm} mit Transforme
 verwendet, über die Menschen kommunizieren können~\cite[87]{cb05}. Die Informationen, über die der Chatbot verfügt, sind damit auf die verwendeten Trainingsdaten
 begrenzt~\cite[92]{cb05}. Dabei werden willkürliche Sequenzen sprachlicher Formen aus den Trainingsdaten auf Grundlage von Wahrscheinlichkeiten 
 zusammengefügt~\cite[93]{cb05}.
-\ac{llm}s werden aus diesem Grund auch häufig als stochastische Papageien bezeichnet~\cite[617]{cb14}. Werden \ac{llm}s in Anwendungen 
+\acp{llm} werden aus diesem Grund auch häufig als stochastische Papageien bezeichnet~\cite[617]{cb14}. Werden \acp{llm} in Anwendungen 
 integriert, können ihr
-Input und Output nicht mehr kontrolliert betrachtet werden~\cite[13]{cb09}. Sie erhalten nun beliebige Inputs und rufen externe \ac{api}s auf~\cite[13]{cb09}. 
+Input und Output nicht mehr kontrolliert betrachtet werden~\cite[13]{cb09}. Sie erhalten nun beliebige Inputs und rufen externe \acp{api} auf~\cite[13]{cb09}. 
 Dieser Unterschied ist für die Betrachtung der Angriffsfläche von Bedeutung. \\
 Für diese Arbeit ist eine Abgrenzung zwischen den Begriffen Chatbot und Agent erforderlich. In der Literatur fehlt diese häufig und in
 manchen Arbeiten werden die Begriffe synonym verwendet~\cite[5]{cb09}. Das \ac{bsi} betrachtet die Szenarien eines Chatbots und eines autonomen Agenten getrennt.
@@ -501,7 +501,7 @@ Agent, der autonom handeln kann. \\
 
 \subsection{Architekturen und Angriffsflächen}
 
-Zu den Komponenten eines \ac{ki}-Systems gehören mindestens die Daten, das \ac{llm}, ein Prozess fürs Training, Test und die Bereitstellung sowie die notwendige 
+Zu den Komponenten eines \ac{ki}-Systems gehören mindestens die Daten, das \ac{llm}, ein Prozess für Training, Test und Bereitstellung sowie die notwendige 
 Infrastruktur~\cite[1]{pi18}. In~\cite{cb11} wurde ein allgemeines Design dokumentiert, welches alle notwendigen Komponenten enthält. Je nach Anwendungsfall können
 aus diesen Komponenten die notwendigen ausgewählt werden~\cite[8]{cb11}. Durch die Übertragung auf einen \ac{llm}-basierten Chatbot ergeben sich die folgenden fünf
 Komponenten: Frontend, Anwendungslogik, \ac{llm}, Daten und Tools. In diesem Abschnitt der Arbeit wird jede dieser Komponenten einzeln betrachtet, da dies für die 
@@ -521,10 +521,10 @@ Abbildung~\ref{fig:chatbot_schichten} fasst die Komponenten und ihre Eintrittspu
 
 Eine Operation eines Chatbots wird ausgelöst, wenn eine Nutzeranfrage über Text- oder Spracheingabe gestellt wird~\cite[8]{cb11}. Die häufigsten Chatbot-Interfaces
 sind webbasierte und mobile Messenger~\cite[243]{cb03}. Da Nutzer eine intuitiv bedienbare Oberfläche bevorzugen, wird für einen Chatbot meist eine solche grafische 
-Darstellung verwendet~\cite[88]{cb05}. Angreifer können über diese unbemerkt sensitive Informationen aus dem Chatverlauf extrahieren, wenn sie das Aufrufen von 
+Darstellung verwendet~\cite[88]{cb05}. Angreifer können über diese unbemerkt sensible Informationen aus dem Chatverlauf extrahieren, wenn sie das Aufrufen von 
 \acp{url} oder das Anzeigen externer Bilder zulässt~\cite[2]{sm08}. Ein manipulierter Chatbot kann unerwünschte Aussagen treffen, 
 Nutzende dazu verleiten, bösartige Links aufzurufen oder sensible Informationen preiszugeben~\cite[2]{sm08}. 
-Zudem erkennen Filter, mit welchen Anweisungen auf der Chatoberfläche von Angreifern normalerweise erfasst werden, nicht unbedingt welche, die indirekt 
+Zudem erkennen Filter, mit denen Anweisungen von Angreifern auf der Chatoberfläche normalerweise erfasst werden, nicht unbedingt solche, die indirekt
 eingeschleust werden~\cite[6]{cb09}.
 
 \paragraph{Anwendungslogik}
@@ -544,8 +544,8 @@ großen Datenmenge, die benötigt wird, um ein \ac{llm} zu trainieren, können d
 häufig aus dem 
 Internet bezogen~\cite[94]{cb05}. Sie können sensible Informationen wie Adressen, Telefonnummern und E-Mail-Adressen enthalten~\cite[3]{pi18}. Je häufiger eine 
 Art dieser Informationen im Datensatz auftritt, desto wahrscheinlicher ist es, dass sie bei einer zufälligen Antwort an den Nutzer ausgegeben werden~\cite[3]{pi18}.
-Zusätzlich können durch den Bezug der Trainingsdaten aus dem Internet diese von Data Poisoning betroffen sein~\cite[4]{pi18}. Vortrainierte Modelle und Fine-Tuning 
-ermöglichen zusätzlich das Einschleusen von Trojanern~\cite[4]{pi18}. Angriffsfläche entsteht auch, wenn Nutzer das \ac{llm} mit ihren Rückmeldungen trainieren 
+Zusätzlich können die Trainingsdaten durch ihren Bezug aus dem Internet von Data Poisoning betroffen sein~\cite[4]{pi18}. Vortrainierte Modelle und Fine-Tuning 
+ermöglichen zusätzlich das Einschleusen von Trojanern~\cite[4]{pi18}. Eine Angriffsfläche entsteht auch, wenn Nutzer das \ac{llm} mit ihren Rückmeldungen trainieren 
 können~\cite[88]{cb05}.
 
 \paragraph{Daten}
@@ -553,7 +553,7 @@ können~\cite[88]{cb05}.
 Über Datenquellen werden externe Informationen, zum Beispiel Nutzerinformationen, in den Chatbot eingebunden~\cite[10]{cb11}. Diese Daten werden aus Datenbanken und 
 über
 Aufrufe von \acp{api} bezogen~\cite[10]{cb11}. Die Integration von Unternehmensdatenbanken und -dokumenten ist notwendig, um \ac{rag}-Szenarios zu ermöglichen, wenn 
-\acp{llm} spezifische Anfragen beantworten werden müssen~\cite[3]{pi18}. Durch diese Integration mit den Unternehmensdaten entsteht eine neue Angriffsfläche. Zusätzlich sind 
+\acp{llm} spezifische Anfragen beantworten müssen~\cite[3]{pi18}. Durch diese Integration mit den Unternehmensdaten entsteht eine neue Angriffsfläche. Zusätzlich sind 
 viele der Daten, die das \ac{llm} verarbeiten muss, ungeprüft und stammen aus nicht vertrauenswürdigen Quellen~\cite[1]{sm08}. Greift ein \ac{llm} auf manipulierte 
 Webseiten zu, 
 können die Ergebnisse verfälscht werden~\cite[2]{sm08}. Grundsätzlich können alle externen Quellen, auf die ein \ac{llm} zugreift, darunter Webseiten, Dokumente, 
@@ -583,20 +583,20 @@ Neben dem Einsatz im Kundenkontakt werden Chatbots auch unternehmensintern genut
 Assistenten bei ihren Aufgaben~\cite[6]{cb16}. Durch den Zugriff auf interne Dokumente ermöglichen sie es, spezifische Informationen
 zu erschließen, ohne dass die Informationsstruktur innerhalb der Dokumente bekannt sein muss~\cite[4]{cb16}.
 Ein solcher unternehmensinterner Chatbot ist auch Gegenstand dieser Arbeit und wird in Kapitel~\ref{ch:methodik} näher beschrieben. \\
-Der ausschlaggebendste Grund, einen Chatbot zu verwenden, ist die damit verbundene Produktivität~\cite[1]{cb11}. Unternehmen setzen Chatbots immer häufiger ein, um die Kosten
+Der ausschlaggebende Grund, einen Chatbot zu verwenden, ist die damit verbundene Produktivität~\cite[1]{cb11}. Unternehmen setzen Chatbots immer häufiger ein, um die Kosten
 zu reduzieren und viele Nutzeranfragen gleichzeitig bearbeiten zu können~\cite[1]{cb11}. Chatbots sind zudem freundlicher gegenüber Nutzern und ermöglichen, dass die 
 Informationen
 nicht aus FAQ-Listen oder auf anderen umständlichen Wegen erfasst werden müssen~\cite[1]{cb11}. Diese Aussage wird auch von einer Studie unterstützt, in der 
-68 \% der Teilnehmer angaben, dass Produktivität der Hauptgrund für die Verwendung eines Chatbots ist~\cite[383]{cb02}. Die Verwendung ist leicht, schnell und bequem~\cite[383]{cb02}.
-Es entstehen keine Wartezeit~\cite[384]{cb02} und sie sind häufig geeigneter als andere Assistenzsysteme wie Onlinesuchen und Telefonate~\cite[379]{cb02}. Aus diesem
+68\,\% der Teilnehmer angaben, dass Produktivität der Hauptgrund für die Verwendung eines Chatbots ist~\cite[383]{cb02}. Die Verwendung ist leicht, schnell und bequem~\cite[383]{cb02}.
+Es entstehen keine Wartezeiten~\cite[384]{cb02} und sie sind häufig geeigneter als andere Assistenzsysteme wie Onlinesuchen und Telefonate~\cite[379]{cb02}. Aus diesem
 Grund werden für alltägliche Aufgaben häufig Chatbots bevorzugt~\cite[385]{cb02}. Für Nutzer bedeutet die Verwendung zudem eine geringere Überwindung, bestimmte 
 Fragen zu stellen, da keine Angst besteht, verurteilt zu werden~\cite[385]{cb02}. Chatbots sind ständig verfügbar, skalierbar und zuverlässig, verursachen geringe 
 Kosten~\cite[3]{cb04} und können bei häufig gestellten Fragen für Entlastung sorgen~\cite[3004]{cb01}. \\
 Die Verwendung von Chatbots hat jedoch auch Grenzen. Sie verfügen nur über ein begrenztes Verständnis, sodass komplexe Fragen und spezielle Terminologie 
 teilweise nicht
 nachvollzogen werden können~\cite[3004]{cb01}. Sie können Frustration bei den Nutzern auslösen, wenn Anfragen nicht zufriedenstellend beantwortet werden, und müssen stetig 
-aktualisiert werden~\cite[3004]{cb01}. Falsch gestellte oder nicht ausreichend ausformuliert Fragen können zu falschen Antworten führen~\cite[238]{cb03} und eine 
-Interaktion wird durch die gegebene Wissensbasis beschränkt~\cite[238]{cb03}. Eine Studie zeigt zudem, dass 40 \% der Anfragen emotional sind und keine
+aktualisiert werden~\cite[3004]{cb01}. Falsch gestellte oder nicht ausreichend ausformulierte Fragen können zu falschen Antworten führen~\cite[238]{cb03} und eine 
+Interaktion wird durch die gegebene Wissensbasis beschränkt~\cite[238]{cb03}. Eine Studie zeigt zudem, dass 40\,\% der Anfragen emotional sind und keine
 spezifischen Informationen erfragt werden~\cite[3506]{cb15}. Ein Chatbot muss in der Lage sein, diese Emotionen zu erkennen und sich daran anzupassen~\cite[380]{cb02}. \\
 Für unternehmensinterne Chatbots ergeben sich verschiedene Risiken. Das wichtigste Risiko entsteht durch vertrauliche Daten. Nutzer geben an, dass die Effizienz bei 
 der Beantwortung von Fragen steigt, je mehr Input in den Chatbot gegeben wird~\cite[385]{cb02}. Chatbots können die Identität, den Standort, soziale Daten und 
@@ -612,12 +612,12 @@ und eine bessere Kommunikationsqualität aufbauen~\cite[6]{cb04}. Das Maß an Ve
 dem Erscheinungsbild und der Menschenähnlichkeit ab~\cite[1]{cb11}. Chatbots sind menschenähnlicher als andere interaktive Systeme, weswegen Nutzer auch eine höhere 
 Erwartung haben, dass sich ein Chatbot sozial und unterhaltsam verhält~\cite[388]{cb02}. Bereits mit ELIZA von Weizenbaum war es möglich, durch die Illusion von 
 Verständnis
-Glaubwürdigkeit zu erzeugen~\cite[42]{cb10}. Diese Gefahr wird heutzutage zunehmend verstärkt, da Inkonsistenzen in den Antworten schwerer festzustellen sind, dadurch, dass
+Glaubwürdigkeit zu erzeugen~\cite[42]{cb10}. Diese Gefahr wird heutzutage zunehmend verstärkt, da Inkonsistenzen in den Antworten schwerer festzustellen sind, da
 der Output syntaktisch kohärent ist und teilweise auch wahre Informationen beinhalten kann~\cite[9]{cb09}. Nutzer werden immer unachtsamer, wenn sie wissen, dass sie 
 mit
 einem Chatbot kommunizieren, und überprüfen die Antworten immer weniger auf ihre Richtigkeit~\cite[10\psq]{cb09}. Somit kann auf die Überprüfung der Ausgabe durch einen 
 Nutzer nicht vertraut werden~\cite[12]{cb09}. Nutzern wird es dadurch seltener möglich sein, einen Angriff zu erkennen, weil ein manipulierter Chatbot schädliche 
-Aktionen glaubhaft begründen kann~\cite[4]{sm08}. Sind die schädlichen Anweisungen zusätzlich versteckt und kodiert, gibt es für einen Nutzer nur fast keine Möglichkeit, 
+Aktionen glaubhaft begründen kann~\cite[4]{sm08}. Sind die schädlichen Anweisungen zusätzlich versteckt und kodiert, gibt es für einen Nutzer kaum eine Möglichkeit, 
 diese zu erkennen~\cite[4]{sm08}. \\
 Das dritte Risiko ergibt sich durch die Anbindung eines Chatbots an interne Systeme. Je mehr Datenquellen und Tools ein Chatbot nutzen kann, desto größer wird die 
 mögliche Angriffsfläche. Das \ac{bsi} empfiehlt daher, den Zugriff auf Quellen so stark wie möglich einzuschränken und zusätzliche menschliche 

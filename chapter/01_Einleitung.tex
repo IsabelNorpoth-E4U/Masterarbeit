@@ -11,11 +11,11 @@ Das ifo Institut verzeichnet für Mai 2026, dass 54,5\,\% der Unternehmen in Deu
 bereits diskutiert und nur 7,9\,\% geben an, dass \ac{ki} für sie keine Rolle spielt~\cite{e02}. Der deutlich höhere Anteil gegenüber den Zahlen des 
 Statistischen Bundesamtes ist auf die unterschiedliche Erhebungsmethodik zurückzuführen, insbesondere auf eine abweichende Zusammensetzung der befragten Unternehmen
 und eine weiter gefasste Definition der \ac{ki}-Nutzung. Beide Erhebungen zeigen jedoch übereinstimmend einen deutlichen Anstieg. \\
-Mit dem zunehmenden und immer umfangreicherem Einsatz von \acp{llm} in Unternehmen wird diesen vermehrt Zugriff auf Dokumente gewährt oder sie werden für weiterführende 
+Mit dem zunehmenden und immer umfangreicheren Einsatz von \acp{llm} in Unternehmen wird diesen vermehrt Zugriff auf Dokumente gewährt oder sie werden für weiterführende 
 Aktionen wie Internetrecherchen eingesetzt, was immer größere Gefahren mit sich bringt.
 Dies spiegelt sich auch im Bericht des \ac{owasp} aus dem Jahr 2026 wider, einer offenen Gemeinschaft, die Organisationen bei der 
 Entwicklung sicherer Anwendungen unterstützt~\cite{pi25}. In diesem Bericht werden die zehn größten Risiken für \acp{llm} definiert. Darin wird
-das Risiko der übermäßigen Handlungsfreiheit (eng.: Excessive Agency) auf Platz~3 eingeordnet, während es 2025 noch auf Platz~6 lag~\cite{pi24}. Dieses Risiko beschreibt die Gefahr, die 
+das Risiko der übermäßigen Handlungsfreiheit (engl.: Excessive Agency) auf Platz~3 eingeordnet, während es 2025 noch auf Platz~6 lag~\cite{pi24}. Dieses Risiko beschreibt die Gefahr, die 
 entsteht, wenn ein \ac{llm} auf zu viele Funktionalitäten zugreifen kann und über zu viele Berechtigungen verfügt. \\
 Es zeigt sich somit, dass \acp{llm} zunehmend Zugriff auf große Datenmengen erhalten, auf deren Grundlage sie Aktionen ausführen können. Diese Aktionen werden als
 \glqq Tool Calls\grqq{} bezeichnet. Durch Tool Calls wird es \acp{llm} ermöglicht, beliebige Funktionen auszuführen, beispielsweise auf externe Daten und Webseiten zuzugreifen 
@@ -35,24 +35,24 @@ Schutzmechanismen zu umgehen. \\
 Ein bekanntes Beispiel aus dem Jahr 2025 ist die Schwachstelle \glqq EchoLeak\grqq, welche Microsoft 365 Copilot betraf. Dabei hätte es Angreifern gelingen können, 
 mithilfe einer in einer E-Mail
 versteckten Anweisung sensible Unternehmensdaten zu exfiltrieren und an einen eigenen Server zu übermitteln~\cite{e07}. Für diesen Angriff wäre keine Interaktion des
-Nutzers erforderlich, sondern durch die E-Mail ausgelöst worden. EchoLeak stellt damit ein praxisnahes Beispiel für eine indirekte Prompt Injection
-dar~\cite{e06}. Durch die frühzeitig Feststellung der Schwachstelle, konnte diese vor einer Ausnutzung durch einen Angreifer behoben werden. \\
+Nutzers erforderlich gewesen, da er allein durch die E-Mail ausgelöst worden wäre. EchoLeak stellt damit ein praxisnahes Beispiel für eine indirekte Prompt Injection
+dar~\cite{e06}. Durch die frühzeitige Feststellung der Schwachstelle konnte diese vor einer Ausnutzung durch einen Angreifer behoben werden. \\
 Einige der berücksichtigten Arbeiten behandeln nicht ausschließlich indirekte Prompt-Injection-Angriffe, sondern auch teilweise Jailbreaks. Der Unterschied
 besteht darin, dass sich Prompt Injection gegen Anwendungen richtet, die auf einem \ac{llm} aufbauen und bei denen nicht vertrauenswürdige Anweisungen mit einem 
 vertrauenswürdigen Prompt verkettet werden. Bei einem Jailbreak wird hingegen versucht, die Sicherheitsfilter des Modells selbst zu umgehen. Das Merkmal, welches 
-ausschlaggebend für Prompt Injection ist, ist somit die Verkettung eines vertrauenswürdigen mit einem nicht vertrauenswürdigen Inhalt kombiniert in einem Prompt~\cite{e05}. \\
+ausschlaggebend für Prompt Injection ist, ist somit die Verkettung eines vertrauenswürdigen mit einem nicht vertrauenswürdigen Inhalt in einem Prompt~\cite{e05}. \\
 Die Literatur zeigt, dass bei den bestehenden Schutzmaßnahmen noch erhebliches Verbesserungspotenzial besteht. An diesem Punkt setzt die vorliegende Arbeit an. Der 
 Fokus liegt auf indirekten Prompt-Injection-Angriffen, bei denen der Angriff über externe Quellen erfolgt, auf die das \ac{llm} zugreift, beispielsweise eine Webseite~\cite[2\psq]{pi6}. \\
-Als Anwendungsfall dient der unternehmensinterne Chatbot ChatBot4U der Energy4U GmbH, der für den Einsatz im Arbeitsalltag dient und damit ein
+Als Anwendungsfall dient der unternehmensinterne Chatbot ChatBot4U der Energy4U GmbH, der im Arbeitsalltag eingesetzt wird und damit ein
 praxisnahes Anwendungsbeispiel darstellt. Im Folgenden werden die Zielsetzung, die Forschungsfragen sowie der Aufbau der Arbeit erläutert.
 
 \section{Zielsetzung}
 
-Ziel dieser Arbeit ist es, zu untersuchen, inwieweit der unternehmensinterne Chatbot der Energy4U GmbH, durch eine selbst entwickelte 
+Ziel dieser Arbeit ist es, zu untersuchen, inwieweit der unternehmensinterne Chatbot der Energy4U GmbH durch eine selbst entwickelte 
 Schutzmaßnahme vor indirekten Prompt-Injection-Angriffen abgesichert werden kann. \\
 Als Vorstufe wird eine Schwachstellenanalyse durchgeführt, um die Angriffsfläche zu identifizieren. Hierfür wird eine lokale Testumgebung aufgebaut. \\
 Auf Grundlage der identifizierten Schwachstellen wird eine Schutzmaßnahme entwickelt und implementiert. Die Entwicklung erfolgt anhand eines selbst erstellten 
-Datensatzes und wird anhand von zwei öffentlichen Datensätzen BIPIA und NotInject überprüft. Die Leistungsfähigkeit wir mithilfe geeigneter Metriken festgehalten. \\
+Datensatzes und wird anhand der zwei öffentlichen Datensätze BIPIA und NotInject überprüft. Die Leistungsfähigkeit wird mithilfe geeigneter Metriken festgehalten. \\
 Die Ergebnisse sollen einen direkten Vergleich zwischen einem einfachen vorgeschalteten \ac{llm}-Klassifikator, der jede Eingabe lediglich mit einer einzelnen Anfrage 
 bewertet, und einer weiterentwickelten Schutzmaßnahme ermöglichen. Die Schutzmaßnahme soll sowohl für den unternehmensinternen Chatbot der Energy4U GmbH einsetzbar als 
 auch auf andere praxisrelevante Chatbots übertragbar sein.
@@ -68,27 +68,27 @@ auch auf andere praxisrelevante Chatbots übertragbar sein.
 \end{enumerate}
 
 Aus der Zielsetzung ergibt sich eine Hauptforschungsfrage, welche in vier Teilfragen untergliedert werden kann. Diese vier Untergliederungen können Teilen der
-Arbeit zugeordnet werden. Beantwortet werden sie im Kapitel~\ref{ch:fazit}. Die erste Teilforschungsfrage wird der Schwachstellenanalyse in Kapitel~\ref{ch:methodik} 
-zugeordnet. Die Teilforschungsfragen 2 und 3 in Kapitel~\ref{ch:schutzmassnahmen} den Entwicklungsschritten der Schutzmaßnahme. Die Teilforschungsfrage 4 wird ebenfalls in dem 
+Arbeit zugeordnet werden. Beantwortet werden sie in Kapitel~\ref{ch:fazit}. Die erste Teilforschungsfrage wird der Schwachstellenanalyse in Kapitel~\ref{ch:methodik}
+zugeordnet, die Teilforschungsfragen 2 und 3 den Entwicklungsschritten der Schutzmaßnahme in Kapitel~\ref{ch:schutzmassnahmen}. Die Teilforschungsfrage 4 wird ebenfalls
 dem Kapitel~\ref{ch:schutzmassnahmen} zugeordnet, indem die Wirksamkeit der Schutzmaßnahme mit öffentlichen Datensätzen überprüft wird. \\
-Die Beantwortung der Hauptforschungsfrage soll allgemein erfolgen, obwohl der unternehmsinterne Chatbot als Testsystem verwendet wird.
+Die Beantwortung der Hauptforschungsfrage soll allgemein erfolgen, obwohl der unternehmensinterne Chatbot als Testsystem verwendet wird.
 
 \section{Aufbau der Arbeit}
 
-Die Arbeit gliedert sich in sieben Kapitel. Im Kapitel~\ref{ch:grundlagen} werden die fachlichen Grundlagen vermittelt. Dazu werden \acp{llm} und ihre Funktionsweise, 
+Die Arbeit gliedert sich in sieben Kapitel. In Kapitel~\ref{ch:grundlagen} werden die fachlichen Grundlagen vermittelt. Dazu werden \acp{llm} und ihre Funktionsweise, 
 ihre Entwicklungsgeschichte, ihre technischen Bestandteile und ihr Aufbau behandelt. 
 Darauf aufbauend wird das Tool Calling bei \acp{llm} erläutert, wobei die Nutzung sowie der Ablauf des Aufrufs externer Ressourcen beschrieben werden. Zusätzlich werden 
 Sicherheitsbedrohungen vorgestellt, welche durch den Einsatz von Tool Calling 
 entstehen. Im weiteren Verlauf werden Chatbots definiert und von \acp{llm} abgegrenzt. Es wird ihre Architektur erläutert und anhand dieser die Angriffsfläche beschrieben.
 Den Abschluss des Kapitels bildet die Betrachtung unternehmensinterner Chatbots mit ihren Einsatzbereichen und Risiken. \\
 Kapitel~\ref{ch:promptinjection} behandelt das zentrale Thema der Arbeit. Prompt-Injection-Angriffe werden definiert und in direkte und indirekte Angriffe kategorisiert.
-Für beide Kategorien werden aktuelle Angriffe vorgestellt und erläutert. Ergänzend wird die Bedeutung dieser Angriffe für Unternehmen behandelt und anhand eines
+Für beide Kategorien werden aktuelle Angriffe vorgestellt und erläutert. Ergänzend wird die Bedeutung dieser Angriffe für Unternehmen behandelt und anhand
 praxisnaher Beispiele veranschaulicht. \\
-Kapitel~\ref{ch:methodik} behandelt die Grundlage des praktischen Teil. Es wird das Testsystem, der Chatbot, und die Testumgebung beschrieben und die durchgeführten Angriffe 
+Kapitel~\ref{ch:methodik} behandelt die Grundlage des praktischen Teils. Es werden das Testsystem, der Chatbot, und die Testumgebung beschrieben und die durchgeführten Angriffe 
 sowie die Ergebnisse dokumentiert. Aus diesen werden Schwachstellen des Chatbots abgeleitet. \\
 In Kapitel~\ref{ch:schutzmassnahmen} wird der Hauptteil der Arbeit behandelt. Anhand einer zuvor dokumentierten Übersicht aktueller Schutzmaßnahmen wird ein 
 eigenes Konzept entwickelt. Diese Schutzmaßnahme wird implementiert und mit den in der Zielsetzung genannten Datensätzen getestet. \\
 Kapitel~\ref{ch:evaluation} bewertet die Ergebnisse und analysiert, aus welchen Gründen die Schutzmaßnahme erfolgreich oder nicht
 erfolgreich war. Zudem werden die Grenzen der Arbeit aufgezeigt. \\
-Kapitel~\ref{ch:fazit} beantwortet die Forschungsfragen, gibt eine Handlungsempfehlung auf Grundlge der zusammengetragenen Ergebnisse, woraus ein Ausblick definiert wird, 
+Kapitel~\ref{ch:fazit} beantwortet die Forschungsfragen, gibt eine Handlungsempfehlung auf Grundlage der zusammengetragenen Ergebnisse, woraus ein Ausblick definiert wird, 
 wie zukünftige Forschung bestehende Lücken schließen kann.

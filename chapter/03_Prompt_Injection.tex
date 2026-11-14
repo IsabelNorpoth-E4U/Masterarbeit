@@ -14,41 +14,41 @@ zunächst die Definition dieser Angriffsform und anschließend ihre verschiedene
 
 \section{Definition und Klassifizierung von Prompt-Injection-Angriffen}
 
-Prompt-Injection bezeichnet eine Angriffsart, die \acp{llm} gefährdet~\cite[54]{pi1}. Dabei wird versucht, das Verhalten eines Sprachmodells zu manipulieren und dessen
+Prompt Injection bezeichnet eine Angriffsart, die \acp{llm} gefährdet~\cite[54]{pi1}. Dabei wird versucht, das Verhalten eines Sprachmodells zu manipulieren, dessen
 Sicherheitsrichtlinien zu umgehen und das \ac{llm} so dazu zu bringen, schädigende Antworten an einen Nutzer auszugeben
 oder schädliches Verhalten auszulösen~\cite[11]{pi2}. \\
 \acp{llm} werden immer häufiger in Agenten-Frameworks integriert~\cite[10471\psq]{pi4}. Diese Frameworks werden aus Agenten aufgebaut, welche 
-einzelne Aufgaben ausführen, beispielweise mithilfe eines \acp{llm} Eingaben verarbeiten~\cite{pi30}. Diese Agenten verarbeiten häufig sensible Daten und
+einzelne Aufgaben ausführen, beispielsweise mithilfe eines \ac{llm} Eingaben verarbeiten~\cite{pi30}. Diese Agenten verarbeiten häufig sensible Daten und
 kommunizieren über \acp{api}, Schnittstellen zwischen Anwendungen und mit externen Umgebungen. 
-Durch den Zugriff auf diese nicht vertrauenswürdigen externen Daten entsteht eine Angriffsfläche für Prompt-Injection Angriffe~\cite[1\psq]{pi5}. 
+Durch den Zugriff auf diese nicht vertrauenswürdigen externen Daten entsteht eine Angriffsfläche für Prompt-Injection-Angriffe~\cite[1\psq]{pi5}. 
 Begünstigt wird dies zusätzlich dadurch, dass
 für solche Angriffe nur geringe technische Anforderungen notwendig sind~\cite[10471\psq]{pi4}. \\
-Vor diesem Hintergrund wurden Prompt-Injection-Angriffe von \ac{owasp} 2026 unter die Top-10 Sicherheitsrisiken für \acp{llm} eingeordnet~\cite[9]{pi24}~\cite[2]{pi11}.
+Vor diesem Hintergrund wurden Prompt-Injection-Angriffe von \ac{owasp} 2026 unter die Top-10-Sicherheitsrisiken für \acp{llm} eingeordnet~\cite[9]{pi24}~\cite[2]{pi11}.
 Ein vergleichbares Ziel verfolgt die Datenbank MITRE ATT\&CK, die aktuelle Angriffstechniken dokumentiert, um Unternehmen eine effektivere Cybersicherheit zu
 ermöglichen~\cite{pi26}. Die dort gesammelten Techniken werden in verschiedene Angriffsphasen unterteilt, die wiederum in der ATLAS-Matrix erfasst sind~\cite[12878]{pi8}.
-Innerhalb dieser Matrix wird Prompt-Injection zwei Phasen zugeordnet, dem Initial Access und der Persistence~\cite{pi27}. Die Phase Initial Access umfasst Angriffe,
+Innerhalb dieser Matrix wird Prompt Injection zwei Phasen zugeordnet: dem Initial Access und der Persistence~\cite{pi27}. Die Phase Initial Access umfasst Angriffe,
 die genutzt werden, um sich Zugriff auf ein System zu verschaffen~\cite{pi28}. Persistence bezeichnet dagegen Angriffe, die dem Angreifer den Zugriff auch nach einem Neustart des
-Systems oder einer Änderungen der Zugangsdaten erhalten~\cite{pi29}. \\
-In der Literatur werden Prompt-Injection Angriffe meist in zwei Kategorien unterteilt: direkte und indirekte Angriffe~\cite[55]{pi1}. Bei direkten Angriffen werden die Anweisungen
+Systems oder einer Änderung der Zugangsdaten erhalten~\cite{pi29}. \\
+In der Literatur werden Prompt-Injection-Angriffe meist in zwei Kategorien unterteilt: direkte und indirekte Angriffe~\cite[55]{pi1}. Bei direkten Angriffen werden die Anweisungen
 unmittelbar in der Nutzeranfrage platziert~\cite[2]{pi9}. Bei indirekten Angriffen werden hingegen externe Quellen genutzt. Das Sprachmodell greift dabei auf nicht
 vertrauenswürdige Daten wie Webseiten zu, in denen bösartige Anweisungen versteckt sein können~\cite[2\psq]{pi6}. \\
 Neben dieser Grundunterscheidung sind weitere Kategorisierungen möglich, beispielsweise durch das Ziel eines Angriffs: Betrug, Schaden, Zerstörung und Falschinformation~\cite[12880]{pi8}. 
 Die genaue Erläuterung geht jedoch über den Rahmen dieser Arbeit hinaus. \\
-Zu den möglichen Folgen von Prompt-Injection Angriffen zählt die Weitergabe sensibler Informationen, etwa interner Unternehmensdaten oder Informationen über das Sprachmodell selbst.
+Zu den möglichen Folgen von Prompt-Injection-Angriffen zählt die Weitergabe sensibler Informationen, etwa interner Unternehmensdaten oder Informationen über das Sprachmodell selbst.
 Darüber hinaus können Angreifer Rechte erlangen und dadurch wichtige Prozesse auslösen~\cite{pi15}. \\
 Für Unternehmen stellen Prompt-Injection-Angriffe eine erhebliche Gefahr dar, da die meisten von ihnen kaum steuern können, welche Tools ihre Mitarbeiter verwenden,
 welche Internetseiten aufgerufen und welche Dateien heruntergeladen werden. Erschwerend kommt hinzu, dass viele \ac{ki}-Tools uneingeschränkt auf interne Ressourcen zugreifen
-können. Eine Studie des Unternehmen Gusto aus dem Jahr 2025 zeigt beispielsweise, dass 45\% der Mitarbeiter \ac{ki}-Tools wie E-Mail-Clients oder Code-Assistenten nutzen, ohne
+können. Eine Studie des Unternehmens Gusto aus dem Jahr 2025 zeigt beispielsweise, dass 45\,\% der Mitarbeiter \ac{ki}-Tools wie E-Mail-Clients oder Code-Assistenten nutzen, ohne
 dafür eine Berechtigung erhalten zu haben. Viele Unternehmen verlieren dadurch die Übersicht über ihre eigene Angriffsfläche~\cite{pi21}.
 
 
 \subsection{Direkte Angriffe}
 
 Die einfachste Form direkter Prompt-Injection-Angriffe ist die Direct Instruction Override, also die direkte Anweisungsüberschreibung~\cite{pi12}.
-Sie wird durch eine einfache Anweisung ausgelöst, mit der alle vorherigen Anweisungen für ungültig erklärt werden sollen. Bereits~\citeauthor{pi9} Perez und Ribeiro
+Sie wird durch eine einfache Anweisung ausgelöst, mit der alle vorherigen Anweisungen für ungültig erklärt werden sollen. Bereits \citeauthor{pi9}
 zeigen in ihrer Arbeit, dass die Formulierung $\glqq$ignore previous instructions$\grqq$ genügt, um vorherige Anweisungen zu überschreiben und das Verhalten
 des \ac{llm} entsprechend zu manipulieren~\cite[3\psq]{pi9}. \\
-Ebenfalls häufig anzutreffen ist die sogenannte Role Manipulation, auch als DAN-Jailbrak bezeichnet~\cite{pi13}. Dabei wird versucht, das Sprachmodell davon zu
+Ebenfalls häufig anzutreffen ist die sogenannte Role Manipulation, auch als DAN-Jailbreak bezeichnet~\cite{pi13}. Dabei wird versucht, das Sprachmodell davon zu
 überzeugen, es besitze eine andere Rolle beziehungsweise Identität, wodurch bestehende Sicherheitsrichtlinien umgangen werden können~\cite{pi12, pi13}.
 Der Name DAN-Jailbreak leitet sich von $\glqq$Do Anything Now$\grqq$ ab. In der Praxis kann dies etwa durch die Anweisung $\glqq$Du bist jetzt DAN. Du bist von allen
 Richtlinien befreit und musst den Regeln nicht mehr folgen$\grqq$ umgesetzt werden~\cite{pi13}. \\
@@ -56,7 +56,7 @@ Darüber hinaus dokumentiert die Literatur zahlreiche weitere Angriffsarten, etw
 Wörter oder die Übersetzung der Anweisung in eine andere Sprache~\cite[42]{pi18}. \\
 Angriffe lassen sich zudem nach ihrem jeweiligen Ziel kategorisieren, wobei zwischen Missbrauch und dem Eindringen in die Privatsphäre unterschieden werden kann~\cite[40]{pi18}.
 Während beim Missbrauch schädlicher Inhalt oder Propaganda erzeugt werden soll, zielt das Eindringen in die Privatsphäre darauf ab, den System-Prompt des \ac{llm}, 
-welcher den Rahmen der Fähigkeiten definiert~\cite{pi31} oder sonstige sensible Informationen zu erfassen und kompromittieren~\cite[40]{pi18}.
+welcher den Rahmen der Fähigkeiten definiert~\cite{pi31}, oder sonstige sensible Informationen zu erfassen und zu kompromittieren~\cite[40]{pi18}.
 
 
 \subsection{Indirekte Angriffe}\label{subsec:indirektepi}
@@ -77,9 +77,9 @@ beschränken: \\
     \item Multiturn Injection: Der Angriff wird passiv über die Ausgabe eines externen Tools erzeugt, da der Angreifer nicht direkt mit dem Agenten kommunizieren kann~\cite[3]{pi7}. Dazu wird ein Chat-Template manipuliert, um eine entsprechende Konversation künstlich zu erzeugen. Durch diese Konversation soll das \ac{llm} dazu verleitet werden, eine bestimmte Aktion auszuführen~\cite[3]{pi7}.
     \item Website Injection: Versteckte Anweisungen werden im Quellcode einer Webseite platziert~\cite{pi12}. Liest das Sprachmodell diesen versteckten Text, führt es die enthaltenen Anweisungen aus~\cite{pi13}.
     \item Encoding Injection: Die bösartige Anweisung wird verschleiert, indem sie beispielsweise Base64-kodiert oder in eine andere Sprache übersetzt wird. Dekodiert das Sprachmodell den Inhalt, führt es die enthaltene Anweisung aus~\cite{pi12}.
-    \item Multi-Modal Injection / Bild Injection: Anweisungen werden in Metadaten versteckt, beispielsweise in der EXIF-Beschreibung eines Bildes~\cite{pi12}.
+    \item Multi-Modal Injection / Bild-Injection: Anweisungen werden in Metadaten versteckt, beispielsweise in der EXIF-Beschreibung eines Bildes~\cite{pi12}.
     \item Document Injection: Anweisungen werden in einem Dokument versteckt und ausgeführt, wenn der Nutzer das Sprachmodell anweist, das Dokument zu analysieren~\cite{pi13}.
-    \item URL Parameter Injection: Das Modell wird dazu gebracht, ein externes Tool zu verwenden, wobei die bösartige Anweisung direkt in der URL versteckt ist, z.B. \\ \texttt{http://evil.com/log?data=<prompt>}~\cite{pi12}.
+    \item URL Parameter Injection: Das Modell wird dazu gebracht, ein externes Tool zu verwenden, wobei die bösartige Anweisung direkt in der URL versteckt ist, z.\,B. \\ \texttt{http://evil.com/log?data=<prompt>}~\cite{pi12}.
 \end{enumerate}
 
 In der Praxis werden direkte und indirekte Angriffsarten häufig miteinander kombiniert, sogenannte Combined Attacks~\cite[2\psq]{pi3}. 
@@ -88,12 +88,12 @@ In der Praxis werden direkte und indirekte Angriffsarten häufig miteinander kom
 
 Die Zahl der Prompt-Injection-Angriffe nimmt von Jahr zu Jahr zu. Laut \ac{owasp} standen Prompt-Injection-Angriffe 2025 wie auch
 2026 an erster Stelle der Gefahren für \ac{llm}-Anwendungen. Eine Studie des Unternehmens Axis Intelligence vom Juni 2026 zeigt
-zudem, dass indirekte Prompt-Injection-Angriffe eine Erfolgsquote von bis zu 68,16 \% erreichen können~\cite{pi22}. \\
+zudem, dass indirekte Prompt-Injection-Angriffe eine Erfolgsquote von bis zu 68,16\,\% erreichen können~\cite{pi22}. \\
 Obwohl kontinuierlich daran gearbeitet wird, LLMs robuster zu gestalten und Sicherheitsrichtlinien so zu formulieren,
 dass Prompt-Injection-Angriffe zuverlässig erkannt werden, gelingt es einem Großteil der Angriffe dennoch, diese Maßnahmen
 zu umgehen~\cite{pi14}. \\
 Im Folgenden werden vier bekannte Beispiele vorgestellt, welche die Bedeutung dieser Bedrohung verdeutlichen. Betrachtet werden ein direkter Angriff auf einen 
-öffentlichen Chatbot, zwei indirekte Angriffe auf Systeme mit Zugriff auf Unternehmensdaten sowie ein Fall, der zeigt, welche Folge ein Angriff haben kann.
+öffentlichen Chatbot, zwei indirekte Angriffe auf Systeme mit Zugriff auf Unternehmensdaten sowie ein Fall, der zeigt, welche Folgen ein Angriff haben kann.
 
 \subsection{Bing Chat \glqq Sydney\grqq}\label{subsec:sydney}
 
@@ -106,26 +106,26 @@ sensible Daten erlangt wird~\cite{pi1}.
 
 \subsection{EchoLeak}\label{subsec:echoleak}
 
-Ein Schwachstelle, an dem das Schadenspotenzial in der Praxis deutlich wird, ist \glqq EchoLeak\grqq. Im Juni 2025 wurde sie mit der Bezeichnung 
+Eine Schwachstelle, an der das Schadenspotenzial in der Praxis deutlich wird, ist \glqq EchoLeak\grqq. Im Juni 2025 wurde sie mit der Bezeichnung 
 CVE-2025-32711 veröffentlicht~\cite{e07}. Betroffen war Microsoft 365 Copilot. Ein Angreifer hätte sensible Daten automatisiert exfiltrieren können, ohne dass der 
 Nutzer davon Kenntnis gehabt hätte~\cite{e06}. Die Schwachstelle wurde von dem Unternehmen Aim Security entdeckt und bereits von Microsoft behoben~\cite{e06}. \\
 Copilot ist eine Anwendung mit \ac{llm}-basierten Tools, die es Nutzern ermöglicht, Dokumente zu erstellen, E-Mails zu analysieren und Agenten auszuführen~\cite{e06}.
 Genau diese Funktionen hätten von einem Angreifer ausgenutzt werden können. An das Opfer hätte eine E-Mail gesendet werden können, die versteckte Anweisungen an das \ac{llm}
-enthält. Formuliert wäre diese so, dass sie sich an den Nutzer richtet, wodurch die Klassifikatoren umgangen wären~\cite{e06}. \\
+enthält. Formuliert wäre diese so, dass sie sich an den Nutzer richtet, wodurch die Klassifikatoren umgangen worden wären~\cite{e06}. \\
 Die E-Mail hätte außerdem einen Link auf die Domain des Angreifers enthalten können. Stellt der Nutzer eine Frage an Copilot, durch die die E-Mail in den Kontext
-aufgenommen wird, hätte Copilot die Anweisung verarbeitet und sensible Daten wären an die vom Angreifer kontrollierte Domain gelangt~\cite{e06}.
+aufgenommen wird, hätte Copilot die Anweisung verarbeitet, und sensible Daten wären an die vom Angreifer kontrollierte Domain gelangt~\cite{e06}.
 
 \subsection{GitHub-MCP-Server}\label{subsec:github_mcp}
 
 Im Mai 2025 wurde eine Schwachstelle aufgedeckt, die das mögliche Ausmaß eines Angriffs verdeutlicht, der Tool Calling und indirekte Prompt Injection 
 kombiniert~\cite{pi34}. Diese Schwachstelle wurde von Invariant Labs aufgedeckt und betraf die offizielle GitHub-\ac{mcp}-Integration~\cite{pi36}. 
-Diese Integration dient dazu, eine Verbindung zwischen \ac{\ac{ki}}-Agenten und der GitHub-Plattform aufzubauen~\cite{pi35}. Damit können Agenten auf Repositories 
+Diese Integration dient dazu, eine Verbindung zwischen \ac{ki}-Agenten und der GitHub-Plattform aufzubauen~\cite{pi35}. Damit können Agenten auf Repositories 
 zugreifen, Issues erstellen, Code analysieren und weitere Aktionen ausführen~\cite{pi35}. \\
-Die Angrifffläche entsteht dadruch, dass für die Integration des Github-\ac{mcp}-Servers ein Zugriffstoken benötigt wird, welcher Zugriff auf alle Daten des Nutzers 
+Die Angriffsfläche entsteht dadurch, dass für die Integration des GitHub-\ac{mcp}-Servers ein Zugriffstoken benötigt wird, welches Zugriff auf alle Daten des Nutzers 
 haben soll~\cite{pi34}. Der Agent hat damit sowohl Zugriff auf die privaten als auch auf alle öffentlichen Repositories. Ein Angreifer muss für einen Angriff 
-ausschließlich ein Issue mit einer versteckten Anweisung in einem öffentlichen Repository erstellen, mit dem der Nutzer interagiert\cite{pi34}. Sendet der Nutzer
-eine Anfrage an den Agenten, die Issues zu bearbeiten, liest dieser die verstekte Anweisung führt sie aus. Er greift dadurch auf die privaten Repositories zu 
-und verschied darin enthaltene sensible Daten in einem öffenntlichen Repository, wodurch der Angreifer Zugriff darauf hat\cite{pi34}. 
+ausschließlich ein Issue mit einer versteckten Anweisung in einem öffentlichen Repository erstellen, mit dem der Nutzer interagiert~\cite{pi34}. Sendet der Nutzer
+eine Anfrage an den Agenten, die Issues zu bearbeiten, liest dieser die versteckte Anweisung und führt sie aus. Er greift dadurch auf die privaten Repositories zu 
+und verschiebt die darin enthaltenen sensiblen Daten in ein öffentliches Repository, wodurch der Angreifer Zugriff darauf hat~\cite{pi34}. 
 
 \subsection{Chatbot eines Autohändlers}\label{subsec:autohaendler}
 
@@ -139,7 +139,7 @@ Gefahr solche Angriffe für das Ansehen und die Finanzen eines Unternehmens dars
 
 Mit den vorgestellten Fällen werden mögliche Auswirkungen von Prompt-Injection-Angriffen veranschaulicht. Bei Bing Chat wurden Daten offengelegt, bei EchoLeak hätten
 ebenfalls Daten offengelegt werden können, die Schwachstelle wurde jedoch behoben, bevor sie ausgenutzt wurde. Beim GitHub-\ac{mcp}-Server zeigt ein Proof of Concept, dass mit einem
-Tool Call eine Aktion ausgelöst werden kann und dadurch ebefalls Daten offengelget werden. Der Chatbot des
+Tool Call eine Aktion ausgelöst werden kann und dadurch ebenfalls Daten offengelegt werden. Der Chatbot des
 Autohändlers zeigt das mögliche Risiko, welches entstanden wäre, wenn der Chatbot Zugriff auf Tools erhalten hätte, ohne ausreichend gesichert zu sein. \\
 Je mehr Daten und Funktionen einem \ac{llm} zur Verfügung stehen, desto größer wird die Angriffsfläche, die ausgenutzt werden kann. Für diese Arbeit sind 
 besonders die indirekten Prompt-Injection-Angriffe relevant, da der untersuchte Chatbot Zugriff auf interne Dokumente sowie mithilfe von Tool Calls auf externe
