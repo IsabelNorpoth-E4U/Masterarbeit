@@ -1,20 +1,3 @@
-# Number of tokens, costs and latency of the eight test runs (section 6.3 "Latenz und Kosten").
-#
-# The api answers were saved without the token usage, so the requests are built again
-# from the result files: the same system prompt and the same user text as in
-# main_original_mistral.py and main_new_approach_mistral.py. The tokens are counted
-# with the tokenizer of the model (mistral-common, with the chat template).
-#   input tokens:  system prompt + user text + chat template
-#   output tokens: the saved answer + end of the answer (</s>). For the guiding
-#                  questions and the numbered lines the JSON answer is written again
-#                  from the saved values, in the form given in the prompt.
-# Not counted: repeated requests after an error of the api.
-#
-# Requirement: python3 -m pip install mistral-common huggingface_hub
-# Run:         python3 token_kosten.py
-#
-# Writes: results_diagramms/mistral_small4_test_new_approach_vs_original_tabelle_token_kosten.tex
-
 import ast
 import json
 
