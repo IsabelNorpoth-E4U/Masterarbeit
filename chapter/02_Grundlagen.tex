@@ -377,7 +377,7 @@ private und
 unangemessene Informationen zuzugreifen oder schädliche Aktionen auszuführen~\cite[10]{tc15}. Werden Tool Calls mithilfe des Outputs des \ac{llm}s durchgeführt, können 
 sich schädliche Auswirkungen über die Chatoberfläche hinaus auf alles ausweiten, worauf das \ac{llm} Zugriff hat und sich zu einer Kette von Auswirkungen entwickeln, da
 die Tool-Ergebnisse in den Kontext gelangen~\cite[10]{pi24}. \\
-OWASP benennt eine Gefahr, die durch Tool Calling entstehen kann, als übermäßige Handlungsfreiheit. Damit Tools verschiedene Funktionen aufrufen können oder mit 
+\ac{owasp} benennt eine Gefahr, die durch Tool Calling entstehen kann, als übermäßige Handlungsfreiheit. Damit Tools verschiedene Funktionen aufrufen können oder mit 
 externen Systemen kommunizieren können, muss ein Handlungsspielraum zugelassen werden. Zusätzlich werden die Tools dynamisch aufgerufen, je nachdem, welcher 
 Nutzerprompt an das \ac{llm} übergeben wird. Durch einen der drei Faktoren kann jedoch eine übermäßige Handlungsfreiheit enstehen~\cite[23]{pi24}:
 
@@ -409,7 +409,7 @@ Wann ein \ac{llm} von diesen Gefahren besonders betroffen ist wird in~\cite[13]{
 Kategorien definiert, die bestimmen, wie anfällig ein \ac{llm} für solche Angriffe ist. Wenn das \ac{llm} auf private Daten zugreifen kann, nicht vertrauenswürdige 
 Inhalte verarbeitet und mit externen Systemen kommuniziert, sind die Voraussetzungen gegeben. Wird eine dieser Kategorien entfernt, entfällt die 
 Angriffsfläche~\cite[13]{pi24}. \\
-Beispiele, welche das Bestehen dieser Angriffsfläche verdeutlichen, sind in OWASP dokumentiert. In einem dieser Szenarien erhält ein \ac{llm}-basierter Assistent
+Beispiele, welche das Bestehen dieser Angriffsfläche verdeutlichen, sind in \ac{owasp} dokumentiert. In einem dieser Szenarien erhält ein \ac{llm}-basierter Assistent
 durch einen Tool Call Zugriff auf das Postfach~\cite[26]{pi24}. Ziel ist es, den Inhalt der E-Mails zusammenzufassen. Um diese Funktion zu ermöglichen, 
 muss das \ac{llm} die Nachrichten lesen können. Das verwendete Tool kann jedoch zusätzlich auch Nachrichten versenden. Eine E-Mail mit einer 
 versteckten Anweisung kann dazu führen, dass über einen indirekten Prompt-Injection-Angriff sensible Informationen an den Angreifer geleitet werden~\cite[26]{pi24}.
@@ -493,7 +493,7 @@ manchen Arbeiten werden die Begriffe synonym verwendet~\cite[5]{cb09}. Das \ac{b
 Ein Chatbot antwortet auf Anfragen eines Nutzers und kann auf Webseiten oder auf Plugins zugreifen, 
 mit denen zusätzliche Aktionen durchgeführt werden können~\cite[8]{cb02}. Ein Agent kann über eine \ac{api} auf ein \ac{llm} zugreifen~\cite[2]{sm08}.
 Auswirkungen von Schwachstellen werden verstärkt, wenn das \ac{llm} als (teil-)autonomes System eingesetzt wird, welches selbstständig Aktionen ausführen kann~\cite[3]{sm08}.
-Auch OWASP grenzt den Begriff Agent ab. Sobald ein \ac{llm} nicht nur eine Komponente einer Anwendung ist, sondern selbst zum Akteur wird, Tools aufrufen kann
+Auch \ac{owasp} grenzt den Begriff Agent ab. Sobald ein \ac{llm} nicht nur eine Komponente einer Anwendung ist, sondern selbst zum Akteur wird, Tools aufrufen kann
 und Informationen über mehrere Sitzungen speichert, wird es als Agent bezeichnet~\cite[7]{pi24}. Agenten rufen Tools dynamisch je nach Nutzeranfrage auf und können 
 mehrere Aufrufe an das \ac{llm} mit dem Output aus vorherigen Aufrufen machen~\cite[23]{pi24}. In~\cite{cb09} wird eine \ac{llm}-integrierte Anwendung als Vorstufe eines 
 autonomen Agenten betrachtet. Der in dieser Arbeit verwendete Chatbot zählt zu den \ac{llm}-integrierten Anwendungen mit Tool-Zugriff, ist jedoch noch kein 
