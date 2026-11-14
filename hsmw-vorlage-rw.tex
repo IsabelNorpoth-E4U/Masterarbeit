@@ -192,7 +192,7 @@ reaches up to 13.5\,\%. However, costs rise by up to a factor of twelve, and lat
 The upstream model therefore significantly improves the detection of prompt injection attacks, but is not
 sufficient as a stand-alone measure. Further limitations are that the measure was tested independently of the
 chatbot, does not detect multi-turn attacks and, due to its high FPR, can only be used to a limited extent in
-customer service. It should therefore be combined with additional measures, such as human oversight of tool calls
+production, as benign user requests are falsely blocked. It should therefore be combined with additional measures, such as human oversight of tool calls
 and a restriction of permitted target addresses.]
 {LLMs werden zunehmend in Chatbots eingesetzt, unter anderem im automatisierten Kundenservice oder im Marketing.
 Um sie an bestimmte Anwendungsfälle anzupassen, werden sie über Tool Calling mit internen Unternehmensdaten und externen 
@@ -207,13 +207,14 @@ Anfrage mit einer Kombination aus Prompt-Filterung, Input-Modifizierung und Prom
 Hauptmodell (Mistral Large 4) weitergereicht wird. Als Vergleich dient ein Originalansatz mit einer binären Anfrage,
 der die grundlegende Erkennungsfähigkeit der Modelle misst. Angewendet wurden die Ansätze auf einen eigenen Datensatz
 und die öffentlichen Datensätze BIPIA und NotInject. Die Evaluation wurde anhand von Metriken, unter anderem
-Recall, \acs{fpr}, Latenz und Kosten, durchgeführt. \\
-Durch die weiterentwickelte Maßnahme steigt der Recall von 34,0 bis 73,1\,\% auf 82,8 bis 92,0\,\%. Die \acs{fpr} verändert
+Recall, FPR, Latenz und Kosten, durchgeführt. \\
+Durch die weiterentwickelte Maßnahme steigt der Recall von 34,0 bis 73,1\,\% auf 82,8 bis 92,0\,\%. Die FPR verändert
 sich kaum und erreicht bis zu 13,5\,\%. Die Kosten steigen jedoch auf bis zum Zwölffachen und die Latenz beträgt bis
 zu 6\,s pro Prüfung. Das vorgeschaltete Modell verbessert die Erkennung von Prompt-Injection-Angriffen deutlich, 
 reicht als alleinstehende Maßnahme jedoch nicht aus. Einschränkend kommt hinzu, dass die Maßnahme unabhängig vom
-Chatbot getestet wurde, keine Multi-Turn-Angriffe erkennt und aufgrund der hohen \acs{fpr} nur eingeschränkt im 
-Kundenservice integriert werden kann. Daher sollte sie in Kombination mit weiteren Maßnahmen implementiert werden, 
+Chatbot getestet wurde, keine Multi-Turn-Angriffe erkennt und aufgrund der hohen FPR nur eingeschränkt im 
+produktiven Einsatz verwendet werden kann, da harmlose Nutzernanfragen fälschlich blockiert werden. Daher sollte sie 
+in Kombination mit weiteren Maßnahmen implementiert werden, 
 wie einer menschlichen Kontrolle und einer erweiterten Kontrolle der Zieladressen.}
 
 %%% Optional Fields for Thesis
@@ -345,7 +346,7 @@ if __name__ == '__main__':
 
 
 % Anhang A: Änderungen am Chatbot (Kapitel 4)
-\input{appendix/server.js.tex}
+\input{appendix/intern/server.js.tex}
 
 % JSON der Multiturn Injection und Chatverläufe der Angriffe (Kapitel 4), nicht im Anhang enthalten
 % erzeugt mit appendix/build_chat_appendix.py
@@ -353,7 +354,7 @@ if __name__ == '__main__':
 % \input{appendix/chats_angriffe.tex}
 
 % Anhang D: Code der Schutzmaßnahme (Kapitel 5 und 6), Dateien in appendix/code/
-\input{appendix/code.tex}
+\input{appendix/intern/code.tex}
 
 % Anhang E: Dokumentation der GenKI-Nutzung
 \chapter{Dokumentation der GenKI-Nutzung}\label{ch:anhang_genki}

@@ -1,7 +1,7 @@
 \chapter{Grundlagen}\label{ch:grundlagen}
 
 In diesem Kapitel werden die fachlichen Grundlagen erläutert, die für diese Arbeit relevant sind. Sie schaffen ein grundlegendes Verständnis, das die
-Nachvollziehbarkeit des praktischen Teils der Arbeit erleichtert. Dazu werden die Themengebiete \acp{llm}, \ac{rag}, Tool Calling und Chatbots beleuchtet und 
+Nachvollziehbarkeit des praktischen Teils der Arbeit erleichtert. Dazu werden die Themengebiete \acp{llm}, Tool Calling und Chatbots beleuchtet und 
 voneinander abgegrenzt.
 
 \section{Large Language Models}
@@ -121,100 +121,100 @@ Niedrige Werte erzeugen deterministischere, hohe Werte vielfältigere Ausgaben~\
 an Token, deren kumulierte Wahrscheinlichkeitsmasse den Wert $p$ erreicht~\cite{llm10}.
 
 
-\section{Retrieval-Augmented Generation}\label{sec:rag}
+% \section{Retrieval-Augmented Generation}\label{sec:rag}
 
-Trotz ihres Erfolgs stoßen \acp{llm} an Grenzen. Dies wird deutlich, wenn sie Anfragen verarbeiten müssen, die über ihre Trainingsdaten hinausgehen~\cite[1]{rag04}. 
-Insbesondere domänenspezifische und wissensintensive Aufgaben können sogenannte Halluzinationen auslösen~\cite[1]{rag04}. Diese Grenzen werden durch zwei Faktoren 
-ausgelöst~\cite[8\psq]{rag03}. Zum einen können nicht alle im Trainingsprozess vermittelten Fakten gespeichert werden, insbesondere selten 
-vorkommende~\cite[8\psq]{rag03}. Zum anderen sind die Daten selbst eingeschränkt. Zum Training werden nur Daten verwendet, die nicht urheberrechtlich geschützt sind.
-Zudem stammen die Daten aus einem festen Zeitpunkt und können nicht aktualisiert werden, wodurch die Gefahr von Halluzinationen und die Generierung von veralteten 
-Antworten steigt~\cite[8\psq]{rag03}. Das Training erfolgt somit überwiegend mit allgemeinen Daten, sodass dem \ac{llm} domänenspezifisches Wissen fehlt~\cite[9]{rag03}. 
-\acp{llm} wie ChatGPT, die auf ihre Trainingsdaten beschränkt sind, können somit keine Informationen zu aktuellen Entwicklungen liefern~\cite[2]{rag04} [4, S. 2]. \\
-Dieses Problem wird dadurch verstärkt, dass \acp{llm} ihre Antworten überzeugend und menschenähnlich formulieren~\cite[2]{rag03}. Halluzinationen sind dadurch schwer 
-festzustellen~\cite[2]{rag03}. Da \acp{llm} in der Praxis mit anderen Systemen wie Chatbots oder Suchmaschinen verknüpft sind, können diese Halluzinationen zu der
-Verbreitung von falschen Annahmen führen und Schaden verursachen~\cite[2]{rag03}. Verstärkt wird dies dadurch, dass ein \ac{llm} seine eigenen Entscheidungen und 
-Vorhersagen schwer nachvollziehen kann~\cite[1]{rag05}. \\
-Um dieses Problem zu beheben, wurde das \acl{rag} entwickelt. Das vortrainierte \ac{llm} mit seinem parametrischen Gedächtnis wird um ein nicht-parametrisches 
-Gedächtnis ergänzt~\cite[2]{rag05}. Aus externen Wissensdatenbanken werden relevante Dokumentenausschnitte abgerufen, die mithilfe von semantischer Ähnlichkeit 
-ausgewählt werden~\cite[1]{rag04}. Durch den Bezug auf externe Daten werden die Halluzinationen reduziert~\cite[1]{rag04}. Diese Daten werden zum Zeitpunkt einer 
-Anfrage abgerufen und entsprechen somit dem neusten Wissensstand~\cite[26]{rag03}. \ac{rag} verbessert die Fähigkeiten eines \ac{llm}, indem parametrisiertes Wissen
-aus dem Trainingsprozess mit nicht-parametrisiertem Wissen aus externen Datenbanken verbunden wird~\cite[16]{rag04}. \\
-Von \ac{rag} ist das Fine-Tuning abzugrenzen. Bei \ac{rag} wird ein \ac{llm} bei einer Nutzeranfrage durch die Suche nach passenden Informationen für die
-Beantwortung unterstützt~\cite[5]{rag04}. Beim Fine-Tuning wird ein \ac{llm} dagegen mit dem spezifischen Wissen trainiert. Es wird in Situationen eingesetzt, in denen 
-bestimmte Strukturen nachgestellt werden sollen~\cite[5]{rag04}. 
+% Trotz ihres Erfolgs stoßen \acp{llm} an Grenzen. Dies wird deutlich, wenn sie Anfragen verarbeiten müssen, die über ihre Trainingsdaten hinausgehen~\cite[1]{rag04}. 
+% Insbesondere domänenspezifische und wissensintensive Aufgaben können sogenannte Halluzinationen auslösen~\cite[1]{rag04}. Diese Grenzen werden durch zwei Faktoren 
+% ausgelöst~\cite[8\psq]{rag03}. Zum einen können nicht alle im Trainingsprozess vermittelten Fakten gespeichert werden, insbesondere selten 
+% vorkommende~\cite[8\psq]{rag03}. Zum anderen sind die Daten selbst eingeschränkt. Zum Training werden nur Daten verwendet, die nicht urheberrechtlich geschützt sind.
+% Zudem stammen die Daten aus einem festen Zeitpunkt und können nicht aktualisiert werden, wodurch die Gefahr von Halluzinationen und die Generierung von veralteten 
+% Antworten steigt~\cite[8\psq]{rag03}. Das Training erfolgt somit überwiegend mit allgemeinen Daten, sodass dem \ac{llm} domänenspezifisches Wissen fehlt~\cite[9]{rag03}. 
+% \acp{llm} wie ChatGPT, die auf ihre Trainingsdaten beschränkt sind, können somit keine Informationen zu aktuellen Entwicklungen liefern~\cite[2]{rag04} [4, S. 2]. \\
+% Dieses Problem wird dadurch verstärkt, dass \acp{llm} ihre Antworten überzeugend und menschenähnlich formulieren~\cite[2]{rag03}. Halluzinationen sind dadurch schwer 
+% festzustellen~\cite[2]{rag03}. Da \acp{llm} in der Praxis mit anderen Systemen wie Chatbots oder Suchmaschinen verknüpft sind, können diese Halluzinationen zu der
+% Verbreitung von falschen Annahmen führen und Schaden verursachen~\cite[2]{rag03}. Verstärkt wird dies dadurch, dass ein \ac{llm} seine eigenen Entscheidungen und 
+% Vorhersagen schwer nachvollziehen kann~\cite[1]{rag05}. \\
+% Um dieses Problem zu beheben, wurde das \acl{rag} entwickelt. Das vortrainierte \ac{llm} mit seinem parametrischen Gedächtnis wird um ein nicht-parametrisches 
+% Gedächtnis ergänzt~\cite[2]{rag05}. Aus externen Wissensdatenbanken werden relevante Dokumentenausschnitte abgerufen, die mithilfe von semantischer Ähnlichkeit 
+% ausgewählt werden~\cite[1]{rag04}. Durch den Bezug auf externe Daten werden die Halluzinationen reduziert~\cite[1]{rag04}. Diese Daten werden zum Zeitpunkt einer 
+% Anfrage abgerufen und entsprechen somit dem neusten Wissensstand~\cite[26]{rag03}. \ac{rag} verbessert die Fähigkeiten eines \ac{llm}, indem parametrisiertes Wissen
+% aus dem Trainingsprozess mit nicht-parametrisiertem Wissen aus externen Datenbanken verbunden wird~\cite[16]{rag04}. \\
+% Von \ac{rag} ist das Fine-Tuning abzugrenzen. Bei \ac{rag} wird ein \ac{llm} bei einer Nutzeranfrage durch die Suche nach passenden Informationen für die
+% Beantwortung unterstützt~\cite[5]{rag04}. Beim Fine-Tuning wird ein \ac{llm} dagegen mit dem spezifischen Wissen trainiert. Es wird in Situationen eingesetzt, in denen 
+% bestimmte Strukturen nachgestellt werden sollen~\cite[5]{rag04}. 
 
-\subsection{Ablauf}
+% \subsection{Ablauf}
 
-Der Ablauf eines \ac{rag} lässt sich in die drei Phasen Indexierung, Retrieval und Generierung unterteilen, wie in Abbildung~\ref{fig:rag_ablauf} visualisiert.
+% Der Ablauf eines \ac{rag} lässt sich in die drei Phasen Indexierung, Retrieval und Generierung unterteilen, wie in Abbildung~\ref{fig:rag_ablauf} visualisiert.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.6\textwidth]{figs/02/rag_ablauf.pdf}
-\caption{Ablauf eines RAG}
-\label{fig:rag_ablauf}
-\end{figure}
+% \begin{figure}[htbp]
+% \centering
+% \includegraphics[width=0.6\textwidth]{figs/02/rag_ablauf.pdf}
+% \caption{Ablauf eines RAG}
+% \label{fig:rag_ablauf}
+% \end{figure}
 
-Bei der Indexierung werden Rohdaten bereinigt und extrahiert~\cite[3]{rag04}. Diese Rohdaten können unter anderem in Formaten wie PDF, HTML oder Markdown 
-vorliegen~\cite[3]{rag04}. Sie werden in einheitlichen Klartext umgewandelt und in kleinere Chunks zerlegt, die auf das Kontextfenster des \ac{llm} angepasst 
-sind~\cite[3]{rag04}. Bei der Unterteilung der Informationen in Chunks ist zusätzlich darauf zu achten, dass der semantische Zusammenhang und die Relevanz der 
-Informationen nicht beeinträchtigt werden~\cite[29]{rag03}. Eine der am häufigsten verwendeten Regeln ist die Unterteilung in Abschnitte mit fester Länge, wie
-100 Wörter bzw. 100, 256 oder 512 Token~\cite[29]{rag03}\cite[8]{rag04}. Je nach gewählter Größe der Chunks entstehen unterschiedliche Probleme. Größere Chunks können 
-mehr Kontext umfassen, benötigen jedoch mehr Verarbeitungszeit, wohingegen bei kleineren Chunks Kontext verloren gehen kann~\cite[8]{rag04}. \\
-Die Chunks werden anschließend mithilfe eines Embedding-Modells in Vektorrepräsentationen umgewandelt und in einer Vektordatenbank gespeichert~\cite[3]{rag04}. 
-Ziel ist es, mit einer passenden Embedding-Funktion einen Vektorraum zu erstellen, in dem relevante Paare aus Fragen und Passagen geringere Abstände haben als 
-irrelevante Paare~\cite[6771]{rag02}. Die Qualität beeinflusst, ob in der Retrieval-Phase der richtige Kontext gefunden wird~\cite[8]{rag04}. \\
-Sobald eine Nutzeranfrage an das \ac{llm} gesendet wird, wird diese mit demselben Modell, das auch bei der Indexierung verwendet wird, in ihre 
-Vektorrepräsentation umgewandelt~\cite[3]{rag04}. Anschließend wird die Ähnlichkeit zwischen der Anfrage und den Chunks berechnet. Die Top-k-Chunks werden 
-ausgewählt und zur Erweiterung des Promptkontextes verwendet~\cite[3]{rag04}. Für die Berechnung werden in der Praxis verschiedene Ähnlichkeitsmaße angewendet, 
-häufig die Kosinus-Ähnlichkeit~\cite[9]{rag04}. Diese entspricht bei normierten Vektoren dem Skalarprodukt~\cite[6771]{rag02}. \\
-In der Generierungsphase wird die Nutzeranfrage mit den ausgewählten Dokumenten kombiniert und dem \ac{llm} mit der Anweisung übergeben, auf Basis dieser Informationen 
-eine Antwort zu generieren~\cite[3]{rag04}. Mit diesen Informationen hat das \ac{llm} die Wahl, auf die internen, durch das Training erlernten Informationen 
-zurückzugreifen  oder die externen Informationen zu verwenden~\cite[3]{rag04}. Im Fall eines Dialoges mit einem Nutzer kann der Chatverlauf erneut in die 
-Nutzeranfrage eingefügt und so ein Multi-Turn ermöglicht werden~\cite[3]{rag04}.
+% Bei der Indexierung werden Rohdaten bereinigt und extrahiert~\cite[3]{rag04}. Diese Rohdaten können unter anderem in Formaten wie PDF, HTML oder Markdown 
+% vorliegen~\cite[3]{rag04}. Sie werden in einheitlichen Klartext umgewandelt und in kleinere Chunks zerlegt, die auf das Kontextfenster des \ac{llm} angepasst 
+% sind~\cite[3]{rag04}. Bei der Unterteilung der Informationen in Chunks ist zusätzlich darauf zu achten, dass der semantische Zusammenhang und die Relevanz der 
+% Informationen nicht beeinträchtigt werden~\cite[29]{rag03}. Eine der am häufigsten verwendeten Regeln ist die Unterteilung in Abschnitte mit fester Länge, wie
+% 100 Wörter bzw. 100, 256 oder 512 Token~\cite[29]{rag03}\cite[8]{rag04}. Je nach gewählter Größe der Chunks entstehen unterschiedliche Probleme. Größere Chunks können 
+% mehr Kontext umfassen, benötigen jedoch mehr Verarbeitungszeit, wohingegen bei kleineren Chunks Kontext verloren gehen kann~\cite[8]{rag04}. \\
+% Die Chunks werden anschließend mithilfe eines Embedding-Modells in Vektorrepräsentationen umgewandelt und in einer Vektordatenbank gespeichert~\cite[3]{rag04}. 
+% Ziel ist es, mit einer passenden Embedding-Funktion einen Vektorraum zu erstellen, in dem relevante Paare aus Fragen und Passagen geringere Abstände haben als 
+% irrelevante Paare~\cite[6771]{rag02}. Die Qualität beeinflusst, ob in der Retrieval-Phase der richtige Kontext gefunden wird~\cite[8]{rag04}. \\
+% Sobald eine Nutzeranfrage an das \ac{llm} gesendet wird, wird diese mit demselben Modell, das auch bei der Indexierung verwendet wird, in ihre 
+% Vektorrepräsentation umgewandelt~\cite[3]{rag04}. Anschließend wird die Ähnlichkeit zwischen der Anfrage und den Chunks berechnet. Die Top-k-Chunks werden 
+% ausgewählt und zur Erweiterung des Promptkontextes verwendet~\cite[3]{rag04}. Für die Berechnung werden in der Praxis verschiedene Ähnlichkeitsmaße angewendet, 
+% häufig die Kosinus-Ähnlichkeit~\cite[9]{rag04}. Diese entspricht bei normierten Vektoren dem Skalarprodukt~\cite[6771]{rag02}. \\
+% In der Generierungsphase wird die Nutzeranfrage mit den ausgewählten Dokumenten kombiniert und dem \ac{llm} mit der Anweisung übergeben, auf Basis dieser Informationen 
+% eine Antwort zu generieren~\cite[3]{rag04}. Mit diesen Informationen hat das \ac{llm} die Wahl, auf die internen, durch das Training erlernten Informationen 
+% zurückzugreifen  oder die externen Informationen zu verwenden~\cite[3]{rag04}. Im Fall eines Dialoges mit einem Nutzer kann der Chatverlauf erneut in die 
+% Nutzeranfrage eingefügt und so ein Multi-Turn ermöglicht werden~\cite[3]{rag04}.
 
-\subsection{Nutzen}
+% \subsection{Nutzen}
 
-Die Verwendung von \acp{rag} bietet viele Vorteile. Es können Halluzinationen reduziert werden, die durch die fehlenden Informationen ausgelöst werden~\cite[22]{rag03}. 
-Dadurch kann ein \ac{llm} verwendet werden, um sich über jede Domäne zu informieren~\cite[22]{rag03}. Zudem entsteht eine stärkere Kontrolle und Interpretierbarkeit 
-der generierten Antworten~\cite[10]{rag05}. \\
-Ein weiterer Vorteil liegt darin, dass das Wissen eines \ac{rag} jederzeit aktualisiert werden kann, ohne dass ein Training erforderlich ist~\cite[7]{rag05}. 
-Die Verwendung eines \ac{rag} eignet sich somit eher für dynamische Umgebungen, in denen Echtzeitwissen benötigt wird, Fine-Tuning hingegen eher für statische 
-Anwendungen, da für eine Aktualisierung ein Training notwendig ist~\cite[5]{rag04}. Zudem übertrifft \ac{rag} die Fähigkeiten von Fine-Tuning sowohl bei Wissen, das 
-bereits durch das Training enthalten war, als auch bei neuem Wissen~\cite[5]{pi24}. \\
-\ac{rag} bietet zudem Nachvollziehbarkeit. Durch die Vektorrepräsentation kann schnell auf die Originalquelle zugegriffen werden, wodurch Antworten für Nutzer 
-nachvollzogen werden können~\cite[14]{rag04} [4, S. 14]. Damit kann sichergestellt werden, dass die Ausgaben überprüfbar sind und auf glaubwürdigen Quellen
-basieren~\cite[32]{rag03}. \\
-Aufgrund dieser Vorteile hat sich die Integration von \ac{rag} in \acp{llm} weit verbreitet und dient als Grundlage bei der Entwicklung von Chatbots und 
-anderen Anwendungen~\cite[1]{rag04}.
+% Die Verwendung von \acp{rag} bietet viele Vorteile. Es können Halluzinationen reduziert werden, die durch die fehlenden Informationen ausgelöst werden~\cite[22]{rag03}. 
+% Dadurch kann ein \ac{llm} verwendet werden, um sich über jede Domäne zu informieren~\cite[22]{rag03}. Zudem entsteht eine stärkere Kontrolle und Interpretierbarkeit 
+% der generierten Antworten~\cite[10]{rag05}. \\
+% Ein weiterer Vorteil liegt darin, dass das Wissen eines \ac{rag} jederzeit aktualisiert werden kann, ohne dass ein Training erforderlich ist~\cite[7]{rag05}. 
+% Die Verwendung eines \ac{rag} eignet sich somit eher für dynamische Umgebungen, in denen Echtzeitwissen benötigt wird, Fine-Tuning hingegen eher für statische 
+% Anwendungen, da für eine Aktualisierung ein Training notwendig ist~\cite[5]{rag04}. Zudem übertrifft \ac{rag} die Fähigkeiten von Fine-Tuning sowohl bei Wissen, das 
+% bereits durch das Training enthalten war, als auch bei neuem Wissen~\cite[5]{pi24}. \\
+% \ac{rag} bietet zudem Nachvollziehbarkeit. Durch die Vektorrepräsentation kann schnell auf die Originalquelle zugegriffen werden, wodurch Antworten für Nutzer 
+% nachvollzogen werden können~\cite[14]{rag04} [4, S. 14]. Damit kann sichergestellt werden, dass die Ausgaben überprüfbar sind und auf glaubwürdigen Quellen
+% basieren~\cite[32]{rag03}. \\
+% Aufgrund dieser Vorteile hat sich die Integration von \ac{rag} in \acp{llm} weit verbreitet und dient als Grundlage bei der Entwicklung von Chatbots und 
+% anderen Anwendungen~\cite[1]{rag04}.
 
-\subsection{Risiken}
+% \subsection{Risiken}
 
-Die Verwendung von \acp{rag} unterliegt Grenzen. Die Retrieval-Phase ist häufig schwer umzusetzen, weshalb unpassende oder irrelevante Chunks für die Beantwortung
-einer Frage ausgewählt werden und ausschlaggebende Informationen übersehen werden~\cite[3]{rag04}. Auf Grundlage solcher Informationen können falsche Antworten
-generiert werden~\cite[22]{rag03}. Die Ursache dafür kann ein unpassendes Embedding-Modell sein, welches die Berechnung der Ähnlichkeit beeinflusst~\cite[30]{rag03}.
-Eine wichtige Rolle spielen die verwendeten externen Informationen~\cite[29]{rag03}. Ist die Qualität nicht ausreichend, steigt das Risiko falscher oder 
-irreführender Antworten~\cite[29]{rag03}. Hinzu kommt, dass kaum eine externe Quelle vollständig korrekt und frei von Vorurteilen ist~\cite[10]{rag05}. \\
-\acp{rag} können Halluzinationen auslösen~\cite[26]{rag03}. Dies kann eintreten, wenn die Nutzeranfrage nicht korrekt wiedergegeben wird oder die externen 
-Informationen nicht in die Generierung einbezogen werden~\cite[26]{rag03}. Auch wenn relevante Informationen erfasst wurden, der Kontext aber nicht ausreichend verwendet 
-wird, sinkt die Qualität einer Antwort~\cite[32]{rag03}. \\
-Durch die Integration von \ac{rag} wird die Angriffsfläche von \acp{llm} erweitert. Sobald eine Ähnlichkeitssuche zwischen einer Datenquelle und einer Nutzeranfrage
-integriert wird, wird die Embedding-Schicht in die Vertrauensgrenze der Anwendung hinzugefügt~\cite[50]{pi24}. Da ein \ac{llm} nicht zwischen Anweisungen und Daten 
-unterscheiden kann, besteht die Möglichkeit, dass das Verhalten des \ac{llm} beeinflusst wird~\cite[10]{pi24}. Systemprompt, Nutzereingaben, aufgerufene Dokumente,
-Chatverläufe und Tool-Ausgaben werden als ein einziger Tokenstrom verarbeitet~\cite[10]{pi24}. Anweisungen, die enthalten sind, können ohne das Wissen der Nutzer 
-in den Kontext aufgenommen und ausgeführt werden~\cite[12]{pi24}. \\
-Eine Gefahr stellt das Corpus Poisoning dar. Wenn es einem Angreifer gelingt, ein Dokument mit einer schädlichen Anweisung über \ac{rag} in den Kontext eines \ac{llm} 
-einzufügen, können auch zukünftige Sitzungen betroffen sein, die auf dieses Dokument zugreifen~\cite[12]{pi24}. Bei jeder Nutzeranfrage, bei der das Dokument 
-abgerufen wird, können die enthaltenen Anweisungen die Ausgabe des \ac{llm} beeinflussen~\cite[15\psq]{pi24}. Bereits fünf manipulierte Dokumente 
-erreichten in einer Wissensbasis mit Millionen von Texten eine Erfolgsquote von rund 90\,\%~\cite[15\psq]{pi24}. Die Inhalte können durch andere Dateien oder 
-kompromittierte interne Quellen so angepasst werden, dass ihr Embedding nahe an einer definierten Zielanfrage liegt und mit einer großen Wahrscheinlichkeit 
-abgerufen wird~\cite[51]{pi24}. \\ 
-Ein weiteres Risiko besteht in der Offenlegung von sensiblen Daten. Durch veraltete Rechte und überholte Wissensdatenbanken können sensible Daten
-an das \ac{rag} übergeben werden und von dem \ac{llm} verwendet werden~\cite[18]{pi24} [1, S. 18]. Um Sicherheit zu bieten, muss nicht das Modell verändert werden, 
-sondern die angebundenen Daten überprüft werden~\cite[18]{pi24}. Dies zeigt sich auch bei der Kosinus-Ähnlichkeit deutlich, da diese keine Zugriffsrechte 
-berücksichtigt~\cite[19]{pi24}. Die Autorisierung muss unabhängig von \ac{rag} erfolgen. \\
-\ac{rag} kann die Qualität eines \ac{llm} stark verbessern, indem dieses mit aktuellem und domänenspezifischem Wissen erweitert wird. Jedoch wird ebenfalls die 
-Angriffsfläche vergrößert. Es entsteht ein neuer Eintrittspunkt für nicht vertrauenswürdige Inhalte, die in den Kontext des \ac{llm} aufgenommen werden können. Wie 
-diese Schwachstelle von Angreifern ausgenutzt werden kann, wird im Kapitel~\ref{ch:promptinjection} betrachtet. 
+% Die Verwendung von \acp{rag} unterliegt Grenzen. Die Retrieval-Phase ist häufig schwer umzusetzen, weshalb unpassende oder irrelevante Chunks für die Beantwortung
+% einer Frage ausgewählt werden und ausschlaggebende Informationen übersehen werden~\cite[3]{rag04}. Auf Grundlage solcher Informationen können falsche Antworten
+% generiert werden~\cite[22]{rag03}. Die Ursache dafür kann ein unpassendes Embedding-Modell sein, welches die Berechnung der Ähnlichkeit beeinflusst~\cite[30]{rag03}.
+% Eine wichtige Rolle spielen die verwendeten externen Informationen~\cite[29]{rag03}. Ist die Qualität nicht ausreichend, steigt das Risiko falscher oder 
+% irreführender Antworten~\cite[29]{rag03}. Hinzu kommt, dass kaum eine externe Quelle vollständig korrekt und frei von Vorurteilen ist~\cite[10]{rag05}. \\
+% \acp{rag} können Halluzinationen auslösen~\cite[26]{rag03}. Dies kann eintreten, wenn die Nutzeranfrage nicht korrekt wiedergegeben wird oder die externen 
+% Informationen nicht in die Generierung einbezogen werden~\cite[26]{rag03}. Auch wenn relevante Informationen erfasst wurden, der Kontext aber nicht ausreichend verwendet 
+% wird, sinkt die Qualität einer Antwort~\cite[32]{rag03}. \\
+% Durch die Integration von \ac{rag} wird die Angriffsfläche von \acp{llm} erweitert. Sobald eine Ähnlichkeitssuche zwischen einer Datenquelle und einer Nutzeranfrage
+% integriert wird, wird die Embedding-Schicht in die Vertrauensgrenze der Anwendung hinzugefügt~\cite[50]{pi24}. Da ein \ac{llm} nicht zwischen Anweisungen und Daten 
+% unterscheiden kann, besteht die Möglichkeit, dass das Verhalten des \ac{llm} beeinflusst wird~\cite[10]{pi24}. Systemprompt, Nutzereingaben, aufgerufene Dokumente,
+% Chatverläufe und Tool-Ausgaben werden als ein einziger Tokenstrom verarbeitet~\cite[10]{pi24}. Anweisungen, die enthalten sind, können ohne das Wissen der Nutzer 
+% in den Kontext aufgenommen und ausgeführt werden~\cite[12]{pi24}. \\
+% Eine Gefahr stellt das Corpus Poisoning dar. Wenn es einem Angreifer gelingt, ein Dokument mit einer schädlichen Anweisung über \ac{rag} in den Kontext eines \ac{llm} 
+% einzufügen, können auch zukünftige Sitzungen betroffen sein, die auf dieses Dokument zugreifen~\cite[12]{pi24}. Bei jeder Nutzeranfrage, bei der das Dokument 
+% abgerufen wird, können die enthaltenen Anweisungen die Ausgabe des \ac{llm} beeinflussen~\cite[15\psq]{pi24}. Bereits fünf manipulierte Dokumente 
+% erreichten in einer Wissensbasis mit Millionen von Texten eine Erfolgsquote von rund 90\,\%~\cite[15\psq]{pi24}. Die Inhalte können durch andere Dateien oder 
+% kompromittierte interne Quellen so angepasst werden, dass ihr Embedding nahe an einer definierten Zielanfrage liegt und mit einer großen Wahrscheinlichkeit 
+% abgerufen wird~\cite[51]{pi24}. \\ 
+% Ein weiteres Risiko besteht in der Offenlegung von sensiblen Daten. Durch veraltete Rechte und überholte Wissensdatenbanken können sensible Daten
+% an das \ac{rag} übergeben werden und von dem \ac{llm} verwendet werden~\cite[18]{pi24} [1, S. 18]. Um Sicherheit zu bieten, muss nicht das Modell verändert werden, 
+% sondern die angebundenen Daten überprüft werden~\cite[18]{pi24}. Dies zeigt sich auch bei der Kosinus-Ähnlichkeit deutlich, da diese keine Zugriffsrechte 
+% berücksichtigt~\cite[19]{pi24}. Die Autorisierung muss unabhängig von \ac{rag} erfolgen. \\
+% \ac{rag} kann die Qualität eines \ac{llm} stark verbessern, indem dieses mit aktuellem und domänenspezifischem Wissen erweitert wird. Jedoch wird ebenfalls die 
+% Angriffsfläche vergrößert. Es entsteht ein neuer Eintrittspunkt für nicht vertrauenswürdige Inhalte, die in den Kontext des \ac{llm} aufgenommen werden können. Wie 
+% diese Schwachstelle von Angreifern ausgenutzt werden kann, wird im Kapitel~\ref{ch:promptinjection} betrachtet. 
 
 \section{Tool Calling}
 
@@ -230,25 +230,25 @@ Welt auszuüben~\cite[3]{tc09}. Für den Prozess wird das sogenannte Tool Learni
 Tools zu interagieren, um komplexe Aufgaben zu erfüllen~\cite[5]{tc10}. Der Schlüssel zu erfolgreichem Tool Learning besteht darin, eine komplexe Aufgabe in mehrere
 Aktionen zu unterteilen, diese in natürliche Sprache zu übersetzen und in ausführbare Anweisungen umzuwandeln, die von den speziellen Tools verstanden werden können. 
 \acp{llm} dienen in diesem Prozess als Übersetzer~\cite[9]{tc11}. \\
-Die Integartion von Tool Calling ist notwendig, da ein \ac{llm} darauf begrenzt ist, die in seinen Gewichten gespeicherten Informationen zu 
+Die Integration von Tool Calling ist notwendig, da ein \ac{llm} darauf begrenzt ist, die in seinen Gewichten gespeicherten Informationen zu 
 verwenden und Generierungen innerhalb eines begrenzten Kontextfenster vorzunehmen~\cite[1]{tc16}. Wenn dieses Wissen erweitert werden soll, muss es durch Training
-aktualisiert werden~\cite[1]{tc16}. Kann ein Modell nur auf interne Repräsentationen zugreifen und ist nicht in der externen Welt integriert wurde, kann es auch 
+aktualisiert werden~\cite[1]{tc16}. Kann ein Modell nur auf interne Repräsentationen zugreifen und ist nicht in der externen Welt integriert worden, kann es auch 
 verstärkt 
 zu Halluzinationen und Fehlerpropagation kommen~\cite[2]{tc15}. Tools ergänzen ein Modell innerhalb dieser Grenzen, indem sie seinen Kontext erweitern, sodass fehlende
 Informationen, die sich nicht in den Gewichten des Modells befinden, ergänzt werden~\cite[3]{tc09}.
 Aufgaben wie Berechnungen oder Informationssammlung können somit an externe Module wie Suchmaschinen oder Python-Interpreter ausgelagert werden~\cite[9]{tc09}.
-Damit lassen sich auch Aktionen ausgeführen, die Daten in Echtzeit oder externe Berechnungen erfordern~\cite[2]{tc14}. Bereits Modelle wie GPT-4 aus dem Jahr 2023~\cite[10]{llm09} 
+Damit lassen sich auch Aktionen ausführen, die Daten in Echtzeit oder externe Berechnungen erfordern~\cite[2]{tc14}. Bereits Modelle wie GPT-4 aus dem Jahr 2023~\cite[10]{llm09} 
 waren in der Lage, strukturierte Ausgaben im JSON-Format zu erzeugen, mit dem Funktionsaufrufe ausgeführt werden konnten. Neuere Modelle verfügen über eine direkt 
 integrierte Unterstützung für Tool Calling~\cite[2]{tc14}. \\
 Die Einsatzmöglichkeiten erstrecken sich vom Aufruf von \acp{api}, über die Suchen im Internet und Ausführen von Code bis zum Zugriff auf Dokumente~\cite{tc03}. 
-\acp{llm} sind jedoch grundsätzlich Sprachverarbeiter, weswegen sie Aufgaben wie das Buchen von Flügen oder Konferenzräumen unabhängig durchführen können~\cite[6]{tc10}.
+\acp{llm} sind jedoch grundsätzlich Sprachverarbeiter, weswegen sie Aufgaben wie das Buchen von Flügen oder Konferenzräumen nicht unabhängig durchführen können~\cite[6]{tc10}.
 Daher werden in diese Tools die notwendigen externen Partner integriert, damit diese Schnittstellen geschaffen werden~\cite[6]{tc10}. Grundsätzlich lassen sich 
 Tools je nach Aufgabe in drei Kategorien einteilen: 
 
 \begin{enumerate}
     \item Datenzugriff: Diese Tools greifen auf externe Daten zu, wie Vektordatenbanken, SQL-Datenbanken, externe APIs, Graphendatenbanken oder Dateisysteme. 
     Welche dieser Optionen verwendet wird, hängt vom Ziel ab. Vektordatenbanken verwendet man bei unstrukturierten Anfragen. SQL wird bei transaktionalen Daten 
-    verwendet, bei denen bekannt ist, wonach gesucht wird. Graphendatenbanken werden verwendet, wenn die Beziehungen der Daten enbenso viel bedeuten wie die Daten 
+    verwendet, bei denen bekannt ist, wonach gesucht wird. Graphendatenbanken werden verwendet, wenn die Beziehungen der Daten ebenso viel bedeuten wie die Daten 
     selbst. \acp{api} werden verwendet, wenn Daten in Echtzeit verarbeitet werden müssen~\cite{tc05}.
     \item Berechnung: Diese Tools sind notwendig, da Daten häufig verändert werden müssen, damit sie verarbeitet werden können. Dazu zählen die Verarbeitung
     von Daten mithilfe von Python oder Anwenden einer Logik, mathematische Operationen, Datentransformationen, die Verarbeitung von Bildern, Videos und Audio sowie
@@ -260,18 +260,18 @@ Tools je nach Aufgabe in drei Kategorien einteilen:
 \end{enumerate}
 
 In der Praxis werden Tools der drei Kategorien in Kombination verwendet. Möchte ein Nutzer beispielsweise den Status einer Lieferung erfahren, werden zunächst
-mit einem Datenzugriffs-Tool die Bestelldaten abgerufen, diese mit einem Berechnungstool aufbereitet und die anschließend eine Benachrichtigung an den Nutzer mit den 
+mit einem Datenzugriffs-Tool die Bestelldaten abgerufen, diese mit einem Berechnungstool aufbereitet und anschließend eine Benachrichtigung an den Nutzer mit den 
 Daten über ein Aktions-Tool gesendet~\cite{tc05}.
 
 \subsection{Konzept und Ablauf}
 
 Ein Tool Call basiert auf verschiedenen Komponenten~\cite{tc06} [6]. Laut~\cite[10\psq]{tc11} handelt es sich dabei um vier. Das \textbf{Tool Set} beinhaltet die 
 Sammlung der Tools mit ihren jeweiligen 
-Funktionen. Die \textbf{Environment} stellt die Infrastruktur bereit zur Ausführung eines Tools bereit und kann virtuell oder real sein. Der \textbf{Controller}
+Funktionen. Die \textbf{Environment} stellt die Infrastruktur zur Ausführung eines Tools bereit und kann virtuell oder real sein. Der \textbf{Controller}
 bildet den Hauptsteuerungspunkt
-eines Tool-Learning-Frameworks und wird normalerweise durch ein \ac{llm} umgesetzt. Der \textbf{Perceiver} verarbeitet das Feedback des Nutzers und der Umgebung und 
+eines Tool-Learning-Frameworks und wird normalerweise durch ein \ac{llm} umgesetzt. Der \textbf{Perceiver} verarbeitet die Rückmeldungen des Nutzers und der Umgebung und 
 generiert daraus
-eine Zusammenfassung für den Controller. Die einfachste Form dieser Rückmeldungen besteht darin, dass ein vordefiniertes Formular ausgefüllt wird. Diese Kooperation 
+eine Zusammenfassung für den Controller. Die einfachste Form dieser Rückmeldungen besteht darin, dass ein vordefiniertes Formular ausgefüllt wird. Diese Zusammenarbeit 
 der 
 Komponenten und der allgemeine Ablauf wird dadurch beschrieben, dass zu einem Zeitpunkt $t$ ein LLM eine Observation $o_t$ der Umgebung erhält und eine Aktion
 $a_t$ in Abhängigkeit vom Kontext $c_t = (o_1, a_1, \dots, o_{t-1}, a_{t-1}, o_t)$ wählt. Der Kontext umfasst die gesamte bisherige Abfolge aus Aktionen und 
@@ -279,13 +279,13 @@ gelieferten Observationen~\cite[3]{tc15}. \\
 Bevor ein \ac{llm} Tools verwenden kann, müssen diese definiert werden. Dazu wird eine Liste mit Namen, Verwendung und Input-/Output-Formaten erstellt~\cite{tc03}. 
 Diese Liste
 ist meist ein strukturiertes JSON-Schema~\cite{tc07}. Anhand dieser Informationen kann ein Modell das richtige Tool identifizieren~\cite{tc06}. 
-Listing~\ref{lst:tool_definition}
+Quelltext~\ref{lst:tool_definition}
 zeigt beispielhaft eine solche Definition. Die Möglichkeiten eines \ac{llm}, den Umgang mit Tools zu erlernen, reichen vom In-Context Learning zu dem expliziten 
-Lernen mithilfe von Tool-enriched Datensätzen~\cite[17777]{tc08}. \\
-Wie zuverlässig ein \ac{llm} ein Tool einsetzt, ist von der Qualität abhängig. Eine Definition sollte drei Punkte umfassen. Erstens sollte die Beschreibung des Zwecks 
-den genauen Umfang und ie Bedingungen enthalten. Einbezogen werden sollte auch, wofür das Tool nicht angewendet werden sollte~\cite{tc03}. Zweitens sollten die 
+Lernen mithilfe von speziellen Datensätzen~\cite[17777]{tc08}. \\
+Wie zuverlässig ein \ac{llm} ein Tool einsetzt, ist von der Qualität der Definition abhängig. Eine Definition sollte drei Punkte umfassen. Erstens sollte die Beschreibung des Zwecks 
+den genauen Umfang und die Bedingungen enthalten. Einbezogen werden sollte auch, wofür das Tool nicht angewendet werden sollte~\cite{tc03}. Zweitens sollten die 
 Parameter
-eingeschränkt sein. Dazu gehört eine ausführliche Beschreibung dessen, was nicht erwartet wird, z.\,B. das Format. Beispiele können zur Unterstützung verwendet 
+eingeschränkt sein. Dazu gehört eine ausführliche Beschreibung dessen, was nicht erwartet wird, z.\,B. bei dem Format. Beispiele können zur Unterstützung verwendet 
 werden. Drittens sollte das Format des Outputs klar definiert werden, also welche Form und welche Informationen er ausweist~\cite{tc03}.
 
 \begin{lstlisting}[caption={Beispiel einer Tool-Definition als JSON-Schema~\cite{tc01}}, label={lst:tool_definition}]
@@ -333,7 +333,7 @@ nichts eigenständig ausführt~\cite{tc03}. Die Kontrolle über die Ausführung 
 die Logik aus und gibt das Ergebnis an das \ac{llm} zurück~\cite{tc03}. \\
 Das Ergebnis eines Tools wird im Normalfall in den aktuellen Kontext des \ac{llm} integriert~\cite[3]{tc09}. Bei den meisten Ansätzen wird der Tool Output als 
 Input an das \ac{llm} übergeben, womit dieses auf Basis der Informationen eine bessere Antwort generieren kann~\cite[17]{tc10}. Diese Antwort des 
-\ac{llm} wird anschließend an den Nutzer als Antwort übergebe~\cite{tc05}. \\
+\ac{llm} wird anschließend an den Nutzer als Antwort übergeben~\cite{tc05}. \\
 Tool Calling ist nicht auf einen einzelnen Aufruf beschränkt sondern es gibt verschiedene Ablaufmöglichkeiten~\cite{tc01}. Auf eine Nutzeranfrage kann das \ac{llm}
 direkt ohne Tool Call diese beantworten oder mehrere Tool Calls ausführen, bis eine Antwort für den Nutzer generiert werden kann~\cite{tc01}. \\
 Sind mehrere Tool Calls notwendig, können diese gleichzeitig oder sequentiell ausgeführt werden~\cite[7]{tc14}. Dabei wird zwischen 
@@ -342,23 +342,27 @@ mehrere Steps, sogenannte Interaktionsschritte~\cite[4]{tc14}. Im Allgemeinen wi
 Wenn ein Tool den Output eines anderen Tools als Eingabe benötigt, müssen die Aufrufe nacheinander ablaufen. Liegen alle notwendigen Informationen vor, können sie 
 parallel ablaufen. Können Anfragen parallel ausgeführt werden, wird die Latenz stark reduziert~\cite[7]{tc14}. Es sinkt aber gleichzeitig die Qualität, wenn die 
 Aufrufe nicht sequentiell durchgeführt werden~\cite[7]{tc14}. Da es zudem eher der Praxis entspricht, dass die einzelnen Aufrufe von Informationen aus vorherigen 
-Aufrufen abhängen, ist es genauer und schneller, die Aufrufe nicht parallel auszuführen~\cite[7]{tc14}. Die Vorgehensweise bei der der Ausführung von Tool 
+Aufrufen abhängen, ist es genauer und schneller, die Aufrufe nicht parallel auszuführen~\cite[7]{tc14}. Die Vorgehensweise bei der Ausführung von Tool 
 Calls kann in zwei Typen unterteilt werden, dem One-Step Task Solving und Iterative Task Solving~\cite[9]{tc10}. Beim One-Step Task Solving wird
 eine eingehende Nutzeranfrge auf ihre Absicht analysiert und anhand dessen die zur Lösung notwendigen Schritte geplant. 
 Diese Schritte werden durchgeführt und die Antwort generiert, ohne die Ergebnisse zu analysieren, auf Fehler zu kontrollieren oder auf Tool-Feedback einzugehen~\cite[9]{tc10}. 
 Beim iterative Task Solving werden die Teilaufgaben anhand der Interaktion mit den einzelnen Tools und des Feedbacks angepasst. Ein Problem wird
 somit ebenfalls in einzelnen Schritten gelöst, jedoch werden diese Schritte überarbeitet, um die Problemlösefähigkeit zu verbessern~\cite[9]{tc10}. \\
-Tool Calling ist von \ac{rag}~\ref{sec:rag} abzugrenzen. Der Unterschied zwischen diesen beiden Ansätzen besteht darin, dass Tool Calling ein aktiver, 
-vom Modell ausgelöster Prozess ist, bei dem ein Modell selbst entscheidet, wann welche Funktionen aufgerufen werden~\cite{tc07}. Bei \ac{rag} werden die relevanten
-Dokumente dagegen vor der Modellantwort aus dem Speicher abgerufen und dem Prozess als Kontext übergeben. Dieser Prozess ist somit passiv~\cite{tc07}. \ac{rag} eignet sich 
-für die Wissensanreicherung, Tool Calling, wenn Aktionen mit externen Systemen notwendig sind~\cite{tc07}. Zusätzlich ist \ac{mcp} abzugrenzen. 
+Tool Calling ist von \acf{rag} abzugrenzen. Bei \ac{rag} wird das vortrainierte \ac{llm} und eine externe Wissensdatenbank ergänzt, aus der relevante Dokumentenausschnitte
+abgerufen werden~\cite[1]{rag04}. Dazu werden die Dokumente bei der Indexierung in Cunks zerlegt, mithilfe eines Embedding-Modelss in Vektorrepräsentationen
+umgewandelt und in einer Vektordatenbank gespeichert~\cite[3]{rag04}. Bei einer Nutzeranfrage wird diese ebenfalls in eine Vektorrepräsentation umgewandelt
+und die passendesten Chunks berechnet~\cite[3]{rag04}. Die ausgewählten Chunks werden mit der Nutzeranfrage kombiniert und auf Basis dessen eine Antwort 
+für den Nutzer generiert~\cite[3]{rag04}. Der Unterschied zwischen diesen beiden Ansätzen besteht darin, dass Tool Calling ein aktiver, vom Modell ausgelöster 
+Prozess ist, bei dem ein Modell selbst entscheidet, wann welche Funktionen aufgerufen werden~\cite{tc07}. Bei \ac{rag} werden die relevanten
+Dokumente dagegen vor der Modellantwort aus dem Speicher abgerufen und dem Prozess als Kontext übergeben. Dieser Prozess ist somit passiv~\cite{tc07}. \ac{rag} 
+eignet sich für die Wissensanreicherung, Tool Calling, wenn Aktionen mit externen Systemen notwendig sind~\cite{tc07}. Zusätzlich ist \ac{mcp} abzugrenzen. 
 Dabei handelt es sich um einen Open-Source-Standard, der es ermöglicht, \ac{ki}-Anwendungen mit Datenquellen, Tools oder Workflows zu verbinden~\cite{tc13}. Tool Calling 
 beschreibt den Mechanismus, wie ein Tool genutzt wird, \ac{mcp} wie das \ac{llm} mit diesem Tool verbunden wird~\cite{tc05}. \\
 Bei der Implementierung von Tool Calling bestehen verschiedene Herausforderungen. Es wird zwar die Erfüllung einer Nutzeranfrage verbessert, jedoch steigen
 auch die Latenz und die Kosten, da mehr Schritte benötigt werden~\cite[17776]{tc08}. Stehen einem \ac{llm} zu viele Tools zur Verfügung, sinkt zusätzlich die
 Performance~\cite{tc03}. Tools sollten dynamisch implementiert werden, damit ein Modell das notwendige Tool mithilfe von Vektorähnlichkeiten erfassen kann.
 Zudem sollte eine Fehlerbehandlung implementiert werden~\cite{tc03}. Durch strukturierte Fehlermeldungen kann ein \ac{llm} diese besser behandeln. Vorübergehende Fehler
-wie eine Netzwerkunterbrechung sollten direkt in der Tool-Schicht behandelt werden durch Wiederholungen mit exponentiell steigender Wartezeit behandelt werden~\cite{tc03}.
+wie eine Netzwerkunterbrechung sollten direkt in der Tool-Schicht durch Wiederholungen mit exponentiell steigender Wartezeit behandelt werden~\cite{tc03}.
 Fehler, die eine definierte Schwelle überschreiten, sollten dazu führen, dass ein Tool nicht mehr aufgerufen wird und dem \ac{llm} explizit mitgeteilt wird, dass 
 es nicht mehr zur Verfügung steht~\cite{tc03}. Diese Prinzipien werden auch in der in Kapitel~\ref{ch:methodik} untersuchten Implementierung aufgegriffen.
 
@@ -366,8 +370,8 @@ es nicht mehr zur Verfügung steht~\cite{tc03}. Diese Prinzipien werden auch in 
 
 Tool Calling erweitert die Funktionen von \acp{llm}. Neben der Texterzeugung ist es auch möglich, über Tools Aktionen auszuführen 
 und auf externe Systeme zuzugreifen. Dabei wird zwischen aktiven und passiven Tools unterschieden. Passive Tools dienen dazu, externe Informationen zu sammeln, 
-welche in den Kontext des \ac{llm}s eingefügt werden sollen. Mit aktiven Tools werden dagegen Aktionen ausgeführt, für die keine menschliche Prüfung notwendig
-ist~\cite[21]{tc09}. Tools wie Taschenrechnern oder Übersetzer stellen dabei keine Gefahr dar. Mit dem Zugriff auf das Internet
+welche in den Kontext des \ac{llm}s eingefügt werden sollen. Mit aktiven Tools werden dagegen Aktionen ausgeführt~\cite[21]{tc09}. Tools wie Taschenrechnern oder 
+Übersetzer stellen dabei keine Gefahr dar. Mit dem Zugriff auf das Internet
 und der Funktionalität, eigenständige Entscheidungen zu treffen, wird jedoch eine Angriffsfläche erzeugt~\cite[26]{tc11}. Ein \ac{llm} wird dadurch befähigt, auf 
 private und 
 unangemessene Informationen zuzugreifen oder schädliche Aktionen auszuführen~\cite[10]{tc15}. Werden Tool Calls mithilfe des Outputs des \ac{llm}s durchgeführt, können 
@@ -406,7 +410,7 @@ Kategorien definiert, die bestimmen, wie anfällig ein \ac{llm} für solche Angr
 Inhalte verarbeitet und mit externen Systemen kommuniziert, sind die Voraussetzungen gegeben. Wird eine dieser Kategorien entfernt, entfällt die 
 Angriffsfläche~\cite[13]{pi24}. \\
 Beispiele, welche das Bestehen dieser Angriffsfläche verdeutlichen, sind in OWASP dokumentiert. In einem dieser Szenarien erhält ein \ac{llm}-basierter Assistent
-urch einen Tool Call Zugriff auf das Postfach~\cite[26]{pi24}. Ziel ist es, den Inhalt der E-Mails zusammenzufassen. Um diese Funktion zu ermöglichen, 
+durch einen Tool Call Zugriff auf das Postfach~\cite[26]{pi24}. Ziel ist es, den Inhalt der E-Mails zusammenzufassen. Um diese Funktion zu ermöglichen, 
 muss das \ac{llm} die Nachrichten lesen können. Das verwendete Tool kann jedoch zusätzlich auch Nachrichten versenden. Eine E-Mail mit einer 
 versteckten Anweisung kann dazu führen, dass über einen indirekten Prompt-Injection-Angriff sensible Informationen an den Angreifer geleitet werden~\cite[26]{pi24}.
 Dieses Beispiel stimmt mit den drei Kategorien des Lethal Trifecta überein und kombiniert übermäßige Funktionalitäten und den Abfluss von Daten über ein Tool.
@@ -414,7 +418,7 @@ Dass solche Szenarien nicht nur theoretisch sind, zeigen dokumentierte Angriffe 
 Abschnitt~\ref{sec:beispiele_angriffe} Angriffe näher betrachtet. \\
 Zusammenfassend ist Prompt Injection die Kompromittierung der Eingabeseite. Erst die übermäßigen Funktionalitäten und Berechtigungen, die durch
 die Kombination mit Tool Calling vergeben werden, ermöglicht es, dass sich die Kompromittierung auf ein ganzes System ausbreitet~\cite[13]{pi24}. In diesem Abschnitt
-wurden somit die Möglichkeiten, die mit einem Angriff über Tools erreicht werden können. Wie das System manipuliert werden kann, wird in
+wurden somit die Möglichkeiten, die mit einem Angriff über Tools erreicht werden können, betrachtet. Wie das System manipuliert werden kann, wird in
 Kapitel~\ref{ch:promptinjection} betrachtet.
 
 \section{Chatbots}
@@ -459,7 +463,7 @@ dass Chatbots
 dieser Art kein eigenes Wissen einbringen, somit ist es unwahrscheinlicher, dass falsche Informationen generiert werden und die Antworten erklärt und reproduziert 
 werden
 können~\cite[101]{cb05}. Zudem sind die Antwortzeiten sehr kurz, da keine genaue Analyse der Nutzereingabe durchgeführt werden muss~\cite[5]{cb11}. Grenzen werden 
-jedoch erreicht, wenn sich ein solches System mit Nutzern über beliebige Themen unterhalten kann, da mehr Regeln und Wortlisten erstellt werden
+jedoch erreicht, wenn sich ein solches System mit Nutzern über beliebige Themen unterhalten soll, da mehr Regeln und Wortlisten erstellt werden
 müssten, als realistisch ist~\cite[102]{cb05}. Dementsprechend erzielten viele dieser Chatbots nicht die erhoffte Wirkung, da die Nutzer durch unsinnige Antworten und 
 mangelnde Benutzbarkeit nicht zufriedengestellt werden konnten~\cite[378]{cb02}. \\
 Retrieval-basierte Chatbots sind dagegen flexibler, da sie die am besten geeignete Antwort mithilfe der verfügbaren Ressourcen auswählen~\cite[10]{cb12}. Die 
@@ -549,7 +553,7 @@ können~\cite[88]{cb05}.
 Über Datenquellen werden externe Informationen, zum Beispiel Nutzerinformationen, in den Chatbot eingebunden~\cite[10]{cb11}. Diese Daten werden aus Datenbanken und 
 über
 Aufrufe von \acp{api} bezogen~\cite[10]{cb11}. Die Integration von Unternehmensdatenbanken und -dokumenten ist notwendig, um \ac{rag}-Szenarios zu ermöglichen, wenn 
-\acp{llm} spezifische Anfragen beantworten müssen~\cite[3]{pi18}. Durch diese Integration mit den Unternehmensdaten entsteht eine neue Angriffsfläche. Zusätzlich sind 
+\acp{llm} spezifische Anfragen beantworten werden müssen~\cite[3]{pi18}. Durch diese Integration mit den Unternehmensdaten entsteht eine neue Angriffsfläche. Zusätzlich sind 
 viele der Daten, die das \ac{llm} verarbeiten muss, ungeprüft und stammen aus nicht vertrauenswürdigen Quellen~\cite[1]{sm08}. Greift ein \ac{llm} auf manipulierte 
 Webseiten zu, 
 können die Ergebnisse verfälscht werden~\cite[2]{sm08}. Grundsätzlich können alle externen Quellen, auf die ein \ac{llm} zugreift, darunter Webseiten, Dokumente, 
@@ -568,8 +572,7 @@ zugreifen, Informationen extrahieren oder private Daten veröffentlichen~\cite[2
 Die damit verbundenen Bedrohungen wurden in Abschnitt~\ref{subsec:sicherheitsbedrohungen} beschrieben. \\
 Wie ein Angriff über Anweisungen eingeschleust werden kann, hängt von der Anwendung ab. Es lässt sich jedoch zwischen passiven, aktiven, nutzerausgelösten und 
 versteckten Methoden 
-unterscheiden~\cite[3\psq]{cb09}. In~\cite[3]{sm08} werden die möglichen Eintrittspunkte eines Angriffs auf den Chatbot visualisiert. Welche Angriffstechniken 
-für solche Angriffe verwendet werden können, wird in Kapitel~\ref{ch:promptinjection} näher beschrieben.
+unterscheiden~\cite[3\psq]{cb09}. Welche Angriffstechniken für solche Angriffe verwendet werden können, wird in Kapitel~\ref{ch:promptinjection} näher beschrieben.
 
 \section{Unternehmensinterne Chatbots}
 
@@ -585,20 +588,20 @@ zu reduzieren und viele Nutzeranfragen gleichzeitig bearbeiten zu können~\cite[
 Informationen
 nicht aus FAQ-Listen oder auf anderen umständlichen Wegen erfasst werden müssen~\cite[1]{cb11}. Diese Aussage wird auch von einer Studie unterstützt, in der 
 68 \% der Teilnehmer angaben, dass Produktivität der Hauptgrund für die Verwendung eines Chatbots ist~\cite[383]{cb02}. Die Verwendung ist leicht, schnell und bequem~\cite[383]{cb02}.
-Bei der Verwendung entsteht keine Wartezeit~\cite[384]{cb02} und sie sind häufiger geeigneter als andere Assistenzsysteme wie Onlinesuchen und Telefonate~\cite[379]{cb02}. Aus diesem
+Es entstehen keine Wartezeit~\cite[384]{cb02} und sie sind häufig geeigneter als andere Assistenzsysteme wie Onlinesuchen und Telefonate~\cite[379]{cb02}. Aus diesem
 Grund werden für alltägliche Aufgaben häufig Chatbots bevorzugt~\cite[385]{cb02}. Für Nutzer bedeutet die Verwendung zudem eine geringere Überwindung, bestimmte 
 Fragen zu stellen, da keine Angst besteht, verurteilt zu werden~\cite[385]{cb02}. Chatbots sind ständig verfügbar, skalierbar und zuverlässig, verursachen geringe 
 Kosten~\cite[3]{cb04} und können bei häufig gestellten Fragen für Entlastung sorgen~\cite[3004]{cb01}. \\
 Die Verwendung von Chatbots hat jedoch auch Grenzen. Sie verfügen nur über ein begrenztes Verständnis, sodass komplexe Fragen und spezielle Terminologie 
 teilweise nicht
 nachvollzogen werden können~\cite[3004]{cb01}. Sie können Frustration bei den Nutzern auslösen, wenn Anfragen nicht zufriedenstellend beantwortet werden, und müssen stetig 
-aktualisiert werden~\cite[3004]{cb01}. Werden Fragen falsch gestellt oder nicht ausreichend ausformuliert, können falsche Antworten generiert werden~\cite[238]{cb03}. 
-Eine Interaktion wird zudem durch die gegebene Wissensbasis beschränkt~\cite[238]{cb03}. Eine Studie zeigt zudem, dass 40 \% der Anfragen emotional sind und keine
+aktualisiert werden~\cite[3004]{cb01}. Falsch gestellte oder nicht ausreichend ausformuliert Fragen können zu falschen Antworten führen~\cite[238]{cb03} und eine 
+Interaktion wird durch die gegebene Wissensbasis beschränkt~\cite[238]{cb03}. Eine Studie zeigt zudem, dass 40 \% der Anfragen emotional sind und keine
 spezifischen Informationen erfragt werden~\cite[3506]{cb15}. Ein Chatbot muss in der Lage sein, diese Emotionen zu erkennen und sich daran anzupassen~\cite[380]{cb02}. \\
 Für unternehmensinterne Chatbots ergeben sich verschiedene Risiken. Das wichtigste Risiko entsteht durch vertrauliche Daten. Nutzer geben an, dass die Effizienz bei 
 der Beantwortung von Fragen steigt, je mehr Input in den Chatbot gegeben wird~\cite[385]{cb02}. Chatbots können die Identität, den Standort, soziale Daten und 
 andere Informationen über einen Nutzer feststellen~\cite[6]{cb04}. Der Datenschutz wird dadurch beeinflusst, ob es sich um ein geschlossenes oder offenes System
-handelt~\cite[5]{cb12}. Bei einem geschlossenen System werden die Daten in einer abgeschlossenen Umgebung verarbeitet. Zudem hat nur ein kleiner 
+handelt~\cite[5]{cb12}. Bei einem geschlossenen System werden die Daten in einer abgeschlossenen Umgebung verarbeitet. Es hat nur ein kleiner 
 Anwenderkreis Zugriff auf die Anwendung und auch die Kontrolle über die Ein- und Ausgabedaten~\cite[5]{cb12}. Offene Systeme dagegen werden unter anderem als 
 Cloud-Lösungen betrieben~\cite[6]{cb12}. Sie stehen im Internet für einen unbestimmten Anwenderkreis zur Verfügung, wodurch die Eingabedaten den geschützten Bereich 
 verlassen und auch für Antworten an andere Nutzer verwendet werden können~\cite[6]{cb12}. Dies betrifft auch dienstliche Informationen, die nicht für die Öffentlichkeit
@@ -609,12 +612,12 @@ und eine bessere Kommunikationsqualität aufbauen~\cite[6]{cb04}. Das Maß an Ve
 dem Erscheinungsbild und der Menschenähnlichkeit ab~\cite[1]{cb11}. Chatbots sind menschenähnlicher als andere interaktive Systeme, weswegen Nutzer auch eine höhere 
 Erwartung haben, dass sich ein Chatbot sozial und unterhaltsam verhält~\cite[388]{cb02}. Bereits mit ELIZA von Weizenbaum war es möglich, durch die Illusion von 
 Verständnis
-Glaubwürdigkeit zu erzeugen~\cite[42]{cb10}. Diese Gefahr wird heutzutage zunehmend verstärkt, da Inkonsistenzen schwerer festzustellen sind, dadurch, dass
+Glaubwürdigkeit zu erzeugen~\cite[42]{cb10}. Diese Gefahr wird heutzutage zunehmend verstärkt, da Inkonsistenzen in den Antworten schwerer festzustellen sind, dadurch, dass
 der Output syntaktisch kohärent ist und teilweise auch wahre Informationen beinhalten kann~\cite[9]{cb09}. Nutzer werden immer unachtsamer, wenn sie wissen, dass sie 
 mit
 einem Chatbot kommunizieren, und überprüfen die Antworten immer weniger auf ihre Richtigkeit~\cite[10\psq]{cb09}. Somit kann auf die Überprüfung der Ausgabe durch einen 
 Nutzer nicht vertraut werden~\cite[12]{cb09}. Nutzern wird es dadurch seltener möglich sein, einen Angriff zu erkennen, weil ein manipulierter Chatbot schädliche 
-Aktionen glaubhaft begründen kann~\cite[4]{sm08}. Sind die schädlichen Anweisungen zusätzlich versteckt und kodiert, gibt es für einen Nutzer keine Möglichkeit, 
+Aktionen glaubhaft begründen kann~\cite[4]{sm08}. Sind die schädlichen Anweisungen zusätzlich versteckt und kodiert, gibt es für einen Nutzer nur fast keine Möglichkeit, 
 diese zu erkennen~\cite[4]{sm08}. \\
 Das dritte Risiko ergibt sich durch die Anbindung eines Chatbots an interne Systeme. Je mehr Datenquellen und Tools ein Chatbot nutzen kann, desto größer wird die 
 mögliche Angriffsfläche. Das \ac{bsi} empfiehlt daher, den Zugriff auf Quellen so stark wie möglich einzuschränken und zusätzliche menschliche 
