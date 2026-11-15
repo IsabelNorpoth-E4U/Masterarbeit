@@ -81,10 +81,13 @@
 \glossaryentry{API?\glossentry{api}|setentrycounter[]{page}"\glsnumberformat}{9}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{9}
 \glossaryentry{API?\glossentry{api}|setentrycounter[]{page}"\glsnumberformat}{9}
+\glossaryentry{API?\glossentry{api}|setentrycounter[]{page}"\glsnumberformat}{9}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{10}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{10}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{10}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{10}
+\glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{10}
+\glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{11}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{11}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{11}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{11}
@@ -186,7 +189,11 @@
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{24}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{24}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{25}
+\glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{25}
+\glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{25}
+\glossaryentry{URL?\glossentry{url}|setentrycounter[]{page}"\glsnumberformat}{25}
 \glossaryentry{OWASP?\glossentry{owasp}|setentrycounter[]{page}"\glsnumberformat}{26}
+\glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{26}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{26}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{26}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{26}
@@ -197,6 +204,8 @@
 \glossaryentry{MCP?\glossentry{mcp}|setentrycounter[]{page}"\glsnumberformat}{27}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{27}
 \glossaryentry{GCP?\glossentry{gcp}|setentrycounter[]{page}"\glsnumberformat}{29}
+\glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{29}
+\glossaryentry{RAG?\glossentry{rag}|setentrycounter[]{page}"\glsnumberformat}{29}
 \glossaryentry{BNetzA?\glossentry{bnetza}|setentrycounter[]{page}"\glsnumberformat}{29}
 \glossaryentry{HTTPS?\glossentry{https}|setentrycounter[]{page}"\glsnumberformat}{30}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{30}
@@ -211,6 +220,7 @@
 \glossaryentry{VPC?\glossentry{vpc}|setentrycounter[]{page}"\glsnumberformat}{30}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{32}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{32}
+\glossaryentry{API?\glossentry{api}|setentrycounter[]{page}"\glsnumberformat}{32}
 \glossaryentry{API?\glossentry{api}|setentrycounter[]{page}"\glsnumberformat}{32}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{32}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{32}
@@ -362,7 +372,7 @@
 \glossaryentry{FPR?\glossentry{fpr}|setentrycounter[]{page}"\glsnumberformat}{77}
 \glossaryentry{FPR?\glossentry{fpr}|setentrycounter[]{page}"\glsnumberformat}{78}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{79}
-\glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{79}
+\glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{80}
 \glossaryentry{FPR?\glossentry{fpr}|setentrycounter[]{page}"\glsnumberformat}{80}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{80}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{80}
@@ -384,4 +394,4 @@
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{83}
 \glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{83}
 \glossaryentry{FPR?\glossentry{fpr}|setentrycounter[]{page}"\glsnumberformat}{83}
-\glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{83}
+\glossaryentry{LLM?\glossentry{llm}|setentrycounter[]{page}"\glsnumberformat}{84}
