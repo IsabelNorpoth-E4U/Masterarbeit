@@ -182,17 +182,17 @@ exfiltrate data or trigger harmful actions. In cooperation with Energy4U GmbH, t
 chatbot ChatBot4U as an example, to what extent an internal company chatbot with tool calling can be protected
 against indirect prompt injection attacks. \\
 In a local test environment, selected attacks revealed five vulnerabilities of the chatbot. Based on these, a
-protective measure was developed: an upstream model (Mistral Small 4) checks each request using a combination of
+protective measure was developed. An Guardmodel (Mistral Small 4) checks each request using a combination of
 prompt filtering, input modification and prompt enhancement before it is passed on to the main model (Mistral
 Large 4). An original approach based on a binary query, which measures the basic detection capability of the
 models, serves as a comparison. Both approaches were applied to a custom dataset and to the public datasets BIPIA
-and NotInject. The evaluation was based on recall, false positive rate (FPR), latency and cost. \\
-The enhanced measure increases recall from 34.0--73.1\,\% to 82.8--92.0\,\%. The FPR remains largely unchanged and
+and NotInject. The evaluation was based on metrics like recall, false positive rate (FPR), latency and cost. \\
+The enhanced measure increases recall from 34.0--73.1\,\% to 82.8--92.0\,\%. The FPR remains the same or decreases and
 reaches up to 13.5\,\%. However, costs rise by up to a factor of twelve, and latency reaches up to 6\,s per check.
 The upstream model therefore significantly improves the detection of prompt injection attacks, but is not
 sufficient as a stand-alone measure. Further limitations are that the measure was tested independently of the
 chatbot, does not detect multi-turn attacks and, due to its high FPR, can only be used to a limited extent in
-production, as benign user requests are falsely blocked. It should therefore be combined with additional measures, such as human oversight of tool calls
+production environments, as benign user requests are falsely blocked. It should therefore be combined with additional measures, such as human oversight of tool calls
 and a restriction of permitted target addresses.]
 {LLMs werden zunehmend in Chatbots eingesetzt, unter anderem im automatisierten Kundenservice oder im Marketing.
 Um sie an bestimmte Anwendungsfälle anzupassen, werden sie über Tool Calling mit internen Unternehmensdaten und externen 
@@ -208,14 +208,14 @@ Hauptmodell (Mistral Large 4) weitergereicht wird. Als Vergleich dient ein Origi
 der die grundlegende Erkennungsfähigkeit der Modelle misst. Angewendet wurden die Ansätze auf einen eigenen Datensatz
 und die öffentlichen Datensätze BIPIA und NotInject. Die Evaluation wurde anhand von Metriken, unter anderem
 Recall, FPR, Latenz und Kosten, durchgeführt. \\
-Durch die weiterentwickelte Maßnahme steigt der Recall von 34,0 bis 73,1\,\% auf 82,8 bis 92,0\,\%. Die FPR verändert
-sich kaum und erreicht bis zu 13,5\,\%. Die Kosten steigen jedoch auf bis zum Zwölffachen und die Latenz beträgt bis
+Durch die weiterentwickelte Maßnahme steigt der Recall von 34,0 bis 73,1\,\% auf 82,8 bis 92,0\,\%. Die FPR bleibt 
+gleich oder sinkt und erreicht bis zu 13,5\,\%. Die Kosten steigen jedoch auf bis zum Zwölffachen und die Latenz beträgt bis
 zu 6\,s pro Prüfung. Das vorgeschaltete Modell verbessert die Erkennung von Prompt-Injection-Angriffen deutlich, 
 reicht als alleinstehende Maßnahme jedoch nicht aus. Einschränkend kommt hinzu, dass die Maßnahme unabhängig vom
 Chatbot getestet wurde, keine Multi-Turn-Angriffe erkennt und aufgrund der hohen FPR nur eingeschränkt im 
-produktiven Einsatz verwendet werden kann, da harmlose Nutzernanfragen fälschlich blockiert werden. Daher sollte sie 
+produktiven Einsatz verwendet werden kann, da harmlose Nutzeranfragen fälschlich blockiert werden. Daher sollte sie 
 in Kombination mit weiteren Maßnahmen implementiert werden, 
-wie einer menschlichen Kontrolle und einer erweiterten Kontrolle der Zieladressen.}
+wie einer menschlichen Kontrolle der Tool-Aufurfe und einer Einschränkung der zulässigen Zieladressen.}
 
 %%% Optional Fields for Thesis
 %\defensedate{2022}% Defense Date (please specify year of defense, default will be the same year as submission date)
