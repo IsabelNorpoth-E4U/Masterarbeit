@@ -78,7 +78,7 @@ Auf Grundlage der gesammelten Ergebnisse lässt sich festhalten, dass ein vorges
 Prompt-Injection-Angriffe absichern kann. Mit dem erweiterten Ansatz werden 82,8\,\% bis 92,0\,\% der Angriffe richtig klassifiziert, gegenüber 34,0\,\% bis 73,1\,\%
 beim Originalansatz. Von den in Kapitel~\ref{ch:methodik} durchgeführten Angriffsvarianten wurden 27 von 29 richtig erkannt. \\
 Die Aussagekraft ist jedoch eingeschränkt. Der Ansatz wurde nicht in den Chatbot integriert, sondern unabhängig davon getestet. Die \ac{fpr}~\eqref{eq:fpr} erreichte bis zu
-13,5\,\% und beeinträchtigt somit einen realitätsnahen Einsatz. Zudem werden keine Multi-Turn-Angriffe erkannt, da die Prüfung bei jeder Anfrage
+13,5\,\% und beeinträchtigt somit einen realitätsnahen Einsatz. Zudem werden Multi-Turn-Angriffe nicht erkannt, da die Prüfung bei jeder Anfrage
 unabhängig durchgeführt wird. Auch die Erkennung, ob eine Anfrage externe Inhalte enthält, kann nicht von der Schutzmaßnahme durchgeführt werden. Es muss somit im
 Datensatz bereits festgelegt sein, wodurch eine praktische Anwendung erschwert wird. \\
 Die Schwachstellen des Chatbots, wie z.\,B. die übermäßige Funktionalität, wurden nicht unmittelbar behoben. Stattdessen werden durch eine Prüfung der Nutzereingaben die

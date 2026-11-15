@@ -1,5 +1,6 @@
 import ast
 import json
+import statistics
 
 from mistral_common.protocol.instruct.messages import SystemMessage, UserMessage
 from mistral_common.protocol.instruct.request import ChatCompletionRequest
@@ -185,11 +186,10 @@ def count_run(model, file_name):
 
     price_in, price_out = PRICES[model]
     cost = tokens_in / 1e6 * price_in + tokens_out / 1e6 * price_out
-    # median like in metrics.py
-    latencies.sort()
+    # median like in metrics.py (mean of the two middle values for an even number)
     return {
         "entries": len(rows),
-        "latency_median": latencies[len(latencies) // 2],
+        "latency_median": statistics.median(latencies),
         "requests": number_of_requests,
         "tokens_in": tokens_in,
         "tokens_out": tokens_out,
