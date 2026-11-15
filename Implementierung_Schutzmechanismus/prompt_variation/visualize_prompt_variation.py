@@ -116,10 +116,9 @@ def percent_tex(rate):
     return f"{100 * rate:.1f}".replace(".", "{,}")
 
 
-# rate with confidence interval, the interval small and gray (as in ../visualize_results.py)
+# rate in percent (as in ../visualize_results.py, no confidence interval)
 def share_tex(share):
-    return (percent_tex(share["rate"]) + r"\,\% {\scriptsize\color{gray}["
-            + percent_tex(share["ci_low"]) + "; " + percent_tex(share["ci_high"]) + "]}")
+    return percent_tex(share["rate"]) + r"\,\%"
 
 
 # one row per guard prompt, recall and FPR for every data set

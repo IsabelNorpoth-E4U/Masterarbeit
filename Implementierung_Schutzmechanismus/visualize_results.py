@@ -123,14 +123,9 @@ def percent_tex(rate):
     return f"{100 * rate:.1f}".replace(".", "{,}")
 
 
-# rate with confidence interval, the interval small and gray
+# rate in percent (the confidence interval is no longer shown in the thesis)
 def share_tex(share):
-    return (percent_tex(share["rate"]) + r"\,\% {\scriptsize\color{gray}["
-            + percent_tex(share["ci_low"]) + "; " + percent_tex(share["ci_high"]) + "]}")
-
-
-def number_tex(value):
-    return f"{value:.3f}".replace(".", "{,}")
+    return percent_tex(share["rate"]) + r"\,\%"
 
 
 def save_text(text, file_name):
@@ -151,10 +146,10 @@ def label_tex(run):
 # one big table with every run of both data sets
 def write_results_table(runs):
     lines = [
-        r"\begin{tabular}{l rrrr rr rr r}",
+        r"\begin{tabular}{l rrrr rr r}",
         r"\toprule",
         r"\textbf{Ansatz} & \textbf{TP} & \textbf{FN} & \textbf{FP} & \textbf{TN} & "
-        r"\textbf{Recall} & \textbf{FPR} & \textbf{Precision} & \textbf{F1} & "
+        r"\textbf{Recall} & \textbf{FPR} & "
         r"\textbf{Latenz (Median)} \\",
     ]
     for data_set in DATA_SETS:
@@ -165,7 +160,7 @@ def write_results_table(runs):
         attacks = cm["tp"] + cm["fn"]
         harmless = cm["fp"] + cm["tn"]
         lines.append(r"\midrule")
-        lines.append(r"\multicolumn{10}{l}{\textit{" + DATA_SET_NAMES[data_set] + " (Test-Split, "
+        lines.append(r"\multicolumn{8}{l}{\textit{" + DATA_SET_NAMES[data_set] + " (Test-Split, "
                      + str(attacks) + " Angriffe, " + str(harmless) + " harmlose Texte)}} \\\\")
         for run in selected:
             m = run["metrics"]
@@ -174,7 +169,6 @@ def write_results_table(runs):
                          + " & " + str(cm["tp"]) + " & " + str(cm["fn"])
                          + " & " + str(cm["fp"]) + " & " + str(cm["tn"])
                          + " & " + share_tex(m["recall"]) + " & " + share_tex(m["fpr"])
-                         + " & " + number_tex(m["precision"]) + " & " + number_tex(m["f1"])
                          + " & " + f"{m['latency_ms']['median']:.0f}" + r"\,ms \\")
     lines.append(r"\bottomrule")
     lines.append(r"\end{tabular}")
