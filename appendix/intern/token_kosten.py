@@ -6,7 +6,8 @@ from mistral_common.protocol.instruct.messages import SystemMessage, UserMessage
 from mistral_common.protocol.instruct.request import ChatCompletionRequest
 from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
 
-# the prompts are read from the scripts, importing them would start the api run
+# files are searched for prompts (e.g. GUARD_PROMPT)
+# -> creates ORIGINAL and NEW
 def read_constants(file_name, names):
     with open(file_name, encoding="utf-8") as file:
         tree = ast.parse(file.read())
@@ -25,7 +26,6 @@ NEW = read_constants("main_new_approach_mistral.py",
 TABLE_FILE = ("results_diagramms/"
               "mistral_small4_test_new_approach_vs_original_tabelle_token_kosten.tex")
 
-# price in dollar per one million tokens (input, output), see section 5
 PRICES = {
     "mistral_small4": (0.15, 0.60),
     "mistral_large4": (1.36, 4.16),
@@ -36,7 +36,6 @@ TOKENIZERS = {
     "mistral_large4": MistralTokenizer.from_hf_hub("mistralai/Mistral-Large-4-1T-A52B"),
 }
 
-# the runs of table tab:ergebnisse: (data set, approach, model, result file)
 RUNS = [
     ("Eigener Datensatz", "Original (Mistral Small~4)", "mistral_small4",
      "results/mistral_small4_test_original_eigen_results.jsonl"),
@@ -56,7 +55,6 @@ RUNS = [
      "results/mistral_small4_test_new_approach_bipia_obfuscated_results.jsonl"),
 ]
 
-
 def load_jsonl(file_name):
     rows = []
     with open(file_name, encoding="utf-8") as file:
@@ -65,16 +63,14 @@ def load_jsonl(file_name):
                 rows.append(json.loads(line))
     return rows
 
-
-# the user text of the guiding questions, like question_answers() in main_new_approach_mistral.py
+# builds request like question_answers() in main_new_approach_mistral.py
 def question_text(text):
     user_text = "Nachricht:\n<<<\n" + text + "\n>>>\n\nFragen:\n"
     for name in NEW["QUESTIONS"]:
         user_text = user_text + name + ": " + NEW["QUESTIONS"][name] + "\n"
     return user_text
 
-
-# the same as number_lines() in main_new_approach_mistral.py
+# same as number_lines() in main_new_approach_mistral.py
 def number_lines(text):
     sentences = []
     for line in text.split("\n"):
@@ -96,13 +92,7 @@ def number_lines(text):
         numbered.append("[" + str(number) + "] " + sentence)
     return "\n".join(numbered)
 
-
-# the user text of the numbered lines, like line_check() in main_new_approach_mistral.py
-def lines_text(text):
-    return "Text:\n<<<\n" + number_lines(text) + "\n>>>"
-
-
-# number of input tokens of one request (with the chat template)
+# build request with systemprompt an usertext and counts token
 def input_tokens(model, system_prompt, user_text):
     messages = [SystemMessage(content=system_prompt), UserMessage(content=user_text)]
     # the template of Mistral Large 4 has no "none", there the setting is left out
@@ -112,61 +102,68 @@ def input_tokens(model, system_prompt, user_text):
         request = ChatCompletionRequest(messages=messages)
     return len(TOKENIZERS[model].encode_chat_completion(request).tokens)
 
-
-# number of output tokens of one answer, +1 for the end of the answer
+# counts output token of the answer
+# +1 because every answer is </s>
 def output_tokens(model, answer):
     tokenizer = TOKENIZERS[model].instruct_tokenizer.tokenizer
     return len(tokenizer.encode(answer, bos=False, eos=False)) + 1
 
-
-# the JSON answer of the guiding questions, in the form of QUESTION_PROMPT
+# builds json answer with saved ja/nein
 def questions_answer(questions):
     data = {}
     for name in questions:
-        data[name] = "JA" if questions[name] else "NEIN"
+        if questions[name]:
+            data[name] = "JA"
+        else:
+            data[name] = "NEIN"
     return json.dumps(data, ensure_ascii=False)
 
-
-# the JSON answer of the numbered lines, in the form of LINES_PROMPT
-def lines_answer(requests):
-    return json.dumps({"aufforderungen": requests}, ensure_ascii=False)
-
-
-# all requests of one test case of the original approach: (input, output)
+# original approach sends one request -> function returns pair of (input, output)
 def requests_original(model, row):
-    return [(input_tokens(model, ORIGINAL["GUARD_PROMPT"], "Nutzereingabe: " + row["prompt"]),
-             output_tokens(model, row["answer"]))]
-
+    tokens_in = input_tokens(model, ORIGINAL["GUARD_PROMPT"], "Nutzereingabe: " + row["prompt"])
+    tokens_out = output_tokens(model, row["answer"])
+    return [(tokens_in, tokens_out)]
 
 # all requests of one test case of the new approach: (input, output)
 # views with "same_as" were not sent again
 def requests_new_approach(model, row):
     requests = []
-    external = row["input_type"] == "external"
     for name in ["V0", "VN", "VS"]:
         view = row["views"][name]
-        if "same_as" not in view:
-            requests.append((input_tokens(model, NEW["QUESTION_PROMPT"],
-                                          question_text(view["text"])),
-                             output_tokens(model, questions_answer(view["questions"]))))
-            if not external:
-                requests.append((input_tokens(model, NEW["GUARD_PROMPT"],
-                                              "Nutzereingabe: " + view["text"]),
-                                 output_tokens(model, view["guard_answer"])))
-        # numbered lines on V0 and VN, VN only if it is different from V0
-        if external and name in ["V0", "VN"] and "same_as" not in view:
-            requests.append((input_tokens(model, NEW["LINES_PROMPT"],
-                                          lines_text(view["text"])),
-                             output_tokens(model, lines_answer(view["requests"]))))
+        if "same_as" in view:
+            continue
+
+        # guiding questions
+        tokens_in = input_tokens(model, NEW["QUESTION_PROMPT"], question_text(view["text"]))
+        tokens_out = output_tokens(model, questions_answer(view["questions"]))
+        requests.append((tokens_in, tokens_out))
+
+        if row["input_type"] == "external":
+            # numbered lines, only on V0 and VN
+            if name != "VS":
+                # like line_check() in main_new_approach_mistral.py,
+                # the JSON answer in the form of LINES_PROMPT
+                user_text = "Text:\n<<<\n" + number_lines(view["text"]) + "\n>>>"
+                answer = json.dumps({"aufforderungen": view["requests"]}, ensure_ascii=False)
+                tokens_in = input_tokens(model, NEW["LINES_PROMPT"], user_text)
+                tokens_out = output_tokens(model, answer)
+                requests.append((tokens_in, tokens_out))
+        else:
+            # guard prompt
+            tokens_in = input_tokens(model, NEW["GUARD_PROMPT"], "Nutzereingabe: " + view["text"])
+            tokens_out = output_tokens(model, view["guard_answer"])
+            requests.append((tokens_in, tokens_out))
     return requests
 
-
-# German number format: 1.234.567 and 0,12
+# change number format from englisch to german -> to put result in text
 def number_de(value, decimals=0):
-    text = f"{value:,.{decimals}f}"
-    return text.replace(",", "X").replace(".", "{,}").replace("X", ".")
+    text = format(value, ",." + str(decimals) + "f")
+    text = text.replace(",", "X")
+    text = text.replace(".", "{,}")
+    text = text.replace("X", ".")
+    return text
 
-
+# main function for token counting process
 def count_run(model, file_name):
     rows = load_jsonl(file_name)
     number_of_requests = 0
@@ -180,12 +177,13 @@ def count_run(model, file_name):
         else:
             requests = requests_original(model, row)
         number_of_requests = number_of_requests + len(requests)
-        for request_in, request_out in requests:
-            tokens_in = tokens_in + request_in
-            tokens_out = tokens_out + request_out
+        for request in requests:
+            tokens_in = tokens_in + request[0]
+            tokens_out = tokens_out + request[1]
 
-    price_in, price_out = PRICES[model]
-    cost = tokens_in / 1e6 * price_in + tokens_out / 1e6 * price_out
+    price_in = PRICES[model][0]
+    price_out = PRICES[model][1]
+    cost = tokens_in / 1000000 * price_in + tokens_out / 1000000 * price_out
     # median like in metrics.py (mean of the two middle values for an even number)
     return {
         "entries": len(rows),
@@ -198,7 +196,7 @@ def count_run(model, file_name):
         "cost_per_1000": cost / len(rows) * 1000,
     }
 
-
+# build table for text
 lines = [
     r"\begin{tabular}{l r r r r r r r r}",
     r"\toprule",
