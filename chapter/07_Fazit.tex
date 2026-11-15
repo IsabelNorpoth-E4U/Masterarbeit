@@ -11,8 +11,10 @@ Handlungsempfehlung für den ChatBot4U definiert und ein Ausblick für weiterfü
 \paragraph{Teilforschungsfrage 1: Welche Schwachstellen weist der Chatbot in Bezug auf indirekte Prompt-Injection-Angriffe auf?}
 
 Die in Kapitel~\ref{ch:methodik} durchgeführten Angriffe haben gezeigt, wie anfällig der Chatbot für indirekte Prompt-Injection-Angriffe war. In der lokalen
-Testumgebung waren von sieben durchgeführten Angriffen sechs in mindestens einem Versuch erfolgreich. Der Chatbot verhinderte weder die Ausführung versteckter Inhalte
-noch die Übermittlung von Daten an eine lokale Webseite und folgte den Aufforderungen, den Nutzer nicht über die Aktionen zu informieren. Die einzelnen Versuche der
+Testumgebung ware jede der sechs indirekten Angriffen in mindestens einem Versuch erfolgreich. Die Multiturn Injection wurde als direkter
+Angriff gewertet und nicht berücksichtigt. Der Chatbot verhinderte weder die Ausführung versteckter Inhalte
+noch die Übermittlung von Daten an eine lokale Webseite. Zwar meldete er dem Nutzer in einigen Versuchen den versteckten Inhalt, folgte jedoch auch Aufforderungen, 
+den Nutzer nicht über die Aktionen zu informieren. Die einzelnen Versuche der
 Angriffe wurden jeweils nur einmal durchgeführt. Aus diesem Grund lässt sich keine Aussage darüber treffen, mit welcher Wahrscheinlichkeit das \ac{llm} diese Angriffe
 zulässt. \\
 Anhand der erfolgreichen Angriffe konnten die folgenden fünf Schwachstellen definiert werden:
@@ -33,50 +35,53 @@ sensible Daten, verarbeitete nicht vertrauenswürdige Inhalte und konnte extern 
 Bei der Verhinderung von Prompt-Injection-Angriffen ist ein vorgeschaltetes \ac{llm} je nach Ausgestaltung nur eingeschränkt hilfreich. Bei einer einfachen binären
 Abfrage mit Mistral Small 4 wurden auf dem eigenen Datensatz 73,1\,\% der Angriffe abgewehrt. Auf dem kombinierten Datensatz aus BIPIA und NotInject lag
 dieser Wert bei 34,0\,\% und auf dem verschleierten BIPIA-Datensatz bei 43,0\,\%. Bei der Verwendung von Mistral Large 4 wurden hingegen nur 41,6\,\% der Angriffe im
-eigenen Datensatz und 24,5\,\% im Datensatz aus BIPIA und NotInject erkannt. Diese Werte wurden in Kombination mit einer \ac{fpr}~\eqref{eq:fpr} von 1,2\,\% erreicht. \\
+eigenen Datensatz und 24,5\,\% im Datensatz aus BIPIA und NotInject erkannt. Diese Werte wurden in Kombination mit einer \ac{fpr}~\eqref{eq:fpr} von 0,0\,\% bzw. 1,2\,\% erreicht. \\
 Diese Ergebnisse sind abhängig von dem Prompt, der dem \ac{llm} zusammen mit der Nutzeranfrage übergeben wird, der Art der schädlichen Anweisungen, die
 erkannt werden müssen, und der Art des Inhalts. Ausschlaggebend sind zusätzlich enthaltene Triggerwörter, welche von dem \ac{llm} vorschnell als Angriff gewertet werden. \\
 Es lässt sich feststellen, dass ein vorgeschaltetes \ac{llm} bei der Erkennung von indirekten Prompt-Injection-Angriffen nur bedingt
-zuverlässig ist und die Leistung variiert, je komplexer eine Anfrage ist. Zusätzlich muss berücksichtigt werden, dass die Frage ausschließlich für den untersuchten
+zuverlässig ist und die Leistung abnimmt, je komplexer eine Anfrage ist. Zusätzlich muss berücksichtigt werden, dass die Frage ausschließlich für den untersuchten
 Ansatz und für \acp{llm} von Mistral beantwortet wurde. Daher ist die Aussage auf diesen spezifischen Anwendungsfall bezogen.
 
-\paragraph{Teilforschungsfrage 3: Verbessert sich die Erkennung von Prompt-Injection-Angriffen, wenn die Schutzmaßnahme um Segmentierung und Rekonstruktion erweitert wird?}
+\paragraph{Teilforschungsfrage 3: Verbessert sich die Erkennung von Prompt-Injection-Angriffen, wenn die Schutzmaßnahme zu einer mehrstufigen Prüfung erweitert wird?}
 
 Durch die Erweiterung der Schutzmaßnahme konnten deutliche Verbesserungen festgestellt werden. Der Recall~\eqref{eq:recall} stieg auf dem eigenen Datensatz von 73,1\,\% auf 82,8\,\%.
 Auf dem Datensatz BIPIA und NotInject stieg er von 34,0\,\% auf 92,0\,\% und auf dem verschleierten BIPIA-Datensatz von 43,0\,\% auf 91,0\,\%. Die Veränderungen
 der \ac{fpr}~\eqref{eq:fpr} fielen weniger stark aus. Auf den öffentlichen Datensätzen blieb sie unverändert, auf dem eigenen Datensatz sank sie von 10,9\,\% auf 6,8\,\%. \\
-Die Verbesserungen des Recall~\eqref{eq:recall}s werden durch unterschiedliche Stufen des erweiterten Ansatzes ausgelöst. Die Rekonstruktion ist vor allem bei verschleierten
+Die Verbesserungen des Recall~\eqref{eq:recall} werden durch unterschiedliche Stufen des erweiterten Ansatzes ausgelöst. Die Rekonstruktion ist vor allem bei verschleierten
 Angriffen im eigenen Datensatz und im verschleierten BIPIA-Datensatz hilfreich. Durch die Dekodierung Base64-kodierter Anfragen, eine Rechtschreibkorrektur und
 weitere Rekonstruktionsschritte lassen sich die Angriffe vom \ac{llm} besser klassifizieren, da sie mehr einem Klartext entsprechen. \\
 Durch die Verwendung der Leitfragen in der zweiten Stufe, welche die Absichten einer Anfrage ermitteln, werden die Angriffe insbesondere im eigenen Datensatz richtig
 klassifiziert. Die in der dritten Stufe durchgeführte Segmentierung wird ausschließlich auf externe Inhalte angewendet und ermöglicht es dem \ac{llm}, eine bessere
-Übersicht über die Daten zu behalten. Durch die Nummerierung der Zeilen wird jede einzeln verarbeitet und weder die Position der Angriffe noch die Länge der
-externen Inhalte sind ausschlaggebend für die Erkennung. Dies ist vor allem für den BIPIA-Datensatz relevant, bei dem 86,5\,\% der Angriffe auf diese Weise erkannt
+Übersicht über die Daten zu behalten. Durch die Nummerierung der Zeilen wird jede einzeln verarbeitet, sodass die Position der Angriffe nicht mehr ausschlaggebend 
+für die Erkennung ist. Dies ist vor allem für den BIPIA-Datensatz relevant, bei dem 86,5\,\% der Angriffe auf diese Weise erkannt
 werden. \\
-Für die Teilforschungsfrage lässt sich somit die Aussage treffen, dass die Erweiterung die Erkennung der Angriffe verbessert. Jedoch führt diese Erweiterung zu
+Für die Teilforschungsfrage lässt sich somit die Aussage treffen, dass eine Erweiterung die Erkennung der Angriffe verbessert. Jedoch führt diese Erweiterung zu
 einem starken Anstieg der erforderlichen Anfragen, der Kosten und der Latenz. Bei jeder Prüfung können bis zu sechs Anfragen notwendig sein, die Kosten können bis
 auf das Zwölffache steigen und die Latenz einer Anfrage kann bis zu 6\,s in Anspruch nehmen.
 
 \paragraph{Teilforschungsfrage 4: Inwieweit lassen sich die Ergebnisse auf öffentliche Datensätze übertragen?}
 
 Aus den Ergebnissen wird deutlich, dass die Erkennungsleistung gegenüber dem Originalansatz vor allem auf den öffentlichen Datensätzen am stärksten gestiegen ist.
-Der Recall~\eqref{eq:recall} stieg von 34,0\,\% auf 92,0\,\% beim Datensatz aus BIPIA und NotInject und von 43,0\,\% auf 91,0\,\% beim verschleierten BIPIA-Datensatz. Eine damit
-festgestellte Schwäche ist jedoch, dass die Fehlalarme stark von der Art der Daten abhängen. Besonders viele Fehlalarme entstanden bei Codeausschnitten oder E-Mails.
-Zudem konnten viele der Fehlalarme, welche bereits beim Originalansatz auftraten, durch die Weiterentwicklung nicht behoben werden. \\
+Der Recall~\eqref{eq:recall} stieg von 34,0\,\% auf 92,0\,\% beim Datensatz aus BIPIA und NotInject und von 43,0\,\% auf 91,0\,\% beim verschleierten BIPIA-Datensatz.
+Der verschleierte BIPIA-Datensatz wurde ausschließlich zum Testen verwendet und der Ansatz somit nicht auf diesen angepasst worden. \\
+Eine damit festgestellte Schwäche ist jedoch, dass die Fehlalarme stark von der Art der Daten abhängen. Besonders viele Fehlalarme entstanden bei NotInject und
+bei Codeausschnitten, nicht erkannte Angriffe vor allem bei 
+E-Mails. Zudem blieb die \ac{fpr}~\eqref{eq:fpr} mit 13,5\,\% unverändert, da viele Fehlalarme, welche bereits beim Originalansatz auftraten, durch die Weiterentwicklung nicht behoben werden. \\
 Die Ergebnisse sind daher nur eingeschränkt übertragbar. Zum einen lagen die öffentlichen Datensätze auf Englisch vor, sodass externe Inhalte ausschließlich
 mit englischsprachigen Einträgen getestet wurden, obwohl der Ansatz auf Deutsch formuliert ist. Zusätzlich wurde der Ansatz nur für externe Inhalte aus Tabellen,
-Codeausschnitten und E-Mails getestet, was die Übertragbarkeit ebenfalls einschränkt.
+Codeausschnitten und E-Mails getestet, was die Übertragbarkeit ebenfalls einschränkt. Auch wurde die Strukturprüfung anhand des Dev-Abschnitts des Datnsatzes aus
+BIPIA und NotInject entwickelt, sodass eine Überanpassung an diesen nicht auschgeschlossen werden kann.
 
 \paragraph{Hauptforschungsfrage: Inwieweit kann ein unternehmensinterner Chatbot mit implementiertem Tool Calling gegen indirekte Prompt-Injection-Angriffe abgesichert werden?}
 
-Auf Grundlage der gesammelten Ergebnisse lässt sich festhalten, dass ein vorgeschaltetes \ac{llm} einen unternehmensinternen Chatbot zum Teil gegen indirekte
-Prompt-Injection-Angriffe absichern kann. Mit dem erweiterten Ansatz werden 83\,\% bis 92\,\% der Angriffe richtig klassifiziert, gegenüber 34,0\,\% bis 73,1\,\%
-beim Originalansatz. Von den in Kapitel~\ref{ch:methodik} durchgeführten Angriffsvarianten wurden 35 von 37 richtig erkannt. \\
+Auf Grundlage der gesammelten Ergebnisse lässt sich festhalten, dass ein vorgeschaltetes \ac{llm} einen unternehmensinternen Chatbot eingeschränkt gegen indirekte
+Prompt-Injection-Angriffe absichern kann. Mit dem erweiterten Ansatz werden 82,8\,\% bis 92,0\,\% der Angriffe richtig klassifiziert, gegenüber 34,0\,\% bis 73,1\,\%
+beim Originalansatz. Von den in Kapitel~\ref{ch:methodik} durchgeführten Angriffsvarianten wurden 27 von 29 richtig erkannt. \\
 Die Aussagekraft ist jedoch eingeschränkt. Der Ansatz wurde nicht in den Chatbot integriert, sondern unabhängig davon getestet. Die \ac{fpr}~\eqref{eq:fpr} erreichte bis zu
-14\,\% und beeinträchtigt somit einen realitätsnahen Einsatz im Kundenservice. Zudem werden keine Multi-Turn-Angriffe erkannt, da die Prüfung bei jeder Anfrage
+13,5\,\% und beeinträchtigt somit einen realitätsnahen Einsatz. Zudem werden keine Multi-Turn-Angriffe erkannt, da die Prüfung bei jeder Anfrage
 unabhängig durchgeführt wird. Auch die Erkennung, ob eine Anfrage externe Inhalte enthält, kann nicht von der Schutzmaßnahme durchgeführt werden. Es muss somit im
 Datensatz bereits festgelegt sein, wodurch eine praktische Anwendung erschwert wird. \\
-Die Schwachstellen des Chatbots, wie die übermäßige Funktionalität, wurden nicht unmittelbar behoben. Stattdessen werden durch eine Prüfung der Nutzereingaben die
+Die Schwachstellen des Chatbots, wie z.B. die übermäßige Funktionalität, wurden nicht unmittelbar behoben. Stattdessen werden durch eine Prüfung der Nutzereingaben die
 Auswirkungen eingeschränkt, die durch die Nutzung von Tools entstehen können. Ein vorgeschaltetes \ac{llm} kann die Erkennung deutlich verbessern, bietet allein
 jedoch keine ausreichende Absicherung. Diese ist nur in Kombination mit weiteren Maßnahmen erreichbar.
 
@@ -86,38 +91,41 @@ Für den in dieser Arbeit untersuchten ChatBot4U wurden in Abschnitt~\ref{sec:sc
 Auf Grundlage dieser wurde eine Schutzmaßnahme entwickelt, welche den Chatbot absichern und die Schwachstellen eindämmen sollte. Aus der Evaluation in
 Kapitel~\ref{ch:evaluation} wird jedoch deutlich, dass dies nicht vollständig erreicht wurde. Da zusätzlich die Maßnahme unabhängig bewertet und nicht in den
 Chatbot integriert wurde, lässt sich nicht für alle Schwachstellen beurteilen, ob diese durch die Maßnahme eingedämmt werden. Aus den Ergebnissen lassen sich jedoch vier
-Handlungsempfehlungen ableiten, die die Eindämmung der Schwachstellen unterstützen.
+Handlungsempfehlungen ableiten, die die Eindämmung der Schwachstellen unterstützen. Darunter sind auch systemseitige Maßnahmen, welche in Kapitel~\ref{ch:schutzmassnahmen}
+ausgeschlossen wurden, da sie eine Änderung an der Architektur erfordern. Durch die Auswertung der Ergebnisse wurde jedoch festgestellt, dass eine 
+vorgeschaltete Prüfung nicht ausreicht als Schutz und solche Änderungen notwendig sind.
 
 \paragraph{Einschränkung übermäßiger Funktionalität}
 
 Das \ac{llm} kann auf beliebige Zielwebseiten zugreifen und Aktionen ausführen. Dadurch sind alle drei Voraussetzungen des Lethal Trifecta erfüllt. Eine
 Möglichkeit, dies einzuschränken, ist die Anpassung der Funktion \texttt{auditUrl}. Bisher prüft diese, ob die Zieladresse lokal oder öffentlich
-erreichbar ist und ob es sich um eine GET- oder POST-Anfrage handelt. Trotz der Überprüfung erfolgen keine Einschränkungen bei den Zugriffen. Es ist daher notwendig,
+erreichbar ist. Trotz der Überprüfung erfolgen keine Einschränkungen bei den Zugriffen. Es ist daher notwendig,
 den Zugriff auf beliebige Webseiten und das Ausführen von Aktionen einzuschränken. Die einfachste Möglichkeit besteht darin, eine Liste von Zieladressen zu definieren,
 auf die der Zugriff des \ac{llm} beschränkt wird.
 
 \paragraph{Menschliche Kontrolle des Datenabflusses}
 
 Eine der ausschlaggebendsten Schwachstellen ist, dass ein Angreifer auf eine Zielwebseite zugreifen und Daten an diese übermitteln konnte, ohne dass der Nutzer dies
-nachvollziehen konnte. Daher sollte eine menschliche Kontrolle integriert werden, durch die der Nutzer vor jeder Tool-Nutzung eine Beschreibung erhält, welche
+nachvollziehen konnte. Daher sollte eine menschliche Kontrolle integriert werden, indem der Nutzer vor jeder Tool-Nutzung eine Beschreibung erhält, welche
 Aktion ausgeführt werden soll, welches Tool gewählt wurde und welche Daten übergeben werden. Dadurch lässt sich verhindern, dass das \ac{llm} den Nutzer täuscht
 und ein anderes als das notwendige Tool ausführt.
 
 \paragraph{Erkennung externer Inhalte}
 
 Beim Tool Calling des untersuchten Systems wird beim Aufruf einer Webseite der gesamte Inhalt als \ac{html}-Quelltext übergeben. Zusätzlich enthält die Schutzmaßnahme
-keine Prüfung auf externe Inhalte; diese werden vorab im Datensatz fest definiert. Externe Inhalte sollten daher vor der Prüfung erkannt, entfernt oder explizit
+keine Prüfung auf externe Inhalte. Diese werden vorab im Datensatz fest definiert. Externe Inhalte sollten daher vor der Prüfung erkannt, entfernt oder explizit
 als externe Inhalte gekennzeichnet werden. Dadurch lässt sich unter anderem erreichen, dass die \acp{llm} nicht durch versteckte Anweisungen oder unsichtbare Zeichen
 beeinflusst werden.
 
 \paragraph{Implementierung der Schutzmaßnahme}
 
 Die in dieser Arbeit entwickelte Schutzmaßnahme kann in Chatbots integriert werden, um deren Schutz zu verstärken. Sie sollte jedoch weder als alleinige
-Schutzmaßnahme noch für den gesamten Datenverkehr eingesetzt werden. Durch die Ergebnisse wird deutlich, dass eine \ac{fpr}~\eqref{eq:fpr} von bis zu 13,5\,\% und eine Latenz
-von bis zu 6\,s im Kundenservice zu Problemen führen können, da sie die Benutzerfreundlichkeit reduzieren. Auch dass eine Anfrage, in der ein Angriff erkannt wird,
-ohne Begründung abgelehnt wird, kann zu Unzufriedenheit der Kunden führen. Es empfiehlt sich daher, die Schutzmaßnahme für die Überprüfung externer Inhalte zu
+Schutzmaßnahme noch für den gesamten Datenverkehr eingesetzt werden. Durch die Ergebnisse wird deutlich, dass eine \ac{fpr}~\eqref{eq:fpr} von bis zu 13,5\,\% und eine Latenz~\eqref{eq:latency}
+von bis zu 6\,s im Einsatz durch die Mitarbetenden zu Problemen führen können, da sie die Benutzerfreundlichkeit reduzieren. Auch dass eine Anfrage, in der ein Angriff erkannt wird,
+ohne Begründung abgelehnt wird, kann zu Unzufriedenheit der Nutzer führen. Es empfiehlt sich daher, die Schutzmaßnahme für die Überprüfung externer Inhalte zu
 integrieren. Anstatt eine Anfrage ohne Begründung abzulehnen, sollte diese zusammen mit dem Verdacht dem Haupt-\ac{llm} übergeben werden, welches die endgültige
-Entscheidung trifft. Zusätzlich sollten die Anfragen der Schutzmaßnahme bei der Integration parallelisiert werden, um die Latenz zu reduzieren.
+Entscheidung trifft. Da Mistral Large 4 jedoch nur eine Erkennungsrate von 41,6\,\% bzw. 24,5\,\% hatte sollte zusätzlich eine mneschliche Kontrolle erfolgen, wie im 
+vorherigen Punkt beschrieben.
 
 \section{Ausblick}
 
@@ -126,19 +134,20 @@ Der wichtigste Schritt ist die Implementierung des Ansatzes in die Produktivumge
 und die Einsatzmöglichkeiten besser beurteilt werden. \\
 Die Schutzmaßnahme sollte außerdem mit weiteren \acp{llm} getestet werden. Bislang bleibt ungeklärt, ob andere Modelle bereits mit dem Originalansatz bessere
 Ergebnisse erzielen und die weiterentwickelte Schutzmaßnahme überflüssig wäre. Dies ist auch in Bezug auf die Kosten relevant, da die Prüfung einer Anfrage 
-ungefähr so viel kostet wie eine Anfrage mit Mistral Large 4. Inzwischen gibt es zudem Modelle, die speziell auf die Klassifikation ausgelegt sind. Ein Beispiel
+1,1- bis 1,4-mal so viel kostet wie eine Prüfung mit Mistral Large 4 im Originalansatz.
+Inzwischen gibt es zudem Modelle, die speziell auf die Klassifikation ausgelegt sind. Ein Beispiel
 ist Microsoft-Decision-1, das bei einer festen Anzahl von Antwortmöglichkeiten für jede eine Wahrscheinlichkeit ausgibt. Das Modell zeichnet sich vor allem durch 
-eine gerige Latenz aus. In einem Test dauerte eine Entscheidung im Median 125\,ms~\cite{f01}. Durch die Ausgabe der Wahrscheinlichkeiten ließe sich die 
+eine geringe Latenz aus. In einem Test dauerte eine Entscheidung im Median 125\,ms~\cite{f01}. Durch die Ausgabe der Wahrscheinlichkeiten ließe sich die 
 in dem weiterentwickelten Ansatz beschriebene Mehrheitsentscheidung ersetzen. \\
 Für eine bessere Übertragbarkeit sollte der Ansatz zusätzlich auf weiteren Datensätzen geprüft werden, auch auf deutschsprachigen. Zusätzlich sollte das Verhalten eines
 möglichen Angreifers simuliert werden, statt ausschließlich statische Datensätze zu verwenden. Dadurch wird die Bewertung praxisnäher und kann sich besser an die
 aktuelle Entwicklung anpassen. \\
 Es können zudem direkte Änderungen an dem Ansatz durchgeführt werden. Bislang wird eine binäre Entscheidung getroffen. Es kann nicht nachvollzogen werden, mit
 welcher Wahrscheinlichkeit eine Anfrage als Angriff klassifiziert wird. Durch die Berechnung der Wahrscheinlichkeit und die Verwendung eines Schwellwerts für die
-Klassifizierung könnte sich der Ansatz besser in den Kundenservice integrieren lassen. Durch die Anpassung des Schwellwerts könnte die \ac{fpr}~\eqref{eq:fpr} gesteuert werden und
+Klassifizierung könnte sich der Ansatz besser in den Produktiveinsatz integrieren lassen. Durch die Anpassung des Schwellwerts könnte die \ac{fpr}~\eqref{eq:fpr} gesteuert werden und
 dazu führen, dass weniger Anfragen abgelehnt werden. Zusätzlich sollte die Prüfung der Anfragen erweitert werden, sodass ein gesamter Chatverlauf geprüft wird
-und nicht jede Anfrage unabhängig voneinander. Zusätzlich sollte eine Erkennung externer Inhalte implementiert werden, damit beispielsweise eine in das Textfeld
-kopierte E-Mail erkannt wird und als externer Inhalt geprüft wird, statt wie aktuell als einfache Nutzeranfrage. \\
+und nicht jede Anfrage unabhängig voneinander. Außerdem sollte eine Erkennung externer Inhalte implementiert werden, damit beispielsweise eine in das Textfeld
+kopierte E-Mail erkannt und als externer Inhalt geprüft wird, statt wie aktuell als einfache Nutzeranfrage. \\
 Abschließend kann festgehalten werden, dass die Notwendigkeit von geeigneten Schutzmaßnahmen gegen Angriffe auf Chatbots immer relevanter
 wird. Chatbots werden um immer mehr Funktionen erweitert und ein größerer Nutzen wird erwartet. Die Architektur der \acp{llm} erschwert es jedoch, dass dieser Schutz
 gewährleistet und die Angriffsfläche reduziert werden kann. Die in dieser Arbeit vorgestellte Schutzmaßnahme verdeutlicht vor allem, welche Bedeutung
