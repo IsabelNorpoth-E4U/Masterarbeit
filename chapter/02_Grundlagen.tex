@@ -246,8 +246,8 @@ Daher werden in diese Tools die notwendigen externen Partner integriert, damit d
 Tools je nach Aufgabe in drei Kategorien einteilen: 
 
 \begin{enumerate}
-    \item Datenzugriff: Diese Tools greifen auf externe Daten zu, wie Vektordatenbanken, SQL-Datenbanken, externe APIs, Graphendatenbanken oder Dateisysteme. 
-    Welche dieser Optionen verwendet wird, hängt vom Ziel ab. Vektordatenbanken verwendet man bei unstrukturierten Anfragen. SQL wird bei transaktionalen Daten 
+    \item Datenzugriff: Diese Tools greifen auf externe Daten zu, wie \glspl{vektordatenbank}, SQL-Datenbanken, externe \acp{api}, Graphendatenbanken oder Dateisysteme. 
+    Welche dieser Optionen verwendet wird, hängt vom Ziel ab. \glspl{vektordatenbank} verwendet man bei unstrukturierten Anfragen. SQL wird bei transaktionalen Daten 
     verwendet, bei denen bekannt ist, wonach gesucht wird. Graphendatenbanken werden verwendet, wenn die Beziehungen der Daten ebenso viel bedeuten wie die Daten 
     selbst. \acp{api} werden verwendet, wenn Daten in Echtzeit verarbeitet werden müssen~\cite{tc05}.
     \item Berechnung: Diese Tools sind notwendig, da Daten häufig verändert werden müssen, damit sie verarbeitet werden können. Dazu zählen die Verarbeitung
@@ -273,7 +273,7 @@ eines Tool-Learning-Frameworks und wird normalerweise durch ein \ac{llm} umgeset
 generiert daraus
 eine Zusammenfassung für den Controller. Die einfachste Form dieser Rückmeldungen besteht darin, dass ein vordefiniertes Formular ausgefüllt wird. Die Zusammenarbeit
 der 
-Komponenten und der allgemeine Ablauf werden dadurch beschrieben, dass zu einem Zeitpunkt $t$ ein LLM eine Observation $o_t$ der Umgebung erhält und eine Aktion
+Komponenten und der allgemeine Ablauf werden dadurch beschrieben, dass zu einem Zeitpunkt $t$ ein \ac{llm} eine Observation $o_t$ der Umgebung erhält und eine Aktion
 $a_t$ in Abhängigkeit vom Kontext $c_t = (o_1, a_1, \dots, o_{t-1}, a_{t-1}, o_t)$ wählt. Der Kontext umfasst die gesamte bisherige Abfolge aus Aktionen und 
 gelieferten Observationen~\cite[3]{tc15}. \\
 Bevor ein \ac{llm} Tools verwenden kann, müssen diese definiert werden. Dazu wird eine Liste mit Namen, Verwendung und Input-/Output-Formaten erstellt~\cite{tc03}. 
@@ -316,7 +316,7 @@ Eiffelturm
 in Paris steht, sollte die Generierung der Antwort nicht extern ausgelagert werden~\cite[19]{tc09}. \acp{llm} können dabei zu abhängig von Tools werden oder aber zu 
 sehr von sich überzeugt sein und keine Tools verwenden wollen~\cite[17776]{tc08}. Für die Verwendung von Tools müssen die Parameter korrekt aus einer Nutzeranfrage 
 extrahiert und an die genauen Formatvorgaben des Tools angepasst werden, ohne dadurch überflüssigen Text zu generieren~\cite[14\psq]{tc10}. \\
-Ein Tool Call läuft wie eine Schleife ab, bei der das LLM selbstständig entscheidet, welche Aktionen ausgeführt werden müssen und dementsprechend welches Tool 
+Ein Tool Call läuft wie eine Schleife ab, bei der das \ac{llm} selbstständig entscheidet, welche Aktionen ausgeführt werden müssen und dementsprechend welches Tool 
 ausgeführt werden soll~\cite{tc03}. Dieser Ablauf gliedert sich in fünf Schritte~\cite{tc07}:
 
 \begin{enumerate}
@@ -350,7 +350,7 @@ Beim Iterative Task Solving werden die Teilaufgaben anhand der Interaktion mit d
 somit ebenfalls in einzelnen Schritten gelöst, jedoch werden diese Schritte überarbeitet, um die Problemlösefähigkeit zu verbessern~\cite[9]{tc10}. \\
 Tool Calling ist von \acf{rag} abzugrenzen. Bei \ac{rag} wird das vortrainierte \ac{llm} um eine externe Wissensdatenbank ergänzt, aus der relevante Dokumentenausschnitte
 abgerufen werden~\cite[1]{rag04}. Dazu werden die Dokumente bei der Indexierung in Chunks zerlegt, mithilfe eines Embedding-Modells in Vektorrepräsentationen
-umgewandelt und in einer Vektordatenbank gespeichert~\cite[3]{rag04}. Bei einer Nutzeranfrage wird diese ebenfalls in eine Vektorrepräsentation umgewandelt
+umgewandelt und in einer \gls{vektordatenbank} gespeichert~\cite[3]{rag04}. Bei einer Nutzeranfrage wird diese ebenfalls in eine Vektorrepräsentation umgewandelt
 und die passendsten Chunks werden ermittelt~\cite[3]{rag04}. Die ausgewählten Chunks werden mit der Nutzeranfrage kombiniert, und auf dieser Basis wird eine Antwort
 für den Nutzer generiert~\cite[3]{rag04}. Der Unterschied zwischen diesen beiden Ansätzen besteht darin, dass Tool Calling ein aktiver, vom Modell ausgelöster 
 Prozess ist, bei dem ein Modell selbst entscheidet, wann welche Funktionen aufgerufen werden~\cite{tc07}. Bei \ac{rag} werden die relevanten
@@ -402,7 +402,7 @@ Informationen zu übermitteln oder schädliche Aktionen auszuführen~\cite[3]{cb
 extrahiert werden~\cite[4]{cb09}. Eine solche Exfiltration kann bereits über eine Leseoperation ausgelöst werden. Eine Suchanfrage kann so gestaltet werden, dass Daten
 an einen vom Angreifer kontrollierten Server übertragen werden~\cite[6]{cb09}. Einfluss auf die Angriffsfläche nehmen somit auch die Tool-Call-Parameter, Logdaten und
 abgerufene Inhalte~\cite[18]{pi24}. \\
-Durch die Verwendung von Tool Calls tritt das sogenannte Confused Deputy Problem auf~\cite[12]{pi24}. Der Angreifer kompromittiert das Backend nicht direkt, sondern 
+Durch die Verwendung von Tool Calls tritt das sogenannte Confused Deputy Problem auf~\cite[12]{pi24}. Der Angreifer kompromittiert das \gls{backend} nicht direkt, sondern 
 positioniert
 Anweisungen an einer Stelle, an der das \ac{llm} diese liest. Diese Anweisungen werden somit ausgeführt, ohne direkte Einwirkung des Angreifers~\cite[12]{pi24}. \\
 Wann ein \ac{llm} von diesen Gefahren besonders betroffen ist, wird in~\cite[13]{pi24} durch das Lethal Trifecta beschrieben. Es werden drei strukturelle
@@ -504,7 +504,7 @@ Agent, der autonom handeln kann. \\
 Zu den Komponenten eines \ac{ki}-Systems gehören mindestens die Daten, das \ac{llm}, ein Prozess für Training, Test und Bereitstellung sowie die notwendige 
 Infrastruktur~\cite[1]{pi18}. In~\cite{cb11} wurde ein allgemeines Design dokumentiert, welches alle notwendigen Komponenten enthält. Je nach Anwendungsfall können
 aus diesen Komponenten die notwendigen ausgewählt werden~\cite[8]{cb11}. Durch die Übertragung auf einen \ac{llm}-basierten Chatbot ergeben sich die folgenden fünf
-Komponenten: Frontend, Anwendungslogik, \ac{llm}, Daten und Tools. In diesem Abschnitt der Arbeit wird jede dieser Komponenten einzeln betrachtet, da dies für die 
+Komponenten: \gls{frontend}, Anwendungslogik, \ac{llm}, Daten und Tools. In diesem Abschnitt der Arbeit wird jede dieser Komponenten einzeln betrachtet, da dies für die 
 Analyse
 der Angriffsfläche notwendig ist. Das zeigt auch der Angriff auf Bing Chat, der erfolgreich durchgeführt werden konnte, weil nur die 
 Input- und Output-Kanäle gesichert, externe Eingaben jedoch nicht berücksichtigt wurden~\cite[12]{cb09}. 
@@ -532,7 +532,7 @@ eingeschleust werden~\cite[6]{cb09}.
 In dieser Komponente erfolgt die Dialogverwaltung, mit der der Gesprächskontext gesteuert und aktualisiert wird~\cite[10]{cb11}. Hier werden der Systemprompt,
 Nutzeranfragen, 
 abgerufene Dokumente, Tool-Ergebnisse und der Gesprächsverlauf verarbeitet. Sie werden kombiniert und als einziger Tokenstrom verarbeitet. Dadurch 
-entstehen Schwachstellen, da keine Vertrauensgrenze existiert. Wenn durch einen Angriff in eine Vektordatenbank oder ein Langzeitgedächtnis geschrieben wird, kann 
+entstehen Schwachstellen, da keine Vertrauensgrenze existiert. Wenn durch einen Angriff in eine \gls{vektordatenbank} oder ein Langzeitgedächtnis geschrieben wird, kann 
 das System zudem über viele Sitzungen hinweg betroffen sein~\cite[10]{pi24}. 
 Auch innerhalb einer Sitzung kann der Kontext die Ausgabe steuern, sodass sich das \ac{llm} über seine eigenen Ausgaben mehrmals selbst manipuliert~\cite[9]{cb09}. \\
 
@@ -565,7 +565,7 @@ Antwort nicht belegen können~\cite[10]{cb09}.
 
 \paragraph{Tools}
 
-Ein Chatbot ruft die benötigten Informationen über das Backend mithilfe von Datenbankanfragen und \ac{api}-Aufrufen ab~\cite[10]{cb11}. Dadurch, dass diese Anfragen 
+Ein Chatbot ruft die benötigten Informationen über das \gls{backend} mithilfe von Datenbankanfragen und \ac{api}-Aufrufen ab~\cite[10]{cb11}. Dadurch, dass diese Anfragen 
 selbst formuliert werden, können Angreifer die Parameter der Anfragen beeinflussen~\cite[10]{cb09}.
 Ein manipulierter Chatbot könnte anschließend weitere Plugins aufrufen und weitere schädliche Aktionen ausführen~\cite[2]{sm08}, beispielsweise auf E-Mail-Postfächer 
 zugreifen, Informationen extrahieren oder private Daten veröffentlichen~\cite[2]{sm08}.

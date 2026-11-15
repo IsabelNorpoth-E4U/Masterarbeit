@@ -62,7 +62,7 @@ welcher den Rahmen der Fähigkeiten definiert~\cite{pi31}, oder sonstige sensibl
 \subsection{Indirekte Angriffe}\label{subsec:indirektepi}
 
 Auch bei indirekten Prompt-Injection-Angriffen lassen sich verschiedene Kategorien unterscheiden. Eine Möglichkeit ist die Unterteilung in passive und aktive Methoden.
-Zu den aktiven Methoden zählen etwa E-Mails, die direkt an das LLM gesendet werden. Als passiv gilt eine Methode dagegen, wenn Informationen vom LLM selbst gesammelt werden.
+Zu den aktiven Methoden zählen etwa E-Mails, die direkt an das \ac{llm} gesendet werden. Als passiv gilt eine Methode dagegen, wenn Informationen vom \ac{llm} selbst gesammelt werden.
 Die bösartigen Anweisungen können in diesem Fall in einer öffentlich zugänglichen Quelle, etwa einer Webseite, versteckt sein~\cite{pi19}. \\
 Eine weitere Kategorisierung orientiert sich an der jeweiligen Auswirkung und bezieht sich dabei auf die CIA-Triade, wobei CIA für Confidentiality (Vertraulichkeit), 
 Integrity (Integrität) und Availability (Verfügbarkeit) steht~\cite{pi23}. \\
@@ -79,7 +79,7 @@ beschränken: \\
     \item Encoding Injection: Die bösartige Anweisung wird verschleiert, indem sie beispielsweise Base64-kodiert oder in eine andere Sprache übersetzt wird. Dekodiert das Sprachmodell den Inhalt, führt es die enthaltene Anweisung aus~\cite{pi12}.
     \item Multi-Modal Injection / Bild-Injection: Anweisungen werden in Metadaten versteckt, beispielsweise in der EXIF-Beschreibung eines Bildes~\cite{pi12}.
     \item Document Injection: Anweisungen werden in einem Dokument versteckt und ausgeführt, wenn der Nutzer das Sprachmodell anweist, das Dokument zu analysieren~\cite{pi13}.
-    \item URL Parameter Injection: Das Modell wird dazu gebracht, ein externes Tool zu verwenden, wobei die bösartige Anweisung direkt in der URL versteckt ist, z.\,B. \\ \texttt{http://evil.com/log?data=<prompt>}~\cite{pi12}.
+    \item URL Parameter Injection: Das Modell wird dazu gebracht, ein externes Tool zu verwenden, wobei die bösartige Anweisung direkt in der \ac{url} versteckt ist, z.\,B. \\ \texttt{http://evil.com/log?data=<prompt>}~\cite{pi12}.
 \end{enumerate}
 
 In der Praxis werden direkte und indirekte Angriffsarten häufig miteinander kombiniert, sogenannte Combined Attacks~\cite[2\psq]{pi3}. 
@@ -89,7 +89,7 @@ In der Praxis werden direkte und indirekte Angriffsarten häufig miteinander kom
 Die Zahl der Prompt-Injection-Angriffe nimmt von Jahr zu Jahr zu. Laut \ac{owasp} standen Prompt-Injection-Angriffe 2025 wie auch
 2026 an erster Stelle der Gefahren für \ac{llm}-Anwendungen. Eine Studie des Unternehmens Axis Intelligence vom Juni 2026 zeigt
 zudem, dass indirekte Prompt-Injection-Angriffe eine Erfolgsquote von bis zu 68,16\,\% erreichen können~\cite{pi22}. \\
-Obwohl kontinuierlich daran gearbeitet wird, LLMs robuster zu gestalten und Sicherheitsrichtlinien so zu formulieren,
+Obwohl kontinuierlich daran gearbeitet wird, \acp{llm} robuster zu gestalten und Sicherheitsrichtlinien so zu formulieren,
 dass Prompt-Injection-Angriffe zuverlässig erkannt werden, gelingt es einem Großteil der Angriffe dennoch, diese Maßnahmen
 zu umgehen~\cite{pi14}. \\
 Im Folgenden werden vier bekannte Beispiele vorgestellt, welche die Bedeutung dieser Bedrohung verdeutlichen. Betrachtet werden ein direkter Angriff auf einen 
