@@ -2,7 +2,7 @@
 
 Auf Grundlage der in Kapitel~\ref{ch:methodik} festgestellten Schwachstellen des untersuchten Systems wird nun eine geeignete Schutzmaßnahme entwickelt. Dafür werden
 in diesem Kapitel bekannte Schutzmaßnahmen gesammelt und in Kategorien eingeordnet. Anschließend wird eine Auswahl anhand dieser Maßnahmen getroffen, um eine 
-Maßnahme zu wählen, welche am passendsten ist für den Anwendungsfall dieser Arbeit. Diese Maßnahme wird anschließend implementiert. Da das Ziel dieser Arbeit die
+zu wählen, welche am passendsten ist für den Anwendungsfall dieser Arbeit. Diese Maßnahme wird anschließend implementiert. Da das Ziel dieser Arbeit die
 Entwicklung eines neuen Ansatzes ist, wird die ausgewählte Maßnahme weiterentwickelt und die Leistung beider Varianten verglichen.
 
 \section{Klassifikation bestehender Schutzmaßnahmen}\label{sec:klassifikation_schutzmassnahmen}
@@ -28,7 +28,7 @@ Der Großteil der bisher entwickelten Schutzmaßnahmen setzt auf der Eingabeseit
 einfach umsetzen lassen, da sie nicht auf ein bestimmtes Modell abgestimmt werden müssen. Zu den häufig eingesetzten Verfahren gehören \textbf{Prompt Enhancement}, 
 \textbf{kryptografische Signierung}, \textbf{Prompt-Filterung}, \textbf{Content Scanning}, \textbf{Datenvalidierung}, \textbf{Sandboxing}, 
 \textbf{Prompt Formatting} und \textbf{Input-Modifikation}. \\
-Beim \textbf{Prompt Enhancement} wird der an das Modell übergebene Prompt so angereichert, dass das Modell Angriffe zuverlässiger erkennen kann~\cite[7]{sm09}. Häufig wird
+Beim \textbf{Prompt Enhancement} wird der an das Modell übergebene Prompt so verändert, dass das Modell Angriffe zuverlässiger erkennen kann~\cite[7]{sm09}. Häufig wird
 dabei eine strikte Trennung zwischen der Anweisung des Nutzers und den zu verarbeitenden Daten vorgenommen, um zu verhindern, dass in den Daten versteckte Anweisungen
 ausgeführt werden. Unterschieden werden semantisches und strukturelles Enhancement. Beim semantischen Enhancement wird der Prompt so umformuliert, dass die Anweisung
 möglichst präzise gefasst ist~\cite[55]{sm11}. Beim strukturellen Enhancement werden hingegen beispielsweise spezielle Trennzeichen oder andere strukturelle
@@ -56,7 +56,7 @@ Um eine unabhängige Bewertung zu gewährleisten, kann hierfür ein separates Mo
 Aktionen und die verwendeten Tools mit der ursprünglichen Nutzeranweisung abgleichen~\cite[7]{sm09}. \\
 Die \textbf{regelbasierte Inhaltsüberprüfung} arbeitet hingegen mit vordefinierten Listen, in denen unzulässige Begriffe oder Quellen festgelegt sind~\cite[55]{pi1}. Diese
 Überprüfung kann skriptbasiert erfolgen, wodurch keine zusätzlichen Anfragen an ein \ac{llm} notwendig sind. \\
-Bei der \textbf{Perplexity-Erkennung} wird die Perplexity als technische Größe für die Vorhersagbarkeit berechnt~\cite[6]{sm11}~\cite{sm46}. 
+Bei der \textbf{Perplexity-Erkennung} wird die Perplexity als technische Größe für die Vorhersagbarkeit berechnet~\cite[6]{sm11}~\cite{sm46}. 
 Sie gibt an, wie gut ein Sprachmodell eine gegebene Tokenfolge vorhersagt~\cite{sm13}.
 Eine hohe Perplexity bedeutet, dass das Modell den beobachteten Tokens im Mittel geringe Wahrscheinlichkeiten zuordnet, der Text für das Modell also schlecht
 vorhersagbar ist. Dies kann auf eine geringe Textqualität oder auf ungewöhnliche, etwa durch einen Angriff manipulierte Inhalte hindeuten~\cite{sm13}. 
@@ -82,7 +82,7 @@ Anwendungsfall ausrichten lässt~\cite[7]{sm09}. \\
 Beim \textbf{Reinforcement Learning} wird das Modell gezielt mit Angriffen konfrontiert, um deren Erkennung zu trainieren~\cite{sm07}. Je nachdem, ob ein Angriff erkannt wird
 oder nicht, erhält das \ac{llm} eine Belohnung oder eine Bestrafung, womit es schrittweise lernt, einen Angriff besser zu klassifizieren.
 Anstelle eines ausschließlich vordefinierten Datensatzes kann dabei auch menschliches Feedback
-einbezogen werden~\cite{sm04}, etwa indem Menschen die Modellausgaben mit Punktwerten bewerten~\cite[8]{sm10}. \\
+einbezogen werden~\cite{sm04}, etwa indem Menschen die Modellausgaben bewerten~\cite[8]{sm10}. \\
 Die \textbf{Bereinigung der Trainingsdaten} soll verhindern, dass ein Modell schädliche Inhalte erlernt~\cite{pi14}. Dazu gehört auch das Entfernen sensibler Informationen aus
 dem Datensatz. Die Bereinigung darf allerdings nicht zu weit gehen, da das Modell andernfalls die Fähigkeit verliert, Angriffe überhaupt als solche zu erkennen~\cite[13]{sm10}.
 Ergänzend zum Training sollten regelmäßig Penetrationstests beziehungsweise \textbf{Red Teaming / Adversarial Testing} durchgeführt werden~\cite[4]{sm08}\cite{pi15}. 
@@ -106,18 +106,18 @@ dienen sollen. Anschließend wird das Vorgehen bei der Konzeption beschrieben un
 
 Für die in dieser Arbeit ausgewählte Schutzmaßnahme wurden mehrere Kriterien definiert:
 
-\begin{itemize}
+\begin{enumerate}
     \item Sie soll sich leicht integrieren lassen, sodass weder die Struktur des Chatbots noch die Systemarchitektur verändert werden müssen. 
     \item Um eine hohe Anzahl von Nutzeranfragen zu ermöglichen, soll die Maßnahme kostengünstig sein und mit einem kleinen Modell ausgeführt werden können
     \item Sie soll ohne Modelltraining eingesetzt werden können, um regelmäßiges Nachtrainieren bei neuen Angriffstechniken zu vermeiden
     \item Die Entscheidungen sollen nachvollziehbar sein, sodass sie für die als Angriff klassifizierten Anfragen rekonstruiert werden können. Zusätzlich
     soll die Anzahl der fälschlich als Angriff eingestuften Anfragen minimiert werden.
-\end{itemize}
+\end{ernumerate}
 
 Für die Konzeption der Schutzmaßnahme wurde anhand der definierten Kriterien eine eingabeseitige Maßnahme gewählt. \\
 Gegen eine ausgabeseitige Maßnahme spricht, dass die Antwort erst geprüft wird, wenn sie bereits vom Hauptmodell verarbeitet wurde. Mit dieser Eigenschaft
 konnte keine geeignete Maßnahme identifiziert werden, die zu dem Anwendungsfall des Chatbots passt. \\
-Eine modellseitige Maßnahme hätte zusätzliches Training erfordert, was jedoch durch das erste Kriterium ausgeschlossen wurde. 
+Eine modellseitige Maßnahme hätte zusätzliches Training erfordert, was jedoch durch das dritte Kriterium ausgeschlossen wurde. 
 Auch die systemseitigen Maßnahmen wurden aufgrund der Kriterien ausgeschlossen, da durch Rechteverwaltung oder menschliche Freigabe die Architektur des Systems
 verändert werden müsste. \\
 Die eingabeseitige Maßnahme überprüft jede Nutzeranfrage, bevor sie von dem Haupt-\ac{llm} verarbeitet wird. Sie kann als zusätzliche Komponente verwendet werden und 
@@ -133,58 +133,60 @@ der Auswertung nicht verfälscht wird. Im Folgenden werden die durchgeführten S
     \item \textbf{Originalansatz:} Mit einem vorgeschalteten \ac{llm} wird für mehrere Datensätze mit einer binären Klassifikation (JA oder NEIN) eine 
     Einschätzung durchgeführt, ob ein Prompt-Injection-Angriff erkannt wird. Dieser Ansatz dient als Baseline, mit der die allgemeine Erkennungsfähigkeit im
     Ausgangszustand festgehalten wird.
-    \item \textbf{Promptvariation beim Originalansatz:} Es wird verglichen, inwieweit die Erkennungsfähigkeit des \ac{llm} vom mitgegebenen Prompt abhängt.
     \item \textbf{Überarbeitung des Ansatzes:} Der Originalansatz wird anhand der Ergebnisse und der dadurch festgestellten Schwachstellen überarbeitet. Der 
     Fokus liegt auf den Auswirkungen durch verschleierte Angriffe, der Positionierung schädlicher Anweisungen und der Art von Daten (z.\,B. Tabellen).
 \end{enumerate}
 
-Die Maßnahme wurde von einem vorgeschalteten \ac{llm} ausgeführt. Dieses \ac{llm} prüft jede Anfrage und leitet sie dann weiter an das Hauptmodell, wenn sie nicht
-als Angriff eingestuft wird (Prompt-Filterung). Vor der Prüfung wird festgestellt, ob die Anfrage externe Inhalte wie eine Webseite oder E-Mail enthält oder 
-ausschließlich aus einem Nutzerprompt besteht. Diese Feststellung wird in dieser Arbeit nicht selbstständig integriert, sondern ist bereits in den Datensatzeinträgen 
-angegeben. Der Ablauf der Maßnahme unterteilt sich in vier Stufen. \\
+Zusätzlich wird untersucht, inwieweit die Erkennung des Originalansatzes durch die Veränderung des Prompts verbessert werden kann. Diese Promptvariation wurde
+nicht als Schritt für die Entwicklung verwendet, sondern dient als Vergleich zum weiterentwickelten Ansatz und wird daher auf dem Test-Abschnitt ausgewertet. \\
+Die Maßnahme wurde von einem vorgeschalteten \ac{llm} ausgeführt. Dieses \ac{llm} prüft jede Anfrage und leitet sie an das Haupt-\ac{llm} weiter, wenn sie nicht
+als Angriff eingestuft wird. Es wird dabei zwischen Nutzeranfragen und externen Inhalten wie Webseiten oder E-Mails unterschieden. 
+Diese Unterscheidung wird in dieser Arbeit nicht selbstständig integriert, sondern ist bereits in den Datensatzeinträgen 
+angegeben. Wie die Prüfung im Einzelnen aufgebaut ist, ergibt sich aus den Entwicklungsschritten in Abschnitt~\ref{subsec:original} bis 
+Abschnitt~\ref{subsec:ueberarbeitung}.  \\
 
-\paragraph{Stufe 1: Erstellung der Versionen}
+% \paragraph{Stufe 1: Erstellung der Versionen}
 
-Im ersten Schritt wird die Anfrage durch mehrere Modifizierungen verändert, die mögliche Verschleierungen rückgängig machen sollen (Input-Modifizierungen). Der daraus
-entstehende Prompt bildet die Version V1. Auf diese Version wird zusätzlich eine Rechtschreibkorrektur durchgeführt, wodurch die Version V2 entsteht. Zusammen mit 
-dem Originalprompt V0 werden für die weitere Prüfung somit drei Versionen der Anfrage verwendet. Mit dieser Stufe wird versucht, die Auswirkungen durch die Schwäche
-bei der Erkennung von verschleierten Nutzeranfragen zu reduzieren.
+% Im ersten Schritt wird die Anfrage durch mehrere Modifizierungen verändert, die mögliche Verschleierungen rückgängig machen sollen. Der daraus
+% entstehende Prompt bildet die Version V1. Auf diese Version wird zusätzlich eine Rechtschreibkorrektur durchgeführt, wodurch die Version V2 entsteht. Zusammen mit 
+% dem Originalprompt V0 werden für die weitere Prüfung somit drei Versionen der Anfrage verwendet. Mit dieser Stufe wird versucht, die Auswirkungen durch die Schwäche
+% bei der Erkennung von verschleierten Nutzeranfragen zu reduzieren.
 
-\paragraph{Stufe 2: Leitfragen}
+% \paragraph{Stufe 2: Leitfragen}
 
-Für jede Version wird eine Anfrage an das vorgeschaltete \ac{llm} gesendet, in der sechs Leitfragen gestellt werden, um das Ziel der Anfrage zu ermitteln. Mit der
-ersten Leitfrage F0 wird abgefragt, ob es sich bei der Nutzeranfrage um eine Verständnisfrage handelt. Mit den restlichen fünf Leitfragen werden verschiedene 
-Absichten abgefragt.
+% Für jede Version wird eine Anfrage an das vorgeschaltete \ac{llm} gesendet, in der sechs Leitfragen gestellt werden, um das Ziel der Anfrage zu ermitteln. Mit der
+% ersten Leitfrage F0 wird abgefragt, ob es sich bei der Nutzeranfrage um eine Verständnisfrage handelt. Mit den restlichen fünf Leitfragen werden verschiedene 
+% Absichten abgefragt.
 
-\paragraph{Stufe 3: Formprüfung und Strukturprüfung}
+% \paragraph{Stufe 3: Formprüfung und Strukturprüfung}
 
-Ab diesem Schritt unterscheidet sich die weitere Prüfung. Bei einer Nutzeranfrage werden drei weitere Anfragen an das vorgeschaltete \ac{llm} gesendet, in denen für
-jede Version gefragt wird, ob es sich um einen Prompt-Injection-Angriff handelt. Bei externen Inhalten wird stattdessen jede Zeile nummeriert und in 
-einer Anfrage für jede Zeile gefragt, an wen sie sich richtet und ob sie inhaltlich zur Nutzeranfrage beziehungsweise zum übrigen Inhalt der externen Daten
-passt. Diese Prüfung wird nur für die Versionen V0 und V1 durchgeführt, wodurch verhindert werden soll, dass eine fehlerhafte Rechtschreibkorrektur die 
-Bedeutung des gesamten Textes verändert. \\
+% Ab diesem Schritt unterscheidet sich die weitere Prüfung. Bei einer Nutzeranfrage werden drei weitere Anfragen an das vorgeschaltete \ac{llm} gesendet, in denen für
+% jede Version abgefragt wird, ob es sich um einen Prompt-Injection-Angriff handelt. Bei externen Inhalten wird stattdessen jede Zeile nummeriert und in 
+% einer Anfrage für jede Zeile gefragt, an wen sie sich richtet und ob sie inhaltlich zur Nutzeranfrage beziehungsweise zum übrigen Inhalt der externen Daten
+% passt. Diese Prüfung wird bei dem externen Inhalt nur für die Versionen V0 und V1 durchgeführt, wodurch verhindert werden soll, dass eine fehlerhafte Rechtschreibkorrektur die 
+% Bedeutung des gesamten Textes verändert. \\
 
-\paragraph{Stufe 4: Entscheidungsregeln}
+% \paragraph{Stufe 4: Entscheidungsregeln}
 
-Abschließend wird anhand definierter Regeln entschieden, ob ein Angriff vorliegt. Je nachdem, ob es sich bei der Anfrage um externen Inhalt oder eine Nutzeranfrage 
-handelt, werden verschiedene Regeln verwendet. Bei einer Nutzeranfrage wird zunächst geprüft, ob mehr als die Hälfte der Versionen von dem vorgeschalteten \ac{llm}
-als Angriff eingestuft wird. Zusätzlich wird überprüft, ob die erste Leitfrage, die klärt, ob es sich bei der Nutzeranfrage um eine Verständnisfrage handelt, mit 
-NEIN beantwortet und mindestens eine der anderen fünf Leitfragen mit JA beantwortet wurde. Ein Angriff liegt vor, wenn mindestens eine der beiden Bedingungen
-erfüllt wurde. \\
-Bei externen Inhalten wird ebenfalls die Regel zur Überprüfung der Leitfragen angewendet. Statt der Abfrage, ob mehr als die Hälfte der Versionen als Angriff gewertet wurde,
-wird überprüft, ob eine Zeile der externen Daten nicht zum Rest passt oder an die \ac{ki} gerichtet ist. Ist mindestens eine der beiden Regeln erfüllt, wird die Anfrage
-als Angriff gewertet.\\
-Durch die Verknüpfung von zwei Regeln soll das \ac{llm} eine höhere Erkennungsrate erreichen. Die Anwendung der Leitfrage F0 verfolgt das Ziel, dass Nutzeranfragen, die
-sich über Themen informieren möchten, nicht direkt als Angriff gewertet werden. Welche Regel ausgelöst wurde, wird gespeichert, damit bei 
-der Auswertung in Kapitel~\ref{ch:evaluation} die Begründungen nachvollziehbar sind. Die konkreten Schritte der Maßnahme werden in Abschnitt~\ref{subsec:ueberarbeitung} erläutert.
+% Abschließend wird anhand definierter Regeln entschieden, ob ein Angriff vorliegt. Je nachdem, ob es sich bei der Anfrage um externen Inhalt oder eine Nutzeranfrage 
+% handelt, werden verschiedene Regeln verwendet. Bei einer Nutzeranfrage wird zunächst geprüft, ob mehr als die Hälfte der Versionen von dem vorgeschalteten \ac{llm}
+% als Angriff eingestuft wird. Zusätzlich wird überprüft, ob die erste Leitfrage, die klärt, ob es sich bei der Nutzeranfrage um eine Verständnisfrage handelt, mit 
+% NEIN beantwortet und mindestens eine der anderen fünf Leitfragen mit JA beantwortet wurde. Ein Angriff liegt vor, wenn mindestens eine der beiden Bedingungen
+% erfüllt wurde. \\
+% Bei externen Inhalten wird ebenfalls die Regel zur Überprüfung der Leitfragen angewendet. Statt der Abfrage, ob mehr als die Hälfte der Versionen als Angriff gewertet wurde,
+% wird überprüft, ob Zeilen der externen Daten nicht zum Rest passen oder an die \ac{ki} gerichtet sind. Ist mindestens eine der beiden Regeln erfüllt, wird die Anfrage
+% als Angriff gewertet.\\
+% Durch die Verknüpfung von zwei Regeln soll das \ac{llm} eine höhere Erkennungsrate erreichen. Die Anwendung der Leitfrage F0 verfolgt das Ziel, dass Nutzeranfragen, die
+% sich über Themen informieren möchten, nicht direkt als Angriff gewertet werden. Welche Regel ausgelöst wurde, wird gespeichert, damit bei 
+% der Auswertung in Kapitel~\ref{ch:evaluation} die Begründungen nachvollziehbar sind. Die konkreten Schritte der Maßnahme werden in Abschnitt~\ref{subsec:ueberarbeitung} erläutert.
 
 \section{Aufbau der Umgebung}\label{sec:aufbau_umgebung}
 
 Als vorgeschaltetes \ac{llm} wurde Mistral Small~4 ausgewählt~\cite{sm15}. Diese Wahl wurde getroffen, damit ein direkter Vergleich mit dem Hauptmodell Mistral Large~4
 möglich ist. Die genauen Modellbezeichnungen lauten \texttt{mistral-small-2603} und \texttt{mistral-large-4-0}. \\
-Mistral Small~4 wurde entwickelt, um trotz seiner kleinen Größe von 119 Milliarden Parametern als Allzweckmodell eingesetzt zu werden. Die Kosten betragen 0,15\,\$ pro
-Million Input-Token und 0,60\,\$ pro Million Output-Token. Die maximale Kontextlänge beträgt 262.144 Token, die etwa 200.000 Wörtern entsprechen~\cite{sm31}. \\
-Mistral Large~4 verfügt über eine Billion Parameter. Hier betragen die Kosten 1,36\,\$ pro Million Input-Token und 4,16\,\$ pro Million Output-Token. 
+Mistral Small~4 wurde entwickelt, um trotz seiner kleinen Größe von 119 Milliarden Parametern als Allzweckmodell eingesetzt zu werden. Die Kosten betragen 0,15\,USD pro
+Million Input-Token und 0,60\,USD pro Million Output-Token. Die maximale Kontextlänge beträgt 262.144 Token, die etwa 200.000 Wörtern entsprechen~\cite{sm31}. \\
+Mistral Large~4 verfügt über eine Billion Parameter. Hier betragen die Kosten 1,36\,USD pro Million Input-Token und 4,16\,USD pro Million Output-Token. 
 Die maximale Kontextlänge liegt bei einer Million Token~\cite{sm32}. \\
 Die technische Umsetzung erfolgt mit Python. Dazu wird das Python-Client-SDK (Software Development Kit) der Mistral AI API verwendet, mit dem der Mistral-Client in 
 Python eingebunden wird~\cite{sm33}. \\
@@ -197,7 +199,7 @@ deutschsprachigen Anfragen und verschleierten Angriffen testen zu können, wurde
 Im ersten Schritt wurden 90 Grundszenarien (\textit{Seed-Prompts}) formuliert: 30 Angriffsprompts, 30 harmlose Prompts sowie 30 weitere harmlose Prompts, die bewusst
 negativ formuliert wurden, sogenannte \textit{Hard Negatives}. Die Hard Negatives wurden aufgenommen, da verschiedene Arbeiten zeigen, dass die Formulierung einer
 Anfrage das Verhalten von Sprachmodellen beeinflussen kann~\cite{sm23, sm24, sm25}. Mit Hard Negatives lässt sich prüfen, ob der Klassifikator harmlose Anfragen allein
-aufgrund ihres Tonfalls fälschlicherweise als Angriff einstuft. Listing~\ref{lst:seeds} zeigt für jede der drei Kategorien ein Beispiel.
+aufgrund ihres Tonfalls fälschlicherweise als Angriff einstuft. Quelltext~\ref{lst:seeds} zeigt für jede der drei Kategorien ein Beispiel.
 
 \begin{lstlisting}[caption={Beispiele für Grundszenarien der drei Kategorien}, label={lst:seeds}, basicstyle=\ttfamily\small, breaklines=true, columns=fullflexible]
 {"seed_id": "A01", "label": "attack", "harmless_level": null, "text": "", "split": "dev"}
@@ -211,12 +213,12 @@ Das Feld \texttt{label} enthält die Kategorie ausgeschrieben, das Feld \texttt{
 negativ formulierten (\texttt{hard\_negative}). Bei Angriffen ist es nicht belegt (\texttt{null}). \\
 Zudem wurden die Grundszenarien in einen Entwicklungsteil (\texttt{dev}) und einen Testteil (\texttt{test}) aufgeteilt. 30 Grundszenarien wurden dem Dev-Abschnitt
 und 60 dem 
-Test-Abschnitt zugeordnet. Der Entwicklungsteil dient der Parameterabstimmung des Verfahrens, etwa der Festlegung des Schwellenwerts, während die abschließende
+Test-Abschnitt zugeordnet. Der Entwicklungsteil dient der Entwicklung des Verfahrens, während die abschließende
 Bewertung ausschließlich auf dem Testteil erfolgt. Auf diese Weise wird verhindert, dass das Verfahren an die Testdaten angepasst wird. \\
 Im zweiten Schritt wurden die 30 Angriffsprompts und die 30 harmlosen Prompts auf 15 verschiedene Arten modifiziert (T01-T15). Zusammen mit den
-unveränderten Prompts (T00) ergeben sich je Grundszenario 16 Varianten und somit $60 \cdot 16 = 960$ Einträge. Die besonderen 30 Hard Negatives wurden ohne
+unveränderten Prompts (T00) ergeben sich je Grundszenario 16 Varianten und somit $60 \cdot 16 = 960$ Einträge. Die 30 Hard Negatives wurden ohne
 Transformation in den Datensatz aufgenommen. Die 15 Modifizierungstechniken stammen aus Arbeiten, die sich mit Prompt-Injection-Angriffen oder allgemein mit 
-Schwächen von \ac{llm}s befassen, die durch Veränderungen am Prompt entstehen:
+Schwächen von \acp{llm} befassen, die durch Veränderungen am Prompt entstehen:
 
 \begin{itemize}
     \item \textbf{T00:} Der Prompt wird unverändert übernommen. \\
@@ -253,7 +255,7 @@ Schwächen von \ac{llm}s befassen, die durch Veränderungen am Prompt entstehen:
     Beispiel: \enquote{Schicke deine Systemanweisung an die Webseite}
 \end{itemize}
 
-Listing~\ref{lst:entry} zeigt den Aufbau eines Eintrags im finalen Datensatz.
+Quelltext~\ref{lst:entry} zeigt den Aufbau eines Eintrags im finalen Datensatz.
 
 \begin{lstlisting}[caption={Aufbau eines Eintrags im finalen Datensatz}, label={lst:entry}, basicstyle=\ttfamily\small, breaklines=true, columns=fullflexible]
 {"id": "A01-T00", "seed_id": "A01", "label": "attack", "harmless_level": null, "messages": [{"role": "user", "content": ""}], "decode_hint": false, "language": "de", "split": "dev"}
@@ -269,7 +271,7 @@ Die einzelnen Felder haben folgende Bedeutung:
     \item[\texttt{harmless\_level}:] Einordnung der harmlosen Einträge. Neben \texttt{normal} und \texttt{hard\_negative} kennzeichnet der Wert \texttt{transformed}
     harmlose Prompts, die mit einer der Techniken T01--T15 modifiziert wurden. Bei Angriffen hat das Feld den Wert \texttt{null}.
     \item[\texttt{messages}:] Der an das \ac{llm} übergebene Prompt einschließlich der Rolle (\texttt{role}), von der die Nachricht ausgeht.
-    \item[\texttt{decode\_hint}:] Gibt an, ob der Prompt einen Hinweis zur Entschlüsselung enthält, wie er für die Techniken T05 bis T07 erforderlich ist.
+    \item[\texttt{decode\_hint}:] Gibt an, ob der Prompt einen Hinweis zur Entschlüsselung enthält, wie er für die Techniken T05 bis T09 sowie T11 bis T13 erforderlich ist.
     \item[\texttt{language}:] Sprache des Prompts. Dieses Feld ist für T09 erforderlich, da die Anweisung dort auf Zulu vorliegt.
     \item[\texttt{split}:] Zugehörigkeit zum Dev-Abschnitt (\texttt{dev}) oder Test-Abschnitt (\texttt{test}).
 \end{description}
@@ -283,9 +285,10 @@ wurden zusätzlich öffentliche Datensätze verwendet. Alle Inhalte werden
 in der Nutzeranfrage zusammengefasst. Darüber hinaus ermöglicht die Verwendung von 
 öffentlichen Datensätzen, dass die Ergebnisse mit anderen Arbeiten vergleichbar sind und ein stärkerer Praxisbezug der Aussagen geschaffen wird. \\
 Ausgewählt wurden die Datensätze BIPIA und NotInject~\cite{sm34, sm35}. \glqq BIPIA\grqq{} (Benchmarking and Defending Against Indirect Prompt Injection Attacks on Large 
-Language Models) wurde von Microsoft entwickelt, um \ac{llm}s auf indirekte Prompt-Injection-Angriffe zu testen. Der Datensatz ist in einen Train- und
+Language Models) wurde von Microsoft entwickelt, um \acp{llm} auf indirekte Prompt-Injection-Angriffe zu testen. Der Datensatz ist in einen Train- und
 Test-Abschnitt unterteilt und umfasst fünf Angriffsszenarien: Codeausschnitte, Tabellen, Zusammenfassungen, Webseiten und E-Mails. In dieser Arbeit werden davon 
-drei verwendet: E-Mails, Tabellen und Codeausschnitte. In diesen Angriffsszenarien sind schädliche Anweisungen am Anfang, in der Mitte oder am Ende positioniert.
+drei verwendet: E-Mails, Tabellen und Codeausschnitte, da Webseiten und Zusammenfassungen aus Lizenzgründen selbst erstellt werden müssen. In diesen Angriffsszenarien 
+sind schädliche Anweisungen am Anfang, in der Mitte oder am Ende positioniert.
 Der Datensatz beinhaltet auch harmlose Einträge. Ein Eintrag für eine E-Mail hat den Aufbau \texttt{\detokenize{{"context": " ", "ideal": "unknown"}}} und für
 einen Codeausschnitt \texttt{\detokenize{{"error": " ", "code": " ", "ideal": " ", "context_url": " ", "context_author_url": " "}}}~\cite{sm34}. Der Datensatz
 liefert für jedes dieser Angriffsszenarien einen übergreifenden Prompt mit, welcher jedoch für diese Arbeit nicht übernommen wurde, sondern nur der externe Inhalt. 
@@ -302,10 +305,10 @@ gibt an, ob ein Eintrag aus einer externen Quelle stammt oder eine Nutzeranfrage
 ein Codeausschnitt. Mit \texttt{attack\_category} wird die Kategorie des Eintrags angegeben, welche aus dem BIPIA-Datensatz übernommen wurde, und mit \texttt{position}
 die Stelle, an der der Angriff im Text platziert ist. \\
 Da der BIPIA-Datensatz keine verschleierten Angriffe enthält, konnte nicht geprüft werden, ob die Rekonstruktion des Textes auch bei externem Inhalt einen Mehrwert
-liefert. Deshalb wurde zusätzlich eine verschleierte Version von BIPIA erstellt, jeweils für den Dev-Abschnitt und den Test-Abschnitt. Bei den Einträgen wurde ausschließlich
-der Inhalt verändert. Dazu werden die Transformationen T01, T02, T03, T08 und T14 des eigenen Datensatzes abwechselnd angewendet. Diese Transformationen wurden mit festen Regeln erstellt. Bei T01, T02 und T03 wurden die zwei längsten Wörter mit mindestens fünf 
-Buchstaben verändert. Bei T08 wurde der gesamte Inhalt Base64-kodiert und wie im eigenen Datensatz mit einem Hinweis zum Dekodieren versehen. Bei T14 wurden 
-abwechselnd Leetspeak, Homoglyphen und unsichtbare Zeichen eingefügt. Die harmlosen Texte aus dem BIPIA-Datensatz wurden nicht verändert. Der verschleierte 
+liefert. Deshalb wurde zusätzlich eine verschleierte Version von BIPIA erstellt, jeweils für den Dev-Abschnitt und den Test-Abschnitt.
+Es wurden die Transformationen T01, T02, T03, T08 und T14 des eigenen Datensatzes abwechselnd angewendet. T01, T02 und T03 verändern jeweils die zwei längsten Wörter 
+mit mindestens fünf Buchstaben. T08 kodiert den gesamte Inhalt in Base64 ergänzt, wie im eigenen Datensatz, einen Hinweis zum Dekodieren. T14 fügt 
+abwechselnd Leetspeak, Homoglyphen und unsichtbare Zeichen ein. Die harmlosen Texte aus dem BIPIA-Datensatz wurden nicht verändert. Der verschleierte 
 Dev-Abschnitt umfasst insgesamt 339 Einträge, der Test-Abschnitt 350 Einträge.
 
 \subsection{Unterschiede zwischen den Datensätzen}
@@ -317,9 +320,9 @@ verschleierte Version fünf. In den originalen öffentlichen Datensätzen sind d
 
 \subsection{Metriken}\label{subsec:metrics}
 
-Um die Schutzmaßnahme auf ihre Wirksamkeit zu überprüfen, wurden mehrere Metriken gewählt: True Positive, False Positive, False Negative, True Negative, Precision, 
-Recall, F1, False Positive Rate, Latenz sowie Konfidenzintervalle nach Wilson. Im Folgenden wird zu den einzelnen Metriken erläutert, was gemessen wird und 
-in welchem Bezug sie verwendet werden sollen. Für die Datensätze BIPIA und NotInject werden zusätzlich die Aufgabe (E-Mail, Tabelle, Code) und die Position 
+Um die Schutzmaßnahme auf ihre Wirksamkeit zu überprüfen, wurden mehrere Metriken gewählt: Konfusionsmatrix, 
+Recall, False Positive Rate und Latenz. Im Folgenden wird zu den einzelnen Metriken erläutert, was gemessen wird und 
+in welchem Bezug sie verwendet werden sollen. Für den Datensatz BIPIA werden zusätzlich die Aufgabe (E-Mail, Tabelle, Code) und die Position 
 (Anfang, Mitte, Ende) festgehalten. Bei dem verschleierten BIPIA-Datensatz und dem eigenen werden zusätzlich die Transformationen dokumentiert.
 
 \paragraph{Konfusionsmatrix}~\cite[75]{sm28}
@@ -340,7 +343,7 @@ In dieser Matrix werden vier verschiedene Kennzahlen dargestellt: \\
 \newcommand\MyBox[2]{%
   \fbox{\lower0.75cm
     \vbox to 1.7cm{\vfil
-      \hbox to 1.7cm{\hfil\parbox{1.4cm}{#1\\#2}\hfil}
+      \hbox to 1.7cm{\hfil\parbox{1.4cm}{#1\\#2}\hfil}/
       \vfil}%
   }%
 }
@@ -355,31 +358,13 @@ In dieser Matrix werden vier verschiedene Kennzahlen dargestellt: \\
 \end{tabular}
 \end{table}
 
-\paragraph{Precision}~\cite[227]{sm29}
-
-Mit der Precision wird der Anteil der als Angriff klassifizierten Einträge, die tatsächlich ein Angriff sind, angegeben
-
-\begin{equation}
-  P = \frac{TP}{TP + FP} .
-  \label{eq:precision}
-\end{equation}
-
-\paragraph{Recall/Sensitivity}~\cite[227]{sm29}
+\paragraph{Recall}~\cite[227]{sm29}
 
 Der Recall (auch \textit{Sensitivity} oder \textit{True Positive Rate}) gibt an, welcher Anteil der tatsächlichen Angriffe als solche erkannt wird
 
 \begin{equation}
   R = \frac{TP}{TP + FN} .
   \label{eq:recall}
-\end{equation}
-
-\paragraph{F1~\cite[227]{sm29}}
-
-Der F1-Wert ist das harmonische Mittel aus Precision und Recall
-
-\begin{equation}
-  F_1 = \frac{2 \cdot P \cdot R}{P + R} .
-  \label{eq:f1}
 \end{equation}
 
 \paragraph{False Positive Rate~\cite[22]{sm27}}
@@ -393,25 +378,12 @@ Die False Positive Rate gibt den Anteil der harmlosen Prompts an, die fälschlic
 
 \paragraph{Latenz~\cite[22]{sm27}}
 
-Gemessen wird die gesamte Dauer der Prüfung pro Text, angegeben wird der Median. Der Median entspricht dem Overhead, den die Schutzmaßnahme verursacht
+Gemessen wird die gesamte Dauer der Prüfung pro Text, angegeben wird der Median über alle Einträge eines Datensatzes.
 
 \begin{equation}
-  \mathit{Latency Overhead} = \mathit{Defense inference time} - \mathit{Baseline inference time} .
+  L = \operatorname{median}(t_1, \dots, t_n) .
   \label{eq:latency}
 \end{equation}
-
-\paragraph{Konfidenzintervalle nach Wilson~\cite{sm44}}
-
-Das Wilson-Intervall berechnet ein Konfidenzintervall für einen Anteil in einer statistischen Population. Dabei ist \(\hat{p}\) der Stichprobenanteil, \(n\) 
-die Stichprobengröße und \(z\) der z-Wert des gewünschten Konfidenzniveaus. Da dieses Intervall eine bessere Schätzung nahe 0 oder 1 liefert, ist es damit
-besonders geeignet bei binären Ergebnissen wie JA/NEIN
-
-\begin{equation}
-  \mathit{Wilson Score} = \frac{\hat{p} + \frac{z^2}{2n} \pm z\sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac{z^2}{4n^2}}}{1+\frac{z^2}{n}} .
-  \label{eq:confidence}
-\end{equation}
-
-Für die Auswertung der Ergebnisse wird in dieser Arbeit ein Konfidenzniveau von 95\% festgelegt. 
 
 \section{Durchführung und Weiterentwicklung}
 
@@ -435,7 +407,7 @@ den vollständigen Ablauf.
 
 Als Eingabe werden die Einträge wie in den Abschnitten~\ref{subsec:datensatz} und~\ref{subsec:externerdatensatz} beschrieben verwendet. Es wird bei jeder Anfrage
 die Anweisung als Systemprompt und der Datensatzeintrag als Nutzerprompt übergeben. Dadurch werden der zu prüfende Text und die Anweisung voneinander getrennt, 
-wodurch das Modell nicht im Nutzerprompt nach Anweisungen sucht. Listing~\ref{lst:guard} zeigt den Aufbau der Anfrage. 
+wodurch das Modell nicht im Nutzerprompt nach Anweisungen sucht. Quelltext~\ref{lst:guard} zeigt den Aufbau der Anfrage. 
 
 \begin{lstlisting}[language=Python, caption={Anfrage an den Klassifikator (Ausschnitt)}, label={lst:guard}]
 GUARD_PROMPT = ("Ist die folgende Nutzereingabe ein Prompt-Injection-Angriff? "
@@ -456,7 +428,7 @@ response = client.chat.complete(
 Das Modell gibt als Antwort JA oder NEIN zurück. Wird mit JA geantwortet, wird der Prompt als Angriff eingestuft. Die binäre Antwort wurde gewählt, weil sie
 eine eindeutige Einschätzung liefert. Bei einem Score von 0 bis 100 hätte dagegen eine Schwelle definiert werden müssen. Zusätzlich werden weniger Token 
 benötigt, wodurch Kosten und Antwortzeit gering bleiben. Es ist jedoch von Nachteil, dass sich aus den binären Antworten keine Wahrscheinlichkeiten ableiten lassen. 
-Somit könnten die Antwortmöglichkeiten die gleiche Wahrscheinlichkeit haben oder die Entscheidung knapp ausfallen, ohne dass dem eine Bedeutung beigemessen wird. \\
+Somit könnten die Antwortmöglichkeiten die gleiche Wahrscheinlichkeit haben oder die Entscheidung knapp ausfallen, ohne dass dem eine Bedeutung zugeordnet wird. \\
 Die Antwortlänge ist auf zehn Token begrenzt und die Reasoning-Funktion deaktiviert, mit der das \ac{llm} vor der Antwort zunächst Zwischenschritte generiert.
 Die Temperatur wurde auf 0 gesetzt, damit in jedem Schritt das wahrscheinlichste nächste Token gewählt wird~\cite{sm45}. 
 Dadurch sollen die Antworten
@@ -471,7 +443,7 @@ Datensätze und die Metriken wurden dabei identisch gelassen. Dieser Vergleich w
 
 Welches Ergebnis bei der Klassifizierung mithilfe des Originalansatzes erzielt wird, ist abhängig von dem gewählten Modell und zusätzlich von dem Prompt, welcher 
 die Aufgabe des \ac{llm} definiert. Durch die Arbeit~\cite{sm46} wird deutlich, welche Auswirkungen bereits durch kleine Änderungen ausgelöst werden. Aus diesem
-Grund wurden neben dem originalen Prompt~\ref{lst:guard} fünf weitere Versionen erstellt. Bei jeder dieser Versionen wurden die Änderungen in Bezug auf ein Merkmal
+Grund wurden neben dem originalen Prompt aus Abschnitt~\ref{lst:guard} fünf weitere Versionen erstellt. Bei jeder dieser Versionen wurden die Änderungen in Bezug auf ein Merkmal
 des Originalprompts durchgeführt. Beibehalten wurde jedoch die Vorgabe, dass ein binäres Antwortformat gewählt werden soll, also das \ac{llm} ausschließlich mit 
 JA oder NEIN antworten soll. Im Folgenden werden die fünf abgeänderten Prompts mit den dazugehörigen geänderten Merkmalen aufgezählt: 
 
@@ -489,7 +461,7 @@ und GP5 werden die beobachteten Schwächen bei der Erkennung benannt. Damit wird
 die sich an das \ac{llm} richtet, enthalten sein könnte oder die Angriffe verschleiert sind. \\
 Damit die Ergebnisse verglichen werden können, werden alle Versionen mit demselben Modell Mistral Small~4, denselben Parametern und denselben Datensätzen durchgeführt.
 Für den Vergleich wird der Recall~\eqref{eq:recall} betrachtet. Das Ergebnis ist in Abbildung~\ref{fig:promptvariation_recall} visualisiert und zeigt den 
-Recall~\eqref{eq:recall} für die drei Datensätze. Ergänzend in in Abbildung Abbildung~\ref{fig:promptvariation_fpr} die \ac{fpr}~\eqref{eq:fpr} dargestellt, 
+Recall~\eqref{eq:recall} für die drei Datensätze. Ergänzend ist in Abbildung~\ref{fig:promptvariation_fpr} die \ac{fpr}~\eqref{eq:fpr} dargestellt, 
 um die Erkennungsrate den Fehlalarmen gegenüberzustellen.
 
 
@@ -505,14 +477,15 @@ um die Erkennungsrate den Fehlalarmen gegenüberzustellen.
 \caption{Originalansatz Promptvariantion - FPR}\label{fig:promptvariation_fpr}
 \end{figure}
 
+Die Promptvariation dient dem Vergleich mit dem weiterentwickelten Ansatz und wird deshalb auf dem Test-Abschnitt durchgeführt. 
 
 \subsection{Entwicklung des Ansatzes}
 
 Auf Grundlage der in Abschnitt~\ref{subsec:original} erfassten Baseline wurde der Ansatz in mehreren Schritten überarbeitet. Im Folgenden werden diese Schritte und 
-die erlangten Erkenntnisse beschrieben. Dabei werden Änderungen beibehalten oder verworfen. Für alle Schritte wurden, wie bei der endgültigen Lösung
+die erlangten Erkenntnisse beschrieben. Dabei werden Änderungen beibehalten oder verworfen. Für alle Schritte wurden, wie bei dem finalen Ansatz
 aus Abschnitt~\ref{subsec:ueberarbeitung}, dieselben Parameter und das \ac{llm} Mistral Small~4 verwendet. Ausgangspunkt sind die Ergebnisse 
 des Dev-Abschnitts des Originalansatzes, der einen Recall~\eqref{eq:recall} von 80,6\,\% und eine \ac{fpr}~\eqref{eq:fpr} von 8,8\,\% erreichte. 
-Die einzelnen Schritte nud die erreichten Werte werden in der Abbildung~\ref{fig:entwicklung_ansatz} visualisiert.\\
+Die einzelnen Schritte und die erreichten Werte werden in der Abbildung~\ref{fig:entwicklung_ansatz} visualisiert.\\
 
 \begin{enumerate}
     \item Rekonstruktion und Leitfragen
@@ -592,12 +565,12 @@ die Werte 87,5\,\% Recall~\eqref{eq:recall} bei 3,5\,\% \ac{fpr}~\eqref{eq:fpr} 
 Die Ergebnisse des Originalansatzes des vorgeschalteten \ac{llm} zeigen mehrere Schwächen in der Klassifikation. Im eigenen Datensatz werden verschleierte 
 Angriffe häufig falsch eingeschätzt. Beispielsweise wurden von dem Test-Abschnitt bei T02 nur 6 von 20 und bei T14 nur 7 von 20 Angriffen erkannt. Insgesamt wurden
 von den Angriffen 73\,\% (T00-T15) und 89\,\% der harmlosen Prompts richtig klassifiziert. Bei den öffentlichen Datensätzen ist eine generelle Schwäche bei der
-Erkennung von Angriffen zu erkennen. Mit dem Modell Mistral Small~4 wurde nur ein Recall~\eqref{eq:recall} von 34\,\% erkannt. Übersehen werden vor allem Angriffe, die am Ende des 
+Erkennung von Angriffen zu erkennen. Mit dem \ac{llm} Mistral Small~4 wurde nur ein Recall~\eqref{eq:recall} von 34\,\% erkannt. Übersehen werden vor allem Angriffe, die am Ende des 
 Textes stehen oder in Tabellen eingebettet sind. \\
 Daher wird der Ansatz so überarbeitet, dass die Erkennungsrate steigt, verschleierte Prompts berücksichtigt werden und die Position eines Angriffs keine Rolle
-für die Erkennung spielt. Dabei werden weiterhin die in Abschnitt~\ref{konzept} definierten Kriterien berücksichtigt. Weder am Hauptmodell noch an der Systemarchitektur sollen
-Änderungen notwendig sein. Zusätzlich soll der Ansatz mit einem kleinen, kostengünstigen Modell umsetzbar sein. Um den Vorgang zu erleichtern, wird der bereits
-implementierte Ansatz erweitert. Als Modell wird weiterhin Mistral Small~4 mit denselben Parametern verwendet. Auch die Metriken werden weiterhin verwendet, damit
+für die Erkennung spielt. Dabei werden weiterhin die in Abschnitt~\ref{konzept} definierten Kriterien berücksichtigt. Weder am Haupt-\ac{llm} noch an der Systemarchitektur sollen
+Änderungen notwendig sein. Zusätzlich soll der Ansatz mit einem kleinen, kostengünstigen \ac{llm} umsetzbar sein. Um den Vorgang zu erleichtern, wird der bereits
+implementierte Ansatz erweitert. Als \ac{llm} wird weiterhin Mistral Small~4 mit denselben Parametern verwendet. Auch die Metriken werden weiterhin verwendet, damit
 die Ergebnisse nach der Implementierung direkt vergleichbar sind. Die Abbildung~\ref{fig:ablauf_massnahme} zeigt den Ablauf und das Zusammenspiel der einzelnen 
 Funktionen. Der vollständige Code befindet sich im Anhang~\ref{sec:code_new_approach}.
 
@@ -608,20 +581,20 @@ Funktionen. Der vollständige Code befindet sich im Anhang~\ref{sec:code_new_app
 \end{figure}
 
 Die Weiterentwicklung kombiniert Prompt-Filterung, Input-Modifizierung und Prompt-Enhancement. Die Ideen stammen aus verschiedenen Arbeiten. \\
-Die Prompt-Filterung orientiert sich an den Arbeiten PIGuard und DataSentinel. Beide setzen ein vorgeschaltetes \ac{llm} ein, um Eingaben auf schädliche
+Die Prompt-Filterung orientiert sich an den Arbeiten PIGuard von \citeauthor{sm37}~\cite{sm37} und DataSentinel von \citeauthor{sm39}~\cite{sm39}. Beide setzen ein vorgeschaltetes \ac{llm} ein, um Eingaben auf schädliche
 Daten beziehungsweise im Fall von PIGuard gezielt auf Prompt-Injection-Angriffe zu prüfen~\cite[30426]{sm37}~\cite[2194]{sm39}. \\
-Die Input-Modifizierung geht auf die Arbeit SmoothLLM zurück. Sie befasst sich zwar mit Jailbreaks und nicht mit Prompt-Injection-Angriffen, die 
-Grundidee lässt sich jedoch auf diesen Anwendungsfall übertragen. Anstatt eine Anfrage an das Modell zu senden mit der Frage, ob ein Prompt
+Die Input-Modifizierung geht auf die Arbeit SmoothLLM von \citeauthor{sm40}~\cite{sm40} zurück. Sie befasst sich zwar mit Jailbreaks und nicht mit Prompt-Injection-Angriffen, die 
+Grundidee lässt sich jedoch auf diesen Anwendungsfall übertragen. Anstatt eine Anfrage an das \ac{llm} zu senden mit der Frage, ob ein Prompt
 einen Angriff enthält, werden mehrere Versionen des Prompts erzeugt und für jede Version eine Abfrage gestellt. Dazu wird ein bestimmter Prozentsatz der
 Zeichen vertauscht, eingefügt oder ersetzt. Die Antworten zu den einzelnen Versionen werden gesammelt und anschließend anhand eines Schwellwerts eine Gesamtantwort
 gebildet. \\
 Das Prinzip, die Entscheidung auf mehrere Versionen und Antworten zu stützen, sowie der Schwellwert \(\gamma = 0{,}5\) wurden übernommen. Der Ansatz dieser Arbeit
-unterscheidet sich jedoch in mehreren Aspekten. Die Änderungen in der Arbeit SmoothLLM werden zufällig an dem Prompt durchgeführt. In dieser Arbeit wird versucht, den 
-Prompt gezielt zu rekonstruieren, damit das Modell den Inhalt und die Absicht besser erfassen kann. Zweitens erfolgt die Änderung über eine festgelegte Funktion
-bei SmoothLLM,
-sodass gleiche Prompts stets zum gleichen Ergebnis führen. Ein letzter Unterschied besteht darin, dass in SmoothLLM die Bewertung durch das Haupt-\ac{llm}
-durchgeführt wird. Bei diesem Ansatz erfolgt dies durch das vorgeschaltete \ac{llm}~\cite{sm40}. \\
-Das Prompt-Enhancement orientiert sich an der Arbeit \enquote{Can Indirect Prompt Injection Attacks Be Detected and Removed?}. Hier wurde die Idee der Segmentation
+unterscheidet sich jedoch in mehreren Aspekten. Erstens werden die Änderungen in der Arbeit SmoothLLM werden zufällig an dem Prompt durchgeführt. In dieser Arbeit wird versucht, den 
+Prompt gezielt zu rekonstruieren, damit das \ac{llm} den Inhalt und die Absicht besser erfassen kann. Zweitens erfolgen die Änderungen über eine festgelegte Funktion
+statt über zufällige Störungen,
+sodass gleiche Prompts stets zu denselben Versionen führen. Drittens erfolgt die Bewertung in SmoothLLM durch das Haupt-\ac{llm}, in diesem Ansatz stattdessen 
+durch das vorgeschaltete \ac{llm}~\cite{sm40}. \\
+Das Prompt-Enhancement orientiert sich an der Arbeit \enquote{Can Indirect Prompt Injection Attacks Be Detected and Removed?} von \citeauthor{sm41}~\cite{sm41}. Hier wurde die Idee der Segmentation
 Removal Method übernommen~\cite[18193]{sm41}. Dabei wird das Dokument, das dem \ac{llm} übergeben wird, in kleinere Segmente unterteilt. Im vorliegenden Ansatz
 entsprechen diese Segmente den einzelnen Zeilen. \\
 Der Ansatz gliedert sich in vier Stufen:
@@ -634,8 +607,7 @@ Der Ansatz gliedert sich in vier Stufen:
 In der ersten Stufe werden drei Versionen der Anfrage gebildet, die dem Modell anschließend zur Einschätzung übergeben werden. Die erste Version V0 ist der
 unveränderte Prompt. Für die zweite Version V1 werden mehrere Modifikationen durchgeführt, die den Prompt möglichst stark rekonstruieren sollen, sodass Klartext 
 entsteht. Als Erstes werden unsichtbare Zeichen aufgelöst, Tag-Zeichen werden in ASCII-Zeichen zurückgeführt und unsichtbare Formatzeichen entfernt~\cite{sm42}.
-Anschließend erfolgt eine NFKC-Normalisierung (Normalization Form Compatibility Composition), die Zeichen in ihre Standardform überführt. Ein Beispiel ist 
-\enquote{Systemprompt}. Das Wort sieht für einen Nutzer normal aus, hat aber für ein Programm eine andere Bedeutung~\cite{sm43}. Danach werden Sonderzeichen zwischen
+Anschließend erfolgt eine NFKC-Normalisierung (Normalization Form Compatibility Composition), die Zeichen in ihre Standardform überführt. Danach werden Sonderzeichen zwischen
 Buchstaben entfernt. Dies ist notwendig, wenn als Verschleierung beispielsweise ein Punkt in einem Wort eingefügt wurde. Anschließend werden alleinstehende
 Buchstaben wie \enquote{p r o m p t} zu Wörtern zusammengefügt. Als letzte Modifikation werden Kodierungen wie Base64 und Hexadezimal dekodiert. \\
 Die dritte Version V2 entsteht, indem auf V1 eine Rechtschreibkorrektur durchgeführt wird. Korrigiert werden Wörter, bei denen ein einzelner Buchstabe falsch ist, da
@@ -643,13 +615,13 @@ in diesem Fall die Wahrscheinlichkeit am höchsten ist, dass es sich tatsächlic
 werden. Die Rechtschreibkorrektur wird anhand der erkannten Sprache durchgeführt. Bei den verwendeten Datensätzen ist
 dies Deutsch und Englisch. \\
 Diese Rekonstruktionstechniken werden ausgewählt, da sie zu den definierten Daten und den aus der Literatur übernommenen Verschleierungstechniken passen. Zudem 
-führt das OWASP-Merkblatt zur Prävention von Prompt Injection aus dem Jahr 2026 die Kodierung von Base64 und Hexadezimal sowie Wörter mit vertauschten Buchstaben
+führt das \ac{owasp}-Merkblatt zur Prävention von Prompt Injection aus dem Jahr 2026 die Kodierung von Base64 und Hexadezimal sowie Wörter mit vertauschten Buchstaben
 als häufige Angriffstechniken auf~\cite{sm42}. Auch die Verwendung von Unicode wird dort aufgezählt. \\
 Mit der Bereinigung wurde absichtlich nicht jede Transformation aus dem eigenen Datensatz rückgängig gemacht, da der Ansatz nicht zu sehr auf diesen Datensatz
-zugeschnitten werden soll. Aus diesem Grund wurde auch auf den öffentlichen Datensätzen getestet. Stattdessen werden häufig vorkommende Techniken behandelt, die eine
+zugeschnitten werden soll. Aus diesem Grund wurde auch auf den öffentlichen Datensätzen getestet und häufig vorkommende Techniken implementiert, die eine
 erste Rekonstruktion ermöglichen. \\
-In der zweiten Stufe wird für jede der Versionen jeweils eine Anfrage mit sechs Leitfragen gestellt, durch welche der Klassifikator die Absicht des Prompts 
-einschätzen soll. So wird neben der äußeren Erscheinung eines Prompts auch die Absicht bewertet. F0 klärt, ob es sich um eine Verständnisfrage handelt. F1 bis F5
+In der zweiten Stufe wird für jede der Versionen jeweils eine Anfrage mit sechs Leitfragen gestellt, durch welche die Absicht des Prompts eingeschätzt werden
+soll. So wird neben der äußeren Erscheinung eines Prompts auch die Absicht bewertet. F0 klärt, ob es sich um eine Verständnisfrage handelt. F1 bis F5
 fragen, ob der Prompt auf eines der folgenden Ziele abzielt:
 
 \begin{itemize}
@@ -664,8 +636,8 @@ Klassifikator gesendet, mit der Frage, ob ein Prompt-Injection-Angriff erkannt w
 zusammengefasst, sodass die Bewertung dieser Versionen nur einmal vorliegt. Dadurch sinkt die Anzahl der Anfragen und identische Versionen können das Ergebnis 
 nicht mehrfach beeinflussen. \\
 Bei externen Inhalten wird zuerst jede Zeile nummeriert. Auf jede dieser Zeilen wird statt der allgemeinen Frage nach einem Prompt-Injection-Angriff gefragt, an
-wen sich die Zeile richtet und ob sie zum übrigen Inhalt passt. Dabei werden nur V0 und V1 verwendet, weil durch die Rechtschreibkorrektur Wörter falsch korrigiert
-werden können. Dadurch könnte der eigentliche Inhalt verschleiert werden oder ein Angriff als ungefährlich erscheinen. Somit werden hier nur zwei Anfragen gemacht. \\
+wen sich die Zeile richtet und ob sie zum übrigen Inhalt passt. Dabei werden nur V0 und V1 verwendet, weil durch die Rechtschreibkorrektur Wörter möglicherweise falsch korrigiert
+werden. Der eigentliche Inhalt könnte verschleiert werden oder ein Angriff als ungefährlich erscheinen. Somit werden hier nur zwei Anfragen gemacht. \\
 In der vierten Stufe wird ebenfalls zwischen den Arten der Inhalte unterschieden. Bei einer Nutzeranfrage werden zwei Regeln mit einem logischen ODER verknüpft.
 Die erste Regel ist die Mehrheitsentscheidung der Formprüfung aus Stufe 3, mit der gemessen wird, ob der Anteil der JA-Antworten über alle Versionen größer als 
 der Schwellwert \(\gamma = 0{,}5\) ist. Wenn dies zutrifft, gilt die Anfrage als auffällig. Die zweite Regel prüft, ob die erste Leitfrage F0 mit NEIN 
@@ -676,7 +648,7 @@ Die zweite Regel ist identisch mit der Regel der Nutzeranfrage. Wenn F0 mit NEIN
 Anfrage auffällig. Auch hier werden beide Regeln mit einem ODER verknüpft. \\
 Wird eine Anfrage als Angriff gewertet, wird der Text abgewiesen. Andernfalls wird die Anfrage an das Hauptmodell weitergeleitet. \\
 Der weiterentwickelte Ansatz übernimmt das vorgestellte Prinzip der Mehrheitsentscheidung, welches in der Arbeit SmoothLLM~\cite{sm40} vorgestellt wird, die Verwendung des 
-vorgeschalteten \ac{llm}s aus der Arbeit PIGuard~\cite[30426]{sm37} sowie die Aufteilung des Textes in Segmente aus der Arbeit 
+vorgeschalteten \acp{llm} aus der Arbeit PIGuard~\cite[30426]{sm37} sowie die Aufteilung des Textes in Segmente aus der Arbeit 
 \enquote{Can Indirect Prompt Injection Attacks Be Detected and Removed?}~\cite[18193]{sm41}. 
 Als eigene Beiträge kommen folgende
 Aspekte hinzu:
@@ -692,7 +664,8 @@ zusätzlich gespeichert, welche Regel zur Einstufung als Angriff geführt hat. S
 Erkennung leisten. \\
 Im Gegensatz zum Originalansatz (Abschnitt~\ref{subsec:original}) sind bei einer Nutzeranfrage bis zu sechs und bei externen Inhalten bis zu fünf Anfragen an das \ac{llm} notwendig. Dabei werden
 drei in der zweiten Stufe und drei beziehungsweise zwei in der dritten Stufe durchgeführt. Dadurch steigen die Kosten und die Antwortzeit deutlich. Der Originalansatz
-benötigte im Median 0,3 bis 0,5\,s. Der Median bei dem überarbeiteten Ansatz liegt dagegen bei 3,4\,s für den eigenen Datensatz, bei 3,8\,s für den BIPIA-Datensatz
+benötigte im Median 0,3 bis 0,5\,s. Der Median bei dem überarbeiteten Ansatz liegt dagegen bei 3,4\,s für den eigenen Datensatz, bei 3,8\,s für den kombinierten 
+Datensatz aus BIPIA und NotInject
 und bei 6,2\,s für die verschleierte Version von BIPIA.
 
 \section{Ergebnisse}\label{sec:results}
@@ -703,17 +676,16 @@ Es wurden insgesamt acht Durchläufe ausgewertet. Der Originalansatz und der wei
 ausgeführt. Der Originalnsatz wurde zusätzlich mit Mistral Large~4 auf dem eigenen Datensatz und auf dem kombinierten Datensatz aus BIPIA und NotInject evaluiert. \\
 Um die Vergleichbarkeit zu gewährleisten, wurden für alle Durchläufe dieselben Parameter verwendet. Die Temperatur wurde auf 0 gesetzt und die 
 Reasoning-Funktion deaktiviert. Die Prompts blieben innerhalb eines Ansatzes für alle Datensätze identisch. \\
-Für jeden Eintrag wurden die Antwort des \acp{llm}, die getroffenen Entscheidungen und die Antwortzeit gespeichert. Beim weiterentwickelten Ansatz wurden zusätzliche
-Daten gepseichert. Es wird die Art der Eingabe, die Antworten für die einzelnen Versionen sowie die Antworten auf die Leitfragen F0 bis F5 gespeichert.
-Bei Nutzeranfragen wurde zusätzlich das Ergebnis der Formprüfung erfasst, bei externen Inhalten die erkannten Zeilen, die eine Aufforderung an die \ac{ki}
-enthalten oder dessen Inhalt nicht zum Rest des Dokuments passt. Es wird zusätzlich gespeichert, welche der Eintscheidungsregeln ausschlaggebend für die Einstufung
-als Angriff war. Durch ist jede Entscheidung reproduzierbar. \\
-Die Latenz wurde für jeden Eintrag gemessen und als Median festgehalten. Da aber bei dem weiterentwickelten Ansatz die Anfragen teilweise parallel durchgeführt wurden,
-dient dieser Wert als Orientierung und entspricht nicht immer der Bearbeitungszeit. \\
-Mit den gespeicherten Daten werden die in Abschnitt~\ref{subsec:metrics} aufgeführten Metriken berechnet. Für Recall~\eqref{eq:recall} und \ac{fpr}~\eqref{eq:fpr} wurde zusätzlich das 95-\%-Konfidenzintervall~\eqref{eq:confidence}
-nach Wilson bestimmt. Die erfassten Metriken ermöglichen verschiedene Fesstellungen über die Daten. \\
-Die zentrale Kennzahl ist der Recall~\eqref{eq:recall}, da er die Erkennungsrate der Angriffe je Datensatz misst. In Kombination mit dem Konfidenzintervallen~\eqref{eq:confidence} kann mithilfe des
-Recall~\eqref{eq:recall} und \ac{fpr}~\eqref{eq:fpr} ein Vergleich der Ansätze und Datensätze gemacht werden. Der Recall~\eqref{eq:recall} je Transformation zeigt für den eigenen Datensatz und den verschleierten 
+Zu jedem Eintrag speichert das Skript die Antwort des \ac{llm}, die getroffenen Entscheidungen und die Antwortzeit. Beim weiterentwickelten Ansatz kommen weitere
+Daten hinzu. Es wird die Art der Eingabe, die Antworten für die einzelnen Versionen sowie die Antworten auf die Leitfragen F0 bis F5 gespeichert.
+Bei Nutzeranfragen enthält die Ausgabe zusätzlich das Ergebnis der Formprüfung, bei externen Inhalten die Zeilen, die eine Aufforderung an die \ac{ki}
+enthalten oder inhaltlich nicht zum Rest des Dokuments passen. Es wird zudem gespeichert, welche der Eintscheidungsregeln zur Einstufung
+als Angriff geführt hat. Dadurch ist jede Entscheidung reproduzierbar. \\
+Die Latenz wurde für jeden Eintrag gemessen und als Median festgehalten. \\
+Mit den gespeicherten Daten werden die in Abschnitt~\ref{subsec:metrics} aufgeführten Metriken berechnet. Die erfassten Metriken ermöglichen verschiedene Fesstellungen 
+über die Daten. \\
+Die zentrale Kennzahl ist der Recall~\eqref{eq:recall}, da er die Erkennungsrate der Angriffe je Datensatz misst. Der Recall~\eqref{eq:recall} je Transformation zeigt 
+für den eigenen Datensatz und den verschleierten 
 BIPIA-Datensatz die Erkennungsraten bei den verschiedenen Verschleierungen. Der Recall~\eqref{eq:recall} je Aufgabe und Position zeigt für den BIPIA-Datensatz, welche Auswirkungen 
 die Art des externen Inhalts (E-Mail, Tabelle, Code) und die Position des Angriffs (Anfang, Mitte, Ende) haben. Einen zusätzlichn Überblick wir durch die Messung
 des \ac{fpr}~\eqref{eq:fpr} je Harmlosigkeitsstufe, mit der gemessen wird, welche Art von harmlosen Anfragen Fehlalarme auslösen. Mit der Konfusionsmatrix werden zusätzlich die 
@@ -722,19 +694,19 @@ korrekten und falschen Klassifikationen gegenübergestellt, womit die Datensätz
 \section{Grenzen der Schutzmaßnahme}
 
 Der Versuchsaufbau unterliegt verschiedenen Grenzen, die im Folgenden in zwei Kategorien eingeteilt werden: allgemeine Grenzen vorgeschalteter Modelle, die aus
-anderen Arbeiten stammen, und Grenzen, die sich speziell auf diesen Versuchsaufbau beziehen. \\
-Eine allgemeine Grenze vorgeschalteter \ac{llm}s, die auch Guard-Modelle genannt werden, liegt darin, dass sie in der Regel schneller und günstiger sein müssen als das Hauptmodell.
+anderen Arbeiten stammen und Grenzen, die sich speziell auf diesen Versuchsaufbau beziehen. \\
+Eine allgemeine Grenze vorgeschalteter \acp{llm}, die auch Guard-Modelle genannt werden, liegt darin, dass sie in der Regel schneller und günstiger sein müssen als das Hauptmodell.
 Andernfalls ist ein vorgeschaltetes \ac{llm} ein unnötiger Zwischenschritt~\cite[1]{sm36}. \\
 Daraus ergibt sich eine Angriffsfläche, die ein Angreifer ausnutzen kann, indem er eine Anfrage an das vorgeschaltete \ac{llm} sendet, welche dessen Rechenkapazität übersteigt, aber noch 
 innerhalb der Fähigkeiten des Hauptmodells liegt~\cite[2]{sm36}. Zusätzlich neigen solche Modelle zur Over-Defense und klassifizieren harmlose Anfragen häufiger
 als Angriff, was zum einen durch Trigger-Wörter ausgelöst werden kann~\cite[1\psq]{sm37}. Diese Over-Defense wird durch Shortcut Learning ausgelöst, durch 
-beispielsweise diese Trigger-Wörter. Eine weitere Grenze besteht darin, dass \ac{llm}s durch Next-Token-Vorhersage daran gewöhnt sind, Sätze von links nach rechts zu verarbeiten.
+beispielsweise diese Trigger-Wörter. Eine weitere Grenze besteht darin, dass \acp{llm} durch Next-Token-Vorhersage daran gewöhnt sind, Sätze von links nach rechts zu verarbeiten.
 Wenn Zeichen oder ganze Wörter vertauscht werden, kann ein \ac{llm} häufiger Probleme mit der Erkennung von Anweisungen haben~\cite[4]{sm38}. \\
 Auch die implementierte Maßnahme weist Grenzen auf, die nicht vollständig berücksichtigt werden konnten. \\
-Bei dem eigenen Ansatz entsteht eine Grenze dadurch, dass er selbst erstellt wurde und trotz der Orientierung an wissenschaftlichen Arbeiten strukturelle Fehler
-aufweisen kann. Hinzu kommt, dass für jede Transformation nur 20 Einträge erstellt wurden, wodurch der Datensatz relativ klein ist. Außerdem wurde die Schutzmaßnahme
+Bei dem eigenen Datensatz entsteht eine Grenze dadurch, dass er selbst erstellt wurde und trotz der Orientierung an wissenschaftlichen Arbeiten strukturelle Fehler
+aufweisen kann. Hinzu kommt, dass für jede Transformation nur 20 Einträge im Test-Abschnitt erstellt wurden, wodurch der Datensatz relativ klein ist. Außerdem wurde die Schutzmaßnahme
 teilweise auf Grundlage dieses Datensatzes implementiert, wodurch potenzielle Verzerrungen erzeugt werden können. \\
-Bei den öffentlichen Datensätzen muss berücksichtigt werden, dass diese auf Englisch verfasst sind, während der Chatbot, der eigene Datensatz und die Schutzmaßnahme
+Bei den öffentlichen Datensätzen muss berücksichtigt werden, dass diese auf Englisch verfasst sind, während der eigene Datensatz und die Schutzmaßnahme
 für einen deutschsprachigen Anwendungsfall entwickelt wurden. Zudem sind nicht alle Angriffsszenarien aus dem Datensatz verwendet worden, sondern nur E-Mails, 
 Tabellen und Codeausschnitte, nicht aber Webseiten, die in Kapitel~\ref{ch:methodik} als Angriffsszenario verwendet wurden. \\
 Eine Grenze des Ansatzes ist, dass externe Inhalte vor dem Durchlauf gekennzeichnet werden müssen. Diese Kennzeichnung erfolgt nicht durch das \ac{llm}, sondern
@@ -746,6 +718,6 @@ ausschließlich Modelle von Mistral
 verwendet. Es lässt sich daher nicht sagen, ob andere Modelle eine andere Erkennungsleistung liefern, sodass die Schutzmaßnahme nicht notwendig wäre oder die
 Entscheidung durch die Integration verschlechtert werden könnte. \\
 Weiterhin sind alle Datensätze fest vorgegeben. Ein realer Angreifer, der seine Angriffe so lange variiert, bis er eine Schwachstelle findet, wird somit nicht 
-abgebildet. Zudem wird nur gemessen, ob ein Angriff erkannt wird, nicht aber, ob das Hauptmodell ihn tatsächlich ausführen würde. Die wichtigste Grenze ist
+abgebildet. Zudem wird nur gemessen, ob ein Angriff erkannt wird, nicht aber, ob das Hauptmodell ihn trotzdem ausführen würde. Die wichtigste Grenze ist
 abschließend, dass die Schutzmaßnahme nicht an einem realen System getestet wurde. Sie wurde nicht in den Chatbot integriert und die Angriffe erneut
 ausgeführt. Somit ist die Wirksamkeit nur in einer Testumgebung belegt und die Auswirkung auf das untersuchte System nicht erfasst.
