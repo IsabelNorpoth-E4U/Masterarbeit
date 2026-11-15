@@ -277,7 +277,6 @@ async function withNetworkRetry(fn, label) {
 \section{Funktion callMistralAI}
 
 \begin{lstlisting}
-// oben in der Datei
 import https from 'https';
 
 // Holt die Nachricht aus einer Mistral-Antwort
@@ -469,7 +468,7 @@ function extractMistralContentText(content) {
     return content;
   }
 
-  // manchmal kommt der Text als Liste von Blöcken zurück
+  // wenn der Text als Liste von Blöcken zurückkommt
   let text = '';
   if (Array.isArray(content)) {
     for (const block of content) {
