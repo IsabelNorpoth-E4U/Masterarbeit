@@ -485,7 +485,7 @@ Auf Grundlage der in Abschnitt~\ref{subsec:original} erfassten Baseline wurde de
 die erlangten Erkenntnisse beschrieben. Dabei werden Änderungen beibehalten oder verworfen. Für alle Schritte wurden, wie bei dem finalen Ansatz
 aus Abschnitt~\ref{subsec:ueberarbeitung}, dieselben Parameter und das \ac{llm} Mistral Small~4 verwendet. Ausgangspunkt sind die Ergebnisse 
 des Dev-Abschnitts des Originalansatzes, der einen Recall~\eqref{eq:recall} von 80,6\,\% und eine \ac{fpr}~\eqref{eq:fpr} von 8,8\,\% erreichte. 
-Die einzelnen Schritte und die erreichten Werte werden in Abbildung~\ref{fig:entwicklung_ansatz} visualisiert.\\
+Die einzelnen Schritte, die jeweils zuletzt erreichten Werte und die wesentlichen Änderungen sind in Tabelle~\ref{tab:entwicklung_ansatz} zusammengefasst.\\
 
 \begin{enumerate}
     \item Rekonstruktion und Leitfragen
@@ -494,48 +494,44 @@ Die einzelnen Schritte und die erreichten Werte werden in Abbildung~\ref{fig:ent
     \item Vereinheitlichung des Ansatzes
 \end{enumerate}
 
-\begin{figure}[htbp]
+\begin{table}[htbp]
 \centering
 \footnotesize
-\begin{tikzpicture}[
-    node distance=5mm,
-    schritt/.style={rectangle, fill={rgb,255:red,31;green,94;blue,153}, text=white, align=center,
-        text width=7.8cm, minimum height=1.3cm, inner sep=4pt, execute at begin node={\hyphenpenalty=10000}},
-    pfeil/.style={-{Stealth[length=2mm]}, semithick, draw={rgb,255:red,31;green,94;blue,153}}
-]
-\node[schritt] (s0) {Originalansatz\\
-    1: Recall 80,6\,\% \,|\, FPR 8,8\,\%};
-\node[schritt, below=of s0] (s1) {1. Rekonstruktion und Leitfragen\\
-    1: Recall 90,6\,\% \,|\, FPR 5,9\,\%\\
-    2: Recall 43,5\,\% \,|\, FPR 16,5\,\%};
-\node[schritt, below=of s1] (s2) {2. Strukturprüfung\\
-    1: Recall 90,6\,\% \,|\, FPR 5,9\,\%\\
-    2: Recall 84,0\,\% \,|\, FPR 17,3\,\%};
-\node[schritt, below=of s2] (s3) {3. Entfernung der Mehrheitsentscheidung für externe Inhalte\\
-    1: Recall 90,6\,\% \,|\, FPR 5,9\,\%\\
-    2: Recall 79,0\,\% \,|\, FPR 4,3\,\%\\
-    3: Recall 75,0\,\% \,|\, FPR 4,3\,\%};
-\node[schritt, below=of s3] (s4) {4. Vereinheitlichung des Ansatzes\\
-    1: Recall 87,5\,\% \,|\, FPR 3,5\,\%\\
-    2: Recall 88,5\,\% \,|\, FPR 15,1\,\%\\
-    3: Recall 87,5\,\% \,|\, FPR 13,7\,\%};
-
-\foreach \a/\b in {s0/s1, s1/s2, s2/s3, s3/s4}
-    \draw[pfeil] (\a) -- (\b);
-
-% Legende
-\node[anchor=south east, align=left, text={rgb,255:red,31;green,94;blue,153}, xshift=-8mm]
-    at (s4.south west) {1: Eigener Datensatz\\ 2: BIPIA \& NotInject\\ 3: BIPIA, verschleiert};
-\end{tikzpicture}
+\newcommand{\zl}[1]{\begin{tabular}[t]{@{}l@{}}#1\end{tabular}}
+\newcommand{\zr}[1]{\begin{tabular}[t]{@{}r@{}}#1\end{tabular}}
 \caption{Entwicklungsschritte des Ansatzes (Dev-Abschnitt)}
-\label{fig:entwicklung_ansatz}
-\end{figure}
+\label{tab:entwicklung_ansatz}
+\begin{tabularx}{\textwidth}{c l r r >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Schritt} & \textbf{Datensatz} & \textbf{Recall} & \textbf{\acs{fpr}} & \textbf{Wesentliche Änderungen} \\
+\midrule
+0 & \zl{Eigener} & \zr{80,6\,\%} & \zr{8,8\,\%} &
+    \textbf{Originalansatz:} binäre Abfrage \\
+\addlinespace
+1 & \zl{Eigener\\ BIPIA \& NotInject} & \zr{90,6\,\%\\ 43,5\,\%} & \zr{5,9\,\%\\ 16,5\,\%} &
+    \textbf{Rekonstruktion und Leitfragen:} Rekonstruktion des Prompts, Mehrheitsentscheidung
+    über die rekonstruierten Versionen, Leitfragen \\
+\addlinespace
+2 & \zl{BIPIA \& NotInject} & \zr{84,0\,\%} & \zr{17,3\,\%} &
+    \textbf{Strukturprüfung:} Auflistung der Aufforderungen in externen Inhalten und ihrer
+    Adressaten, Nummerierung der Zeilen, Kombination mit Mehrheitsentscheidung und Leitfragen \\
+\addlinespace
+3 & \zl{BIPIA \& NotInject\\ BIPIA, verschleiert} & \zr{79,0\,\%\\ 75,0\,\%} & \zr{4,3\,\%\\ 4,3\,\%} &
+    \textbf{Entfernung der Mehrheitsentscheidung für externe Inhalte}, Leitfragen je Zeile verworfen,
+    Test auf verschleierten BIPIA-Datensatz \\
+\addlinespace
+4 & \zl{Eigener\\ BIPIA \& NotInject\\ BIPIA, verschleiert} & \zr{87,5\,\%\\ 88,5\,\%\\ 87,5\,\%} & \zr{3,5\,\%\\ 15,1\,\%\\ 13,7\,\%} &
+    \textbf{Vereinheitlichung des Ansatzes:} Rekonstruktion und Leitfragen auch für externe Inhalte,
+    Formprüfung mit Mehrheitsentscheidung für einfache Nutzeranfragen \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 
 Im ersten Schritt, \textbf{Rekonstruktion und Leitfragen}, wurde anhand der bei dem Originalansatz erkannten Schwächen bei der Erkennung von Verschleierungen ein 
 Ansatz implementiert, der den Prompt rekonstruieren soll. Dieser wurde um eine Mehrheitsentscheidung über die rekonstruierten Prompts und um Leitfragen erweitert. 
 Es wurde nur der eigene Datensatz verwendet. Auf dem Dev-Abschnitt wurde ein Recall~\eqref{eq:recall} von 90,6\,\% und eine \ac{fpr}~\eqref{eq:fpr} von 5,9\,\% erreicht. \\
-Dieser Ansatz wurde anschließend auf die öffentlichen Datensätze angewendet. Auf dem Dev-Abschnitt erreichte er lediglich einen Recall~\eqref{eq:recall} von 43,5\,\%. 
+Dieser Ansatz wurde anschließend auf die öffentlichen Datensätze getestet. Auf dem Dev-Abschnitt erreichte er lediglich einen Recall~\eqref{eq:recall} von 43,5\,\% bei einer \ac{fpr}~\eqref{eq:fpr} von 16,5\,\%.
 Dadurch konnte die Schwäche des Ansatzes festgestellt werden. Angriffe werden nur erkannt, wenn sie schädlich formuliert sind, jedoch ist dies im 
 BIPIA-Datensatz nicht der Fall, denn die Gefahr besteht darin, dass sich die Anweisungen in externen Inhalten befinden. \\
 Anhand der öffentlichen Datensätze wurde daher für externe Inhalte die \textbf{Strukturprüfung} entwickelt. Das \ac{llm} listete dabei alle Aufforderungen, 
@@ -551,13 +547,14 @@ Eine weitere Änderung bestand darin, die Leitfragen für jede Zeile einzeln abz
 verschlechterten. \\
 Nach diesem Schritt wurde festgestellt, dass der Ansatz noch nicht auf verschleierten externen Daten getestet wurde. Aus diesem Grund wurde ein Teil des 
 BIPIA-Datensatzes mit ausgewählten Transformationen verschleiert. Diese Verschleierung wird in Abschnitt~\ref{subsec:externerdatensatz} genauer erläutert. 
-Der Test mit diesem Datensatz ergab, dass der Recall~\eqref{eq:recall} auf 75,0\,\% sank. Interpretiert wurde dieses Ergebnis als Überanpassung des Ansatzes an die
+Der Test mit diesem Datensatz ergab, dass der Recall~\eqref{eq:recall} auf 75,0\,\% sank, bei einer gleichbleibenden \ac{fpr}~\eqref{eq:fpr} von 4,3\,\%. Interpretiert wurde dieses Ergebnis als Überanpassung des Ansatzes an die
 vorliegenden Datensätze. Als Reaktion darauf wurde eine \textbf{Vereinheitlichung des Ansatzes} entwickelt. Dabei wurde die Rekonstruktion 
 wieder aufgenommen, um auch verschleierte Inhalte in externen Daten erfassen zu können. Auch die Leitfragen wurden auf diese rekonstruierten Versionen angewendet. 
 Der Recall~\eqref{eq:recall} stieg bei den externen Inhalten auf 88,5\,\% und in der verschleierten Version auf 87,5\,\%. Es stieg zwar zusätzlich die \ac{fpr}~\eqref{eq:fpr} auf 15,1\,\% 
 beziehungsweise 13,7\,\%, dieser Anstieg wurde jedoch in Kauf genommen, da auf diese Weise ein einheitlicher Ansatz entstand. \\
-Dieser Ansatz enthielt keine allgemeine Frage nach einem Prompt-Injection-Angriff. Sie wurde bei der Mehrheitsentscheidung wieder eingeführt, womit
-die Werte 87,5\,\% Recall~\eqref{eq:recall} bei 3,5\,\% \ac{fpr}~\eqref{eq:fpr} auf dem Dev-Abschnitt des eigenen Datensatzes erreicht wurden. Dieser Ansatz wurde als Endversion festgelegt.
+Dieser Ansatz enthielt keine allgemeine Frage nach einem Prompt-Injection-Angriff. Sie wurde bei der Formprüfung für einfach Nutzeranfragen wieder eingeführt, womit
+die Werte 87,5\,\% Recall~\eqref{eq:recall} bei 3,5\,\% \ac{fpr}~\eqref{eq:fpr} auf dem Dev-Abschnitt des eigenen Datensatzes erreicht wurden. Bei extertenen Inhalten
+wird sie nicht angewendet, da Code und Tabellen durch ihr ungewöhnliches Format vor allem Fehlalarme auslösten. Dieser Ansatz wurde als Endversion festgelegt.
 
 
 \subsection{Überarbeitung des Ansatzes und erneute Durchführung}\label{subsec:ueberarbeitung} 
