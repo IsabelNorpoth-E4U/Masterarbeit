@@ -1,24 +1,3 @@
-# Makes the tables and diagrams for the results chapter of the thesis (test split).
-# Everything is saved in the folder results_diagramms. The file names start like the
-# result files (model, split, approaches), followed by the data set and the content:
-#   ..._tabelle_ergebnisse.tex                     all runs with all metrics
-#   ..._tabelle_fpr_harmlos.tex                    false positive rate per kind of harmless text
-#   ..._<data set>_recall_gesamt                   recall of every run
-#   ..._eigen_recall_pro_transformation            own data set, recall per transformation T00 ... T15
-#   ..._bipia_obfuscated_recall_pro_transformation obfuscated BIPIA, recall per transformation
-#   ..._bipia_recall_pro_aufgabe                   BIPIA, recall per task (e-mail, table, code)
-#   ..._bipia_recall_pro_position                  BIPIA, recall per position of the attack
-#   ..._<data set>_recall_vs_fpr                   recall against false positive rate
-#   ..._<data set>_konfusionsmatrix                confusion matrix of every run
-#   ..._<data set>_fpr_pro_harmless_level          false positive rate per kind of harmless text
-#   ..._<data set>_regeln_neuer_ansatz             new approach: which rule found the attack / false alarm
-#   ..._tabelle_<data set>_recall_pro_transformation.tex  recall per transformation and latency
-# The diagrams are saved as .pdf (for LaTeX) and .png.
-# Runs without a results file are skipped, so the script can run at any time.
-#
-# Requirement: python3 -m pip install matplotlib
-# Run:         python3 visualize_results.py
-
 import json
 import os
 
@@ -32,15 +11,13 @@ DIAGRAM_DIR = "results_diagramms"
 # start of every file name: model, split, the compared approaches
 PREFIX = "mistral_small4_test_new_approach_vs_original_"
 
-# colors: blue of the HSMW template, yellow of the Energy4u logo, gray.
-# The yellow is very light, so every bar gets a dark edge and a value label.
+# colors: blue of the HSMW template, yellow of the Energy4u logo, gray
+# Edge to darken the yellow
 BLUE = "#0069b4"
 YELLOW = "#ffd23f"
 GRAY = "#9a9a9a"
 EDGE = "#333333"
 
-# all runs on the test split: data set, label, file name (without _results.jsonl), color.
-# The new approach is the own approach, so it gets the HSMW blue.
 RUNS = [
     ["eigen", "Original (Mistral Small 4)", "mistral_small4_test_original_eigen", YELLOW],
     ["eigen", "Original (Mistral Large 4)", "mistral_large4_test_original_eigen", GRAY],
@@ -59,7 +36,6 @@ DATA_SET_NAMES = {
     "bipia_obfuscated": "BIPIA, verschleiert",
 }
 
-# simple look of the diagrams: no frame on top and right, light grid behind the bars
 plt.rcParams["font.size"] = 9
 plt.rcParams["axes.spines.top"] = False
 plt.rcParams["axes.spines.right"] = False
@@ -70,8 +46,6 @@ plt.rcParams["grid.color"] = "#dddddd"
 plt.rcParams["legend.frameon"] = False
 plt.rcParams["pdf.fonttype"] = 42  # text stays text in the pdf
 
-
-# ---------- helper functions ----------
 
 # reads the results of every run that exists and computes the metrics
 def load_runs():
@@ -95,7 +69,6 @@ def load_runs():
         runs.append(run)
     return runs
 
-
 # only the runs of one data set
 def runs_of(runs, data_set):
     selected = []
@@ -104,31 +77,25 @@ def runs_of(runs, data_set):
             selected.append(run)
     return selected
 
-
 # 0.731 -> '73{,}1' (German decimal comma in LaTeX)
 def percent_tex(rate):
     return f"{100 * rate:.1f}".replace(".", "{,}")
 
-
 # share -> '19/26 (73{,}1\,\%)'
-def fraction_tex(s):
-    return str(s["k"]) + "/" + str(s["n"]) + " (" + percent_tex(s["rate"]) + r"\,\%)"
+def fraction_tex(share):
+    return str(share["k"]) + "/" + str(share["n"]) + " (" + percent_tex(share["rate"]) + r"\,\%)"
 
-
-# the label of a run for LaTeX, the new approach in bold
 def label_tex(run):
     label = run["label"].replace("Small 4", "Small~4").replace("Large 4", "Large~4")
     if "Neuer Ansatz" in label:
         label = r"\textbf{" + label + "}"
     return label
 
-
 def save_text(lines, file_name):
     path = os.path.join(DIAGRAM_DIR, file_name)
     with open(path, "w", encoding="utf-8") as file:
         file.write("\n".join(lines) + "\n")
     print("Saved as", path)
-
 
 def save_diagram(figure, name):
     for ending in [".pdf", ".png"]:
@@ -217,7 +184,7 @@ def write_results_table(runs):
             cm = m["confusion_matrix"]
             recall = percent_tex(m["recall"]["rate"]) + r"\,\%"
             fpr = percent_tex(m["fpr"]["rate"]) + r"\,\%"
-            latency = f"{m['latency_ms']['median']:.0f}" + r"\,ms"
+            latency = f"{m['latency_ms']:.0f}" + r"\,ms"
             lines.append(label_tex(run) + " & " + str(cm["tp"]) + " & " + str(cm["fn"])
                          + " & " + str(cm["fp"]) + " & " + str(cm["tn"])
                          + " & " + recall + " & " + fpr + " & " + latency + r" \\")
@@ -283,7 +250,7 @@ def write_transformation_table(runs):
         lines.append(line + r" \\")
         line = r"\textbf{Latenz (Median)}"
         for run in selected:
-            line = line + " & " + f"{run['metrics']['latency_ms']['median']:.0f}" + r"\,ms"
+            line = line + " & " + f"{run['metrics']['latency_ms']:.0f}" + r"\,ms"
         lines.append(line + r" \\")
         lines.append(r"\bottomrule")
         lines.append(r"\end{tabular}")
@@ -319,9 +286,13 @@ def draw_recall_per_transformation(runs):
                 row.append(run["metrics"]["recall_by_transformation"][transformation])
             values.append(row)
         # the own data set has many bars, so no value labels there
+        if data_set == "eigen":
+            value_labels = False
+        else:
+            value_labels = True
         draw_grouped_bars(selected, transformations, values, "Transformation",
                           PREFIX + data_set + "_recall_pro_transformation",
-                          value_labels=(data_set != "eigen"))
+                          value_labels=value_labels)
 
 
 # BIPIA: recall per task and per position of the attack
@@ -343,36 +314,6 @@ def draw_recall_bipia(runs):
                       "Position des Angriffs im Text", PREFIX + "bipia_recall_pro_position")
 
 
-# recall against false positive rate, one diagram per data set (top left is best).
-# The lines show the 95 % confidence interval.
-def draw_recall_vs_fpr(runs):
-    for data_set in DATA_SETS:
-        selected = runs_of(runs, data_set)
-        if len(selected) == 0:
-            continue
-        figure, ax = plt.subplots(figsize=(10 / 2.54, 8 / 2.54))
-        ax.grid(True, axis="both")
-        for run in selected:
-            recall = run["metrics"]["recall"]
-            fpr = run["metrics"]["fpr"]
-            x = 100 * fpr["rate"]
-            y = 100 * recall["rate"]
-            x_low = x - 100 * fpr["ci_low"]
-            x_high = 100 * fpr["ci_high"] - x
-            y_low = y - 100 * recall["ci_low"]
-            y_high = 100 * recall["ci_high"] - y
-            ax.errorbar(x, y, xerr=[[x_low], [x_high]], yerr=[[y_low], [y_high]],
-                        fmt="o", markersize=8, color=run["color"], markeredgecolor=EDGE,
-                        ecolor="#555555", elinewidth=0.8, capsize=2, label=run["label"])
-        ax.set_xlim(-1, 30)
-        ax.set_ylim(0, 100)
-        ax.set_xlabel("Falsch-Positiv-Rate (%)")
-        ax.set_ylabel("Recall (%)")
-        ax.set_title(DATA_SET_NAMES[data_set], fontsize=9)
-        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=1, fontsize=8)
-        save_diagram(figure, PREFIX + data_set + "_recall_vs_fpr")
-
-
 # confusion matrix of every run, one diagram per data set with one matrix per run
 def draw_confusion_matrices(runs):
     for data_set in DATA_SETS:
@@ -380,6 +321,7 @@ def draw_confusion_matrices(runs):
         if len(selected) == 0:
             continue
         figure, axes = plt.subplots(1, len(selected), figsize=(5.5 * len(selected) / 2.54, 6 / 2.54))
+        # with only one run (the other results file is missing) axes is not a list
         if len(selected) == 1:
             axes = [axes]
         for i in range(len(selected)):
@@ -466,24 +408,33 @@ def draw_rules_new_approach(runs):
                     rule_1 = True
                 if check.startswith("C1_"):
                     rule_2 = True
+            label = row["label"]
             if rule_1 and rule_2:
-                counts[row["label"]][2] += 1
+                counts[label][2] = counts[label][2] + 1
             elif rule_1:
-                counts[row["label"]][0] += 1
+                counts[label][0] = counts[label][0] + 1
             elif rule_2:
-                counts[row["label"]][1] += 1
+                counts[label][1] = counts[label][1] + 1
 
-        highest = max(counts["attack"] + counts["harmless"] + [1])
+        # the highest bar, at least 1 so that the y axis is never 0 high
+        highest = max(counts["attack"] + counts["harmless"])
+        if highest == 0:
+            highest = 1
+
+        # two bars per group: attacks left, harmless texts right.
+        # Each bar is 0.4 wide, with a small gap between the bars (width * 0.9).
+        positions_attack = [-0.2, 0.8, 1.8]
+        positions_harmless = [0.2, 1.2, 2.2]
         figure, ax = plt.subplots(figsize=(12 / 2.54, 7 / 2.54))
-        bars_attack = ax.bar([-0.2, 0.8, 1.8], counts["attack"], 0.4 * 0.9, label="erkannte Angriffe (TP)",
-                             color=BLUE, edgecolor=EDGE, linewidth=0.6)
-        bars_harmless = ax.bar([0.2, 1.2, 2.2], counts["harmless"], 0.4 * 0.9, label="Fehlalarme (FP)",
-                               color=GRAY, edgecolor=EDGE, linewidth=0.6)
+        ax.bar(positions_attack, counts["attack"], 0.4 * 0.9, label="erkannte Angriffe (TP)",
+               color=BLUE, edgecolor=EDGE, linewidth=0.6)
+        ax.bar(positions_harmless, counts["harmless"], 0.4 * 0.9, label="Fehlalarme (FP)",
+               color=GRAY, edgecolor=EDGE, linewidth=0.6)
         # the number above every bar
-        for bar in list(bars_attack) + list(bars_harmless):
-            x = bar.get_x() + bar.get_width() / 2
-            height = bar.get_height()
-            ax.text(x, height + highest * 0.015, str(int(height)),
+        for i in range(3):
+            ax.text(positions_attack[i], counts["attack"][i] + highest * 0.015, str(counts["attack"][i]),
+                    ha="center", va="bottom", fontsize=7, color=EDGE)
+            ax.text(positions_harmless[i], counts["harmless"][i] + highest * 0.015, str(counts["harmless"][i]),
                     ha="center", va="bottom", fontsize=7, color=EDGE)
         ax.set_xticks(range(3))
         ax.set_xticklabels(["Formprüfung (G) /\nStrukturprüfung (C2)", "Leitfragen (C1)", "beide Regeln"])
@@ -506,7 +457,6 @@ write_transformation_table(all_runs)
 draw_recall_overview(all_runs)
 draw_recall_per_transformation(all_runs)
 draw_recall_bipia(all_runs)
-draw_recall_vs_fpr(all_runs)
 draw_confusion_matrices(all_runs)
 draw_fpr_per_level(all_runs)
 draw_rules_new_approach(all_runs)
