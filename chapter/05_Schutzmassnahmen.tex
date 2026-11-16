@@ -97,10 +97,10 @@ werden~\cite[11]{sm10}. Beim \textbf{Defensive Pruning} schließlich werden weni
 Leistungsfähigkeit wesentlich zu beeinträchtigen~\cite[11]{sm10}. Auf diese Weise kann die Widerstandsfähigkeit gegenüber Angriffen erhöht werden, ohne dass ein
 erneutes Fine-Tuning erforderlich ist.
 
-\section{Auswahl und Konzeption einer Schutzmaßnahme}\label{konzept}
+\section{Auswahl und Entwicklung einer Schutzmaßnahme}\label{konzept}
 
 Im Folgenden wird der Prozess der Entwicklung einer Schutzmaßnahme dokumentiert. Dazu werden zu Beginn Anforderungen definiert, die als Orientierungshilfe 
-dienen sollen. Anschließend wird das Vorgehen bei der Konzeption beschrieben und das daraus entstandene Konzept vorgestellt.
+dienen sollen. Anschließend wird das Vorgehen bei der Entwicklung beschrieben und das daraus entstandene Konzept vorgestellt.
 
 \subsection{Anforderungen der Schutzmaßnahme}
 
@@ -114,7 +114,7 @@ Für die in dieser Arbeit ausgewählte Schutzmaßnahme wurden mehrere Kriterien 
     soll die Anzahl der fälschlich als Angriff eingestuften Anfragen minimiert werden.
 \end{enumerate}
 
-Für die Konzeption der Schutzmaßnahme wurde anhand der definierten Kriterien eine eingabeseitige Maßnahme gewählt. \\
+Für die Entwicklung der Schutzmaßnahme wurde anhand der definierten Kriterien eine eingabeseitige Maßnahme gewählt. \\
 Gegen eine ausgabeseitige Maßnahme spricht, dass die Antwort erst geprüft wird, wenn sie bereits vom Hauptmodell verarbeitet wurde. Mit dieser Eigenschaft
 konnte keine geeignete Maßnahme identifiziert werden, die zu dem Anwendungsfall des Chatbots passt. \\
 Eine modellseitige Maßnahme hätte zusätzliches Training erfordert, was jedoch durch das dritte Kriterium ausgeschlossen wurde. 
@@ -261,20 +261,44 @@ Quelltext~\ref{lst:entry} zeigt den Aufbau eines Eintrags im finalen Datensatz.
 {"id": "A01-T00", "seed_id": "A01", "label": "attack", "harmless_level": null, "messages": [{"role": "user", "content": ""}], "decode_hint": false, "language": "de", "split": "dev"}
 \end{lstlisting}
 
-Die einzelnen Felder haben folgende Bedeutung:
+In Tabelle~\ref{tab:felder_datensatz} werden die Felder zusammengefasst:
 
-\begin{description}
-    \item[\texttt{id}:] Eindeutige Kennung, die sich aus der ID des Grundszenarios und der Nummer der Transformation zusammensetzt. \texttt{T00} kennzeichnet dabei den
-    unveränderten Grundprompt.
-    \item[\texttt{seed\_id}:] ID des zugrunde liegenden Grundszenarios.
-    \item[\texttt{label}:] Klasse des Eintrags (\texttt{attack} oder \texttt{harmless}).
-    \item[\texttt{harmless\_level}:] Einordnung der harmlosen Einträge. Neben \texttt{normal} und \texttt{hard\_negative} kennzeichnet der Wert \texttt{transformed}
-    harmlose Prompts, die mit einer der Techniken T01--T15 modifiziert wurden. Bei Angriffen hat das Feld den Wert \texttt{null}.
-    \item[\texttt{messages}:] Der an das \ac{llm} übergebene Prompt einschließlich der Rolle (\texttt{role}), von der die Nachricht ausgeht.
-    \item[\texttt{decode\_hint}:] Gibt an, ob der Prompt einen Hinweis zur Entschlüsselung enthält, wie er für die Techniken T05 bis T09 sowie T11 bis T13 erforderlich ist.
-    \item[\texttt{language}:] Sprache des Prompts. Dieses Feld ist für T09 erforderlich, da die Anweisung dort auf Zulu vorliegt.
-    \item[\texttt{split}:] Zugehörigkeit zum Dev-Abschnitt (\texttt{dev}) oder Test-Abschnitt (\texttt{test}).
-\end{description}
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Felder eines Eintrags im eigenen Datensatz}
+\label{tab:felder_datensatz}
+\begin{tabularx}{\textwidth}{>{\ttfamily}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{3.6cm}}
+\toprule
+\textbf{\rmfamily Feld} & \textbf{Bedeutung} & \textbf{Werte} \\
+\midrule
+id             & Eindeutige Kennung aus der ID des Grundszenarios und der Nummer der Transformation
+                 & z.\,B. \texttt{A01-T00}; \texttt{T00} = unveränderter Grundprompt \\
+\addlinespace
+seed\_id       & ID des zugrunde liegenden Grundszenarios
+                 & z.\,B. \texttt{A01} \\
+\addlinespace
+label          & Klasse des Eintrags
+                 & \texttt{attack}, \texttt{harmless} \\
+\addlinespace
+harmless\_level & Einordnung der harmlosen Einträge; \texttt{transformed} kennzeichnet harmlose Prompts,
+                 die mit einer der Techniken T01--T15 modifiziert wurden
+                 & \texttt{normal}, \texttt{hard\_negative}, \texttt{transformed}; bei Angriffen \texttt{null} \\
+\addlinespace
+messages       & An das \ac{llm} übergebener Prompt einschließlich der Rolle (\texttt{role}), von der die Nachricht ausgeht
+                 & Liste mit \texttt{role} und \texttt{content} \\
+\addlinespace
+decode\_hint   & Gibt an, ob der Prompt einen Hinweis zur Entschlüsselung enthält (erforderlich für T05--T09 und T11--T13)
+                 & \texttt{true}, \texttt{false} \\
+\addlinespace
+language       & Sprache des Prompts; erforderlich für T09, da die Anweisung dort auf Zulu vorliegt
+                 & z.\,B. \texttt{de}, \texttt{zu} \\
+\addlinespace
+split          & Zugehörigkeit zum Dev- oder Test-Abschnitt
+                 & \texttt{dev}, \texttt{test} \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 Insgesamt umfasst der Datensatz 330 Dev- und 660 Test-Einträge.
 
@@ -378,12 +402,14 @@ Die \ac{fpr} gibt den Anteil der harmlosen Prompts an, die fälschlicherweise bl
 
 \paragraph{Latenz~\cite[22]{sm27}}
 
-Gemessen wird die gesamte Dauer der Prüfung pro Text, angegeben wird der Median über alle Einträge eines Datensatzes.
+Gemessen wird die gesamte Dauer der Prüfung pro Text, angegeben wird der Median über alle Einträge eines Datensatzes
 
 \begin{equation}
-  L = \operatorname{median}(t_1, \dots, t_n) .
+  L = \operatorname{median}(t_1, \dots, t_n) ,
   \label{eq:latency}
 \end{equation}
+
+wobei $t$ der Dauer der Prüfung des $i$-ten Eintrags nud $n$ der Anzahl der Einträge entspricht.
 
 \section{Durchführung und Weiterentwicklung}
 
@@ -399,7 +425,7 @@ Abbildung~\ref{fig:ablauf_original} zeigt den vollständigen Ablauf.
 
 \begin{figure}[h]
 \centering
-\includegraphics[page=2, trim=262 229 185 18, clip, width=0.6\textwidth]{notes/Grafiken_05.pdf}
+\includegraphics[page=2, trim=262 229 185 18, clip, width=0.8\textwidth]{notes/Grafiken_05.pdf}
 \caption{Ablauf des Originalansatzes}\label{fig:ablauf_original}
 \end{figure}
 
@@ -615,7 +641,7 @@ führt das \ac{owasp}-Merkblatt zur Prävention von Prompt Injection aus dem Jah
 als häufige Angriffstechniken auf~\cite{sm42}. Auch die Verwendung von Unicode wird dort aufgezählt. \\
 Mit der Bereinigung wurde absichtlich nicht jede Transformation aus dem eigenen Datensatz rückgängig gemacht, da der Ansatz nicht zu sehr auf diesen Datensatz
 zugeschnitten werden soll. Aus diesem Grund wurde auch auf den öffentlichen Datensätzen getestet und häufig vorkommende Techniken implementiert, die eine
-erste Rekonstruktion ermöglichen. \\
+erste Rekonstruktion ermöglichen. \medskip
 In der zweiten Stufe wird für jede der Versionen jeweils eine Anfrage mit sechs Leitfragen gestellt, durch welche die Absicht des Prompts eingeschätzt werden
 soll. So wird neben der äußeren Erscheinung eines Prompts auch die Absicht bewertet. F0 klärt, ob es sich um eine Verständnisfrage handelt. F1 bis F5
 fragen, ob der Prompt auf eines der folgenden Ziele abzielt:
@@ -633,7 +659,7 @@ zusammengefasst, sodass die Bewertung dieser Versionen nur einmal vorliegt. Dadu
 nicht mehrfach beeinflussen. \\
 Bei externen Inhalten wird zuerst jede Zeile nummeriert. Auf jede dieser Zeilen wird statt der allgemeinen Frage nach einem Prompt-Injection-Angriff gefragt, an
 wen sich die Zeile richtet und ob sie zum übrigen Inhalt passt. Dabei werden nur V0 und V1 verwendet, weil durch die Rechtschreibkorrektur Wörter möglicherweise falsch korrigiert
-werden. Der eigentliche Inhalt könnte verschleiert werden oder ein Angriff als ungefährlich erscheinen. Somit werden hier nur zwei Anfragen gestellt. \\
+werden. Der eigentliche Inhalt könnte verschleiert werden oder ein Angriff als ungefährlich erscheinen. Somit werden hier nur zwei Anfragen gestellt. \medskip
 In der vierten Stufe wird ebenfalls zwischen den Arten der Inhalte unterschieden. Bei einer Nutzeranfrage werden zwei Regeln mit einem logischen ODER verknüpft.
 Die erste Regel ist die Mehrheitsentscheidung der Formprüfung aus Stufe 3, mit der gemessen wird, ob der Anteil der JA-Antworten über alle Versionen größer als 
 der Schwellwert \(\gamma = 0{,}5\) ist. Wenn dies zutrifft, gilt die Anfrage als auffällig. Die zweite Regel prüft, ob die erste Leitfrage F0 mit NEIN 
@@ -643,7 +669,7 @@ Bei externen Inhalten wird die erste Regel abgeändert. Es wird geprüft, ob min
 Die zweite Regel ist identisch mit der Regel der Nutzeranfrage. Wenn F0 mit NEIN und mindestens eine weitere der Leitfragen mit JA beantwortet wurde, ist diese 
 Anfrage auffällig. Auch hier werden beide Regeln mit einem ODER verknüpft. \\
 Wird eine Anfrage als Angriff gewertet, wird der Text abgewiesen. Andernfalls wird die Anfrage an das Hauptmodell weitergeleitet. \\
-Der weiterentwickelte Ansatz übernimmt das vorgestellte Prinzip der Mehrheitsentscheidung, welches in der Arbeit SmoothLLM~\cite{sm40} vorgestellt wird, die Verwendung des 
+Der weiterentwickelte Ansatz übernimmt das Prinzip der Mehrheitsentscheidung, welches in der Arbeit SmoothLLM~\cite{sm40} vorgestellt wird, die Verwendung des 
 vorgeschalteten \ac{llm} aus der Arbeit PIGuard~\cite[30426]{sm37} sowie die Aufteilung des Textes in Segmente aus der Arbeit 
 \enquote{Can Indirect Prompt Injection Attacks Be Detected and Removed?}~\cite[18193]{sm41}. 
 Als eigene Beiträge kommen folgende
@@ -705,12 +731,12 @@ teilweise auf Grundlage dieses Datensatzes implementiert, wodurch potenzielle Ve
 Bei den öffentlichen Datensätzen muss berücksichtigt werden, dass diese auf Englisch verfasst sind, während der eigene Datensatz und die Schutzmaßnahme
 für einen deutschsprachigen Anwendungsfall entwickelt wurden. Zudem sind nicht alle Angriffsszenarien aus dem Datensatz verwendet worden, sondern nur E-Mails, 
 Tabellen und Codeausschnitte, nicht aber Webseiten, die in Kapitel~\ref{ch:methodik} als Angriffsszenario verwendet wurden. \\
-Eine Grenze des Ansatzes ist, dass externe Inhalte vor dem Durchlauf gekennzeichnet werden müssen. Diese Kennzeichnung erfolgt nicht durch das \ac{llm}, sondern
+Eine Grenze des Ansatzes besteht darin, dass externe Inhalte vor dem Durchlauf gekennzeichnet werden müssen. Diese Kennzeichnung erfolgt nicht durch das \ac{llm}, sondern
 ist im Datensatz als zusätzliches Feld angegeben. Somit findet eine aktive Überprüfung, ob es sich um externen Inhalt handelt, nicht statt. Eine weitere 
 Grenze ist die Latenz. Im Gegensatz zu einer Überprüfung mit dem Hauptmodell müssen bei der Schutzmaßnahme zahlreiche Anfragen gestellt werden, wodurch der Median
 der Antwortzeit deutlich steigt. Zudem liefert jede Anfrage an das vorgeschaltete \ac{llm} nur eine binäre Antwort (JA oder NEIN). Dadurch kann nicht 
-festgestellt werden, wie sicher diese Entscheidung ist. Auch eine Entscheidung, bei der beide Antworten gleich wahrscheinlich sind, ist möglich. Außerdem wurden 
-ausschließlich Modelle von Mistral 
+festgestellt werden, wie sicher diese Entscheidung ist. Auch eine Entscheidung, bei der beide Antworten gleich wahrscheinlich sind, ist möglich. \\
+Außerdem wurden ausschließlich Modelle von Mistral 
 verwendet. Es lässt sich daher nicht sagen, ob andere Modelle eine andere Erkennungsleistung liefern, sodass die Schutzmaßnahme nicht notwendig wäre oder die
 Entscheidung durch die Integration verschlechtert werden könnte. \\
 Weiterhin sind alle Datensätze fest vorgegeben. Ein realer Angreifer, der seine Angriffe so lange variiert, bis er eine Schwachstelle findet, wird somit nicht 

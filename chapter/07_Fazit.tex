@@ -1,7 +1,7 @@
 \chapter{Fazit}\label{ch:fazit}
 
 Ziel dieser Arbeit war es, einen unternehmensinternen Chatbot mit integriertem Tool Calling auf Schwachstellen gegenüber indirekten Prompt-Injection-Angriffen zu
-untersuchen. Auf Grundlage der festgestellten Schwachstellen sollte ein Konzept für eine Schutzmaßnahme entwickelt werden, die sich ohne Änderungen an dem System
+untersuchen. Auf Grundlage der festgestellten Schwachstellen sollte ein Konzept für eine Schutzmaßnahme entwickelt werden, die sich ohne Änderungen in dem System
 integrieren lässt. Diese Maßnahme wurde implementiert und anhand geeigneter Metriken bewertet. Die Ergebnisse wurden in Kapitel~\ref{ch:evaluation}
 ausgewertet. In diesem Kapitel werden auf Basis dieser Evaluation die Teilforschungsfragen und die Hauptforschungsfrage beantwortet. Daraufhin wird eine
 Handlungsempfehlung für den ChatBot4U definiert und ein Ausblick für weiterführende Arbeiten gegeben.
@@ -105,8 +105,8 @@ auf die der Zugriff des \ac{llm} beschränkt wird.
 
 \paragraph{Menschliche Kontrolle des Datenabflusses}
 
-Eine der ausschlaggebendsten Schwachstellen ist, dass ein Angreifer auf eine Zielwebseite zugreifen und Daten an diese übermitteln konnte, ohne dass der Nutzer dies
-nachvollziehen konnte. Daher sollte eine menschliche Kontrolle integriert werden, indem der Nutzer vor jeder Tool-Nutzung eine Beschreibung erhält, welche
+Eine der ausschlaggebendsten Schwachstellen besteht darin, dass ein Angreifer auf eine Zielwebseite zugreifen und Daten an diese übermitteln konnte, ohne dass der Nutzer dies
+nachvollziehen konnte. Daher sollte eine menschliche Kontrolle integriert werden, wodurch der Nutzer vor jeder Tool-Nutzung eine Beschreibung erhält, welche
 Aktion ausgeführt werden soll, welches Tool gewählt wurde und welche Daten übergeben werden. Dadurch lässt sich verhindern, dass das \ac{llm} den Nutzer täuscht
 und ein anderes als das notwendige Tool ausführt.
 

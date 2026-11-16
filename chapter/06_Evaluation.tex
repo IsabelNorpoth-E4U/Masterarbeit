@@ -175,7 +175,7 @@ BIPIA, verschleiert & 74 & 12 & 96 & 182 \\
 Der Einfluss der einzelnen Regeln unterscheidet sich je nach Datensatz. Im eigenen Datensatz wurden 52 Angriffe ausschließlich durch die Leitfragen erkannt. Ohne diese
 Prüfung wäre der Recall~\eqref{eq:recall} auf 66,6\,\% gesunken und hätte damit eine schlechtere Leistung als der Originalansatz erzeugt. Bei BIPIA, bei dem anstelle der Formprüfung 
 die Strukturprüfung verwendet wird, werden dadurch die meisten Angriffe erkannt und die Leitfragen wirken nur unterstützend. 86,5\,\% der Angriffe werden durch die 
-Strukturprüfung erkannt. Dies bestätigt die Auswirkung der Aufteilung der Daten in Zeilen. Das \ac{llm} behält dadurch eine bessere Übersicht und die Erkennung eines
+Strukturprüfung erkannt. Dies bestätigt die positive Auswirkung der Aufteilung der Daten in Zeilen. Das \ac{llm} behält dadurch eine bessere Übersicht und die Erkennung eines
 Angriffs ist nicht mehr von der Position des Angriffs abhängig.
 
 \begin{table}[htbp]
@@ -327,14 +327,14 @@ bestimmte Triggerwörter in den Anweisungen ausgelöst wird.
 \section{Grenzen}
 
 Abschließend werden die Grenzen dieser Arbeit zusammengetragen. Sie wurden bereits in den Kapiteln~\ref{ch:methodik} und~\ref{ch:schutzmassnahmen} genannt und
-werden hier zusammengefasst. \\
+werden hier zusammengefasst.
 
 \paragraph{Modell}
 Als Kriterium für die Schutzmaßnahme wurde definiert, dass ein \ac{llm} verwendet werden soll, welches schneller und kostengünstiger ist als das Haupt-\ac{llm}. 
 Gewählt wurde Mistral Small 4 in Kombination mit dem Haupt-\ac{llm} Mistral Large 4. Durch den Einsatz dieses vorgeschalteten \ac{llm} entsteht jedoch eine 
 neue Angriffsfläche, da kleinere Modelle weniger robust sind und Angriffe nicht zuverlässig als solche klassifizieren können. Zudem erhöht sich das Risiko 
 von Over-Defense, bei der harmlose Anfragen fälschlicherweise als Angriff klassifiziert werden, weil das \ac{llm} aufgrund bestimmter Begriffe und Formulierungen
-vorschnell einen Angriff annimmt. Dies wurde auch in Abschnitt~\ref{subsec:ergebnisse_bipia} festgestellt. Zudem wird einem \ac{llm} die Klassifizierung eines
+vorschnell einen Angriff annimmt. Dies wurde auch in Abschnitt~\ref{subsec:ergebnisse_bipia} festgestellt. Auch wird einem \ac{llm} die Klassifizierung eines
 Angriffs erschwert, wenn die Reihenfolge der Wörter verändert wird. Dies ist darauf zurückzuführen, dass ein \ac{llm} einen Text von links nach 
 rechts verarbeitet, was mit der Token-Generierung zusammenhängt~\cite[4]{sm38}. Da die Schutzmaßnahme nur mit Mistral Small 4 und Mistral Large 4 getestet wurde,
 kann zudem nicht ausgeschlossen werden, dass der Einsatz der Maßnahme durch ein stärkeres \ac{llm} mit vergleichbaren Kosten ersetzt werden könnte.
