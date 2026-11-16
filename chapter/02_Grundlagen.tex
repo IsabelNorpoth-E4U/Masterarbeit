@@ -80,9 +80,9 @@ Arbeit für die Testumgebung eingesetzt~\cite{llm12}.
 der Sprache, die sie durch das Training auf großen Datensätzen erlernt haben~\cite[2978]{cb01}. \\
 Da Modelle darauf ausgelegt sind, numerische Daten zu verarbeiten, muss die Eingabe zunächst umgewandelt werden~\cite[2991]{cb01}. Dazu wird der Text in kleinere 
 Einheiten, sogenannte Token, zerlegt~\cite[2991]{cb01}. Diese Token werden anschließend als numerische Repräsentationen, sogenannte Input Embeddings, in einem
-Vektorraum dargestellt~\cite[2991]{cb01}. Embeddings ermöglichen es einem Modell, Wörter mit ähnlicher Bedeutung miteinander zu assoziieren, indem ihnen
+Vektorraum dargestellt~\cite[2991]{cb01}. Embeddings ermöglichen einem Modell, Wörter mit ähnlicher Bedeutung miteinander zu assoziieren, indem ihnen
 ähnliche Vektoren zugeordnet werden~\cite[2991]{cb01}. \\
-Das zentrale Element der Transformer-Architektur ist der Attention-Mechanismus. Er ermöglicht es den Token einer Sequenz, miteinander zu interagieren, und dient der
+Das zentrale Element der Transformer-Architektur ist der Attention-Mechanismus. Er ermöglicht den Token einer Sequenz, miteinander zu interagieren, und dient der
 Berechnung der Repräsentationen von Eingabe- und Ausgabesequenz~\cite[25]{llm09}. Eine Attention-Funktion bildet eine Anfrage und eine Menge von Schlüssel-Wert-Paaren 
 auf eine Ausgabe ab, wobei alle Werte als Vektoren vorliegen~\cite[3\psq]{llm06}. Die Ausgabe ergibt sich als gewichtete Summe der Werte, wobei das Gewicht eines 
 Wertes davon abhängt, wie gut die Anfrage zum jeweiligen Schlüssel passt~\cite[3\psq]{llm06}. \\
@@ -238,7 +238,7 @@ zu Halluzinationen und Fehlerpropagation kommen~\cite[2]{tc15}. Tools ergänzen 
 Informationen, die sich nicht in den Gewichten des Modells befinden, ergänzt werden~\cite[3]{tc09}.
 Aufgaben wie Berechnungen oder Informationssammlung können somit an externe Module wie Suchmaschinen oder Python-Interpreter ausgelagert werden~\cite[9]{tc09}.
 Damit lassen sich auch Aktionen ausführen, die Daten in Echtzeit oder externe Berechnungen erfordern~\cite[2]{tc14}. Bereits Modelle wie GPT-4 aus dem Jahr 2023~\cite[10]{llm09} 
-waren in der Lage, strukturierte Ausgaben im JSON-Format zu erzeugen, mit denen Funktionsaufrufe ausgeführt werden konnten. Neuere Modelle verfügen über eine direkt 
+waren in der Lage, strukturierte Ausgaben im \ac{json}-Format zu erzeugen, mit denen Funktionsaufrufe ausgeführt werden konnten. Neuere Modelle verfügen über eine direkt 
 integrierte Unterstützung für Tool Calling~\cite[2]{tc14}. \\
 Die Einsatzmöglichkeiten erstrecken sich vom Aufruf von \acp{api} über die Suche im Internet und das Ausführen von Code bis zum Zugriff auf Dokumente~\cite{tc03}. 
 \acp{llm} sind jedoch grundsätzlich Sprachverarbeiter, weswegen sie Aufgaben wie das Buchen von Flügen oder Konferenzräumen nicht unabhängig durchführen können~\cite[6]{tc10}.
@@ -246,8 +246,8 @@ Daher werden in diese Tools die notwendigen externen Partner integriert, damit d
 Tools je nach Aufgabe in drei Kategorien einteilen: 
 
 \begin{enumerate}
-    \item Datenzugriff: Diese Tools greifen auf externe Daten zu, wie \glspl{vektordatenbank}, SQL-Datenbanken, externe \acp{api}, Graphendatenbanken oder Dateisysteme. 
-    Welche dieser Optionen verwendet wird, hängt vom Ziel ab. \glspl{vektordatenbank} verwendet man bei unstrukturierten Anfragen. SQL wird bei transaktionalen Daten 
+    \item Datenzugriff: Diese Tools greifen auf externe Daten zu, wie \glspl{vektordatenbank}, \ac{sql}-Datenbanken, externe \acp{api}, Graphendatenbanken oder Dateisysteme. 
+    Welche dieser Optionen verwendet wird, hängt vom Ziel ab. \glspl{vektordatenbank} verwendet man bei unstrukturierten Anfragen. \ac{sql} wird bei transaktionalen Daten 
     verwendet, bei denen bekannt ist, wonach gesucht wird. Graphendatenbanken werden verwendet, wenn die Beziehungen der Daten ebenso viel bedeuten wie die Daten 
     selbst. \acp{api} werden verwendet, wenn Daten in Echtzeit verarbeitet werden müssen~\cite{tc05}.
     \item Berechnung: Diese Tools sind notwendig, da Daten häufig verändert werden müssen, damit sie verarbeitet werden können. Dazu zählen die Verarbeitung
@@ -265,7 +265,7 @@ Daten über ein Aktions-Tool gesendet~\cite{tc05}.
 
 \subsection{Konzept und Ablauf}
 
-Ein Tool Call basiert auf verschiedenen Komponenten~\cite{tc06}. Laut~\cite[10\psq]{tc11} handelt es sich dabei um vier. Das \textbf{Tool Set} beinhaltet die 
+Ein Tool Call basiert auf verschiedenen Komponenten~\cite{tc06}. Laut \textcite[10\psq]{tc11} handelt es sich dabei um vier. Das \textbf{Tool Set} beinhaltet die 
 Sammlung der Tools mit ihren jeweiligen 
 Funktionen. Die \textbf{Environment} stellt die Infrastruktur zur Ausführung eines Tools bereit und kann virtuell oder real sein. Der \textbf{Controller}
 bildet den Hauptsteuerungspunkt
@@ -278,17 +278,17 @@ $a_t$ in Abhängigkeit vom Kontext $c_t = (o_1, a_1, \dots, o_{t-1}, a_{t-1}, o_
 gelieferten Observationen~\cite[3]{tc15}. \\
 Bevor ein \ac{llm} Tools verwenden kann, müssen diese definiert werden. Dazu wird eine Liste mit Namen, Verwendung und Input-/Output-Formaten erstellt~\cite{tc03}. 
 Diese Liste
-ist meist ein strukturiertes JSON-Schema~\cite{tc07}. Anhand dieser Informationen kann ein Modell das richtige Tool identifizieren~\cite{tc06}. 
+ist meist ein strukturiertes \ac{json}-Schema~\cite{tc07}. Anhand dieser Informationen kann ein Modell das richtige Tool identifizieren~\cite{tc06}. 
 Quelltext~\ref{lst:tool_definition}
 zeigt beispielhaft eine solche Definition. Die Möglichkeiten eines \ac{llm}, den Umgang mit Tools zu erlernen, reichen vom In-Context Learning bis zum expliziten
 Lernen mithilfe von speziellen Datensätzen~\cite[17777]{tc08}. \\
 Wie zuverlässig ein \ac{llm} ein Tool einsetzt, ist von der Qualität der Definition abhängig. Eine Definition sollte drei Punkte umfassen. Erstens sollte die Beschreibung des Zwecks 
 den genauen Umfang und die Bedingungen enthalten. Einbezogen werden sollte auch, wofür das Tool nicht angewendet werden sollte~\cite{tc03}. Zweitens sollten die 
 Parameter
-eingeschränkt sein. Dazu gehört eine ausführliche Beschreibung dessen, was nicht erwartet wird, z.\,B. bei dem Format. Beispiele können zur Unterstützung verwendet 
+eingeschränkt sein. Dazu gehört eine ausführliche Beschreibung dessen, was nicht erwartet wird, z.\,B. bezüglich des Formates. Beispiele können zur Unterstützung verwendet 
 werden. Drittens sollte das Format des Outputs klar definiert werden, also welche Form und welche Informationen er aufweist~\cite{tc03}.
 
-\begin{lstlisting}[caption={Beispiel einer Tool-Definition als JSON-Schema~\cite{tc01}}, label={lst:tool_definition}]
+\begin{lstlisting}[caption={Beispiel einer Tool-Definition als \acs{json}-Schema~\cite{tc01}}, label={lst:tool_definition}]
 {
   "type": "function",
   "function": {
@@ -311,13 +311,13 @@ werden. Drittens sollte das Format des Outputs klar definiert werden, also welch
 Sobald ein \ac{llm} eine Anfrage vom Nutzer erhält, muss es entscheiden, ob die Anfrage direkt beantwortet werden kann oder ein Tool benötigt wird~\cite{tc03}. Ist ein
 Tool erforderlich, müssen die richtigen Parameter für das Tool extrahiert werden~\cite[9]{tc10}. Das \ac{llm} muss somit eigenständig entscheiden,
 welches Tool verwendet werden soll~\cite{tc04}. Diese Entscheidung spielt eine wichtige Rolle. Soll beispielsweise eine große Zahl mithilfe
-einer Rechenoperation berechnet werden, ist es notwendig, ein Tool mit einzubeziehen. Wenn dagegen nach Fakten gefragt wird, etwa was 1 + 2 ergibt oder ob der 
-Eiffelturm
-in Paris steht, sollte die Generierung der Antwort nicht extern ausgelagert werden~\cite[19]{tc09}. \acp{llm} können dabei zu abhängig von Tools werden oder aber zu 
+einer Rechenoperation berechnet werden, ist es notwendig, ein Tool mit einzubeziehen. Wenn dagegen nach Fakten gefragt wird, etwa \glqq was 1 + 2 ergibt\grqq oder 
+\glqq ob der Eiffelturm in Paris steht\grqq, sollte die Generierung der Antwort nicht extern ausgelagert werden~\cite[19]{tc09}. \acp{llm} können dabei zu 
+abhängig von Tools werden oder aber zu 
 sehr von sich überzeugt sein und keine Tools verwenden wollen~\cite[17776]{tc08}. Für die Verwendung von Tools müssen die Parameter korrekt aus einer Nutzeranfrage 
 extrahiert und an die genauen Formatvorgaben des Tools angepasst werden, ohne dadurch überflüssigen Text zu generieren~\cite[14\psq]{tc10}. \\
-Ein Tool Call läuft wie eine Schleife ab, bei der das \ac{llm} selbstständig entscheidet, welche Aktionen ausgeführt werden müssen und dementsprechend welches Tool 
-ausgeführt werden soll~\cite{tc03}. Dieser Ablauf gliedert sich in fünf Schritte~\cite{tc07}:
+Ein Tool Call läuft wie eine Schleife ab, bei der das \ac{llm} selbstständig entscheidet, welche Aktionen ausgeführt werden müssen und welches Tool 
+dafür benötigt wird~\cite{tc03}. Dieser Ablauf gliedert sich in fünf Schritte~\cite{tc07}:
 
 \begin{enumerate}
     \item \textbf{Werkzeugdefinition}: Entwickler definieren verfügbare Tools in einem strukturierten Format.
@@ -327,7 +327,7 @@ ausgeführt werden soll~\cite{tc03}. Dieser Ablauf gliedert sich in fünf Schrit
     \item \textbf{Antwortgenerierung}: Es wird eine natürlichsprachliche Antwort auf Grundlage der zurückgegebenen Daten generiert.
 \end{enumerate}
 
-Abhängig von den Quellen wird dieser Ablauf unterschiedlich unterteilt. In~\cite[8]{tc10} umfasst dieser Prozess vier Stufen: Aufgabenplanung, 
+Abhängig von den Quellen wird dieser Ablauf unterschiedlich unterteilt. Laut~\citeauthor{tc10} umfasst dieser Prozess vier Stufen: Aufgabenplanung, 
 Tool-Auswahl, Tool Calling und Antwortgenerierung~\cite[8]{tc10}. Bei diesem Ablauf ist zu beachten, dass das \ac{llm} keinen Zugriff auf externe Systeme hat und 
 nichts eigenständig ausführt~\cite{tc03}. Die Kontrolle über die Ausführung liegt in der Anwendungslogik~\cite{tc07}. Die Anwendung erhält den Payload, validiert ihn, führt
 die Logik aus und gibt das Ergebnis an das \ac{llm} zurück~\cite{tc03}. \\
@@ -405,7 +405,7 @@ abgerufene Inhalte~\cite[18]{pi24}. \\
 Durch die Verwendung von Tool Calls tritt das sogenannte Confused Deputy Problem auf~\cite[12]{pi24}. Der Angreifer kompromittiert das \gls{backend} nicht direkt, sondern 
 positioniert
 Anweisungen an einer Stelle, an der das \ac{llm} diese liest. Diese Anweisungen werden somit ausgeführt, ohne direkte Einwirkung des Angreifers~\cite[12]{pi24}. \\
-Wann ein \ac{llm} von diesen Gefahren besonders betroffen ist, wird in~\cite[13]{pi24} durch das Lethal Trifecta beschrieben. Es werden drei strukturelle
+Wann ein \ac{llm} von diesen Gefahren besonders betroffen ist, wird laut~\citeauthor{pi24} durch das Lethal Trifecta beschrieben. Es werden drei strukturelle
 Kategorien definiert, die bestimmen, wie anfällig ein \ac{llm} für solche Angriffe ist. Wenn das \ac{llm} auf private Daten zugreifen kann, nicht vertrauenswürdige 
 Inhalte verarbeitet und mit externen Systemen kommuniziert, sind die Voraussetzungen gegeben. Wird eine dieser Kategorien entfernt, entfällt die 
 Angriffsfläche~\cite[13]{pi24}. \\
@@ -447,7 +447,7 @@ Antwortgenerierung, die menschliche Beteiligung, die Berechtigungen und der Komm
 angehören~\cite[3]{cb11}. Bei der Wissensdomäne wird zwischen generischen Chatbots, die alle Nutzerfragen beantworten, Open-Domain-Chatbots, die in mehreren 
 Domänen agieren, und domänenspezifischen Chatbots, die auf eine Domäne spezialisiert sind, unterschieden~\cite[3]{cb11}. Hinsichtlich ihres Ziels können Chatbots 
 informativ sein und dem Nutzer spezifische Informationen aus einer Quelle liefern, konversationell sein und eine menschenähnliche Konversation
-führen oder aufgabenorientiert sein und bei der Erfüllung von Aufgaben, zum Beispiel einer Hotelbuchung, unterstützen~\cite[3]{cb11}. In~\cite{cb03} wird hinsichtlich 
+führen oder aufgabenorientiert sein und bei der Erfüllung von Aufgaben, zum Beispiel einer Hotelbuchung, unterstützen~\cite[3]{cb11}. Laut~\citeauthor{cb03} wird hinsichtlich 
 der Zielsetzung eine ähnliche Kategorisierung vorgenommen. Es wird zwischen Virtual Companion Chatbots und Task-focused Chatbots unterschieden~\cite[243]{cb03}. 
 Virtual Companion Chatbots dienen dazu, eine Unterhaltung über beliebige Themen zu führen, Task-focused Chatbots dagegen dazu, Nutzer bei speziellen Themen zu
 unterstützen~\cite[243]{cb03}. Besonders relevant für diese Arbeit ist die Unterscheidung bei der Antwortgenerierung in regelbasierte, 
@@ -476,10 +476,10 @@ Chatbots besser an unstrukturierte Eingaben von Nutzern angepasst werden~\cite[2
 Language
 Generation (NLG) auf Grundlage der aktuellen und vorherigen Eingaben, benötigen jedoch eine große Menge an Training~\cite[10]{cb12}. Beim Vergleich der Ansätze wird 
 deutlich, dass regelbasierte Chatbots mehr Zuverlässigkeit bieten, sprachverarbeitende Chatbots jedoch mehr Benutzerfreundlichkeit~\cite[4]{cb04}. Generative Chatbots
-eignen sich für informelle Open-Domain-Gespräche, regelbasierte Chatbots eher für geschlossene Domänen, also wenn der Chatbot für einen spezifischen 
-Anwendungsfall entwickelt wurde~\cite[8]{cb11}. Hybride Chatbots kombinieren die beiden Verfahren. Wenn keine Regel für eine Anfrage verwendet werden kann, wird
-ein regelbasierter und generativer Ansatz verwendet~\cite[8]{cb11}. Heutzutage bieten \acp{llm} wie GPT die effizienteste Lösung, einfachere Methoden sind jedoch
-leichter reproduzierbar, weswegen häufig eine hybride Variante verwendet wird~\cite[104]{cb05}. \\
+eignen sich für informelle Open-Domain-Gespräche, jedoch nicht für geschlossene Domänen. Für solche Domänen sind regelbasierte Chatbots geeignet, welche auf
+eine spezifischen Anwendungsfall ausgerichtet sind~\cite[8]{cb11}. Mit Hybriden Chatbots werden diese Verfahren kombiniert. Sie beantworten Anfragen anhand
+definierter Regeln~\cite[8]{cb11}. Wenn keine Regel verwendet werden kann, wird die Antwort über einen retrieval-basierten oder einen generativen Ansatz erzeugt~\cite[8]{cb11}.
+Heutzutage bieten \acp{llm} wie GPT die effizienteste Lösung, einfachere Methoden sind jedoch leichter reproduzierbar, weswegen häufig eine hybride Variante verwendet wird~\cite[104]{cb05}. \\
 Ein \ac{llm}-basierter Chatbot basiert häufig auf einem \ac{llm} mit Transformer-Architektur~\cite[87]{cb05}. Zusätzlich wird eine Softwarekomponente
 verwendet, über die Menschen kommunizieren können~\cite[87]{cb05}. Die Informationen, über die der Chatbot verfügt, sind damit auf die verwendeten Trainingsdaten
 begrenzt~\cite[92]{cb05}. Dabei werden willkürliche Sequenzen sprachlicher Formen aus den Trainingsdaten auf Grundlage von Wahrscheinlichkeiten 
@@ -495,14 +495,14 @@ mit denen zusätzliche Aktionen durchgeführt werden können~\cite[8]{cb02}. Ein
 Auswirkungen von Schwachstellen werden verstärkt, wenn das \ac{llm} als (teil-)autonomes System eingesetzt wird, welches selbstständig Aktionen ausführen kann~\cite[3]{sm08}.
 Auch \ac{owasp} grenzt den Begriff Agent ab. Sobald ein \ac{llm} nicht nur eine Komponente einer Anwendung ist, sondern selbst zum Akteur wird, Tools aufrufen kann
 und Informationen über mehrere Sitzungen speichert, wird es als Agent bezeichnet~\cite[7]{pi24}. Agenten rufen Tools dynamisch je nach Nutzeranfrage auf und können 
-mehrere Aufrufe an das \ac{llm} mit dem Output aus vorherigen Aufrufen machen~\cite[23]{pi24}. In~\cite{cb09} wird eine \ac{llm}-integrierte Anwendung als Vorstufe eines 
+mehrere Aufrufe an das \ac{llm} mit dem Output aus vorherigen Aufrufen machen~\cite[23]{pi24}. Laut~\citeauthor{cb09} wird eine \ac{llm}-integrierte Anwendung als Vorstufe eines 
 autonomen Agenten betrachtet. Der in dieser Arbeit verwendete Chatbot zählt zu den \ac{llm}-integrierten Anwendungen mit Tool-Zugriff, ist jedoch noch kein 
 Agent, der autonom handeln kann. \\
 
 \subsection{Architekturen und Angriffsflächen}
 
 Zu den Komponenten eines \ac{ki}-Systems gehören mindestens die Daten, das \ac{llm}, ein Prozess für Training, Test und Bereitstellung sowie die notwendige 
-Infrastruktur~\cite[1]{pi18}. In~\cite{cb11} wurde ein allgemeines Design dokumentiert, welches alle notwendigen Komponenten enthält. Je nach Anwendungsfall können
+Infrastruktur~\cite[1]{pi18}. \citeauthor{cb11} dokumentierte ein allgemeines Design, welches alle notwendigen Komponenten enthält. Je nach Anwendungsfall können
 aus diesen Komponenten die notwendigen ausgewählt werden~\cite[8]{cb11}. Durch die Übertragung auf einen \ac{llm}-basierten Chatbot ergeben sich die folgenden fünf
 Komponenten: \gls{frontend}, Anwendungslogik, \ac{llm}, Daten und Tools. In diesem Abschnitt der Arbeit wird jede dieser Komponenten einzeln betrachtet, da dies für die 
 Analyse
@@ -513,7 +513,7 @@ Abbildung~\ref{fig:chatbot_schichten} fasst die Komponenten und ihre Eintrittspu
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.9\textwidth]{figs/02/chatbot_schichten.pdf}
-\caption{Komponenten eines LLM-basierten Chatbots}
+\caption{Komponenten eines \acs{llm}-basierten Chatbots}
 \label{fig:chatbot_schichten}
 \end{figure}
 
@@ -607,7 +607,7 @@ Cloud-Lösungen betrieben~\cite[6]{cb12}. Sie stehen im Internet für einen unbe
 verlassen und auch für Antworten an andere Nutzer verwendet werden können~\cite[6]{cb12}. Dies betrifft auch dienstliche Informationen, die nicht für die Öffentlichkeit
 bestimmt sind~\cite[6]{cb12}. Aus diesem Grund werden geschlossene Systeme aus datenschutzrechtlicher Sicht bevorzugt~\cite[6]{cb12}. Zudem besteht in einem 
 Unternehmen die Gefahr, dass Beschäftigte ohne klare Regelungen \ac{ki}-Anwendungen unkontrolliert verwenden~\cite[9]{cb12}. \\
-Ein zweites Risiko ergibt sich aus der Vertrauensbeziehung zwischen dem Chatbot und den Nutzern. Chatbots sollen menschenähnliche Antworten liefern sowie Vertrauen 
+Ein weiteres Risiko ergibt sich aus der Vertrauensbeziehung zwischen dem Chatbot und den Nutzern. Chatbots sollen menschenähnliche Antworten liefern sowie Vertrauen 
 und eine bessere Kommunikationsqualität aufbauen~\cite[6]{cb04}. Das Maß an Vertrauen, das ein Nutzer dem Chatbot entgegenbringt, hängt von Faktoren wie dem Verhalten,
 dem Erscheinungsbild und der Menschenähnlichkeit ab~\cite[1]{cb11}. Chatbots sind menschenähnlicher als andere interaktive Systeme, weswegen Nutzer auch eine höhere 
 Erwartung haben, dass sich ein Chatbot sozial und unterhaltsam verhält~\cite[388]{cb02}. Bereits mit ELIZA von Weizenbaum war es möglich, durch die Illusion von 

@@ -73,13 +73,13 @@ beschränken: \\
 
 
 \begin{enumerate}
-    \item E-Mail Injection: Die E-Mail enthält sowohl sichtbaren als auch versteckten Inhalt. Der versteckte Inhalt enthält die bösartige Anweisung, die ausgeführt wird, sobald der Nutzer das Modell bittet, die E-Mail zu bearbeiten~\cite{pi13}.
-    \item Multiturn Injection: Der Angriff wird passiv über die Ausgabe eines externen Tools erzeugt, da der Angreifer nicht direkt mit dem Agenten kommunizieren kann~\cite[3]{pi7}. Dazu wird ein Chat-Template manipuliert, um eine entsprechende Konversation künstlich zu erzeugen. Durch diese Konversation soll das \ac{llm} dazu verleitet werden, eine bestimmte Aktion auszuführen~\cite[3]{pi7}.
-    \item Website Injection: Versteckte Anweisungen werden im Quellcode einer Webseite platziert~\cite{pi12}. Liest das Sprachmodell diesen versteckten Text, führt es die enthaltenen Anweisungen aus~\cite{pi13}.
-    \item Encoding Injection: Die bösartige Anweisung wird verschleiert, indem sie beispielsweise Base64-kodiert oder in eine andere Sprache übersetzt wird. Dekodiert das Sprachmodell den Inhalt, führt es die enthaltene Anweisung aus~\cite{pi12}.
-    \item Multi-Modal Injection / Bild-Injection: Anweisungen werden in Metadaten versteckt, beispielsweise in der EXIF-Beschreibung eines Bildes~\cite{pi12}.
-    \item Document Injection: Anweisungen werden in einem Dokument versteckt und ausgeführt, wenn der Nutzer das Sprachmodell anweist, das Dokument zu analysieren~\cite{pi13}.
-    \item URL Parameter Injection: Das Modell wird dazu gebracht, ein externes Tool zu verwenden, wobei die bösartige Anweisung direkt in der \ac{url} versteckt ist, z.\,B. \\ \texttt{http://evil.com/log?data=<prompt>}~\cite{pi12}.
+    \item \textbf{E-Mail Injection:} Die E-Mail enthält sowohl sichtbaren als auch versteckten Inhalt. Der versteckte Inhalt enthält die bösartige Anweisung, die ausgeführt wird, sobald der Nutzer das Modell bittet, die E-Mail zu bearbeiten~\cite{pi13}.
+    \item \textbf{Multiturn Injection:} Der Angriff wird passiv über die Ausgabe eines externen Tools erzeugt, da der Angreifer nicht direkt mit dem Agenten kommunizieren kann~\cite[3]{pi7}. Dazu wird ein Chat-Template manipuliert, um eine entsprechende Konversation künstlich zu erzeugen. Durch diese Konversation soll das \ac{llm} dazu verleitet werden, eine bestimmte Aktion auszuführen~\cite[3]{pi7}.
+    \item \textbf{Website Injection:} Versteckte Anweisungen werden im Quellcode einer Webseite platziert~\cite{pi12}. Liest das Sprachmodell diesen versteckten Text, führt es die enthaltenen Anweisungen aus~\cite{pi13}.
+    \item \textbf{Encoding Injection:} Die bösartige Anweisung wird verschleiert, indem sie beispielsweise Base64-kodiert oder in eine andere Sprache übersetzt wird. Dekodiert das Sprachmodell den Inhalt, führt es die enthaltene Anweisung aus~\cite{pi12}.
+    \item \textbf{Multi-Modal Injection / Bild-Injection:} Anweisungen werden in Metadaten versteckt, beispielsweise in der EXIF-Beschreibung eines Bildes~\cite{pi12}.
+    \item \textbf{Document Injection:} Anweisungen werden in einem Dokument versteckt und ausgeführt, wenn der Nutzer das Sprachmodell anweist, das Dokument zu analysieren~\cite{pi13}.
+    \item \textbf{URL Parameter Injection:} Das Modell wird dazu gebracht, ein externes Tool zu verwenden, wobei die bösartige Anweisung direkt in der \ac{url} versteckt ist, z.\,B. \\ \texttt{http://evil.com/log?data=<prompt>}~\cite{pi12}.
 \end{enumerate}
 
 In der Praxis werden direkte und indirekte Angriffsarten häufig miteinander kombiniert, sogenannte Combined Attacks~\cite[2\psq]{pi3}.

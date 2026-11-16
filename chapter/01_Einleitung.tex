@@ -27,7 +27,7 @@ wird von Angreifern bei sogenannten \glqq Prompt-Injection-Angriffen\grqq{} ausg
 Auf diese Weise lassen sich schädliche Aktionen auslösen, ohne dass ein direkter Zugriff auf das \ac{llm} notwendig ist~\cite{pi15}. \\
 Durch den Einsatz von Tool Calls wird dieses Risiko verstärkt. Während ein erfolgreicher Angriff ohne Tool Call lediglich eine fehlerhafte Antwort erzeugt, können
 mithilfe von Tool Calls reale Aktionen ausgeführt werden. Dadurch nimmt die Bedrohung dieser Angriffe deutlich zu. Besonders kritisch ist dies bei Chatbots, die 
-auf Unternehmensdaten zugreifen, da diese häufig Zugang zu sensiblen internen Informationen haben. \\
+auf Unternehmensdaten zugreifen, da diese häufig auch Zugang zu sensiblen internen Informationen haben. \\
 Das Problem ist bereits seit mehreren Jahren bekannt, weshalb bereits zahlreiche Ansätze existieren, diese Angriffe abzuwehren. Es werden unter anderem zusätzliche
 Klassifikatoren, Filter oder Vorverarbeitungsschritte implementiert, um Angriffe zu erkennen, bevor sie das \ac{llm} mit Zugriff auf die Tools erreichen~\cite[4]{pi9}~\cite[9]{sm10}.
 Es gibt jedoch Belege dafür, dass diese Maßnahmen nicht ausreichend wirksam sind~\cite{sm22}. Angreifer entwickeln ihre Angriffe stetig weiter, um genau diese 

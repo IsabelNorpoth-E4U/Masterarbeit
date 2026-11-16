@@ -207,7 +207,7 @@ aufgrund ihres Tonfalls fälschlicherweise als Angriff einstuft. Quelltext~\ref{
 {"seed_id": "B31", "label": "harmless", "harmless_level": "hard_negative", "text": "", "split": "dev"}
 \end{lstlisting}
 
-Als Format wurde JSON gewählt, da es für Datensätze weit verbreitet ist und sich bei der Weiterverarbeitung einfach handhaben lässt. Jedes Grundszenario besitzt
+Als Format wurde \ac{json} gewählt, da es für Datensätze weit verbreitet ist und sich bei der Weiterverarbeitung einfach handhaben lässt. Jedes Grundszenario besitzt
 eine eindeutige Kennung (\texttt{seed\_id}), deren Präfix die Kategorie angibt: \texttt{A} steht für \textit{attack} (Angriff), \texttt{B} für \textit{benign} (harmlos).
 Das Feld \texttt{label} enthält die Kategorie ausgeschrieben, das Feld \texttt{harmless\_level} unterscheidet zwischen normalen harmlosen Prompts (\texttt{normal}) und 
 negativ formulierten (\texttt{hard\_negative}). Bei Angriffen ist es nicht belegt (\texttt{null}). \\
