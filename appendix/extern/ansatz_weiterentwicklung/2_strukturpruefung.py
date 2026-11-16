@@ -345,7 +345,7 @@ def decide(row):
     votes, number_of_variants = count_votes(row)
     share = votes / number_of_variants
     # rule 1: majority vote of the variants
-    if share > GAMMA:Microsoft.QuickAction.Bluetooth
+    if share > GAMMA:
         return True, "majority_vote"
     # rule 2: the guiding questions find the asked action harmful
     if question_vote(row):
