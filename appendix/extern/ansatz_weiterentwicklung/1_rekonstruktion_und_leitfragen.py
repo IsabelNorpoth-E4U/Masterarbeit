@@ -338,13 +338,11 @@ def check_prompt(prompt):
         "latency_ms": round((time.time() - start_time) * 1000, 1),
     }
 
-
 def load_jsonl(file_name):
     if not os.path.exists(file_name):
         return []
     with open(file_name, encoding="utf-8") as file:
         return [json.loads(line) for line in file if line.strip()]
-
 
 def run_all():
     testcases = load_jsonl(TESTCASES_FILE)
