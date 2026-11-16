@@ -1,36 +1,3 @@
-# Variant C: an additional check for external content (indirect prompt injection)
-#
-# Idea (own implementation): the guard lists every request or instruction in a
-# document and says for each one
-#   - an_wen:             is it written to an AI assistant ("KI") or to a human ("Mensch")?
-#   - passt_zum_dokument: is it a normal part of this document ("JA") or not ("NEIN")?
-# A fixed rule decides: attack, if one request is written to the AI
-# or does not fit the document.
-#
-# How it is combined with the existing approach:
-#   - user messages (NotInject, data/testcases.jsonl): nothing changes,
-#     the decision of the existing approach is taken as it is
-#   - external content (BIPIA): attack, if the existing approach says attack
-#     OR variant C says attack. So variant C can only add attacks,
-#     an attack that was found before is still found.
-#
-# The existing approach is not run again: its results are read from its results file.
-# The data sets are not changed. A text is external content, if its source is "BIPIA".
-#
-# Splitting long texts (own section below, switch by commenting in/out):
-#   on the development data variant C missed many attacks in long texts (tables),
-#   so long texts can be split into parts. Every part is checked with variant C,
-#   the text is an attack, if one part is an attack.
-#
-# Two data sets, switch by commenting in/out:
-#   development data (BIPIA train): to try out variant C, without the existing approach
-#   test data (BIPIA test + NotInject): only once, after variant C is fixed
-#
-# Before:  python3 build_bipia_testcases.py --dev   (development data)
-#          python3 build_bipia_testcases.py         (test data)
-# Run:     python3 main_bipia_variant_c_mistral.py
-# Only the evaluation again (no api calls): python3 main_bipia_variant_c_mistral.py --evaluate
-
 import json
 import os
 import sys
@@ -91,15 +58,15 @@ NUMBER_NAME = "_numbered_questions"
 TESTCASES_FILE = "data/bipia_dev_testcases.jsonl"
 SPLIT = "dev"
 DATA_NAME = "bipia_dev"
-BASE_RESULTS_FILE = "results/bipia_dev_mistral_small4_hybrid2_results.jsonl"
-BASE_NAME = "_hybrid2"
+BASE_RESULTS_FILE = "results/bipia_dev_mistral_small4_new_approach1_results.jsonl"
+BASE_NAME = "_new_approach1"
 
 # test data: hybrid (version 1, prompts like main_hybrid_mistral.py) + variant C
 # TESTCASES_FILE = "data/bipia_testcases.jsonl"
 # SPLIT = "test"
 # DATA_NAME = "bipia"
-# BASE_RESULTS_FILE = "results/bipia_mistral_small4_hybrid2_results.jsonl"
-# BASE_NAME = "_hybrid2"
+# BASE_RESULTS_FILE = "results/bipia_mistral_small4_new_approach1_results.jsonl"
+# BASE_NAME = "_new_approach1"
 
 # test data: original approach (version 1) + variant C
 # TESTCASES_FILE = "data/bipia_testcases.jsonl"
@@ -113,7 +80,7 @@ BASE_NAME = "_hybrid2"
 RAW_FILE = ("results/" + DATA_NAME + "_variant_c" + NUMBER_NAME + PART_NAME
             + "_mistral_small4_raw.jsonl")
 
-# for example "bipia_hybrid2_variant_c_mistral_small4" (test data, hybrid + variant C)
+# for example "bipia_new_approach1_variant_c_mistral_small4" (test data, hybrid + variant C)
 NAME = DATA_NAME + BASE_NAME + "_variant_c" + NUMBER_NAME + PART_NAME + "_mistral_small4"
 # the answers together with the decision
 RESULTS_FILE = "results/" + NAME + "_results.jsonl"
@@ -225,10 +192,7 @@ def ask_mistral(system_prompt, user_text, max_tokens):
                 reasoning_effort="none",
                 response_format={"type": "json_object"},
             )
-            answer = response.choices[0].message.content
-            if answer is None:
-                answer = ""
-            return answer.strip()
+            return (response.choices[0].message.content or "").strip()
         except Exception as error:
             print("  request failed, trying again:", error)
             time.sleep(WAIT_SECONDS)
@@ -372,14 +336,10 @@ def variant_c_decision(requests):
 
 # reads a jsonl file (one JSON per line), empty list if the file does not exist
 def load_jsonl(file_name):
-    rows = []
     if not os.path.exists(file_name):
-        return rows
+        return []
     with open(file_name, encoding="utf-8") as file:
-        for line in file:
-            if line.strip() != "":
-                rows.append(json.loads(line))
-    return rows
+        return [json.loads(line) for line in file if line.strip()]
 
 
 # external content = text the assistant reads (BIPIA), not a message of the user
@@ -393,18 +353,13 @@ def run_all():
     os.makedirs("results", exist_ok=True)
 
     # ids of the texts that are already in the file
-    done = []
-    for row in load_jsonl(RAW_FILE):
-        done.append(row["id"])
+    done = {row["id"] for row in load_jsonl(RAW_FILE)}
 
     print("Model:", MODEL)
     print("Number of test cases:", len(testcases))
     print("Already done:", len(done))
 
-    number = 0
-    for testcase in testcases:
-        number = number + 1
-
+    for number, testcase in enumerate(testcases, start=1):
         if testcase["id"] in done or not is_external(testcase):
             continue
 
@@ -478,7 +433,6 @@ def evaluate():
         else:
             result["reason"] = "harmless"
 
-        result["score"] = None
         result["latency_ms"] = base_latency + c_latency
         results.append(result)
 

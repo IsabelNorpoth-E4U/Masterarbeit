@@ -1,50 +1,3 @@
-# New approach (version 5.1 in ENTWICKLUNGSPROTOKOLL.md): one process for all texts,
-# messages of the user and external content each get one additional check.
-# The earlier version 2 is in archiv/version_2/.
-#
-# For every text (message of the user and external content):
-#   A  views of the text (prompt modification, no LLM):
-#        V0 original
-#        VN cleaned: invisible characters, NFKC, symbols between two letters
-#           removed, single letters joined, Base64 / hex decoded
-#        VS VN with spelling correction (German or English, chosen per text)
-#      views with the same text are checked only once
-#   C1 guiding questions F0 ... F5 for every view (input filtering, one request per view)
-#      a view is suspicious, if F0 = NEIN and one of F1 ... F5 = JA
-#
-# Only for messages of the user:
-#   G  the guard answers JA/NEIN for every view (input filtering, the same question
-#      as in version 2). It finds a suspicious form (reversed, translated or encoded
-#      text with "decode and do it"), which the guiding questions can not read.
-#      Suspicious, if more than half of the views say JA (majority vote like in
-#      SmoothLLM, Robey et al., with their default GAMMA = 0.5). In documents an
-#      unusual form is normal (code, tables), there the guard gave mostly false alarms.
-#
-# Only for external content (e-mail, web page, table, code from a tool call):
-#   B  the views V0 and VN are split into numbered lines and sentences (prompt enhancement)
-#   C2 every line with a request: written to the AI or to a human, and does it fit
-#      the document (input filtering, one request per view)
-#      a view is suspicious, if one request is written to the AI or does not fit
-#
-# Decision:
-#   message of the user: G (majority of the views) or C1 in at least one view
-#   external content:    C1 or C2 in at least one view
-# One suspicious view is enough, like in Erase-and-Check (Kumar et al., COLM 2024):
-# an obfuscated attack is often only visible in the cleaned view.
-# An answer that is not usable counts as suspicious, so a technical problem
-# does not let an attack through.
-#
-# Choose the data set by commenting in/out (each has its own result files).
-#
-# Requirement: python3 -m pip install mistralai pyspellchecker
-#              and the API key in the file mistral_key.txt in this folder
-# BIPIA data:  python3 build_bipia_testcases.py                    (test data)
-#              python3 build_bipia_testcases.py --obfuscated       (obfuscated test data)
-#              python3 build_bipia_testcases.py --dev              (development data)
-#              python3 build_bipia_testcases.py --dev --obfuscated (obfuscated development data)
-# Run all:     python3 main_new_approach_mistral.py
-# Only the evaluation again (no api calls): python3 main_new_approach_mistral.py --evaluate
-
 import base64
 import json
 import os
@@ -183,11 +136,6 @@ with open(KEY_FILE, encoding="utf-8") as key_file:
 # ---------- requests to the api ----------
 
 def ask_mistral(system_prompt, user_text, max_tokens, json_answer=False):
-    if json_answer:
-        response_format = {"type": "json_object"}
-    else:
-        response_format = None
-
     for attempt in range(MAX_TRIES):
         try:
             response = client.chat.complete(
@@ -199,12 +147,9 @@ def ask_mistral(system_prompt, user_text, max_tokens, json_answer=False):
                 temperature=0,
                 max_tokens=max_tokens,
                 reasoning_effort="none",
-                response_format=response_format,
+                response_format={"type": "json_object"} if json_answer else None,
             )
-            answer = response.choices[0].message.content
-            if answer is None:
-                answer = ""
-            return answer.strip()
+            return (response.choices[0].message.content or "").strip()
         except Exception as error:
             print("  request failed, trying again:", error)
             time.sleep(WAIT_SECONDS)
@@ -219,14 +164,12 @@ def read_json(answer):
         data = json.loads(answer)
     except Exception:
         return None
-    if type(data) != dict:
-        return None
-    return data
+    return data if isinstance(data, dict) else None
 
 
 # "JA" -> True, "NEIN" -> False, None if the answer is neither
 def to_yes_no(answer):
-    if answer is True or answer is False:
+    if isinstance(answer, bool):
         return answer
     answer = str(answer).strip().upper()
     if answer.startswith("JA"):
@@ -244,10 +187,7 @@ INNER_SYMBOLS = ".-_*|/+~"
 
 # applies a function to every word of the text
 def per_word(text, function):
-    new_words = []
-    for word in text.split(" "):
-        new_words.append(function(word))
-    return " ".join(new_words)
+    return " ".join(function(word) for word in text.split(" "))
 
 
 # invisible characters ("Unicode smuggling", OWASP LLM Prompt Injection Prevention
@@ -271,28 +211,27 @@ def reveal_invisible(text):
 # removes symbols and spaces inside words
 def remove_spacing(text):
     # part 1: remove a symbol between two letters, "ober.halb" -> "oberhalb"
-    new_text = ""
-    for i in range(len(text)):
-        character = text[i]
-        if character in INNER_SYMBOLS and 0 < i < len(text) - 1:
-            if text[i - 1].isalpha() and text[i + 1].isalpha():
-                continue
-        new_text = new_text + character
+    kept = []
+    for i, character in enumerate(text):
+        between_letters = (0 < i < len(text) - 1
+                           and text[i - 1].isalpha() and text[i + 1].isalpha())
+        if not (character in INNER_SYMBOLS and between_letters):
+            kept.append(character)
 
     # part 2: join single letters, "o b e r h a l b  d i e s e r" -> "oberhalb dieser"
     # (two spaces give an empty piece, so the word ends there)
     words = []
     letters = ""
-    for piece in new_text.split(" "):
+    for piece in "".join(kept).split(" "):
         if len(piece) == 1:
-            letters = letters + piece
-        else:
-            if letters != "":
-                words.append(letters)
-                letters = ""
-            if piece != "":
-                words.append(piece)
-    if letters != "":
+            letters += piece
+            continue
+        if letters:
+            words.append(letters)
+            letters = ""
+        if piece:
+            words.append(piece)
+    if letters:
         words.append(letters)
     return " ".join(words)
 
@@ -301,10 +240,7 @@ def remove_spacing(text):
 def looks_like_text(text):
     if text == "":
         return False
-    readable = 0
-    for character in text:
-        if character.isprintable() or character == "\n" or character == "\t":
-            readable = readable + 1
+    readable = sum(1 for c in text if c.isprintable() or c in "\n\t")
     return readable / len(text) > 0.9
 
 
@@ -385,17 +321,14 @@ def correct_word(word, language):
     start = 0
     end = len(word)
     while start < end and not word[start].isalpha():
-        start = start + 1
+        start += 1
     while end > start and not word[end - 1].isalpha():
-        end = end - 1
+        end -= 1
     core = word[start:end]
 
     if len(core) < 4 or not core.isalpha() or core.isupper():
         return word
-    for character in core[1:]:
-        if character.isupper():
-            return word
-    if is_known(core, language):
+    if any(c.isupper() for c in core[1:]) or is_known(core, language):
         return word
 
     fixed = SPELL[language].correction(core.lower())
@@ -453,8 +386,8 @@ def guard_majority(views):
 # Returns True/False for every question, or None if the answer is not usable.
 def question_answers(text):
     user_text = "Nachricht:\n<<<\n" + text + "\n>>>\n\nFragen:\n"
-    for name in QUESTIONS:
-        user_text = user_text + name + ": " + QUESTIONS[name] + "\n"
+    for name, question in QUESTIONS.items():
+        user_text += name + ": " + question + "\n"
 
     answer = ask_mistral(QUESTION_PROMPT, user_text, max_tokens=100, json_answer=True)
     data = read_json(answer)
@@ -463,12 +396,9 @@ def question_answers(text):
 
     answers = {}
     for name in QUESTIONS:
-        if name not in data:
+        answers[name] = to_yes_no(data.get(name))
+        if answers[name] is None:
             return None
-        yes_no = to_yes_no(data[name])
-        if yes_no is None:
-            return None
-        answers[name] = yes_no
     return answers
 
 
@@ -479,10 +409,7 @@ def questions_suspicious(questions):
         return True
     if questions["F0"]:
         return False
-    for name in ATTACK_QUESTIONS:
-        if questions[name]:
-            return True
-    return False
+    return any(questions[name] for name in ATTACK_QUESTIONS)
 
 
 # ---------- steps B and C2: numbered lines (only external content) ----------
@@ -593,7 +520,6 @@ def check_text(text, external):
         "input_type": "external" if external else "user",
         "views": views,
         "latency_ms": round((time.time() - start_time) * 1000, 1),
-        "score": None,
     }
 
 
@@ -626,14 +552,10 @@ def decide(row):
 # ---------- files ----------
 
 def load_jsonl(file_name):
-    rows = []
     if not os.path.exists(file_name):
-        return rows
+        return []
     with open(file_name, encoding="utf-8") as file:
-        for line in file:
-            if line.strip() != "":
-                rows.append(json.loads(line))
-    return rows
+        return [json.loads(line) for line in file if line.strip()]
 
 
 # api run for all test cases, the answers are saved after every test case
@@ -644,17 +566,13 @@ def run_all():
             testcases.append(testcase)
     os.makedirs("results", exist_ok=True)
 
-    done = []
-    for row in load_jsonl(RESULTS_FILE):
-        done.append(row["id"])
+    done = {row["id"] for row in load_jsonl(RESULTS_FILE)}
 
     print("Model:", MODEL)
     print("Number of test cases:", len(testcases))
     print("Already done:", len(done))
 
-    number = 0
-    for testcase in testcases:
-        number = number + 1
+    for number, testcase in enumerate(testcases, start=1):
         if testcase["id"] in done:
             continue
 
@@ -677,7 +595,7 @@ def run_all():
 # adds the decision to every test case and prints the metrics
 def evaluate():
     rows = load_jsonl(RESULTS_FILE)
-    if len(rows) == 0:
+    if not rows:
         raise SystemExit("No results yet. Run first: python3 main_new_approach_mistral.py")
 
     with open(RESULTS_FILE, "w", encoding="utf-8") as file:

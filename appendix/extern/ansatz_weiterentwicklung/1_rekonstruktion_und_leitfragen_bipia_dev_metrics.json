@@ -1,5 +1,5 @@
 {
-  "run": "bipia_dev_mistral_small4_hybrid2",
+  "run": "bipia_dev_mistral_small4_new_approach1",
   "split": "dev",
   "n": 339,
   "confusion_matrix": {

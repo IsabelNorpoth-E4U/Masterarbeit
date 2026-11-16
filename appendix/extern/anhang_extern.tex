@@ -1,0 +1,78 @@
+% Externer Anhang zur Masterarbeit (eigenes PDF)
+% Kapitel 1 (chats_angriffe.tex) wird erzeugt mit:  py build_chat_appendix.py
+% Kompilieren in diesem Ordner:                     latexmk -pdf anhang_extern.tex
+\documentclass[a4paper,11pt]{report}
+\usepackage[ngerman]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+\lstset{
+	basicstyle=\ttfamily\small, % Monospace-Schrift für Code
+	columns=fullflexible, % keine künstlich gesperrten Buchstaben
+	keepspaces=true, % Einrückungen im Code bleiben erhalten
+	breaklines=true, % lange Codezeilen umbrechen statt über den Rand
+	breakindent=0pt, % umgebrochene Zeilen nicht einrücken
+	frame=single,
+	numbers=left,
+	numberstyle=\tiny\color{gray},
+	commentstyle=\color{gray},
+	keywordstyle=\color{blue!60!black},
+	stringstyle=\color{green!40!black},
+	showstringspaces=false,
+	literate=%
+		{Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+		{ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+		{ß}{{\ss}}1
+		{–}{{--}}1 {—}{{---}}1
+		{§}{{\S}}1 {°}{{\textdegree}}1 {ø}{{\o}}1 {„}{{\glqq}}1 {“}{{\grqq}}1 {”}{{''}}1 {→}{{$\rightarrow$}}1
+}
+\renewcommand{\lstlistingname}{Listing}
+
+\title{Externer Anhang zur Masterarbeit}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% ---------- Angriffe aus Kapitel 4 ----------
+\input{chats_angriffe.tex}
+
+% ---------- Änderungen am Chatbot (Kapitel 4) ----------
+\input{server.js.tex}
+
+% ---------- Code der Weiterentwicklung des Ansatzes ----------
+\chapter{Weiterentwicklung des Ansatzes}\label{ch:anhang_weiterentwicklung}
+
+\section{Rekonstruktion und Leitfragen}
+\lstinputlisting[language=Python, caption={1\_rekonstruktion\_und\_leitfragen.py}, label={lst:ext_1}]{ansatz_weiterentwicklung/1_rekonstruktion_und_leitfragen.py}
+
+\section{Strukturprüfung}
+\lstinputlisting[language=Python, caption={2\_strukturpruefung.py}, label={lst:ext_2}]{ansatz_weiterentwicklung/2_strukturpruefung.py}
+
+\section{Entfernung, Mehrheitsentscheidung und externe Inhalte}
+\lstinputlisting[language=Python, caption={3\_entfernung\_mehrheitsentscheidung\_externe\_inhalte.py}, label={lst:ext_3}]{ansatz_weiterentwicklung/3_entfernung_mehrheitsentscheidung_externe_inhalte.py}
+
+\section{Vereinheitlichung des Ansatzes}
+\lstinputlisting[language=Python, caption={4\_vereinheitlichung\_des\_ansatzes.py}, label={lst:ext_4}]{ansatz_weiterentwicklung/4_vereinheitlichung_des_ansatzes.py}
+
+% ---------- Auswertung (Kapitel 6) ----------
+\chapter{Auswertung}\label{ch:anhang_auswertung}
+
+\section{Berechnung der Metriken}\label{sec:code_metrics}
+\lstinputlisting[language=Python, caption={Berechnung der Metriken (metrics.py)}, label={lst:code_metrics}]{metrics.py}
+
+\section{Berechnung der Kosten}\label{sec:code_kosten}
+\lstinputlisting[language=Python, caption={Berechnung der Token-Kosten (token\_kosten.py)}, label={lst:code_kosten}]{token_kosten.py}
+
+% \section{Visualisierung der Ergebnisse}
+% \lstinputlisting[language=Python, caption={visualize\_results.py}, label={lst:ext_visualize}]{visualize_results.py}
+
+\end{document}
