@@ -340,7 +340,7 @@ def question_vote(row):
 def yes_questions(row):
     return "+".join(name for name in ATTACK_QUESTIONS if row["questions"][name])
 
-# decides for one test case. Returns True/False and the reason.
+# decides for one testcase. Returns True/False and the reason.
 def decide(row):
     votes, number_of_variants = count_votes(row)
     share = votes / number_of_variants
