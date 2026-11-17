@@ -122,7 +122,7 @@ In der Testumgebung wurden dem \ac{llm} zwei Tools bereitgestellt, auf welche es
 \begin{enumerate}
     \item \texttt{brave\_search}: führt eine Websuche über die Brave Search \ac{api} aus und gibt die ersten fünf Treffer mit Titel, \ac{url} und Kurzbeschreibung zurück.
     \item \texttt{browser\_action}: kann mit zwei Modi verschiedene Aktionen auf einer mitgegebenen \ac{url} ausführen. Im Modus \texttt{open\_url} wird die Seite 
-    per \ac{http}-GET geladen und der Inhalt als \ac{html} zurückgegeben. Mit dem Modus \texttt{fill\_form} wird die Seite in einem Playwright-Browser geöffnet, es werden beliebig
+    per \ac{http}-GET geladen und die erten 3.000 Zeichen des \ac{html}-Quelltextes zurückgegeben. Mit dem Modus \texttt{fill\_form} wird die Seite in einem Playwright-Browser geöffnet, es werden beliebig
     viele Felder befüllt und das Formular wird abgeschickt, außer es wird vom \ac{llm} untersagt.
 \end{enumerate}
 
@@ -141,7 +141,9 @@ kann das \ac{llm} jedem Ergebnis den passenden Aufruf zuordnen. Bei einer Websuc
 einer Webseite die Funktion \texttt{browserAction}. Bevor \texttt{browserAction} eine Seite aufruft, prüft \texttt{auditUrl} die vom Modell mitgegebene \ac{url}. 
 Die Adresse wird bereinigt und es wird überprüft, ob sie das Protokoll \ac{http} oder \ac{https} verwendet, da nur diese zugelassen werden, und ob es sich um eine lokale Adresse wie 
 \texttt{localhost} oder \texttt{127.0.0.1} handelt. Lokale Adressen werden nur akzeptiert, wenn eine spezielle Freigabe existiert. Fehler beim Laden oder Ausfüllen
-werden als strukturiertes Ergebnis zurückgegeben, damit das \ac{llm} darauf reagieren kann. Wenn es zu Verbindungsfehlern bei den Netzwerkanfragen an Mistral oder
+einer Seite werden als strukturiertes Ergebnis zurückgegeben, damit das \ac{llm} darauf reagieren kann. Wird eine
+\ac{url} von \texttt{auditUrl} abgelehnt oder schlägt die Websuche fehl, wird die Anfrage dagegen mit einem Fehler abgebrochen.
+Wenn es zu Verbindungsfehlern bei den Netzwerkanfragen an Mistral oder
 Brave kommt, werden diese über die Funktion \texttt{withNetworkRetry} bis zu zweimal mit steigender Wartezeit wiederholt~\cite{an16}. \\
 Die Tool-Ergebnisse werden dem Verlauf hinzugefügt und erneut an das Modell gesendet, das daraufhin weitere Tools anfordern kann, beispielsweise zunächst eine Suche und
 anschließend das Öffnen einer Webseite. Um zu verhindern, dass das \ac{llm} in einer Endlosschleife landet, kann dieser Ablauf nur bis zu fünfmal durchgeführt
@@ -471,7 +473,7 @@ zugreifen kann.
 
 \subsection{Keine Vorverarbeitung externer Inhalte}
 
-Externe Inhalte werden nicht überprüft, bevor sie in den Kontext aufgenommen werden. Bei Zugriff auf eine Webseite wird diese im Ganzen als \ac{html}-Quelltext
+Externe Inhalte werden nicht überprüft, bevor sie in den Kontext aufgenommen werden. Bei Zugriff auf eine Webseite werden die ersten 3.000 Zeichen des \ac{html}-Quelltext
 zurückgegeben. Inhalte, die für Nutzer unsichtbar oder unauffällig sind, werden somit weder entfernt noch markiert. Dies zeigt sich bei der Multi-Modal Injection, der 
 Website Injection und der Document Injection. Bei der Website Injection sind die schädlichen Anweisungen in einem Textblock mit der Schriftgröße null
 in einem für den Nutzer unsichtbaren Bereich platziert. Bei der Document Injection ist der Inhalt für den Nutzer unauffällig, da der 
