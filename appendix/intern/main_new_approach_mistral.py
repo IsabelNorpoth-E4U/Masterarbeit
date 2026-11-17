@@ -287,6 +287,7 @@ def is_known(word, language):
 # corrects words, only if....
 def correct_word(word, language):
     # punctuation stays the same
+    start = 0
     end = len(word)
     while start < end and not word[start].isalpha():
         start = start + 1

@@ -40,6 +40,9 @@ GAMMA = 0.5
 MAX_TRIES = 5
 WAIT_SECONDS = 5
 
+# fields of a test case that are copied into the result
+TESTCASE_FIELDS = ["id", "seed_id", "split", "label", "harmless_level"]
+
 # only BIPIA has these fields
 BIPIA_FIELDS = ["source", "task", "attack_category", "position", "transformation"]
 
