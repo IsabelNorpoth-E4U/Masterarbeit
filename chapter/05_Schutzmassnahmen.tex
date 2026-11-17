@@ -122,7 +122,7 @@ Auch die systemseitigen Maßnahmen wurden aufgrund der Kriterien ausgeschlossen,
 verändert werden müsste. \\
 Die eingabeseitige Maßnahme überprüft jede Nutzeranfrage, bevor sie von dem Haupt-\ac{llm} verarbeitet wird. Sie kann als zusätzliche Komponente verwendet werden und 
 hängt nicht von der übrigen Systemstruktur ab. Es kamen allerdings nicht alle eingabeseitigen Maßnahmen infrage, da Maßnahmen wie Sandboxing und das kryptografische 
-Signieren Eingriffe in das System erfordert hätten. \\
+Signieren Eingriffe in das System erfordert hätten.
 
 \subsection{Entwicklung der Maßnahme}
 
@@ -143,7 +143,7 @@ Die Maßnahme wurde von einem vorgeschalteten \ac{llm} ausgeführt. Dieses \ac{l
 als Angriff eingestuft wird. Es wird dabei zwischen Nutzeranfragen und externen Inhalten wie Webseiten oder E-Mails unterschieden. 
 Diese Unterscheidung wird in dieser Arbeit nicht selbstständig integriert, sondern ist bereits in den Datensatzeinträgen 
 angegeben. Wie die Prüfung im Einzelnen aufgebaut ist, ergibt sich aus den Entwicklungsschritten in Abschnitt~\ref{subsec:original} bis 
-Abschnitt~\ref{subsec:ueberarbeitung}.  \\
+Abschnitt~\ref{subsec:ueberarbeitung}.
 
 % \paragraph{Stufe 1: Erstellung der Versionen}
 
@@ -189,7 +189,7 @@ Million Input-Token und 0,60\,USD pro Million Output-Token. Die maximale Kontext
 Mistral Large~4 verfügt über eine Billion Parameter. Hier betragen die Kosten 1,36\,USD pro Million Input-Token und 4,16\,USD pro Million Output-Token. 
 Die maximale Kontextlänge liegt bei einer Million Token~\cite{sm32}. \\
 Die technische Umsetzung erfolgt mit Python. Dazu wird das Python-Client-SDK (Software Development Kit) der Mistral-AI-\ac{api} verwendet, mit dem der Mistral-Client in 
-Python eingebunden wird~\cite{sm33}. \\
+Python eingebunden wird~\cite{sm33}.
 
 \subsection{Erstellung des Datensatzes}\label{subsec:datensatz}
 
@@ -197,7 +197,7 @@ Zusätzlich zu den öffentlichen Datensätzen BIPIA und NotInject, die in Abschn
 erstellt. Die öffentlichen Datensätze sind englischsprachig und enthalten die Angriffe ausschließlich im Klartext. Um die Schutzmaßnahme mit
 deutschsprachigen Anfragen und verschleierten Angriffen testen zu können, wurde daher ein eigener Datensatz in zwei Schritten erstellt. \\
 Im ersten Schritt wurden 90 Grundszenarien (\textit{Seed-Prompts}) formuliert: 30 Angriffsprompts, 30 harmlose Prompts sowie 30 weitere harmlose Prompts, die bewusst
-negativ formuliert wurden, sogenannte \textit{Hard Negatives}. Die Hard Negatives wurden aufgenommen, da verschiedene Arbeiten zeigen, dass die Formulierung einer
+negativ formuliert wurden, sogenannte \textit{Hard Negatives}. Die Hard Negatives wurden aufgenommen, da verschiedene Arbeiten argumentieren, dass die Formulierung einer
 Anfrage das Verhalten von Sprachmodellen beeinflussen kann~\cite{sm23, sm24, sm25}. Mit Hard Negatives lässt sich prüfen, ob der Klassifikator harmlose Anfragen allein
 aufgrund ihres Tonfalls fälschlicherweise als Angriff einstuft. Quelltext~\ref{lst:seeds} zeigt für jede der drei Kategorien ein Beispiel.
 
@@ -268,34 +268,26 @@ In Tabelle~\ref{tab:felder_datensatz} werden die Felder zusammengefasst:
 \footnotesize
 \caption{Felder eines Eintrags im eigenen Datensatz}
 \label{tab:felder_datensatz}
-\begin{tabularx}{\textwidth}{>{\ttfamily}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{3.6cm}}
+\begin{tabularx}{\textwidth}{>{\ttfamily}l >{\raggedright\arraybackslash}X}
 \toprule
-\textbf{\rmfamily Feld} & \textbf{Bedeutung} & \textbf{Werte} \\
+\textbf{\rmfamily Feld} & \textbf{Bedeutung} \\
 \midrule
-id             & Eindeutige Kennung aus der ID des Grundszenarios und der Nummer der Transformation
-                 & z.\,B. \texttt{A01-T00}; \texttt{T00} = unveränderter Grundprompt \\
+id             & Eindeutige Kennung aus der ID des Grundszenarios und der Nummer der Transformation \\
 \addlinespace
-seed\_id       & ID des zugrunde liegenden Grundszenarios
-                 & z.\,B. \texttt{A01} \\
+seed\_id       & ID des zugrunde liegenden Grundszenarios \\
 \addlinespace
-label          & Klasse des Eintrags
-                 & \texttt{attack}, \texttt{harmless} \\
+label          & Klasse des Eintrags \\
 \addlinespace
 harmless\_level & Einordnung der harmlosen Einträge; \texttt{transformed} kennzeichnet harmlose Prompts,
-                 die mit einer der Techniken T01--T15 modifiziert wurden
-                 & \texttt{normal}, \texttt{hard\_negative}, \texttt{transformed}; bei Angriffen \texttt{null} \\
+                 die mit einer der Techniken T01--T15 modifiziert wurden \\
 \addlinespace
-messages       & An das \ac{llm} übergebener Prompt einschließlich der Rolle (\texttt{role}), von der die Nachricht ausgeht
-                 & Liste mit \texttt{role} und \texttt{content} \\
+messages       & An das \ac{llm} übergebener Prompt einschließlich der Rolle (\texttt{role}), von der die Nachricht ausgeht \\
 \addlinespace
-decode\_hint   & Gibt an, ob der Prompt einen Hinweis zur Entschlüsselung enthält (erforderlich für T05--T09 und T11--T13)
-                 & \texttt{true}, \texttt{false} \\
+decode\_hint   & Gibt an, ob der Prompt einen Hinweis zur Entschlüsselung enthält (erforderlich für T05--T09 und T11--T13) \\
 \addlinespace
-language       & Sprache des Prompts; erforderlich für T09, da die Anweisung dort auf Zulu vorliegt
-                 & z.\,B. \texttt{de}, \texttt{zu} \\
+language       & Sprache des Prompts; erforderlich für T09, da die Anweisung dort auf Zulu vorliegt \\
 \addlinespace
-split          & Zugehörigkeit zum Dev- oder Test-Abschnitt
-                 & \texttt{dev}, \texttt{test} \\
+split          & Zugehörigkeit zum Dev- oder Test-Abschnitt \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -322,7 +314,7 @@ Der zweite Datensatz, \glqq NotInject\grqq, dient dazu, zu testen, wie stark ein
 Einträge so formuliert, dass sie wie ein Angriff klingen. Der Datensatz enthält 339 Einträge, in welche sogenannte Triggerwörter eingefügt wurden. Die Wörter
 werden häufig fälschlicherweise als Angriff klassifiziert. Ein Eintrag sieht wie folgt aus: \texttt{\detokenize{{"prompt": " ", "word_list": ["ignore"], "category": 
 "Technique Queries"}}}~\cite{sm35}. Alle Einträge werden in dieser Arbeit im Test-Abschnitt verwendet und als Nutzeranfragen behandelt, da sie keine externen Inhalte
-beinhalten und somit nicht für die Entwicklung des Ansatzes notwendig sind. \\
+beinhalten und nicht für die Entwicklung des Ansatzes notwendig sind. \\
 Beide Datensätze wurden in das Format des eigenen Datensatzes aus Abschnitt~\ref{subsec:datensatz} gebracht. Der Train-Abschnitt wurde mit dem Dev-Abschnitt 
 gleichgesetzt. Zu jedem Eintrag wurden vier Felder ergänzt: \texttt{input\_type}, \texttt{task}, \texttt{attack\_category} und \texttt{position}. \texttt{input\_type}
 gibt an, ob ein Eintrag aus einer externen Quelle stammt oder eine Nutzeranfrage ist. Mit \texttt{task} wird das Angriffsszenario definiert, etwa eine E-Mail oder
@@ -351,7 +343,7 @@ in welchem Bezug sie verwendet werden sollen. Für den Datensatz BIPIA werden zu
 
 \paragraph{Konfusionsmatrix}~\cite[75]{sm28}
 
-In dieser Matrix werden vier verschiedene Kennzahlen dargestellt: \\
+In dieser Matrix werden vier verschiedene Kennzahlen dargestellt:
 
 \begin{enumerate}
     \item True Positive (TP): Anzahl der als Angriff klassifizierten Einträge, die tatsächlich Angriffe sind
@@ -409,7 +401,7 @@ Gemessen wird die gesamte Dauer der Prüfung pro Text, angegeben wird der Median
   \label{eq:latency}
 \end{equation}
 
-wobei $t$ der Dauer der Prüfung des $i$-ten Eintrags nud $n$ der Anzahl der Einträge entspricht.
+wobei $t_i$ der Dauer der Prüfung des $i$-ten Eintrags und $n$ der Anzahl der Einträge entspricht.
 
 \section{Durchführung und Weiterentwicklung}
 
@@ -510,7 +502,7 @@ Auf Grundlage der in Abschnitt~\ref{subsec:original} erfassten Baseline wurde de
 die erlangten Erkenntnisse beschrieben. Dabei werden Änderungen beibehalten oder verworfen. Für alle Schritte wurden, wie bei dem finalen Ansatz
 aus Abschnitt~\ref{subsec:ueberarbeitung}, dieselben Parameter und das \ac{llm} Mistral Small~4 verwendet. Ausgangspunkt sind die Ergebnisse 
 des Dev-Abschnitts des Originalansatzes, der einen Recall~\eqref{eq:recall} von 80,6\,\% und eine \ac{fpr}~\eqref{eq:fpr} von 8,8\,\% erreichte. 
-Die einzelnen Schritte, die jeweils zuletzt erreichten Werte und die wesentlichen Änderungen sind in Tabelle~\ref{tab:entwicklung_ansatz} zusammengefasst.\\
+Die einzelnen Schritte, die jeweils zuletzt erreichten Werte und die wesentlichen Änderungen sind in Tabelle~\ref{tab:entwicklung_ansatz} zusammengefasst.
 
 \begin{enumerate}
     \item Rekonstruktion und Leitfragen
@@ -528,7 +520,7 @@ Die einzelnen Schritte, die jeweils zuletzt erreichten Werte und die wesentliche
 \label{tab:entwicklung_ansatz}
 \begin{tabularx}{\textwidth}{c l r r >{\raggedright\arraybackslash}X}
 \toprule
-\textbf{Schritt} & \textbf{Datensatz} & \textbf{Recall} & \textbf{\acs{fpr}} & \textbf{Wesentliche Änderungen} \\
+\textbf{Schritt} & \textbf{Datensatz} & \textbf{Recall} & \textbf{FPR} & \textbf{Wesentliche Änderungen} \\
 \midrule
 0 & \zl{Eigener} & \zr{80,6\,\%} & \zr{8,8\,\%} &
     \textbf{Originalansatz:} binäre Abfrage \\
@@ -556,7 +548,7 @@ Die einzelnen Schritte, die jeweils zuletzt erreichten Werte und die wesentliche
 Im ersten Schritt, \textbf{Rekonstruktion und Leitfragen}, wurde anhand der bei dem Originalansatz erkannten Schwächen bei der Erkennung von Verschleierungen ein 
 Ansatz implementiert, der den Prompt rekonstruieren soll. Dieser wurde um eine Mehrheitsentscheidung über die rekonstruierten Prompts und um Leitfragen erweitert. 
 Es wurde nur der eigene Datensatz verwendet. Auf dem Dev-Abschnitt wurde ein Recall~\eqref{eq:recall} von 90,6\,\% und eine \ac{fpr}~\eqref{eq:fpr} von 5,9\,\% erreicht. \\
-Dieser Ansatz wurde anschließend auf die öffentlichen Datensätze getestet. Auf dem Dev-Abschnitt erreichte er lediglich einen Recall~\eqref{eq:recall} von 43,5\,\% bei einer \ac{fpr}~\eqref{eq:fpr} von 16,5\,\%.
+Dieser Ansatz wurde anschließend auf den öffentlichen Datensätze getestet. Auf dem Dev-Abschnitt erreichte er lediglich einen Recall~\eqref{eq:recall} von 43,5\,\% bei einer \ac{fpr}~\eqref{eq:fpr} von 16,5\,\%.
 Dadurch konnte die Schwäche des Ansatzes festgestellt werden. Angriffe werden nur erkannt, wenn sie schädlich formuliert sind, jedoch ist dies im 
 BIPIA-Datensatz nicht der Fall, denn die Gefahr besteht darin, dass sich die Anweisungen in externen Inhalten befinden. \\
 Anhand der öffentlichen Datensätze wurde daher für externe Inhalte die \textbf{Strukturprüfung} entwickelt. Das \ac{llm} listete dabei alle Aufforderungen, 
@@ -573,14 +565,14 @@ verschlechterten. \\
 Nach diesem Schritt wurde festgestellt, dass der Ansatz noch nicht auf verschleierten externen Daten getestet wurde. Aus diesem Grund wurde ein Teil des 
 BIPIA-Datensatzes mit ausgewählten Transformationen verschleiert. Diese Verschleierung wird in Abschnitt~\ref{subsec:externerdatensatz} genauer erläutert. 
 Der Test mit diesem Datensatz ergab, dass der Recall~\eqref{eq:recall} auf 75,0\,\% sank, bei einer gleichbleibenden \ac{fpr}~\eqref{eq:fpr} von 4,3\,\%. Interpretiert wurde dieses Ergebnis als Überanpassung des Ansatzes an die
-vorliegenden Datensätze. Als Reaktion darauf wurde eine \textbf{Vereinheitlichung des Ansatzes} entwickelt. Dabei wurde die Rekonstruktion 
-wieder aufgenommen, um auch verschleierte Inhalte in externen Daten erfassen zu können. Auch die Leitfragen wurden auf diese rekonstruierten Versionen angewendet. 
+vorliegenden Datensätze. 
+Als Reaktion darauf wurde eine \textbf{Vereinheitlichung des Ansatzes} entwickelt. Dabei wurde die Rekonstruktion bei externen Inhalten
+vollständig übernommen, um auch verschleierte Inhalte in externen Daten erfassen zu können. Auch die Leitfragen wurden auf jede dieser rekonstruierten Versionen angewendet. 
 Der Recall~\eqref{eq:recall} stieg bei den externen Inhalten auf 88,5\,\% und in der verschleierten Version auf 87,5\,\%. Es stieg zwar zusätzlich die \ac{fpr}~\eqref{eq:fpr} auf 15,1\,\% 
 beziehungsweise 13,7\,\%, dieser Anstieg wurde jedoch in Kauf genommen, da auf diese Weise ein einheitlicher Ansatz entstand. \\
-Dieser Ansatz enthielt keine allgemeine Frage nach einem Prompt-Injection-Angriff. Sie wurde bei der Formprüfung für einfach Nutzeranfragen wieder eingeführt, womit
-die Werte 87,5\,\% Recall~\eqref{eq:recall} bei 3,5\,\% \ac{fpr}~\eqref{eq:fpr} auf dem Dev-Abschnitt des eigenen Datensatzes erreicht wurden. Bei extertenen Inhalten
-wird sie nicht angewendet, da Code und Tabellen durch ihr ungewöhnliches Format vor allem Fehlalarme auslösten. Dieser Ansatz wurde als Endversion festgelegt.
-
+Bei einfachen Nutzeranfragen wird zusätzlich die Formprüfung mit der Frage, ob ein Prompt-Injection-Angriff vorliegt, beibehalten.
+Damit wurden auf dem Dev-Abschnitt des eigenen Datensatzes 87,5\,\% Recall~\eqref{eq:recall} bei 3,5\,\% \ac{fpr}~\eqref{eq:fpr} erreicht. Bei externen Inhalten
+wird die Formprüfung nicht angewendet, da Code und Tabellen durch ihr ungewöhnliches Format vor allem Fehlalarme auslösten. Dieser Ansatz wurde als Endversion festgelegt.
 
 \subsection{Überarbeitung des Ansatzes und erneute Durchführung}\label{subsec:ueberarbeitung} 
 
@@ -641,7 +633,7 @@ führt das \ac{owasp}-Merkblatt zur Prävention von Prompt Injection aus dem Jah
 als häufige Angriffstechniken auf~\cite{sm42}. Auch die Verwendung von Unicode wird dort aufgezählt. \\
 Mit der Bereinigung wurde absichtlich nicht jede Transformation aus dem eigenen Datensatz rückgängig gemacht, da der Ansatz nicht zu sehr auf diesen Datensatz
 zugeschnitten werden soll. Aus diesem Grund wurde auch auf den öffentlichen Datensätzen getestet und häufig vorkommende Techniken implementiert, die eine
-erste Rekonstruktion ermöglichen. \medskip
+erste Rekonstruktion ermöglichen.\par\medskip
 In der zweiten Stufe wird für jede der Versionen jeweils eine Anfrage mit sechs Leitfragen gestellt, durch welche die Absicht des Prompts eingeschätzt werden
 soll. So wird neben der äußeren Erscheinung eines Prompts auch die Absicht bewertet. F0 klärt, ob es sich um eine Verständnisfrage handelt. F1 bis F5
 fragen, ob der Prompt auf eines der folgenden Ziele abzielt:
@@ -650,7 +642,7 @@ fragen, ob der Prompt auf eines der folgenden Ziele abzielt:
     \item \textbf{F1:} Umgehen der Regeln, Vorgaben oder Rolle des Assistenten,
     \item \textbf{F2:} Offenlegen interner Informationen wie Systemvorgaben, Zugangsdaten oder des Gesprächsverlaufs,
     \item \textbf{F3:} Übermitteln von Daten an ein externes Ziel, das der Nutzer nicht selbst angegeben hat, wie es dem in Kapitel~\ref{ch:methodik} untersuchten Szenario entspricht,
-    \item \textbf{F4:} in eingebetteten Inhalten wie E-Mails oder Webseiten versteckte Anweisungen, also indirekte Prompt Injection,
+    \item \textbf{F4:} In eingebetteten Inhalten wie E-Mails oder Webseiten versteckte Anweisungen, also indirekte Prompt Injection,
     \item \textbf{F5:} Täuschen des Nutzers, etwa durch Verschweigen von Informationen oder das ungefragte Einfügen von Links.
 \end{itemize}
 Die dritte Stufe unterscheidet zwischen Nutzeranfragen und externen Inhalten. Bei einer Nutzeranfrage werden die drei Versionen aus der ersten Stufe an den 
@@ -659,7 +651,7 @@ zusammengefasst, sodass die Bewertung dieser Versionen nur einmal vorliegt. Dadu
 nicht mehrfach beeinflussen. \\
 Bei externen Inhalten wird zuerst jede Zeile nummeriert. Auf jede dieser Zeilen wird statt der allgemeinen Frage nach einem Prompt-Injection-Angriff gefragt, an
 wen sich die Zeile richtet und ob sie zum übrigen Inhalt passt. Dabei werden nur V0 und V1 verwendet, weil durch die Rechtschreibkorrektur Wörter möglicherweise falsch korrigiert
-werden. Der eigentliche Inhalt könnte verschleiert werden oder ein Angriff als ungefährlich erscheinen. Somit werden hier nur zwei Anfragen gestellt. \medskip
+werden. Der eigentliche Inhalt könnte verschleiert werden oder ein Angriff als ungefährlich erscheinen. Somit werden hier nur zwei Anfragen gestellt.\par\medskip
 In der vierten Stufe wird ebenfalls zwischen den Arten der Inhalte unterschieden. Bei einer Nutzeranfrage werden zwei Regeln mit einem logischen ODER verknüpft.
 Die erste Regel ist die Mehrheitsentscheidung der Formprüfung aus Stufe 3, mit der gemessen wird, ob der Anteil der JA-Antworten über alle Versionen größer als 
 der Schwellwert \(\gamma = 0{,}5\) ist. Wenn dies zutrifft, gilt die Anfrage als auffällig. Die zweite Regel prüft, ob die erste Leitfrage F0 mit NEIN 
@@ -711,7 +703,7 @@ für den eigenen Datensatz und den verschleierten
 BIPIA-Datensatz die Erkennungsraten bei den verschiedenen Verschleierungen. Der Recall~\eqref{eq:recall} je Aufgabe und Position zeigt für den BIPIA-Datensatz, welche Auswirkungen 
 die Art des externen Inhalts (E-Mail, Tabelle, Code) und die Position des Angriffs (Anfang, Mitte, Ende) haben. Einen zusätzlichen Überblick liefert die Messung
 der \ac{fpr}~\eqref{eq:fpr} je Harmlosigkeitsstufe, mit der erfasst wird, welche Arten harmloser Anfragen Fehlalarme auslösen. Mit der Konfusionsmatrix werden zusätzlich die 
-korrekten und falschen Klassifikationen gegenübergestellt, womit die Datensätze und Ansätze miteinander verglichen werden können. \\
+korrekten und falschen Klassifikationen gegenübergestellt, womit die Datensätze und Ansätze miteinander verglichen werden können.
 
 \section{Grenzen der Schutzmaßnahme}\label{sec:grenzen_massnahme}
 
@@ -741,5 +733,5 @@ verwendet. Es lässt sich daher nicht sagen, ob andere Modelle eine andere Erken
 Entscheidung durch die Integration verschlechtert werden könnte. \\
 Weiterhin sind alle Datensätze fest vorgegeben. Ein realer Angreifer, der seine Angriffe so lange variiert, bis er eine Schwachstelle findet, wird somit nicht 
 abgebildet. Zudem wird nur gemessen, ob ein Angriff erkannt wird, nicht aber, ob das Hauptmodell ihn trotzdem ausführen würde. Die wichtigste Grenze ist
-abschließend, dass die Schutzmaßnahme nicht an einem realen System getestet wurde. Sie wurde weder in den Chatbot integriert, noch wurden die Angriffe erneut
-ausgeführt. Somit ist die Wirksamkeit nur in einer Testumgebung belegt und die Auswirkung auf das untersuchte System nicht erfasst.
+abschließend, dass die Schutzmaßnahme nicht an einem realen System getestet wurde. Sie wurde nicht in den Chatbot integriert. 
+Somit ist die Wirksamkeit nur in einer Testumgebung belegt und die Auswirkung auf das untersuchte System nicht erfasst.

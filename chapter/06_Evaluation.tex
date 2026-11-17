@@ -9,8 +9,8 @@ Für die theoretische Auswertung werden die acht in Abschnitt~\ref{sec:results} 
 und der verschleierte BIPIA-Datensatz mit 350 Einträgen (200 Angriffe, 150 harmlose Einträge) verwendet. Auf allen Datensätzen wurden der Originalansatz (Abschnitt~\ref{subsec:original})
 und der weiterentwickelte Ansatz (Abschnitt~\ref{subsec:ueberarbeitung}) mit Mistral Small 4 durchgeführt. Zusätzlich wurden der eigene Datensatz und der Datensatz aus BIPIA
 und NotInject mit Mistral Large 4 klassifiziert, welches das Haupt-\ac{llm} dieser Arbeit ist und eine Gegenüberstellung der Ergebnisse ermöglicht. \\
-Für die in den Durchläufen entstandenen Ergebnisse wurden die in Abschnitt~\ref{subsec:metrics} aufgelisteten Metriken berechnet. Relevant für die Auswertung sind
-der Recall~\eqref{eq:recall} und die \ac{fpr}~\eqref{eq:fpr}. \\
+Für die in den Durchläufen entstandenen Ergebnisse wurden die in Abschnitt~\ref{subsec:metrics} aufgelisteten Metriken berechnet. Besonders relevant für die Auswertung sind
+der Recall~\eqref{eq:recall} und die \ac{fpr}~\eqref{eq:fpr}.
 
 \section{Ergebnisse der Klassifikation}
 
@@ -260,7 +260,7 @@ auf dem eigenen Datensatz 0,6\,s und auf dem Datensatz aus BIPIA und NotInject 1
 Beim weiterentwickelten Ansatz steigt die Latenz~\eqref{eq:latency} deutlich an und unterscheidet sich
 danach, ob es sich um eine einfache Nutzeranfrage oder externen Inhalt handelt. Bei einfachen Nutzeranfragen liegt die Latenz~\eqref{eq:latency} zwischen 2,7\,s (NotInject) 
 und 3,4\,s (eigener Datensatz). Bei externen Inhalten liegt sie zwischen 5,1\,s (BIPIA) und 6,2\,s (BIPIA, verschleiert). Die Latenz steigt bei dem weiterentwickelten Ansatz
-somit um etwa 3 bis 6\,s an. \\
+somit um etwa 3 bis 6\,s an.
 
 \section{Praktische Einschätzung}
 

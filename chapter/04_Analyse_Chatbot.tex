@@ -13,7 +13,7 @@ Die Architektur setzt sich aus sieben Komponenten zusammen:
 
 \begin{enumerate}
     \item \textbf{\gls{frontend}:} Stellt die Chat-Oberfläche bereit und nimmt die Nutzereingaben entgegen. Die Authentifizierung der Nutzer erfolgt über Firebase Authentication. Im Energy-Bot-Modus leitet das \gls{frontend} Anfragen an das \gls{backend} weiter, im Normal-Modus kommuniziert der \gls{frontend}-Server direkt mit dem \ac{llm}-Provider.
-    \item \textbf{\gls{backend}:} Verarbeitet die \ac{rag}-Anfragen und steuert den Datei-Upload sowie die Entgegennahme von Nutzer-Feedback.
+    \item \textbf{\gls{backend}:} Verarbeitet die Anfragen und steuert den Datei-Upload sowie die Entgegennahme von Nutzer-Feedback.
     \item \textbf{\gls{vektordatenbank}{ }(\gls{qdrant}):} Speichert die Embeddings zusammen mit einem Payload (Chunk-Text und Metadaten) und führt die Similarity Search aus.
     \item \textbf{\gls{objectstorage}:} Legt die Originaldokumente (z.\,B. PDFs und Markdown-Dateien) ab. Über Verlinkungen in den Quellenangaben können Nutzer das Dokument direkt aus dem Chat im Browser öffnen, und zwar an der passenden Seite.
     \item \textbf{\gls{nutzerdatenbank}{ }(Firestore):}  Speichert Nutzer-Metadaten und die Chatverläufe pro Nutzer verschlüsselt, erfasst Nutzungsstatistiken und speichert das Nutzer-Feedback.
@@ -39,7 +39,7 @@ Beim Normal-Modus sendet das \gls{frontend} eine Anfrage direkt an den \ac{llm}-
 und der Server Daten in Echtzeit senden kann. Dadurch ist es nicht notwendig, dass der \ac{llm}-Provider die Daten erst nach der vollständigen Generierung 
 zurücksendet. Stattdessen erhält das \gls{frontend} Token für Token die Antwort und zeigt diese dem Nutzer an~\cite{an18}. \\
 Im Gegensatz dazu wird beim Energy-Bot-Modus eine Anfrage vom \gls{frontend} an das \gls{backend} gesendet. Das \gls{backend} führt eine Similarity Search
-in \gls{qdrant} durch und sendet eine vorgegebene Anzahl an Chunks zurück. In diesen Chunks sind Verweise auf die Originaldokumente, sodass später Links zu 
+in \gls{qdrant} durch und sendet eine vorgegebene Anzahl an Chunks zurück. In diesen Chunks sind Verweise auf die Originaldokumente enthalten, sodass später Links zu 
 den genutzten Dokumenten als Quellen mitgegeben werden können. Mithilfe dieser Chunks wird eine Anfrage vom \gls{backend} an den \ac{llm}-Provider
 gesendet. Auch diese Anfrage wird mit \ac{sse} gestreamt. Diese gestreamte Antwort wird zurück an das \gls{frontend} gesendet und anschließend Token für Token
 dem Nutzer angezeigt. \\
@@ -49,7 +49,7 @@ ein eigenes \gls{frontend} und \gls{backend} auf Cloud Run sowie eine \gls{qdran
 Die Unterteilung in zwei Projekte erfüllt den Zweck, Kunden für eine beschränkte Zeit eine Demoversion zur Verfügung zu stellen, ohne dass sie Zugriff auf 
 die internen Dokumente haben. Den Kunden soll dadurch ein erster Eindruck ermöglicht werden, wie mit den Dokumenten gearbeitet wird. 
 Somit liegt der wesentliche Unterschied zwischen den beiden Instanzen im Datenbestand. Die interne \gls{qdrant}-Instanz enthält sowohl die interne als auch
-die öffentliche Sammlung, wogegen die externe Instanz nur die öffentliche Sammlung beinhaltet. \\
+die öffentliche Sammlung, wogegen die externe Instanz nur die öffentliche Sammlung beinhaltet.
 
 \begin{figure}[h]
 \centering
@@ -72,7 +72,7 @@ die ebenfalls lokal gehostet wird. \\
 Als Modell für die Testumgebung wurde das Modell Mistral Large 4 mit einer Temperatur von 0,7 ausgewählt. Die Bedeutung der Temperatur wird in 
 Abschnitt~\ref{subsec:steuerungllm} näher erläutert. \\
 Es soll die Frage geklärt werden, welche Schwachstellen im System durch diese Angriffe festgestellt werden können. Die identifizierten Schwachstellen sollen anschließend 
-als Grundlage für die Auswahl und Implementierung geeigneter Schutzmaßnahmen dienen.
+als Grundlage für die Auswahl und Implementierung einer geeigneten Schutzmaßnahme dienen.
 
 \section{Aufbau der Testumgebung}\label{sec:einrichtung}
 
@@ -105,7 +105,7 @@ Abschließend war der Chatbot lokal erreichbar (Abbildung~\ref{fig:chatbot_login
 Für den Aufbau der Testumgebung musste die ursprüngliche Version des Chatbots um die Fähigkeit erweitert werden, Aktionen außerhalb des Chats durchzuführen (Tool Calls), 
 beispielsweise das Ausfüllen von Formularen auf Webseiten oder der Zugriff auf externe Quellen. Diese Aktionen waren notwendig, um das in 
 Abschnitt~\ref{sec:untersuchungsziel} beschriebene Angriffsszenario, die Übermittlung des Chatverlaufs an eine externe Webseite, zu ermöglichen. Dabei entscheidet 
-das \ac{llm} eigenständig, welche Tools es aufruft, um eine Nutzeranfrage auszuführen. \\
+das \ac{llm} eigenständig, welche Tools es aufruft, um eine Nutzeranfrage auszuführen.
 
 \paragraph{Änderungen am System}
 
@@ -162,8 +162,8 @@ Als Ziel der Angriffe dient eine bewusst einfach gehaltene Webseite, die mit dem
 ist. Sie enthält ein Formularelement mit einem mehrzeiligen Textfeld, das mit dem Label \enquote{JSON} beschriftet ist, und einen Absende-Button. Der Server kann 
 sowohl POST- als auch GET-Anfragen verarbeiten. Im Fall von POST wird der mitgesendete Text ausgelesen, im Fall von GET wird geprüft, ob sich der 
 Text in der \ac{url} befindet. Der Text wird in der Konsole ausgegeben. Jeder Zugriff wird mit dem Zeitpunkt und der Anfrageart protokolliert. Dadurch ist 
-es nachvollziehbar, ob bei einem Tool Call die Webseite erreicht wurde, welche Anfrage veranlasst wurde und welcher Inhalt übermittelt wurde. Der Quellcode 
-wird in einem ergänzenden Dokument zu dieser Arbeit bereitgestellt.
+es nachvollziehbar, ob bei einem Tool Call die Webseite erreicht wurde, welche Anfrage veranlasst wurde und welcher Inhalt übermittelt wurde. 
+Der Quellcode befindet sich im Anhang~\ref{sec:anhang_webseite}.
 
 \section{Durchführung der ausgewählten Prompt-Injection-Angriffe}\label{sec:durchfuehrung}
 
@@ -171,7 +171,7 @@ In diesem Abschnitt werden die in Kapitel~\ref{ch:promptinjection} vorgestellten
 Bei den meisten Angriffen wurden vor der schädlichen Anfrage zunächst weitere Nutzeranfragen an den Chatbot gesendet. Damit wurde sichergestellt,
 dass der vollständige Chatverlauf übertragen wird, da der Chatverlauf ansonsten nur aus einer Nachricht besteht und nicht festzustellen ist, ob nur diese Nachricht oder
 der gesamte Verlauf gesendet wird. Zusätzlich ließ sich mögliches Fehlverhalten ausschließen, beispielsweise durch die Kombination von Tool Calls 
-und Suchen in der Wissensdatenbank. Die vollständigen Chatverläufe liegen der Arbeit in digitaler Form bei. \\
+und Suchen in der Wissensdatenbank. Die vollständigen Chatverläufe liegen der Arbeit in digitaler Form bei.
 
 \subsection{E-Mail Injection}
 
@@ -395,7 +395,7 @@ Beide Versuche weichen von der in Kapitel~\ref{ch:promptinjection} beschriebenen
 schädliche Anweisung separat mitgesendet. Daher müssen diese Versuche als direkte Prompt Injection gewertet werden 
 und werden bei der Bewertung der indirekten Angriffe nicht berücksichtigt. \\
 Im ersten Versuch wurde der Chatverlauf direkt übermittelt. Im zweiten Versuch war der Chatbot zur Übermittlung bereit, die POST-Anfrage wurde jedoch nicht korrekt 
-ausgeführt. Der Misserfolg der drei abgewandelten 
+ausgeführt. Auch der Misserfolg der drei abgewandelten 
 Folgefragen ist somit auf einen technischen Fehler und nicht auf eine Weigerung des Modells zurückzuführen.
 
 \paragraph{Website Injection}

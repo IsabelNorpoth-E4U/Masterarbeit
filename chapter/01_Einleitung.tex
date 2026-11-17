@@ -3,7 +3,7 @@
 
 \section{Problemstellung und Motivation}
 
-\acfp{llm} finden in der Praxis und insbesondere in Unternehmen zunehmend Anwendung. Diese Entwicklung lässt sich in zahlreichen Statistiken der vergangenen 
+\acp{llm} finden in der Praxis und insbesondere in Unternehmen zunehmend Anwendung. Diese Entwicklung lässt sich in zahlreichen Statistiken der vergangenen 
 Jahre verfolgen. So stellt das Statistische Bundesamt fest, dass der Anteil der Unternehmen, die \ac{ki} einsetzen, im Zeitraum von 2021 bis 2025 von 
 11\,\% auf 26\,\% gestiegen ist. Dabei ist zu beachten, dass Unternehmen aller Größenklassen in diese Statistik einbezogen wurden, auch solche mit 10 bis 
 49 Beschäftigten. Bei Unternehmen mit 250 und mehr Beschäftigten stieg der Anteil im selben Zeitraum von 31\,\% auf 57\,\%~\cite{e01}. \\
@@ -34,8 +34,8 @@ Es gibt jedoch Belege dafür, dass diese Maßnahmen nicht ausreichend wirksam si
 Schutzmechanismen zu umgehen. \\
 Ein bekanntes Beispiel aus dem Jahr 2025 ist die Schwachstelle \glqq EchoLeak\grqq, welche Microsoft 365 Copilot betraf. Dabei hätte es Angreifern gelingen können, 
 mithilfe einer in einer E-Mail
-versteckten Anweisung sensible Unternehmensdaten zu exfiltrieren und an einen eigenen Server zu übermitteln~\cite{e07}. Für diesen Angriff wäre keine Interaktion des
-Nutzers erforderlich gewesen, da er allein durch die E-Mail ausgelöst worden wäre. EchoLeak stellt damit ein praxisnahes Beispiel für eine indirekte Prompt Injection
+versteckten Anweisung sensible Unternehmensdaten zu exfiltrieren und an einen eigenen Server zu übermitteln~\cite{e07}. Für diesen Angriff wäre keine Interaktion mit dem
+Nutzer erforderlich gewesen, da er allein durch die E-Mail ausgelöst worden wäre. EchoLeak stellt damit ein praxisnahes Beispiel für eine indirekte Prompt Injection
 dar~\cite{e06}. Durch die frühzeitige Feststellung der Schwachstelle konnte diese vor einer Ausnutzung durch einen Angreifer behoben werden. \\
 Einige der berücksichtigten Arbeiten behandeln nicht ausschließlich indirekte Prompt-Injection-Angriffe, sondern auch teilweise Jailbreaks. Der Unterschied
 besteht darin, dass sich Prompt Injection gegen Anwendungen richtet, die auf einem \ac{llm} aufbauen und bei denen nicht vertrauenswürdige Anweisungen mit einem 
@@ -52,7 +52,7 @@ Ziel dieser Arbeit ist es, zu untersuchen, inwieweit der unternehmensinterne Cha
 Schutzmaßnahme vor indirekten Prompt-Injection-Angriffen abgesichert werden kann. \\
 Als Vorstufe wird eine Schwachstellenanalyse durchgeführt, um die Angriffsfläche zu identifizieren. Hierfür wird eine lokale Testumgebung aufgebaut. \\
 Auf Grundlage der identifizierten Schwachstellen wird eine Schutzmaßnahme entwickelt und implementiert. Die Entwicklung erfolgt anhand eines selbst erstellten 
-Datensatzes und wird anhand der zwei öffentlichen Datensätze BIPIA und NotInject überprüft. Die Leistungsfähigkeit wird mithilfe geeigneter Metriken festgehalten. \\
+Datensatzes und wird mit den zwei öffentlichen Datensätzen BIPIA und NotInject überprüft. Die Leistungsfähigkeit wird mithilfe geeigneter Metriken festgehalten. \\
 Die Ergebnisse sollen einen direkten Vergleich zwischen einem einfachen vorgeschalteten \ac{llm}-Klassifikator, der jede Eingabe lediglich mit einer einzelnen Anfrage 
 bewertet, und einer weiterentwickelten Schutzmaßnahme ermöglichen. Die Schutzmaßnahme soll sowohl für den unternehmensinternen Chatbot der Energy4U GmbH einsetzbar als 
 auch auf andere praxisrelevante Chatbots übertragbar sein.
@@ -84,11 +84,11 @@ Den Abschluss des Kapitels bildet die Betrachtung unternehmensinterner Chatbots 
 Kapitel~\ref{ch:promptinjection} behandelt das zentrale Thema der Arbeit. Prompt-Injection-Angriffe werden definiert und in direkte und indirekte Angriffe kategorisiert.
 Für beide Kategorien werden aktuelle Angriffe vorgestellt und erläutert. Ergänzend wird die Bedeutung dieser Angriffe für Unternehmen behandelt und anhand
 praxisnaher Beispiele veranschaulicht. \\
-Kapitel~\ref{ch:methodik} behandelt die Grundlage des praktischen Teils. Es werden das Testsystem, der Chatbot, und die Testumgebung beschrieben und die durchgeführten Angriffe 
+Kapitel~\ref{ch:methodik} behandelt die Grundlage des praktischen Teils. Es werden das Testsystem, der Chatbot und die Testumgebung beschrieben und die durchgeführten Angriffe 
 sowie die Ergebnisse dokumentiert. Aus diesen werden Schwachstellen des Chatbots abgeleitet. \\
 In Kapitel~\ref{ch:schutzmassnahmen} wird der Hauptteil der Arbeit behandelt. Anhand einer zuvor dokumentierten Übersicht aktueller Schutzmaßnahmen wird ein 
 eigenes Konzept entwickelt. Diese Schutzmaßnahme wird implementiert und mit den in der Zielsetzung genannten Datensätzen getestet. \\
 Kapitel~\ref{ch:evaluation} bewertet die Ergebnisse und analysiert, aus welchen Gründen die Schutzmaßnahme erfolgreich oder nicht
 erfolgreich war. Zudem werden die Grenzen der Arbeit aufgezeigt. \\
-Kapitel~\ref{ch:fazit} beantwortet die Forschungsfragen, gibt eine Handlungsempfehlung auf Grundlage der zusammengetragenen Ergebnisse, woraus ein Ausblick definiert wird, 
+Kapitel~\ref{ch:fazit} beantwortet die Forschungsfragen und gibt eine Handlungsempfehlung auf Grundlage der zusammengetragenen Ergebnisse, woraus ein Ausblick definiert wird, 
 wie zukünftige Forschung bestehende Lücken schließen kann.

@@ -45,7 +45,7 @@ dafür eine Berechtigung erhalten zu haben. Viele Unternehmen verlieren dadurch 
 \subsection{Direkte Angriffe}
 
 Die einfachste Form direkter Prompt-Injection-Angriffe ist die Direct Instruction Override, also die direkte Anweisungsüberschreibung~\cite{pi12}.
-Sie wird durch eine einfache Anweisung ausgelöst, mit der alle vorherigen Anweisungen für ungültig erklärt werden sollen. Bereits \citeauthor{pi9}
+Sie wird durch eine einfache Anweisung ausgelöst, mit der alle vorherigen Anweisungen für ungültig erklärt werden sollen. Bereits \textcite{pi9}
 zeigen in ihrer Arbeit, dass die Formulierung $\glqq$ignore previous instructions$\grqq$ genügt, um vorherige Anweisungen zu überschreiben und das Verhalten
 des \ac{llm} entsprechend zu manipulieren~\cite[3\psq]{pi9}. \\
 Ebenfalls häufig anzutreffen ist die sogenannte Role Manipulation, auch als DAN-Jailbreak bezeichnet~\cite{pi13}. Dabei wird versucht, das Sprachmodell davon zu
@@ -69,7 +69,7 @@ Integrity (Integrität) und Availability (Verfügbarkeit) steht~\cite{pi23}. \\
 Diese Form des indirekten Prompt-Injection-Angriffs tritt am häufigsten in Agentensystemen auf, sobald eine Interaktion mit externen Daten erfolgt. Sie geht dabei nicht
 vom Endnutzer, sondern von einem Dritten aus und verfolgt das Ziel, ein System zu kompromittieren oder sensible Daten dieses Systems zu exfiltrieren~\cite[2\psq]{pi3}. \\
 Da sich die in der Literatur beschriebenen Angriffe je nach Quelle in Bezeichnung und anderen Aspekten unterscheiden, wird sich diese Arbeit auf sieben Angriffsarten 
-beschränken: \\
+beschränken:
 
 
 \begin{enumerate}
@@ -132,7 +132,7 @@ und verschiebt die darin enthaltenen sensiblen Daten in ein öffentliches Reposi
 Dass durch Prompt-Injection-Angriffe ein großer Schaden für Unternehmen entstehen kann, zeigt ein Vorfall im Dezember 2023. Ein Nutzer kompromittierte einen 
 \ac{llm}-basierten Chatbot eines Autohändlers aus den USA. Er wies den Chatbot an, allen Anweisungen des Nutzers zuzustimmen und mit rechtlich verbindlichen Angeboten 
 zu antworten~\cite{pi32}. Daraufhin wurde für den Verkauf eines Neuwagens der Preis von einem US-Dollar verhandelt~\cite{pi33}. Der Chatbot konnte ausschließlich 
-mit Text kommunizieren und war nicht in der Lage, Aktionen wie Transaktionen auszuführen~\cite{pi32}. An diesem Beispiel wird deutlich, welche 
+mit Text kommunizieren und war nicht in der Lage, Aktionen wie Transaktionen auszuführen~\cite{pi32}. An diesem Beispiel wird jedoch deutlich, welche 
 Gefahr solche Angriffe für das Ansehen und die Finanzen eines Unternehmens darstellen können.
 
 \subsection{Zusammenfassung der Auswirkungen}

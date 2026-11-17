@@ -1842,7 +1842,7 @@ This work has neither been previously submitted to another authority nor has it 
 {Hiermit erkläre ich, dass ich die vorliegende Arbeit selbstständig und nur unter Verwendung der angegebenen Quellen und Hilfsmittel angefertigt habe.\par
 Sämtliche Stellen der Arbeit, die im Wortlaut oder dem Sinn nach Publikationen oder Vorträgen anderer Autoren entnommen sind, habe ich als solche kenntlich gemacht.\par
 Diese Arbeit wurde in gleicher oder ähnlicher Form noch keiner anderen Prüfungsbehörde vorgelegt oder anderweitig veröffentlicht.\par
-Zur Unterstützung der sprachlichen Überarbeitung wurde die KI-gestützte Anwendung ChatGPT (OpenAI) eingesetzt. Die inhaltliche Analyse, wissenschaftliche Bewertung, Interpretation der Ergebnisse sowie die Entwicklung des Forschungsdesigns und des Konzepts erfolgten eigenständig durch die Verfasserin. Die Verantwortung für sämtliche Inhalte der Arbeit liegt ausschließlich bei der Verfasserin. Die Dokumentation befindet sich in Anhang D. \par }
+Zur Unterstützung der sprachlichen Überarbeitung wurde die KI-gestützte Anwendung ChatGPT (OpenAI) eingesetzt. Die inhaltliche Analyse, wissenschaftliche Bewertung, Interpretation der Ergebnisse sowie die Entwicklung des Forschungsdesigns und des Konzepts erfolgten eigenständig durch die Verfasserin. Die Verantwortung für sämtliche Inhalte der Arbeit liegt ausschließlich bei der Verfasserin. Die Dokumentation befindet sich in Anhang C. \par }
 \SetMultiLanguageLabel{statementAuthorshipMultiplePaper}
 {We do hereby declare that we have composed the presented work independently on our own and without any other resources than the ones given.\par
 All thoughts taken directly or indirectly from external sources are correctly acknowledged.\par
@@ -1850,7 +1850,7 @@ This work has neither been previously submitted to another authority nor has it 
 {Hiermit erklären wir, dass wir die vorliegende Arbeit selbstständig und nur unter Verwendung der angegebenen Quellen und Hilfsmittel angefertigt haben.\par
 Sämtliche Stellen der Arbeit, die im Wortlaut oder dem Sinn nach Publikationen oder Vorträgen anderer Autoren entnommen sind, haben wir als solche kenntlich gemacht.\par
 Diese Arbeit wurde in gleicher oder ähnlicher Form noch keiner anderen Prüfungsbehörde vorgelegt oder anderweitig veröffentlicht.\par
-Zur Unterstützung der sprachlichen Überarbeitung wurde die KI-gestützte Anwendung ChatGPT (OpenAI) eingesetzt. Die inhaltliche Analyse, wissenschaftliche Bewertung, Interpretation der Ergebnisse sowie die Entwicklung des Forschungsdesigns und des Konzepts erfolgten eigenständig durch die Verfasserin. Die Verantwortung für sämtliche Inhalte der Arbeit liegt ausschließlich bei der Verfasserin. Die Dokumentation befindet sich in Anhang D. \par } 
+Zur Unterstützung der sprachlichen Überarbeitung wurde die KI-gestützte Anwendung ChatGPT (OpenAI) eingesetzt. Die inhaltliche Analyse, wissenschaftliche Bewertung, Interpretation der Ergebnisse sowie die Entwicklung des Forschungsdesigns und des Konzepts erfolgten eigenständig durch die Verfasserin. Die Verantwortung für sämtliche Inhalte der Arbeit liegt ausschließlich bei der Verfasserin. Die Dokumentation befindet sich in Anhang C. \par } 
 \SetMultiLanguageLabel{statementAuthorshipSingleOath}
 {I -- {\@author} -- do hereby declare in lieu of an oath that I have composed the presented work independently on my own and without any other resources than the ones given.\par
 All thoughts taken directly or indirectly from external sources are correctly acknowledged.\par
@@ -1858,7 +1858,7 @@ This work has neither been previously submitted to another authority nor has it 
 {Hiermit versichere ich -- {\@author} -- an Eides statt, dass ich die vorliegende Arbeit selbstständig und nur unter Verwendung der angegebenen Quellen und Hilfsmittel angefertigt habe.\par
 Sämtliche Stellen der Arbeit, die im Wortlaut oder dem Sinn nach Publikationen oder Vorträgen anderer Autoren entnommen sind, habe ich als solche kenntlich gemacht.\par
 Diese Arbeit wurde in gleicher oder ähnlicher Form noch keiner anderen Prüfungsbehörde vorgelegt oder anderweitig veröffentlicht.\par
-Zur Unterstützung der sprachlichen Überarbeitung wurde die KI-gestützte Anwendung ChatGPT (OpenAI) eingesetzt. Die inhaltliche Analyse, wissenschaftliche Bewertung, Interpretation der Ergebnisse sowie die Entwicklung des Forschungsdesigns und des Konzepts erfolgten eigenständig durch die Verfasserin. Die Verantwortung für sämtliche Inhalte der Arbeit liegt ausschließlich bei der Verfasserin. Die Dokumentation befindet sich in Anhang D. \par }
+Zur Unterstützung der sprachlichen Überarbeitung wurde die KI-gestützte Anwendung ChatGPT (OpenAI) eingesetzt. Die inhaltliche Analyse, wissenschaftliche Bewertung, Interpretation der Ergebnisse sowie die Entwicklung des Forschungsdesigns und des Konzepts erfolgten eigenständig durch die Verfasserin. Die Verantwortung für sämtliche Inhalte der Arbeit liegt ausschließlich bei der Verfasserin. Die Dokumentation befindet sich in Anhang C. \par }
 \SetMultiLanguageLabel{statementAuthorshipMultipleOath}
 {We -- {\def\and{, }\@author} -- do hereby declare in lieu of an oath that we have composed the presented work independently on our own and without any other resources than the ones given.\par
 All thoughts taken directly or indirectly from external sources are correctly acknowledged.\par

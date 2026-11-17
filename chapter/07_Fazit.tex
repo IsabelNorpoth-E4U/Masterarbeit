@@ -32,7 +32,7 @@ sensible Daten, verarbeitete nicht vertrauenswürdige Inhalte und konnte extern 
 
 \paragraph{Teilforschungsfrage 2: Wie zuverlässig ist ein vorgeschaltetes LLM bei der Abwehr von Prompt-Injection-Angriffen?}
 
-Bei der Verhinderung von Prompt-Injection-Angriffen ist ein vorgeschaltetes \ac{llm} je nach Ausgestaltung nur eingeschränkt hilfreich. Bei einer einfachen binären
+Bei der Verhinderung von Prompt-Injection-Angriffen ist ein vorgeschaltetes \ac{llm} je nach Nutzeranfrage nur eingeschränkt hilfreich. Bei einer einfachen binären
 Abfrage mit Mistral Small 4 wurden auf dem eigenen Datensatz 73,1\,\% der Angriffe abgewehrt. Auf dem kombinierten Datensatz aus BIPIA und NotInject lag
 dieser Wert bei 34,0\,\% und auf dem verschleierten BIPIA-Datensatz bei 43,0\,\%. Bei der Verwendung von Mistral Large 4 wurden hingegen nur 41,6\,\% der Angriffe im
 eigenen Datensatz und 24,5\,\% im Datensatz aus BIPIA und NotInject erkannt. Diese Werte wurden in Kombination mit einer \ac{fpr}~\eqref{eq:fpr} von 0,0\,\% bzw. 1,2\,\% erreicht. \\
@@ -105,7 +105,7 @@ auf die der Zugriff des \ac{llm} beschränkt wird.
 
 \paragraph{Menschliche Kontrolle des Datenabflusses}
 
-Eine der ausschlaggebendsten Schwachstellen besteht darin, dass ein Angreifer auf eine Zielwebseite zugreifen und Daten an diese übermitteln konnte, ohne dass der Nutzer dies
+Eine der ausschlaggebendsten Schwachstellen besteht darin, dass das \ac{llm} auf eine Zielwebseite zugreifen und Daten an diese übermitteln konnte, ohne dass der Nutzer dies
 nachvollziehen konnte. Daher sollte eine menschliche Kontrolle integriert werden, wodurch der Nutzer vor jeder Tool-Nutzung eine Beschreibung erhält, welche
 Aktion ausgeführt werden soll, welches Tool gewählt wurde und welche Daten übergeben werden. Dadurch lässt sich verhindern, dass das \ac{llm} den Nutzer täuscht
 und ein anderes als das notwendige Tool ausführt.

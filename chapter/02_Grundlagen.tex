@@ -36,11 +36,11 @@ Die Entwicklung von Sprachmodellen lässt sich in vier Phasen unterteilen~\cite[
   \item \acp{llm}
 \end{enumerate}
 
-Die Phasen werden im Folgenden näher beschrieben. \\
+Die Phasen werden im Folgenden näher beschrieben.
 
 Die ersten bekannten statistischen Sprachmodelle wurden in den 1980er- und 1990er-Jahren entwickelt~\cite[2968]{cb01}. Hierzu zählt das n-Gramm-Modell, welches 
 Wahrscheinlichkeiten anhand der Häufigkeit von Wortfolgen berechnet~\cite[2968]{cb01}. Diese Modelle basieren auf der Markov-Annahme, nach der die Vorhersage
-eines Wortes in einer Sequenz vom vorherigen Kontext abhängt~\cite[2976]{cb01}. Sie stießen jedoch an ihre Grenze, wenn linguistische Kontexte erfasst und 
+eines Wortes in einer Sequenz vom vorherigen Kontext abhängt~\cite[2976]{cb01}. Sie stießen jedoch an ihre Grenzen, wenn linguistische Kontexte erfasst und 
 semantische Zusammenhänge vorhergesagt werden mussten~\cite[2976]{cb01}. \\
 Ab 2012 kamen zunehmend neuronale Sprachmodelle zum Einsatz~\cite[2970]{cb01}. Sie verwenden verschiedene Architekturen mit dem Ziel, die Wahrscheinlichkeit einer 
 Sequenz zu bestimmen~\cite[2977]{cb01}. Durchgesetzt haben sich vor allem \acp{rnn} und \ac{lstm}~\cite[2]{llm06}. Sie wurden vor allem für die
@@ -117,7 +117,7 @@ Beschreibung~\cite[6\psq]{llm07}. Zero-Shot ist am einfachsten umzusetzen, stell
 Neben dem Prompt beeinflussen Sampling-Parameter die Generierung~\cite[26]{llm09}. Im Gegensatz zur Greedy Search wird beim Sampling das nächste Token auf Grundlage
 der Wahrscheinlichkeitsverteilung zufällig ausgewählt~\cite[26]{llm09}. Die dadurch entstehende Zufälligkeit fördert die Vielfalt der Ausgabe~\cite[26]{llm09}, da
 auch weniger wahrscheinliche, aber potenzielle Sequenzen erzeugt werden~\cite[2996]{cb01}. Über die Temperatur wird gesteuert, wie zufällig die Ausgabe ausfällt. 
-Niedrige Werte erzeugen deterministischere, hohe Werte vielfältigere Ausgaben~\cite{llm10}. Der Parameter top\_p begrenzt die Auswahl auf die kleinste Menge 
+Niedrige Werte erzeugen deterministischere, hohe Werte vielfältigere Ausgaben~\cite{llm10}. Der Parameter $top\_p$ begrenzt die Auswahl auf die kleinste Menge 
 an Token, deren kumulierte Wahrscheinlichkeitsmasse den Wert $p$ erreicht~\cite{llm10}.
 
 
@@ -311,7 +311,7 @@ werden. Drittens sollte das Format des Outputs klar definiert werden, also welch
 Sobald ein \ac{llm} eine Anfrage vom Nutzer erhält, muss es entscheiden, ob die Anfrage direkt beantwortet werden kann oder ein Tool benötigt wird~\cite{tc03}. Ist ein
 Tool erforderlich, müssen die richtigen Parameter für das Tool extrahiert werden~\cite[9]{tc10}. Das \ac{llm} muss somit eigenständig entscheiden,
 welches Tool verwendet werden soll~\cite{tc04}. Diese Entscheidung spielt eine wichtige Rolle. Soll beispielsweise eine große Zahl mithilfe
-einer Rechenoperation berechnet werden, ist es notwendig, ein Tool mit einzubeziehen. Wenn dagegen nach Fakten gefragt wird, etwa \glqq was 1 + 2 ergibt\grqq oder 
+einer Rechenoperation berechnet werden, ist es notwendig, ein Tool mit einzubeziehen. Wenn dagegen nach Fakten gefragt wird, etwa \glqq was 1 + 2 ergibt\grqq{} oder 
 \glqq ob der Eiffelturm in Paris steht\grqq, sollte die Generierung der Antwort nicht extern ausgelagert werden~\cite[19]{tc09}. \acp{llm} können dabei zu 
 abhängig von Tools werden oder aber zu 
 sehr von sich überzeugt sein und keine Tools verwenden wollen~\cite[17776]{tc08}. Für die Verwendung von Tools müssen die Parameter korrekt aus einer Nutzeranfrage 
@@ -327,14 +327,14 @@ dafür benötigt wird~\cite{tc03}. Dieser Ablauf gliedert sich in fünf Schritte
     \item \textbf{Antwortgenerierung}: Es wird eine natürlichsprachliche Antwort auf Grundlage der zurückgegebenen Daten generiert.
 \end{enumerate}
 
-Abhängig von den Quellen wird dieser Ablauf unterschiedlich unterteilt. Laut~\citeauthor{tc10} umfasst dieser Prozess vier Stufen: Aufgabenplanung, 
+Abhängig von den Quellen wird dieser Ablauf unterschiedlich unterteilt. Laut~\textcite{tc10} umfasst dieser Prozess vier Stufen: Aufgabenplanung, 
 Tool-Auswahl, Tool Calling und Antwortgenerierung~\cite[8]{tc10}. Bei diesem Ablauf ist zu beachten, dass das \ac{llm} keinen Zugriff auf externe Systeme hat und 
 nichts eigenständig ausführt~\cite{tc03}. Die Kontrolle über die Ausführung liegt in der Anwendungslogik~\cite{tc07}. Die Anwendung erhält den Payload, validiert ihn, führt
 die Logik aus und gibt das Ergebnis an das \ac{llm} zurück~\cite{tc03}. \\
 Das Ergebnis eines Tools wird im Normalfall in den aktuellen Kontext des \ac{llm} integriert~\cite[3]{tc09}. Bei den meisten Ansätzen wird der Tool Output als 
 Input an das \ac{llm} übergeben, womit dieses auf Basis der Informationen eine bessere Antwort generieren kann~\cite[17]{tc10}. Diese Antwort des 
 \ac{llm} wird anschließend an den Nutzer als Antwort übergeben~\cite{tc05}. \\
-Tool Calling ist nicht auf einen einzelnen Aufruf beschränkt, sondern es gibt verschiedene Ablaufmöglichkeiten~\cite{tc01}. Auf eine Nutzeranfrage kann das \ac{llm}
+Tool Calling ist nicht auf einen einzelnen Aufruf beschränkt, sondern es gibt verschiedene Ablaufmöglichkeiten~\cite{tc01}. Bei einer Nutzeranfrage kann das \ac{llm}
 diese direkt ohne Tool Call beantworten oder mehrere Tool Calls ausführen, bis eine Antwort für den Nutzer generiert werden kann~\cite{tc01}. \\
 Sind mehrere Tool Calls notwendig, können diese gleichzeitig oder sequentiell ausgeführt werden~\cite[7]{tc14}. Dabei wird zwischen 
 Turns und Steps unterschieden~\cite[4]{tc14}. Eine Konversation beinhaltet mehrere Turns, die durch eine Nutzernachricht ausgelöst werden. Jeder dieser Turns umfasst
@@ -351,7 +351,7 @@ somit ebenfalls in einzelnen Schritten gelöst, jedoch werden diese Schritte üb
 Tool Calling ist von \acf{rag} abzugrenzen. Bei \ac{rag} wird das vortrainierte \ac{llm} um eine externe Wissensdatenbank ergänzt, aus der relevante Dokumentenausschnitte
 abgerufen werden~\cite[1]{rag04}. Dazu werden die Dokumente bei der Indexierung in Chunks zerlegt, mithilfe eines Embedding-Modells in Vektorrepräsentationen
 umgewandelt und in einer \gls{vektordatenbank} gespeichert~\cite[3]{rag04}. Bei einer Nutzeranfrage wird diese ebenfalls in eine Vektorrepräsentation umgewandelt
-und die passendsten Chunks werden ermittelt~\cite[3]{rag04}. Die ausgewählten Chunks werden mit der Nutzeranfrage kombiniert, und auf dieser Basis wird eine Antwort
+und die passendsten Chunks werden ermittelt~\cite[3]{rag04}. Die ausgewählten Chunks werden mit der Nutzeranfrage kombiniert und auf dieser Basis wird eine Antwort
 für den Nutzer generiert~\cite[3]{rag04}. Der Unterschied zwischen diesen beiden Ansätzen besteht darin, dass Tool Calling ein aktiver, vom Modell ausgelöster 
 Prozess ist, bei dem ein Modell selbst entscheidet, wann welche Funktionen aufgerufen werden~\cite{tc07}. Bei \ac{rag} werden die relevanten
 Dokumente dagegen vor der Modellantwort aus dem Speicher abgerufen und dem Prozess als Kontext übergeben. Dieser Prozess ist somit passiv~\cite{tc07}. \ac{rag} 
@@ -370,11 +370,11 @@ es nicht mehr zur Verfügung steht~\cite{tc03}. Diese Prinzipien werden auch in 
 
 Tool Calling erweitert die Funktionen von \acp{llm}. Neben der Texterzeugung ist es auch möglich, über Tools Aktionen auszuführen 
 und auf externe Systeme zuzugreifen. Dabei wird zwischen aktiven und passiven Tools unterschieden. Passive Tools dienen dazu, externe Informationen zu sammeln, 
-welche in den Kontext des \ac{llm}s eingefügt werden sollen. Mit aktiven Tools werden dagegen Aktionen ausgeführt~\cite[21]{tc09}. Tools wie Taschenrechner oder
+welche in den Kontext des \acp{llm} eingefügt werden sollen. Mit aktiven Tools werden dagegen Aktionen ausgeführt~\cite[21]{tc09}. Tools wie Taschenrechner oder
 Übersetzer stellen dabei keine Gefahr dar. Mit dem Zugriff auf das Internet
 und der Funktionalität, eigenständige Entscheidungen zu treffen, wird jedoch eine Angriffsfläche erzeugt~\cite[26]{tc11}. Ein \ac{llm} wird dadurch befähigt, auf 
 private und 
-unangemessene Informationen zuzugreifen oder schädliche Aktionen auszuführen~\cite[10]{tc15}. Werden Tool Calls mithilfe des Outputs des \ac{llm}s durchgeführt, können 
+unangemessene Informationen zuzugreifen oder schädliche Aktionen auszuführen~\cite[10]{tc15}. Werden Tool Calls mithilfe des Outputs des \acp{llm} durchgeführt, können 
 sich schädliche Auswirkungen über die Chatoberfläche hinaus auf alles ausweiten, worauf das \ac{llm} Zugriff hat, und sich zu einer Kette von Auswirkungen entwickeln, da
 die Tool-Ergebnisse in den Kontext gelangen~\cite[10]{pi24}. \\
 \ac{owasp} benennt eine Gefahr, die durch Tool Calling entstehen kann, als übermäßige Handlungsfreiheit. Damit Tools verschiedene Funktionen aufrufen können oder mit 
@@ -447,7 +447,7 @@ Antwortgenerierung, die menschliche Beteiligung, die Berechtigungen und der Komm
 angehören~\cite[3]{cb11}. Bei der Wissensdomäne wird zwischen generischen Chatbots, die alle Nutzerfragen beantworten, Open-Domain-Chatbots, die in mehreren 
 Domänen agieren, und domänenspezifischen Chatbots, die auf eine Domäne spezialisiert sind, unterschieden~\cite[3]{cb11}. Hinsichtlich ihres Ziels können Chatbots 
 informativ sein und dem Nutzer spezifische Informationen aus einer Quelle liefern, konversationell sein und eine menschenähnliche Konversation
-führen oder aufgabenorientiert sein und bei der Erfüllung von Aufgaben, zum Beispiel einer Hotelbuchung, unterstützen~\cite[3]{cb11}. Laut~\citeauthor{cb03} wird hinsichtlich 
+führen oder aufgabenorientiert sein und bei der Erfüllung von Aufgaben, zum Beispiel einer Hotelbuchung, unterstützen~\cite[3]{cb11}. Laut~\textcite{cb03} wird hinsichtlich 
 der Zielsetzung eine ähnliche Kategorisierung vorgenommen. Es wird zwischen Virtual Companion Chatbots und Task-focused Chatbots unterschieden~\cite[243]{cb03}. 
 Virtual Companion Chatbots dienen dazu, eine Unterhaltung über beliebige Themen zu führen, Task-focused Chatbots dagegen dazu, Nutzer bei speziellen Themen zu
 unterstützen~\cite[243]{cb03}. Besonders relevant für diese Arbeit ist die Unterscheidung bei der Antwortgenerierung in regelbasierte, 
@@ -477,7 +477,7 @@ Language
 Generation (NLG) auf Grundlage der aktuellen und vorherigen Eingaben, benötigen jedoch eine große Menge an Training~\cite[10]{cb12}. Beim Vergleich der Ansätze wird 
 deutlich, dass regelbasierte Chatbots mehr Zuverlässigkeit bieten, sprachverarbeitende Chatbots jedoch mehr Benutzerfreundlichkeit~\cite[4]{cb04}. Generative Chatbots
 eignen sich für informelle Open-Domain-Gespräche, jedoch nicht für geschlossene Domänen. Für solche Domänen sind regelbasierte Chatbots geeignet, welche auf
-eine spezifischen Anwendungsfall ausgerichtet sind~\cite[8]{cb11}. Mit Hybriden Chatbots werden diese Verfahren kombiniert. Sie beantworten Anfragen anhand
+einen spezifischen Anwendungsfall ausgerichtet sind~\cite[8]{cb11}. Mit hybriden Chatbots werden diese Verfahren kombiniert. Sie beantworten Anfragen anhand
 definierter Regeln~\cite[8]{cb11}. Wenn keine Regel verwendet werden kann, wird die Antwort über einen retrieval-basierten oder einen generativen Ansatz erzeugt~\cite[8]{cb11}.
 Heutzutage bieten \acp{llm} wie GPT die effizienteste Lösung, einfachere Methoden sind jedoch leichter reproduzierbar, weswegen häufig eine hybride Variante verwendet wird~\cite[104]{cb05}. \\
 Ein \ac{llm}-basierter Chatbot basiert häufig auf einem \ac{llm} mit Transformer-Architektur~\cite[87]{cb05}. Zusätzlich wird eine Softwarekomponente
@@ -495,14 +495,14 @@ mit denen zusätzliche Aktionen durchgeführt werden können~\cite[8]{cb02}. Ein
 Auswirkungen von Schwachstellen werden verstärkt, wenn das \ac{llm} als (teil-)autonomes System eingesetzt wird, welches selbstständig Aktionen ausführen kann~\cite[3]{sm08}.
 Auch \ac{owasp} grenzt den Begriff Agent ab. Sobald ein \ac{llm} nicht nur eine Komponente einer Anwendung ist, sondern selbst zum Akteur wird, Tools aufrufen kann
 und Informationen über mehrere Sitzungen speichert, wird es als Agent bezeichnet~\cite[7]{pi24}. Agenten rufen Tools dynamisch je nach Nutzeranfrage auf und können 
-mehrere Aufrufe an das \ac{llm} mit dem Output aus vorherigen Aufrufen machen~\cite[23]{pi24}. Laut~\citeauthor{cb09} wird eine \ac{llm}-integrierte Anwendung als Vorstufe eines 
+mehrere Aufrufe an das \ac{llm} mit dem Output aus vorherigen Aufrufen machen~\cite[23]{pi24}. Laut~\textcite{cb09} wird eine \ac{llm}-integrierte Anwendung als Vorstufe eines 
 autonomen Agenten betrachtet. Der in dieser Arbeit verwendete Chatbot zählt zu den \ac{llm}-integrierten Anwendungen mit Tool-Zugriff, ist jedoch noch kein 
-Agent, der autonom handeln kann. \\
+Agent, der autonom handeln kann.
 
 \subsection{Architekturen und Angriffsflächen}
 
 Zu den Komponenten eines \ac{ki}-Systems gehören mindestens die Daten, das \ac{llm}, ein Prozess für Training, Test und Bereitstellung sowie die notwendige 
-Infrastruktur~\cite[1]{pi18}. \citeauthor{cb11} dokumentierte ein allgemeines Design, welches alle notwendigen Komponenten enthält. Je nach Anwendungsfall können
+Infrastruktur~\cite[1]{pi18}. \textcite{cb11} dokumentierten ein allgemeines Design, welches alle notwendigen Komponenten enthält. Je nach Anwendungsfall können
 aus diesen Komponenten die notwendigen ausgewählt werden~\cite[8]{cb11}. Durch die Übertragung auf einen \ac{llm}-basierten Chatbot ergeben sich die folgenden fünf
 Komponenten: \gls{frontend}, Anwendungslogik, \ac{llm}, Daten und Tools. In diesem Abschnitt der Arbeit wird jede dieser Komponenten einzeln betrachtet, da dies für die 
 Analyse
@@ -534,7 +534,7 @@ Nutzeranfragen,
 abgerufene Dokumente, Tool-Ergebnisse und der Gesprächsverlauf verarbeitet. Sie werden kombiniert und als einziger Tokenstrom verarbeitet. Dadurch 
 entstehen Schwachstellen, da keine Vertrauensgrenze existiert. Wenn durch einen Angriff in eine \gls{vektordatenbank} oder ein Langzeitgedächtnis geschrieben wird, kann 
 das System zudem über viele Sitzungen hinweg betroffen sein~\cite[10]{pi24}. 
-Auch innerhalb einer Sitzung kann der Kontext die Ausgabe steuern, sodass sich das \ac{llm} über seine eigenen Ausgaben mehrmals selbst manipuliert~\cite[9]{cb09}. \\
+Auch innerhalb einer Sitzung kann der Kontext die Ausgabe steuern, sodass sich das \ac{llm} über seine eigenen Ausgaben mehrmals selbst manipuliert~\cite[9]{cb09}.
 
 \paragraph{LLM}
 
@@ -552,7 +552,7 @@ können~\cite[88]{cb05}.
 
 Über Datenquellen werden externe Informationen, zum Beispiel Nutzerinformationen, in den Chatbot eingebunden~\cite[10]{cb11}. Diese Daten werden aus Datenbanken und 
 über
-Aufrufe von \acp{api} bezogen~\cite[10]{cb11}. Die Integration von Unternehmensdatenbanken und -dokumenten ist notwendig, um \ac{rag}-Szenarios zu ermöglichen, wenn 
+Aufrufe von \acp{api} bezogen~\cite[10]{cb11}. Die Integration von Unternehmensdatenbanken und -dokumenten ist notwendig, um \ac{rag}-Szenarien zu ermöglichen, wenn 
 \acp{llm} spezifische Anfragen beantworten müssen~\cite[3]{pi18}. Durch diese Integration mit den Unternehmensdaten entsteht eine neue Angriffsfläche. Zusätzlich sind 
 viele der Daten, die das \ac{llm} verarbeiten muss, ungeprüft und stammen aus nicht vertrauenswürdigen Quellen~\cite[1]{sm08}. Greift ein \ac{llm} auf manipulierte 
 Webseiten zu, 
@@ -584,7 +584,7 @@ Assistenten bei ihren Aufgaben~\cite[6]{cb16}. Durch den Zugriff auf interne Dok
 zu erschließen, ohne dass die Informationsstruktur innerhalb der Dokumente bekannt sein muss~\cite[4]{cb16}.
 Ein solcher unternehmensinterner Chatbot ist auch Gegenstand dieser Arbeit und wird in Kapitel~\ref{ch:methodik} näher beschrieben. \\
 Der ausschlaggebende Grund, einen Chatbot zu verwenden, ist die damit verbundene Produktivität~\cite[1]{cb11}. Unternehmen setzen Chatbots immer häufiger ein, um die Kosten
-zu reduzieren und viele Nutzeranfragen gleichzeitig bearbeiten zu können~\cite[1]{cb11}. Chatbots sind zudem freundlicher gegenüber Nutzern und ermöglichen, dass die 
+zu reduzieren und viele Nutzeranfragen gleichzeitig bearbeiten zu können~\cite[1]{cb11}. Chatbots sind zudem nutzerfreundlicher und ermöglichen, dass die 
 Informationen
 nicht aus FAQ-Listen oder auf anderen umständlichen Wegen erfasst werden müssen~\cite[1]{cb11}. Diese Aussage wird auch von einer Studie unterstützt, in der 
 68\,\% der Teilnehmer angaben, dass Produktivität der Hauptgrund für die Verwendung eines Chatbots ist~\cite[383]{cb02}. Die Verwendung ist leicht, schnell und bequem~\cite[383]{cb02}.

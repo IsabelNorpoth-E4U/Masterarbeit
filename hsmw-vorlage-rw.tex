@@ -134,7 +134,7 @@ uniquename=init, %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Titel: [englisch]{deutsch}
-\title[Examination and development of protective measures against indirect prompt injection attacks in tool calling in the use case of an internal company chatbot]{Untersuchung und Entwicklung von Schutzmaßnahmen gegen indirekte Prompt-Injection-Angriffe bei Tool Calling im Anwendungsfall eines unternehmensinternen Chatbot}
+\title[Examination and development of protective measures against indirect prompt injection attacks in tool calling in the use case of an internal company chatbot]{Untersuchung und Entwicklung von Schutzmaßnahmen gegen indirekte Prompt-Injection-Angriffe bei Tool Calling im Anwendungsfall eines unternehmensinternen Chatbots}
 
 %%% VERWENDEN SIE DEN STERN FÜR EINE AUTORIN
 \author*{Isabel}{Norpoth}[]<figs/Unterschrift_Isabel.png>
@@ -182,14 +182,14 @@ exfiltrate data or trigger harmful actions. In cooperation with Energy4U GmbH, t
 chatbot ChatBot4U as an example, to what extent an internal company chatbot with tool calling can be protected
 against indirect prompt injection attacks. \\
 In a local test environment, selected attacks revealed five vulnerabilities of the chatbot. Based on these, a
-protective measure was developed. A Guardmodel (Mistral Small 4) checks each request using a combination of
+protective measure was developed. A guard model (Mistral Small 4) checks each request using a combination of
 prompt filtering, input modification and prompt enhancement before it is passed on to the main model (Mistral
 Large 4). An original approach based on a binary query, which measures the basic detection capability of the
 models, serves as a comparison. Both approaches were applied to a custom dataset and to the public datasets BIPIA
-and NotInject. The evaluation was based on metrics like recall, false positive rate (FPR), latency and cost. \\
+and NotInject. The evaluation was based on metrics such as recall, FPR, latency and cost. \\
 The enhanced measure increases recall from 34.0--73.1\,\% to 82.8--92.0\,\%. The FPR remains the same or decreases and
 reaches up to 13.5\,\%. However, costs rise up to a factor of twelve, and latency reaches up to 6\,s per check.
-The upstream model therefore significantly improves the detection of prompt injection attacks, but is not
+The guard model therefore significantly improves the detection of prompt injection attacks, but is not
 sufficient as a stand-alone measure. Further limitations are that the measure was tested independently of the
 chatbot, does not detect multi-turn attacks and, due to its high FPR, can only be used to a limited extent in
 production environments, as benign user requests are falsely blocked. It should therefore be combined with additional measures, such as human oversight of tool calls
@@ -215,7 +215,7 @@ reicht als alleinstehende Maßnahme jedoch nicht aus. Einschränkend kommt hinzu
 Chatbot getestet wurde, keine Multi-Turn-Angriffe erkennt und aufgrund der hohen FPR nur eingeschränkt im 
 produktiven Einsatz verwendet werden kann, da harmlose Nutzeranfragen fälschlich blockiert werden. Daher sollte sie 
 in Kombination mit zusätzlichen Maßnahmen implementiert werden, 
-wie einer menschlichen Kontrolle der Tool-Aufurfe oder einer Einschränkung der zulässigen Zieladressen.}
+wie einer menschlichen Kontrolle der Tool-Aufrufe oder einer Einschränkung der zulässigen Zieladressen.}
 
 %%% Optional Fields for Thesis
 %\defensedate{2022}% Defense Date (please specify year of defense, default will be the same year as submission date)
